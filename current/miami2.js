@@ -71,7 +71,7 @@ const Dance = {
   finish() {
     const s = this.s; this.s = null; ui.wrestle.hidden = true; ui.wrestle.querySelector('.hint').textContent = 'MASH E · HIT THE ARROW WHEN HE THRASHES'; Game.mode = 'play';
     if (s.score >= 11) s.then();
-    else say([['DJ FLAMINGO', `${s.score} out of 16? My GRANDMA hits more beats than that.`], ['DJ FLAMINGO', 'Again. From the top.']], () => Dance.start(s.then));
+    else say([['DJ FLAMINGO', `${s.score} out of 16? My GRANDMA hits more beats than that.`], ['DJ FLAMINGO', 'Again. From the top?', [['“Hit it.”', () => { s.again = true; }], ['“Gimme a minute.”', () => [['DJ FLAMINGO', 'Take your time, abuelo. The floor ain’t goin’ nowhere.']]]]]], () => { if (s.again) Dance.start(s.then); });
   },
   draw() {
     const s = this.s, t = Game.t; if (!s) return;

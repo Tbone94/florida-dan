@@ -219,7 +219,8 @@ const Wrestle = {
   },
   swipe() { const a = Input.axis(); if (!Game._swipeLock && Math.hypot(a.x, a.y) > .8) { Game._swipeLock = true; return dirOf(a.x, a.y); } if (Math.hypot(a.x, a.y) < .3) Game._swipeLock = false; return null; },
   finish() {
-    const w = this.w; this.w = null; ui.wrestle.hidden = true; ui.wrestlePrompt.textContent = '';   // the ▶ lives outside the panel; clear it or it blinks forever Game.mode = Game.prevMode === 'wrestle' ? 'play' : Game.prevMode;
+    const w = this.w; this.w = null; ui.wrestle.hidden = true; ui.wrestlePrompt.textContent = '';   // the ▶ lives outside the panel; clear it or it blinks forever
+    Game.mode = Game.prevMode === 'wrestle' ? 'play' : (Game.prevMode || 'play');
     if (w.won) w.onWin && w.onWin(); else w.onLose && w.onLose();
   },
   draw() {
