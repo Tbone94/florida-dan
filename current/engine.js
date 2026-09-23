@@ -177,8 +177,12 @@ const Screen = (() => {
     uniform sampler2D tex;
     uniform float t, drunk, high, shroom, powder, crash, flash, night, cig;
     uniform vec3 tint, view;
+    uniform vec2 tsize; uniform float pscale;
     vec3 hue(vec3 c, float a){ vec3 k = vec3(.57735); float ca = cos(a); return c*ca + cross(k, c)*sin(a) + k*dot(k, c)*(1. - ca); }
-    vec3 S(vec2 u){ return texture2D(tex, clamp(u, .001, .999)).rgb; }
+    vec3 S(vec2 u){   // sharp bilinear: hard pixels, but the edges land evenly at any (non-integer) scale
+      vec2 px = clamp(u, .0005, .9995) * tsize, i = floor(px), d = fract(px) - .5, r = vec2(.5 - .5 / pscale);
+      return texture2D(tex, (i + (d - clamp(d, -r, r)) * pscale + .5) / tsize).rgb;
+    }
     void main(){
       vec2 u = view.xy + uv * view.z;
       u.x += sin(t*1.3 + u.y*3.) * .006 * drunk;
@@ -211,8 +215,8 @@ const Screen = (() => {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
     const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
-    [[gl.TEXTURE_MIN_FILTER, gl.NEAREST], [gl.TEXTURE_MAG_FILTER, gl.NEAREST], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]].forEach(([k, v]) => gl.texParameteri(gl.TEXTURE_2D, k, v));
-    ['t', 'drunk', 'high', 'shroom', 'powder', 'crash', 'flash', 'night', 'cig', 'tint', 'view'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
+    [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]].forEach(([k, v]) => gl.texParameteri(gl.TEXTURE_2D, k, v));
+    ['t', 'drunk', 'high', 'shroom', 'powder', 'crash', 'flash', 'night', 'cig', 'tint', 'view', 'tsize', 'pscale'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
   }
   function present(fx) {
     if (!gl) { ctx2d.imageSmoothingEnabled = false; ctx2d.drawImage(src, 0, 0, cv.width, cv.height); return; }
@@ -221,6 +225,7 @@ const Screen = (() => {
     for (const k of ['t', 'drunk', 'high', 'shroom', 'powder', 'crash', 'flash', 'night', 'cig']) gl.uniform1f(U[k], fx[k] || 0);
     gl.uniform3fv(U.tint, fx.tint || [1, 1, 1]);
     gl.uniform3fv(U.view, fx.view || [0, 0, 1]);
+    gl.uniform2f(U.tsize, src.width, src.height); gl.uniform1f(U.pscale, Math.max(1, cv.width / src.width / ((fx.view && fx.view[2]) || 1)));
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
   return { init, present };

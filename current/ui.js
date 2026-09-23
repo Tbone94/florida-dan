@@ -187,10 +187,10 @@ function resize() {
   if (buf.width !== VW) { buf.width = VW; g.imageSmoothingEnabled = false; }
   Object.assign(stage.style, { width: w + 'px', height: h + 'px', left: ((vw - w) / 2) + 'px', top: (portrait ? 8 : (vh - h) / 2) + 'px' });
   stage.style.setProperty('--u', Math.max(11, Math.min(21, w / 54, h / 25)) + 'px');   // short landscape phones: size text by height too
-  // Render at a whole-number multiple of the 320x180 art, capped at 4x (1280x720). The browser upscales the rest
-  // crisply (image-rendering: pixelated). Full-screen on a big display was pushing 5000+px-wide frames through the FX shader.
-  const dpr = devicePixelRatio || 1, k = clamp(Math.floor(w * dpr / VW), 1, window.TRAILER ? 6 : 4);
-  screenCv.width = VW * k; screenCv.height = VH * k;
+  // Render at the screen's real resolution (capped at 2200px wide); the shader's sharp-bilinear upscale keeps every
+  // game pixel the same size at any scale, so scrolling doesn't shimmer the way a CSS-stretched canvas did.
+  const dpr = devicePixelRatio || 1, cw = Math.round(Math.min(w * dpr, window.TRAILER ? 1920 : 2200));
+  screenCv.width = cw; screenCv.height = Math.round(cw * VH / VW);
   document.body.classList.toggle('portrait', portrait);
   $('rotate').hidden = !(portrait && isTouch);
 }

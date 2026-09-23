@@ -246,6 +246,7 @@ function update(dt) {
   if (act && Input.tapped('a')) act.fn();
   const D = Game.dan, look = D.ride ? 26 : 12, lx = D.dir === 'right' ? look : D.dir === 'left' ? -look : 0, ly = D.dir === 'down' ? look * .6 : D.dir === 'up' ? -look * .6 : 0;
   Game.cam.x += (D.x + lx - VW / 2 - Game.cam.x) * Math.min(1, dt * 5); Game.cam.y += (D.y + ly - VH / 2 - 10 - Game.cam.y) * Math.min(1, dt * 5);
+  Game.cam.x = D.x + Math.round(Game.cam.x - D.x); Game.cam.y = D.y + Math.round(Game.cam.y - D.y);   // whole-pixel offset from Dan: he and his ride stay rock-steady while the world scrolls
 }
 function tickFx(dt) {
   const F = Game.fx, hadPowder = F.powder > 0;
