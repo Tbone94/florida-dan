@@ -42,7 +42,7 @@ const Fishing = {
     Game.mode = 'fish'; ui.fishHud.hidden = true; this.msg(''); Sound.play('splash');
   },
   msg(s, secs = 1.4) { ui.fishMsg.textContent = s; if (this.f) this.f.msgT = secs; },
-  exit() { Game.mode = 'play'; ui.fishHud.hidden = true; ui.card.hidden = true; this.msg(''); this.f = null; },
+  exit() { Game.mode = 'play'; ui.fishHud.hidden = true; ui.card.hidden = true; this.msg(''); this.f = null; if (this.big) { this.big = false; react('cheer'); } },
   lose(text) { const f = this.f; f.phase = 'done'; f.endT = 1.8; f.hooked = null; ui.fishHud.hidden = true; this.msg(text, 1.8); Sound.play('fail'); },
   update(dt) {
     const f = this.f; if (!f) { Game.mode = 'play'; ui.fishHud.hidden = true; ui.card.hidden = true; return; }
@@ -118,7 +118,7 @@ const Fishing = {
   land(fi) {
     const f = this.f; f.phase = 'card'; ui.fishHud.hidden = true; this.msg('');
     const c = { id: fi.sp.id, name: fi.sp.name, lbs: fi.lbs, junk: !!fi.sp.junk, legend: !!fi.sp.legend };
-    Game.catchBag.push(c); Game.day_.caught.push(c); Game.inv.fish = Game.catchBag.filter(x => !x.junk).length;
+    Game.catchBag.push(c); Game.day_.caught.push(c); this.big = !c.junk && (c.lbs >= 5 || c.legend); Game.inv.fish = Game.catchBag.filter(x => !x.junk).length;
     Game.chill = Math.min(100, Game.chill + (c.junk ? 3 : 10));
     ui.cardK.textContent = c.junk ? 'YOU CAUGHT... UH' : c.legend ? 'LEGENDARY CATCH' : 'CAUGHT';
     ui.cardN.textContent = c.name; ui.cardW.textContent = `${c.lbs} lb`; ui.cardQ.textContent = '“' + pick(fi.sp.q) + '”';

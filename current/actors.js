@@ -15,13 +15,13 @@ const dirOf = (x, y) => Math.abs(x) > Math.abs(y) ? (x > 0 ? 'right' : 'left') :
 // ---------- Dan ----------
 function moveDan(dt) {
   const D = Game.dan, F = Game.fx; let { x: ax, y: ay } = Input.axis();
-  if (D.hiding || D.ride === 'lambo') { D.moving = false; return; }
+  if (D.hiding || D.ride === 'lambo' || D.anim === 'flop') { D.moving = false; return; }
   if (F.shroom > .4 && (ax || ay)) { ax = -ax * (Math.sin(Game.t * .3) > .6 ? 1 : -1); ay = ay; }    // left is right now. deal with it
   if (F.buzz > 55 && (ax || ay)) {
     const a = Math.atan2(ay, ax) + Math.sin(Game.t * 2.3) * (F.buzz - 55) / 45 * .9, m = Math.hypot(ax, ay);
     ax = Math.cos(a) * m; ay = Math.sin(a) * m;
   }
-  D.moving = !!(ax || ay);
+  D.moving = !!(ax || ay); D.idleT = D.moving ? 0 : (D.idleT || 0) + dt;
   if (!D.moving) { D.frame = 0; return; }
   D.dir = dirOf(ax, ay);
   D.stepT += dt; if (D.stepT > .16) { D.stepT = 0; D.frame ^= 1; }
@@ -47,6 +47,7 @@ function moveDan(dt) {
     if (World.at(D.x, D.y) === T.SHALLOW) sp *= .5; else if (World.at(D.x, D.y) === T.SAWGRASS) sp *= .75;
     const nx = D.x + ax * sp * dt, ny = D.y + ay * sp * dt;
     if (canWalk(nx, D.y)) D.x = nx; if (canWalk(D.x, ny)) D.y = ny;
+    if (Input.held('run') && Math.random() < dt * 9) Game.parts.push({ kind: 'dust', x: D.x - ax * 6, y: D.y, vx: -ax * 12, vy: -6, life: .45 });
     if (Game.fx.powder > 0 && Math.random() < dt * 20) Game.parts.push({ kind: 'speed', x: D.x - ax * 8, y: D.y - 8 + rnd(-6, 6), vx: -ax * 40, vy: -ay * 40, life: .25 });
   }
 }
@@ -62,12 +63,28 @@ function drawDan(x, y, t) {
   const wading = World.at(D.x, D.y) === T.SHALLOW;
   shadow(x, y + 1, 12);
   const bob = D.moving ? (D.frame ? -1 : 0) : Math.round(Math.sin(t * 2) * .5);
+  if (D.anim === 'flop') {   // flat on his back, stars circling
+    g.save(); g.translate(Math.round(x), Math.round(y - 5)); g.rotate(D.dir === 'left' ? Math.PI / 2 : -Math.PI / 2); g.drawImage(SPR.dan.down[0], -8, -11); g.restore();
+    for (let i = 0; i < 3; i++) { const a = t * 6 + i * 2.1; R(x + Math.cos(a) * 8, y - 12 + Math.sin(a) * 3, 2, 2, PAL.yellow); }
+    return;
+  }
+  const hop = D.anim === 'cheer' ? -Math.round(Math.abs(Math.sin((1.3 - D.animT) * Math.PI * 1.6)) * 8) : 0;   // two happy hops
+  const idle = !D.moving && !D.anim ? Math.floor((D.idleT || 0) / 3.2) % 4 : 0, idleOn = (D.idleT || 0) > 6;
+  if (hop) { shadow(x, y + 1, 12); g.drawImage(spr, Math.round(x - 8), Math.round(y - 21 + hop)); R(x - 9, y - 22 + hop, 2, 4, PAL.skin); R(x + 7, y - 22 + hop, 2, 4, PAL.skin); return; }
+  if (idleOn && idle === 1) { const look = SPR[Game.flags.suit && MIAMI() ? 'dansuit' : 'dan'][Math.floor(t * .8) % 2 ? 'left' : 'right'][0]; shadow(x, y + 1, 12); g.drawImage(look, Math.round(x - 8), Math.round(y - 21 + bob)); return; }   // looks around
   if (wading) { g.drawImage(spr, 0, 0, 16, 16, Math.round(x - 8), Math.round(y - 15 + bob), 16, 16); R(x - 9, y, 18, 1, PAL.foam); }
   else g.drawImage(spr, Math.round(x - 8), Math.round(y - 21 + bob));
   const hx = D.dir === 'left' ? x - 9 : x + 6, hy = y - 11 + bob;
-  if (D.anim === 'beer' || D.anim === 'energy') { OR(hx, hy - 4, 3, 5, D.anim === 'beer' ? PAL.blue : PAL.black); R(hx, hy - 4, 3, 1, PAL.tin); }
+  const chugging = D.anim === 'beer' && D.animT < 1.1 && D.animT > .3;
+  if ((D.anim === 'beer' && !chugging) || D.anim === 'energy') { OR(hx, hy - 4, 3, 5, D.anim === 'beer' ? PAL.blue : PAL.black); R(hx, hy - 4, 3, 1, PAL.tin); }
   if (D.anim === 'cig' || D.anim === 'joint') { R(D.dir === 'left' ? x - 7 : x + 3, y - 14 + bob, 4, 1, PAL.white); R(D.dir === 'left' ? x - 8 : x + 7, y - 14 + bob, 1, 1, PAL.orange); }
   if (D.anim === 'hotdog') { OR(hx - 1, hy - 2, 5, 2, PAL.redD); }
+  if (chugging) { OR(hx, hy - 9, 3, 5, PAL.blue); R(hx, hy - 9, 3, 1, PAL.tin); if (Math.floor(t * 8) % 2) R(hx + (D.dir === 'left' ? -2 : 4), hy - 10, 1, 1, PAL.white); }   // chug: can up at the mouth
+  if (idleOn && !D.moving && !D.anim) {
+    if (idle === 0 && Math.floor(t * 6) % 2) R(x - 2, y - 9 + bob, 3, 2, PAL.skin);                            // belly scratch
+    if (idle === 2) { R(x - 10, y - 23, 2, 5, PAL.skin); R(x + 8, y - 23, 2, 5, PAL.skin); }                  // big stretch
+    if (idle === 3 && Math.floor(t * 2) % 2) label('z', x + 8, y - 26 - (t * 4) % 6, PAL.white, 6);          // dozing standing up
+  }
   if (D.punchT > 0) {   // the fist
     const k = D.punchT / .18, reach = 5 + (1 - k) * 6, dx = D.dir === 'right' ? 1 : D.dir === 'left' ? -1 : 0, dy = D.dir === 'down' ? 1 : D.dir === 'up' ? -1 : 0;
     const fx = x + dx * reach - 2, fy = y - 12 + dy * reach * .6 - 1;
@@ -144,7 +161,7 @@ function updateGator(gt, dt) {
 function gatorBite(gt, dx, dy, dist) {
   gt.chomp = .45; gt.cd = 14; gt.state = 'wander'; Game.gatorCalm = 6;   // after a bite every gator gives Dan a moment
   knockback(dx / dist, dy / dist, hasUp('waders') ? 12 : 22);
-  Sound.play('chomp'); hurtDan(hasUp('waders') ? 7 : 15);
+  Sound.play('chomp'); hurtDan(hasUp('waders') ? 7 : 15); react('flop');
   Game.day_.bites++;
   let msg = pick(['OW! SON OF A BITCH!', 'HE BIT MY ASS! MY ACTUAL ASS!', "That's my good leg, you scaly f*ck!", 'NOT THE JORTS!', 'Mother of GOD that hurts!']);
   if (Game.inv.beer > 0 && Math.random() < .5) { Game.inv.beer--; msg = `${gt.chuck ? 'Chuck' : 'Gator'} stole a Swamp Lite. Rude as hell.`; }
@@ -156,6 +173,12 @@ function knockback(nx, ny, d) {
   const D = Game.dan;
   for (let i = d; i > 0; i -= 3) { const x = D.x + nx * i, y = D.y + ny * i; if (D.ride === 'boat' ? canBoat(x, y) : D.ride === 'cooler' ? canDrive(x, y) : canWalk(x, y)) { D.x = x; D.y = y; break; } }
   if (D.ride === 'boat') Object.assign(Game.boat, { x: D.x, y: D.y }); if (D.ride === 'cooler') Object.assign(Game.cooler, { x: D.x, y: D.y });
+}
+// big body reactions: 'cheer' (jump, arms up, confetti) and 'flop' (flat on his back, seeing stars)
+function react(kind) {
+  const D = Game.dan; if (D.ride) return;
+  D.anim = kind; D.animT = kind === 'flop' ? .9 : 1.3; D.idleT = 0;
+  if (kind === 'cheer') for (let i = 0; i < 14; i++) Game.parts.push({ kind: 'confetti', x: D.x, y: D.y - 22, vx: rnd(-40, 40), vy: rnd(-70, -30), life: rnd(.8, 1.3), c: pick([PAL.hat, PAL.yellow, PAL.teal, PAL.white]) });
 }
 function hurtDan(n) { Game.dan.hurt = .7; Game.shake = 5; Game.chill = Math.max(0, Game.chill - n); splash(Game.dan.x, Game.dan.y, 6); }
 

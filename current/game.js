@@ -186,7 +186,7 @@ function drawObjective(cx, cy, t) {
 function wrestleGator(a) {
   Wrestle.start({ foe: a.chuck ? 'chuck' : 'gator', arena: 'swamp', onWin: () => {
     if (a.gig === 'pool') { Game.chill = Math.min(100, Game.chill + 25); return Gigs.complete('pool'); }
-    a.stun = 10; a.state = 'flee'; a.timer = 12; a.cd = 12; a.belly = 1.8; Game.chill = Math.min(100, Game.chill + 25); Game.day_.wrestles++;
+    a.stun = 10; a.state = 'flee'; a.timer = 12; a.cd = 12; a.belly = 1.8; Game.chill = Math.min(100, Game.chill + 25); Game.day_.wrestles++; setTimeout(() => react('cheer'), 0);
     if (a.chuck) { done('chuck'); headline('FLORIDA MAN WRESTLES ALLIGATOR NAMED "CHUCK," CALLS IT "A DISAGREEMENT BETWEEN FRIENDS"', 8); }
     else if (Game.day_.wrestles === 1) headline('FLORIDA MAN WRESTLES ALLIGATOR "FOR FUN"; ALLIGATOR "NOT HAVING FUN"', 6);
     toast(pick(['Gator: humbled.', 'Dan flexes at nobody.', 'That’s what I thought, lizard.']));
@@ -307,6 +307,7 @@ const Events = {
 // ---------- particles ----------
 function splash(x, y, n) { for (let i = 0; i < n; i++) Game.parts.push({ kind: 'splash', x, y, vx: rnd(-25, 25), vy: rnd(-50, -20), life: rnd(.5, .8) }); }
 function updateParts(dt) {
+  for (const p of Game.parts) if (p.kind === 'confetti') p.vy += 150 * dt;   // confetti falls
   const D = Game.dan;
   if ((D.anim === 'cig' || D.anim === 'joint' || Game.fx.cig > 0) && Math.random() < dt * 3) Game.parts.push({ kind: 'smoke', x: D.x + 5, y: D.y - 16, vx: rnd(2, 8), vy: -9, life: 1.6 });
   for (const p of Game.parts) { p.x += p.vx * dt; p.y += p.vy * dt; if (p.kind === 'splash' || p.kind === 'spark') p.vy += 120 * dt; if (p.kind === 'bug') { p.vx += rnd(-80, 80) * dt; p.vy += rnd(-80, 80) * dt; } p.life -= dt; }
@@ -322,6 +323,8 @@ function drawParts(cx, cy) {
     else if (p.kind === 'spark') R(x, y, 2, 2, p.c || PAL.yellow);
     else if (p.kind === 'fire') { R(x - 1, y - 1, 3, 3, p.life > 1.5 ? PAL.yellow : PAL.orange); }
     else if (p.kind === 'speed') R(x, y, 6, 1, PAL.white);
+    else if (p.kind === 'confetti') R(x, y, 2, 1, p.c);
+    else if (p.kind === 'dust') { g.globalAlpha = Math.min(.6, p.life * 1.4); R(x - 2, y - 2, 4, 3, PAL.sandD); g.globalAlpha = 1; }
     else if (p.kind === 'bug') { R(x, y, 2, 1, PAL.black); R(x + 2, y, 1, 1, PAL.red); }
     else if (p.kind === 'text') label(p.text, x, y, PAL.yellow, 9);
   }

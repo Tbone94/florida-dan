@@ -43,7 +43,7 @@ const Heat = {
   },
   end() { this.cop = null; const r = Game.npcs.find(n => n.id === 'rhonda'); if (r) r.hidden = false; },
   busted() {
-    this.end(); Sound.play('siren');
+    this.end(); Sound.play('siren'); react('flop');
     const fine = Math.min(Game.money, 20), took = ['beer', 'joint', 'shroom', 'powder'].filter(k => Game.inv[k] > 0);
     Game.money -= fine; took.forEach(k => Game.inv[k] = 0); Game.dan.ride = null;
     headline(pick(['FLORIDA MAN LEADS DEPUTY ON LOW-SPEED CHASE, CAUGHT HIDING BEHIND A LAWN FLAMINGO', 'FLORIDA MAN ARRESTED AFTER TELLING DEPUTY "YOU CAN’T ARREST ME, I’M ON THE CLOCK"']), 6);

@@ -69,7 +69,7 @@ const Gigs = {
   complete(id) {
     const G = G_(), d = GIGS[id]; if (G.active !== id) return;
     G.active = null; G.done.push(id); done('gig_' + id);
-    Game.money += d.pay; Sound.play('cash'); toast(`Gig done: +$${d.pay}`);
+    Game.money += d.pay; Sound.play('cash'); toast(`Gig done: +$${d.pay}`); react('cheer');
     headline(d.hl, 2);
     if (id === 'pool') Game.animals = Game.animals.filter(a => a.gig !== 'pool');
   },
