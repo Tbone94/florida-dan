@@ -157,7 +157,7 @@ const Miami = {
     list.push(...MiamiCases.interactions());
     if (near(S_.door, 18) && Game.flags.checkedIn !== false) list.push({ label: 'Go up to your room (sleep)', fn: () => sleep() });
     if (near(S_.court, 22)) { const cs = Cases.courtCase(); list.push({ label: cs ? 'Enter the courthouse' : 'Miami-Dade Courthouse (closed)', fn: () => cs ? Court.start(cs) : toast('The Miami-Dade Courthouse. Dan salutes it. Force of habit.') }); }
-    if (near(S_.stationDoor, 22)) list.push({ label: Cases.info().n >= 4 && Cases.info().n <= 5 ? 'Greyhound (can’t leave mid-case)' : 'Take the bus back to the swamp', fn: () => { const n = Cases.info().n; if (n === 4 || n === 5) return toast('Brenda would kill you. Finish the case first.'); travel('swamp'); } });
+    if (near(S_.stationDoor, 22)) list.push({ label: Cases.info().n >= 4 && Cases.info().n <= 5 ? 'Greyhound (can’t leave mid-case)' : 'Greyhound', fn: () => busMenu() });
     if (Game.urgent > 0 && near(S_.hide, 22)) list.push({ label: 'USE THE TOILET', fn: () => { Game.urgent = 0; Sound.play('splash'); toast('...Made it. A beach porta-potty in July. Dan has seen God, and God is sweaty.'); Game.chill = 100; } });
     return list;
   },
@@ -165,12 +165,10 @@ const Miami = {
 
 // ---------- the Greyhound between worlds ----------
 function travel(to) {
-  const lines = to === 'miami'
-    ? [['', 'Dan boards the Greyhound with a cooler, a jon boat paddle, and no plan.'], ['', 'Six hours. Four stops. One man eating a whole rotisserie chicken in the back row.'], ['', 'MIAMI.']]
-    : [['', 'Dan boards the Greyhound north. The rotisserie chicken guy is on this bus too.'], ['', 'The swamp welcomes him back with 100% humidity and a mosquito the size of a sparrow.']];
+  const lines = TRAVEL_LINES[to];
   say(lines, () => {
     World.load(to);
-    const a = to === 'miami' ? World.spots.arrive : { x: 20.5 * TS, y: 43.8 * TS };
+    const a = to === 'swamp' ? { x: 20.5 * TS, y: 43.8 * TS } : World.spots.arrive;
     Object.assign(Game.dan, { x: a.x, y: a.y, ride: null, dir: 'down', hiding: false, carry: null });
     Object.assign(Game.boat, { x: World.spots.boat.x, y: World.spots.boat.y, dir: 'right' });
     Object.assign(Game.cooler, { x: a.x + 24, y: a.y + 6, dir: 'down' });
@@ -178,8 +176,10 @@ function travel(to) {
     spawn();
     Game.cam.x = Game.dan.x - VW / 2; Game.cam.y = Game.dan.y - VH / 2 - 10; Game.flash = .7;
     if (to === 'miami' && !Game.flags.miamiFirst) { Game.flags.miamiFirst = true; headline('FLORIDA MAN ARRIVES IN MIAMI WITH A COOLER AND "NO PLAN"; CITY "BRACES"', 3); }
-    toast(to === 'miami' ? 'Welcome to MIAMI. Everything is pink and costs $19.' : 'Home sweet swamp.', 3.5);
+    toast({ miami: 'Welcome to MIAMI. Everything is pink and costs $19.', daytona: 'Welcome to DAYTONA BEACH. World Center of Racing. And sunburns.', swamp: 'Home sweet swamp.' }[to], 3.5);
+    if (to === 'daytona' && !Game.flags.daytonaFirst) { Game.flags.daytonaFirst = true; headline('FLORIDA MAN ARRIVES IN DAYTONA; SPEEDWAY "ON HIGH ALERT"', 2); }
     if (typeof MiamiCases !== 'undefined') MiamiCases.arrived(to);
+    if (typeof DaytonaCases !== 'undefined') DaytonaCases.arrived(to);
     if (!Gigs.active()) Gigs.newDay();   // new town, new people with work
     save();
   });

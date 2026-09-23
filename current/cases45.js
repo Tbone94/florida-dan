@@ -134,7 +134,7 @@ const MiamiCases = {
     const D = Game.dan, c = this.c(), F = Game.flags, S_ = MSP(), list = [], near = (p, r) => p && Math.hypot(D.x - p.x, D.y - p.y) < r;
     if (!MIAMI()) {   // the bus stop on County Road 29
       if (c.n === 4 && c.d === 1 && qOpen('bus') && near({ x: 20.3 * TS, y: 43.5 * TS }, 26)) list.push({ label: 'Catch the Greyhound to Miami', fn: () => travel('miami') });
-      else if ((c.n === 0 && F.case5Won) && near({ x: 20.3 * TS, y: 43.5 * TS }, 26)) list.push({ label: 'Catch the Greyhound to Miami', fn: () => travel('miami') });
+      else if (F.case5Won && near({ x: 20.3 * TS, y: 43.5 * TS }, 26)) list.push({ label: 'Greyhound', fn: () => busMenu() });
       return list;
     }
     if (D.ride) return list;

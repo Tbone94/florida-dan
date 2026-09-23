@@ -31,6 +31,9 @@ const GIGS = {
     hl: 'FLORIDA MAN HERDS ESCAPED COW HOME USING ONLY YELLING' },
 };
 const G_ = () => Game.day_.gig || (Game.day_.gig = { offers: {}, active: null, done: [] });
+// who the story needs on each case day: they never offer side gigs that day (so the story always gets the conversation)
+const STORY_NPCS = { '4.1': ['valet'], '4.2': ['abuela', 'dj'], '4.3': ['raul', 'sheila'], '5.1': ['abuela', 'doc'], '5.2': ['doc'], '6.1': ['tammy'], '6.2': ['rusty', 'donna', 'tiny'], '7.1': ['rusty', 'chip'], '7.2': ['tammy', 'tiny', 'donna', 'wrench', 'chip'], '7.3': ['rusty', 'tammy'] };
+const storyBusy = id => { const c = Cases.info(); return (STORY_NPCS[c.n + '.' + c.d] || []).includes(id) || !!Q(id); };
 const TRIAL_LIMIT = 40;
 const trialPoints = () => { const S_ = World.spots; return [S_.bubbaDock, S_.tikiDock, S_.dockEnd, S_.bubbaDock]; };
 
@@ -38,7 +41,7 @@ const Gigs = {
   newDay() {
     const G = G_(); G.offers = {}; G.active = null;
     if (Game.day < 2) return;
-    const ids = Object.keys(GIGS).filter(id => { const d = GIGS[id]; return Game.npcs.some(n => n.id === d.giver) && !Q(d.giver) && (!d.ok || d.ok()); }).sort(() => Math.random() - .5).slice(0, MIAMI() ? 2 : 3);   // nobody offers a gig on a day they're in the story
+    const ids = Object.keys(GIGS).filter(id => { const d = GIGS[id]; return Game.npcs.some(n => n.id === d.giver) && !storyBusy(d.giver) && (!d.ok || d.ok()); }).sort(() => Math.random() - .5).slice(0, Game.region === 'swamp' ? 3 : 2);   // nobody offers a gig on a day they're in the story
     for (const id of ids) G.offers[GIGS[id].giver] = id;
   },
   offering: n => { const G = G_(); return !G.active && !!G.offers[n.id]; },
@@ -92,7 +95,7 @@ const Gigs = {
     if (D.carry === 'mattress') { const dm = World.props.find(p => p.kind === 'dumpster'); if (dm && Math.hypot(D.x - dm.x - 12, D.y - dm.y - 8) < 32) return { label: 'Toss the mattress', fn: () => { D.carry = null; Sound.play('boom'); Gigs.complete('mattress'); } }; }
     const S_ = World.spots, near = (p, r) => p && Math.hypot(D.x - p.x, D.y - p.y) < r;
     const nb = World.props.find(p => p.kind === 'newsbox'); if (nb && !D.ride && near({ x: nb.x + 6, y: nb.y + 6 }, 18)) return { label: 'Bribe the Swamp Gazette', fn: () => Bribe.open() };
-    return MiamiGigs.interaction() || Detector.interaction();
+    return MiamiGigs.interaction() || DaytonaGigs.interaction() || Detector.interaction();
   },
   // where the objective arrow points while a gig is the thing to do
   target(q) {
@@ -102,7 +105,7 @@ const Gigs = {
     if (id === 'mattress') return Game.pickups.find(p => p.kind === 'mattress') || (Game.dan.carry === 'mattress' ? World.props.find(p => p.kind === 'dumpster') : null);
     if (id === 'trial') { const G = G_(), P = trialPoints(); return G.cp >= 1 ? P[G.cp] : P[0]; }
     if (id === 'cow') return Game.animals.find(a => a.herd);
-    return MiamiGigs.target(id);
+    return MiamiGigs.target(id) || DaytonaGigs.target(id);
   },
   // race buoys (only while the trial is on)
   draw(cx, cy, t) {

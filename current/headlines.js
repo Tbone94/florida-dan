@@ -17,6 +17,18 @@ const HEADLINES = [
   ['gigPickles', /IGUANA IN BOW TIE/, 'Sheila lost a very dapper lizard.'],
   ['ring', /FINDS WEDDING RING WITH METAL DETECTOR/, 'The beach hides things. Bring the right tool.'],
   ['doubloon', /FINDS PIRATE GOLD/, 'Somewhere under the sand, there’s real treasure.'],
+  // ---- Daytona ----
+  ['daytona', /ARRIVES IN DAYTONA/, 'Take the Greyhound north, after Miami.'],
+  ['donutRun', /THROUGH DONUT DRIVE-THRU/, 'The pace car goes where the pace car wants.'],
+  ['pitStop', /FOUR TIRES IN RECORD TIME/, 'Rusty’s pit crew quit. Somebody’s gotta change tires.'],
+  ['armWrestle', /BIKER NAMED "TINY"/, 'Tiny has something that isn’t his.'],
+  ['pacing', /RECKLESS PACING/, 'Volusia County wants a word.'],
+  ['qualify', /QUALIFIES FOR DAYTONA 250/, 'One fast lap in the #29.'],
+  ['daytona250', /WINS DAYTONA 250/, 'Win the big one.'],
+  ['chipBusted', /ENERGY DRINK MOGUL ARRESTED/, 'Somebody sabotaged the #29.'],
+  ['gigDonuts', /DONUTS TO NASCAR PIT CREWS/, 'Donna’s donuts need a delivery man.'],
+  ['gigHelmet', /LUCKY HELMET/, 'Tiny lost something on the beach.'],
+  ['gigPit', /PIT DRILL RECORD/, 'Tammy Jo runs pit drills.'],
 
   // ---- the Flamingo case ----
   ['fry', /DEEP-FRIES FROZEN TURKEY/, 'Merle, a frozen turkey, and hot oil.'],

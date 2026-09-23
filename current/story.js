@@ -52,6 +52,7 @@ function advanceTalk(choiceFn) {
   if (T_.q.length) return showTalk();
   ui.talk.hidden = true; Game.mode = T_.prev === 'talk' ? 'play' : (T_.prev || 'play'); Game.talk = null;
   if (T_.then) T_.then();
+  if (Game.afterTalk && Game.mode === 'play') { const f = Game.afterTalk; Game.afterTalk = null; f(); }   // actions that must wait for the talk box to close (minigames, travel)
 }
 
 let toastT = 0;
@@ -288,6 +289,7 @@ const Story = {
   // --- world objects ---
   interactions() {
     if (MIAMI()) return Miami.interactions();
+    if (DAYTONA()) return Daytona.interactions();
     const D = Game.dan, F = Game.flags, S_ = World.spots, list = [];
     const near = (p, r) => Math.hypot(D.x - p.x, D.y - p.y) < r;
     if (D.ride) return list;

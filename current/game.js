@@ -23,7 +23,7 @@ function newGame() {
 function startDay() {
   const S_ = World.spots;
   Object.assign(Game, { hour: 6, chill: 70, urgent: 0, storm: 0, heat: 0, parts: [], projectiles: [], day_: freshDayLog() });
-  Heat.end(); headlineQ.length = 0; Game.dan.hiding = false; Game.dan.carry = null; Game.vehicles = []; BoatChase.boat = null; Race.on = false; Game.prints = []; Game.scene = null; Game.courtExtra = {};
+  Heat.end(); headlineQ.length = 0; Game.car = null; Game.racing = false; if (typeof Speedway !== 'undefined') { Speedway.on = false; Speedway.cars = []; } if (typeof Convoy !== 'undefined') Convoy.on = false; Game.dan.hiding = false; Game.dan.carry = null; Game.vehicles = []; BoatChase.boat = null; Race.on = false; Game.prints = []; Game.scene = null; Game.courtExtra = {};
   Object.assign(Game.fx, { buzz: 0, high: 0, shroom: 0, powder: 0, crash: 0, cig: 0 });
   Object.assign(Game.dan, { x: S_.dan.x, y: S_.dan.y, dir: 'down', ride: null, hurt: 0 });
   Object.assign(Game.boat, { x: S_.boat.x, y: S_.boat.y, dir: 'right' });
@@ -39,6 +39,7 @@ function startDay() {
 
 function spawn() {
   if (MIAMI()) return Miami.spawn();
+  if (DAYTONA()) return Daytona.spawn();
   const S_ = World.spots;
   Game.npcs = [
     makeNPC('merle', 'Merle', S_.merle.x, S_.merle.y, 'down', { wander: 18 }),
@@ -198,9 +199,10 @@ function grabPython(a) {
     onLose: () => { a.stun = 0; a.state = 'flee'; a.timer = 3; toast('The python slithered off. Dan got hugged a lil. Not in a nice way.'); } });
 }
 function yell() {
-  if (Game.gitCd > 0) return; Game.gitCd = .8; Game.day_.gits++; Sound.play('git');
+  if (Game.gitCd > 0) return; Game.gitCd = .8; Game.day_.gits++;
+  const horn = Game.dan.ride === 'cooler' && hasUp('horn'); if (horn) [392, 330, 262, 262, 262, 294, 330, 349, 392, 392, 392, 330].forEach((f, i) => Sound.tone(f, .14, 'square', .07, 0, i * .11)); else Sound.play('git');
   const D = Game.dan; Game.parts.push({ kind: 'text', x: D.x, y: D.y - 30, vx: 0, vy: -12, life: 1, text: pick(['GIT!', 'GO ON, GIT!', 'NOT TODAY, SATAN!', 'GIT OUTTA HERE!', 'SHOO, YOU SUMBITCH!']) });
-  for (const a of Game.animals) if (!a.pet && !a.spirit && Math.hypot(a.x - D.x, a.y - D.y) < (a.chuck ? 96 : 84)) { a.state = 'flee'; a.timer = a.herd ? 1.1 : 5; a.cd = a.type === 'gator' ? 14 : a.type === 'raccoon' ? 30 : 6;   // one GIT should buy real peace
+  for (const a of Game.animals) if (!a.pet && !a.spirit && Math.hypot(a.x - D.x, a.y - D.y) < (a.chuck ? 96 : 84) * (horn ? 1.7 : 1)) { a.state = 'flee'; a.timer = a.herd ? 1.1 : 5; a.cd = a.type === 'gator' ? 14 : a.type === 'raccoon' ? 30 : 6;   // one GIT should buy real peace
     if (a.chuck) { done('chuck'); if (!Game.flags.chuckGit) { Game.flags.chuckGit = true; setTimeout(() => toast('Chuck hisses and backs off. You have Chuck’s respect. For now.'), 600); } } }
   for (const n of Game.npcs) if (n.canadian && Math.hypot(n.x - D.x, n.y - D.y) < 60) { n.canadian = false; Game.flags.canadianGone = true; n.hx = n.x - 200; n.wander = 0; n.x -= 40; toast('THE CANADIAN: Sorry! Sorry, eh! SO sorry!'); headline('FLORIDA MAN YELLS "GIT" AT CANADIAN OVER POOL CHAIR; CANADIAN APOLOGIZES ELEVEN TIMES', 3); }
   for (const n of Game.npcs) if (Math.hypot(n.x - D.x, n.y - D.y) < 50) { n.scared = 1; if (n.id === 'tourist' && !Game.day_.yelledTourist) { Game.day_.yelledTourist = true; headline('FLORIDA MAN YELLS "GIT" AT TOURIST FROM OHIO', 4); } }
@@ -218,6 +220,7 @@ function update(dt) {
     case 'talk': updateTalk(dt); tickWorld(dt * .0); return;
     case 'fish': Fishing.update(dt); tickFx(dt); updateParts(dt); return;
     case 'wrestle': Wrestle.update(dt); tickFx(dt); return;
+    case 'mash': Mash.update(dt); tickFx(dt); return;
     case 'raccoon': Minigame.updateRaccoon(dt); return;
     case 'court': return;
     case 'objection': Objection.update(dt); return;
@@ -251,7 +254,7 @@ function update(dt) {
     if (p.kind === 'cowpie') continue;
     const d = Math.hypot(p.x - Game.dan.x, p.y - Game.dan.y);
     if (p.kind === 'trash' ? !(Game.dan.ride === 'boat' && d < 18) : (Game.dan.ride || d >= 12)) continue;
-    if (p.kind === 'mattress') { if (Game.dan.carry) continue; p.got = true; Game.dan.carry = 'mattress'; Sound.play('pickup'); toast('Dan hoists the mattress. It is damp. Do not think about why.'); continue; }
+    if (p.kind === 'mattress' || p.kind === 'helmet') { if (Game.dan.carry) continue; p.got = true; Game.dan.carry = p.kind; Sound.play('pickup'); toast(p.kind === 'helmet' ? 'Tiny’s lucky helmet. It smells like victory and nachos.' : 'Dan hoists the mattress. It is damp. Do not think about why.'); continue; }
     if (p.kind === 'rollerdog') { if (Game.dan.carry) continue; p.got = true; Game.dan.carry = 'rollerdog'; Sound.play('pickup'); toast('Got the roller dog machine! Still warm. Take it back to Darlene.'); continue; }
     p.got = true; giveItem(p.kind); toast(pick(PICKUP_LINES[p.kind] || [`Got ${ITEMS[p.kind] ? ITEMS[p.kind].name : p.kind}.`]));
   }
@@ -357,7 +360,7 @@ function drawWorld() {
   if (D.ride !== 'cooler') L.push([Game.cooler.y + 3, () => drawCooler(Game.cooler.x - cx, Game.cooler.y - cy, Game.cooler.dir, t, false)]);
   if (Game.mode !== 'title') L.push([D.y + (D.ride === 'boat' ? 4 : 0), () => drawDan(D.x - cx, D.y - cy, t)]);
   L.sort((a, b) => a[0] - b[0]).forEach(e => e[1]());
-  Heat.draw(cx, cy, t); Lambo.draw(cx, cy, t); BoatChase.draw(cx, cy, t);
+  Heat.draw(cx, cy, t); Lambo.draw(cx, cy, t); BoatChase.draw(cx, cy, t); Car.drawAll(cx, cy, t);
   drawProjectiles(cx, cy); drawParts(cx, cy); Gigs.draw(cx, cy, t);
   if (Game.mode !== 'title') Ambient.air(cx, cy, t);
   drawObjective(cx, cy, t);
@@ -386,7 +389,7 @@ function drawStorm(t) {
 
 function render() {
   g.setTransform(1, 0, 0, 1, 0, 0);
-  const scene = Game.mode === 'fish' ? () => Fishing.draw() : Game.mode === 'wrestle' ? () => Wrestle.draw() : Game.mode === 'raccoon' ? () => Minigame.drawRaccoon()
+  const scene = Game.mode === 'fish' ? () => Fishing.draw() : Game.mode === 'wrestle' ? () => Wrestle.draw() : Game.mode === 'raccoon' ? () => Minigame.drawRaccoon() : Game.mode === 'mash' ? () => Mash.draw()
     : Game.mode === 'dance' ? () => Dance.draw()
     : (Game.mode === 'objection' || Game.scene === 'parade' || Game.mode === 'court' || (Game.mode === 'talk' && Game.talk && Game.talk.prev === 'court') || (Game.mode === 'gazette' && Game.flags.inCourt)) ? () => Court.draw(Game.t) : null;
   if (!scene) drawWorld();

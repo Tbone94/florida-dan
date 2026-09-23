@@ -28,7 +28,7 @@ const REGIONS = {};
 World.load = function (id) {
   if (!REGIONS[id]) {
     this.map = new Uint8Array(MW * MH); this.props = []; this.spots = {};
-    (id === 'miami' ? buildMiami : buildWorld)();
+    ({ miami: buildMiami, daytona: typeof buildDaytona === 'function' ? buildDaytona : buildWorld }[id] || buildWorld)();
     gatorMap(); REGIONS[id] = { map: this.map, props: this.props, spots: this.spots, gatorOK };
   }
   const Rg = REGIONS[id]; this.map = Rg.map; this.props = Rg.props; this.spots = Rg.spots; gatorOK = Rg.gatorOK; Game.region = id;
@@ -180,6 +180,7 @@ function drawTiles(cx, cy, t) {
         if (hs > .85) { R(x + 4, y + 6, 4, 1, PAL.concreteD); R(x + 7, y + 7, 3, 1, PAL.concreteD); }
         if (hs < .05) R(x + 6, y + 6, 4, 3, PAL.grey);   // gum. or worse
         break;
+      case T.TRACK: drawTrackTile(tx, ty, x, y, hs); break;
       case T.SAND:
         R(x, y, TS, TS, MIAMI() ? '#f7e7bd' : PAL.sand); if (hs > .4) R(x + hs * 12, y + 3 + hs * 9, 1, 1, PAL.sandD); if (hs < .1) R(x + 9, y + 4, 2, 1, PAL.white);
         break;
@@ -328,7 +329,7 @@ function drawProp(p, cx, cy, t) {
       break;
     }
     case 'reeds': { for (let i = 0; i < 5; i++) { const rx = x + 2 + i * 3 + p.s * 2, sw = Math.sin(t * 1.5 + i + p.s * 5); R(rx + sw * .6, y + 2 + (i % 2) * 3, 1, 11 - (i % 2) * 3, PAL.camo); } R(x + 5 + p.s * 3, y, 2, 5, PAL.brown); break; }
-    default: if (typeof drawLandmark === 'function' && drawLandmark(p, x, y, w, h, t)) break; if (typeof drawMoneyProp === 'function' && drawMoneyProp(p, x, y, w, h, t)) break; if (typeof drawMiamiProp === 'function') drawMiamiProp(p, x, y, w, h, t); break;
+    default: if (typeof drawLandmark === 'function' && drawLandmark(p, x, y, w, h, t)) break; if (typeof drawMoneyProp === 'function' && drawMoneyProp(p, x, y, w, h, t)) break; if (typeof drawDaytonaProp === 'function' && drawDaytonaProp(p, x, y, w, h, t)) break; if (typeof drawMiamiProp === 'function') drawMiamiProp(p, x, y, w, h, t); break;
     case 'lily': { R(x + 4, y + 6, 8, 5, PAL.grassDD); R(x + 5, y + 6, 7, 4, PAL.grass); R(x + 8, y + 6, 1, 2, PAL.waterD); if (p.s > .7) R(x + 6, y + 5, 2, 2, PAL.hat); break; }
   }
 }

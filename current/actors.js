@@ -8,13 +8,14 @@ function canWalk(x, y) {
   for (const n of Game.npcs) if (n.solid !== false && Math.hypot(x - n.x, y - n.y) < 7) return false;
   return true;
 }
-function canBoat(x, y) { const air = hasUp('airboat') && !MIAMI(); for (const [ox, oy] of [[0, 0], [-8, 0], [8, 0], [0, -5], [0, 5]]) { const k = World.at(x + ox, y + oy); if (!BOATABLE(k) && !(air && k === T.SAWGRASS)) return false; } return true; }   // an airboat skims sawgrass
+function canBoat(x, y) { const air = hasUp('airboat') && Game.region === 'swamp'; for (const [ox, oy] of [[0, 0], [-8, 0], [8, 0], [0, -5], [0, 5]]) { const k = World.at(x + ox, y + oy); if (!BOATABLE(k) && !(air && k === T.SAWGRASS)) return false; } return true; }   // an airboat skims sawgrass
 function canDrive(x, y) { for (const [ox, oy] of [[-6, 0], [6, 0], [0, -4], [0, 3]]) { const k = World.at(x + ox, y + oy); if (!DRIVABLE(k) || World.solidAt(x + ox, y + oy)) return false; } return true; }
 const dirOf = (x, y) => Math.abs(x) > Math.abs(y) ? (x > 0 ? 'right' : 'left') : (y > 0 ? 'down' : 'up');
 
 // ---------- Dan ----------
 function moveDan(dt) {
   const D = Game.dan, F = Game.fx; let { x: ax, y: ay } = Input.axis();
+  if (D.ride === 'car') return Car.tick(dt);
   if (D.hiding || D.ride === 'lambo' || D.anim === 'flop') { D.moving = false; return; }
   if (F.shroom > .4 && (ax || ay)) { ax = -ax * (Math.sin(Game.t * .3) > .6 ? 1 : -1); ay = ay; }    // left is right now. deal with it
   if (F.buzz > 55 && (ax || ay)) {
@@ -35,7 +36,7 @@ function moveDan(dt) {
     if (Math.random() < dt * 8) Game.parts.push({ kind: 'foam', x: D.x - ax * 14, y: D.y - ay * 8 + 3, vx: 0, vy: 0, life: .8 });
     if (Math.random() < dt * 5) Sound.play('engine');
   } else if (D.ride === 'cooler') {
-    sp = (hasUp('boombox') ? 128 : 96) * (F.powder > 0 ? 1.5 : 1) * (World.at(D.x, D.y) === T.SAWGRASS ? .5 : 1);
+    sp = (hasUp('boombox') ? 128 : 96) * (hasUp('nitro') && Input.held('run') ? 1.35 : 1) * (F.powder > 0 ? 1.5 : 1) * (World.at(D.x, D.y) === T.SAWGRASS ? .5 : 1);
     if (hasUp('boombox') && Math.random() < dt * 3) Game.parts.push({ kind: 'text', x: D.x + rnd(-8, 8), y: D.y - 18, vx: rnd(-8, 8), vy: -14, life: .9, text: '♪' });
     const nx = D.x + ax * sp * dt, ny = D.y + ay * sp * dt;
     if (canDrive(nx, D.y)) D.x = nx; else if (Math.abs(ax) > .5) bonk();
@@ -56,7 +57,7 @@ function bonk() { if (Game.t - bonkT < .8) return; bonkT = Game.t; Game.shake = 
 
 function drawDan(x, y, t) {
   const D = Game.dan, F = Game.fx;
-  if (D.hiding || D.ride === 'lambo' || (D.hurt > 0 && Math.floor(t * 20) % 2)) return;
+  if (D.hiding || D.ride === 'lambo' || D.ride === 'car' || (D.hurt > 0 && Math.floor(t * 20) % 2)) return;
   const spr = SPR[Game.flags.suit && MIAMI() ? 'dansuit' : 'dan'][D.dir][D.moving ? D.frame : 0];
   if (D.ride === 'boat') return drawBoat(x, y, Game.boat.dir, t, true);
   if (D.ride === 'cooler') return drawCooler(x, y, Game.cooler.dir, t, true);
@@ -92,7 +93,7 @@ function drawDan(x, y, t) {
   }
   if (F.powder > 0) { R(x - 3, y - 13 + bob, 1, 1, PAL.white); }   // "sinus medicine" residue
   if (hasUp('aviators') && D.dir !== 'up') R(x - 4, y - 16 + bob, 8, 1, PAL.yellow);   // gold aviators
-  Detector.draw(x, y, t);
+  Detector.draw(x, y, t); drawTattoos(x, y, bob);
   if (D.carry) { const s = SPR.icons[D.carry]; if (s) g.drawImage(s, Math.round(x - 5), Math.round(y - 33 + bob)); }
 }
 
@@ -103,11 +104,11 @@ function drawBoat(x, y, dir, t, withDan) {
   OR(bx, by, w, h, PAL.greyD); R(bx + 2, by + 2, w - 4, h - 4, PAL.grey); R(bx + 2, by + 2, w - 4, 2, PAL.tankD);
   if (horiz) { OR(bx + (dir === 'right' ? -4 : w), by + 3, 4, 7, PAL.ink); }
   else OR(bx + 5, by + (dir === 'down' ? -4 : h), 6, 4, PAL.ink);
-  if (hasUp('airboat') && !MIAMI()) {   // the fan cage, spinning, on the back
+  if (hasUp('airboat') && Game.region === 'swamp') {   // the fan cage, spinning, on the back
     const fx = horiz ? bx + (dir === 'right' ? 2 : w - 10) : bx + 4, fy = horiz ? by - 10 : by + (dir === 'down' ? 2 : h - 10);
     OR(fx, fy, 8, 12, PAL.greyD); R(fx + 1, fy + 1, 6, 10, PAL.ink); const a = t * 40; R(fx + 3 + Math.round(Math.cos(a) * 2), fy + 5 + Math.round(Math.sin(a) * 4), 2, 2, PAL.white);
   }
-  label(hasUp('airboat') && !MIAMI() ? 'SS BUDGET II' : 'SS BUDGET', x, by + h + 7, PAL.white, 5);
+  label(hasUp('airboat') && Game.region === 'swamp' ? 'SS BUDGET II' : 'SS BUDGET', x, by + h + 7, PAL.white, 5);
   if (withDan) g.drawImage(SPR.dan[Game.dan.dir][0], 0, 0, 16, 14, Math.round(x - 8), Math.round(y - 16 + bob), 16, 14);
 }
 function drawCooler(x, y, dir, t, withDan) {
@@ -116,6 +117,7 @@ function drawCooler(x, y, dir, t, withDan) {
   OR(x - 10, y - 8 + jig, 20, 10, PAL.white); R(x - 10, y - 8 + jig, 20, 3, PAL.red); R(x - 3, y - 4 + jig, 6, 2, PAL.greyD);
   OR(x - 11, y + 1, 4, 4, PAL.ink); OR(x + 7, y + 1, 4, 4, PAL.ink);
   R(x - 8, y - 1 + jig, 3, 2, PAL.yellow); R(x + 5, y - 1 + jig, 3, 2, PAL.yellow);   // headlights. why does it have headlights
+  if (hasUp('stripes')) { R(x - 2, y - 8 + jig, 2, 10, PAL.blue); R(x + 1, y - 8 + jig, 1, 10, PAL.white); }
   if (withDan) g.drawImage(SPR.dan[Game.dan.dir][0], 0, 0, 16, 16, Math.round(x - 8), Math.round(y - 24 + jig), 16, 16);
 }
 

@@ -14,10 +14,10 @@ function findTile(pred, x0, y0, x1, y1, seed) {
 const Cases = {
   info(day = Game.day) {
     if (day <= 4) return { n: 1, d: day }; if (day <= 7) return { n: 2, d: day - 4 }; if (day <= 10) return { n: 3, d: day - 7 };
-    if (day <= 13) return { n: 4, d: day - 10 }; if (day <= 16) return { n: 5, d: day - 13 }; return { n: 0, d: day - 16 };
+    if (day <= 13) return { n: 4, d: day - 10 }; if (day <= 16) return { n: 5, d: day - 13 }; if (day <= 19) return { n: 6, d: day - 16 }; if (day <= 22) return { n: 7, d: day - 19 }; return { n: 0, d: day - 22 };
   },
   name() { return CASE_NAMES[this.info().n]; },
-  courtCase() { return Game.day === 4 ? 'flamingo' : Game.day === 7 ? 'manatee' : Game.day === 10 ? 'skunk' : Game.day === 13 && MIAMI() ? 'lambo' : Game.day === 16 && MIAMI() && Game.flags.flyer ? 'sinus' : null; },
+  courtCase() { return Game.day === 4 ? 'flamingo' : Game.day === 7 ? 'manatee' : Game.day === 10 ? 'skunk' : Game.day === 13 && MIAMI() ? 'lambo' : Game.day === 16 && MIAMI() && Game.flags.flyer ? 'sinus' : Game.day === 19 && DAYTONA() ? 'donut' : Game.day === 22 && DAYTONA() && Game.flags.raceWon ? 'race' : null; },
   places() {
     if (this._p) return this._p;
     const M = World.spots.merle;
@@ -43,6 +43,7 @@ const Cases = {
 
   setupDay(n) {
     const c = this.info(n), F = Game.flags;
+    if (c.n >= 6) return DaytonaCases.setupDay(n);
     if (c.n >= 4) return MiamiCases.setupDay(n);
     if (c.n === 2 && c.d === 1) {
       setQuests([['kayden', 'Find the kid who filmed it (boat ramp)'], ['pam', 'Talk to Dr. Pam (Merle’s island)']]);
@@ -77,6 +78,7 @@ const Cases = {
 
   tick(dt) {
     const c = this.info(), F = Game.flags;
+    if (DAYTONA() || c.n >= 6) { DaytonaCases.tick(dt); Favors.tick(dt); return; }
     if (c.n >= 4 || MIAMI()) { MiamiCases.tick(dt); Favors.tick(dt); return; }
     if (c.n === 2 && c.d === 1) {
       if (F.contentStart != null && !F.contentDone) {
@@ -105,6 +107,7 @@ const Cases = {
   talk(n) {
     const c = this.info(), F = Game.flags;
     if (MIAMI() && MiamiCases.talk(n)) return true;
+    if (DAYTONA()) return DaytonaCases.talk(n);
     if (n.id === 'kayden' && c.n === 2) {
       n.quest = false;
       if (!F.kaydenAsk) {
@@ -224,7 +227,9 @@ const Cases = {
   },
   sleepBlock() {
     const c = this.info(), open = Game.quests.filter(q => !q.done && !q.opt && q.id !== 'bed');
-    if (this.courtCase()) return 'Court. Today. The courthouse. East end of 29. GO.';
+    if (this.courtCase()) return DAYTONA() ? 'Court. Today. The Volusia County Courthouse. GO.' : MIAMI() ? 'Court. Today. The Miami-Dade Courthouse. GO.' : 'Court. Today. The courthouse. East end of 29. GO.';
+    if (c.n === 6 && c.d === 1 && !Game.flags.donutRun) return 'Brenda: the Grand Marshal thing is TODAY, Dan. Daytona. Go.';
+    if (c.n === 7 && c.d === 3 && !Game.flags.raceWon) return 'Sleep? It’s RACE DAY.';
     if (c.n === 2 || c.n === 3) return open.length ? `Still got stuff to do: ${open[0].text.toLowerCase().replace(/\s*\(.*\)$/, '')}.` : null;
     return Game.hour < 17 ? 'Too early. Even for Dan.' : null;
   },

@@ -63,7 +63,7 @@ function hud() {
   if (F.powder > 0) tags.push(`“SINUSES” ${Math.ceil(F.powder)}s`); if (F.crash > 0) tags.push('CRASHING'); if (F.cig > 0) tags.push('SMOKIN');
   set(ui.fxTags, tags.join(' · '));
   const hs = Math.ceil((Game.heat || 0) - .05); $('heat').hidden = hs <= 0; set($('heat'), '★'.repeat(hs) + '☆'.repeat(5 - Math.max(0, hs)) + (Heat.cop ? '  WANTED' : '')); $('heat').classList.toggle('hot', !!Heat.cop);
-  const tt = Gigs.timer(); ui.urgent.hidden = !(Game.urgent > 0 || tt); if (Game.urgent > 0) set(ui.urgent, `FIND A TOILET: ${Math.ceil(Game.urgent)}s`); else if (tt) set(ui.urgent, `BEAT THE RECORD: ${tt}s`);
+  const tt = Gigs.timer(), rh = typeof Speedway !== 'undefined' ? Speedway.hud() : ''; ui.urgent.hidden = !(Game.urgent > 0 || tt || rh); if (rh) set(ui.urgent, rh); else if (Game.urgent > 0) set(ui.urgent, `FIND A TOILET: ${Math.ceil(Game.urgent)}s`); else if (tt) set(ui.urgent, `BEAT THE RECORD: ${tt}s`);
   for (const [id, n] of [['statBait', Game.inv.bait], ['statCan', Game.inv.can], ['statPy', Game.pythons.length]]) $(id).hidden = !n;
   updateHotbar(); renderQuests();
   if (Game.mode !== 'play') ui.prompt.hidden = true;
@@ -80,6 +80,8 @@ const VENDORS = {
   clinic: { title: 'DR. SNIFFLES’ SINUS CLINIC', sub: 'Medical grade. Allegedly. Buying here gets you noticed (+1★).', items: () => ['powder', 'cafecito'], shady: true },
   suits: { title: 'PASTEL SUITS', sub: 'Miami formal. For crimes, weddings, and crimes at weddings.', items: () => ['suit'] },
   bubba: { title: 'BUBBA’S', sub: 'Boats, bait, and bail. Mostly bail.', items: () => Upgrades.forSale('bubba') },
+  ink: { title: 'INK & REGRET', sub: 'No refunds. No crying. No exes’ names.', items: () => Upgrades.forSale('ink') },
+  speed: { title: 'WRENCH’S SPEED SHOP', sub: 'Go faster. Look faster. Honk.', items: () => Upgrades.forSale('speed') },
   surf: { title: 'SURF & DIVE', sub: 'Wax, gear, and one extremely illegal engine.', items: () => Upgrades.forSale('surf') },
   cafe: { title: 'CAFÉ ABUELA', sub: 'Ventanita open. Pay in cash or compliments.', items: () => ['cafecito', 'pastelito'] },
 };
@@ -169,7 +171,7 @@ $('musicBtn').addEventListener('click', e => { e.stopPropagation(); Sound.toggle
 // Trash Baby: face him to send him home (he waddles back to the cabin porch); walk up to him there to bring him along again
 function setTrashBaby(stay) {
   Game.flags.tbStay = stay; const tb = Game.animals.find(a => a.pet);
-  if (stay && MIAMI()) { Game.animals = Game.animals.filter(a => a !== tb); toast('Trash Baby hops a Greyhound back to the swamp. He’ll be on the porch.'); }
+  if (stay && Game.region !== 'swamp') { Game.animals = Game.animals.filter(a => a !== tb); toast('Trash Baby hops a Greyhound back to the swamp. He’ll be on the porch.'); }
   else if (stay) { const d = World.spots.door; if (tb) { tb.hx = d.x + 22; tb.hy = d.y + 8; } toast('Trash Baby waddles home to the porch. Judging you the whole way.'); }
   else { if (tb) tb.hx = tb.hy = undefined; toast('Trash Baby scampers after you. Reunited.'); }
   Sound.play(stay ? 'talk' : 'pickup'); save();
@@ -249,7 +251,7 @@ function frame(now) {
   Input.poll(); menuNav();
   // one bad frame should never freeze the swamp on its last image; log it and keep going
   try { update(dt); render(); hud(); } catch (e) { console.error('frame error', e); }
-  Sound.music(dt, Heat.cop ? 'chase' : Game.fx.powder > 0 ? 'speed' : Game.fx.high > 0 ? 'slow' : Game.fx.shroom > 0 ? 'trip' : (Game.hour >= 20.5 || Game.hour < 6) ? 'night' : 'norm');
+  Sound.music(dt, Heat.cop || Game.racing ? 'chase' : Game.fx.powder > 0 ? 'speed' : Game.fx.high > 0 ? 'slow' : Game.fx.shroom > 0 ? 'trip' : (Game.hour >= 20.5 || Game.hour < 6) ? 'night' : 'norm');
   Input.endFrame();
   if (!window.TRAILER) requestAnimationFrame(frame);
 }
