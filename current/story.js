@@ -224,7 +224,11 @@ const Story = {
     const opts = [['Shop', shop], ['Sell fish ($4 each)', sell], ['Leave', () => [['DARLENE', 'Bye, sugar. Don’t die.']]]];
     if (Game.day === 2 && !Q('darlene').done) {
       if (F.raccoonOut) { done('darlene'); return say([['DARLENE', 'You got it out! With your FACE! You’re a hero, Dan. A disgusting hero.'], ['', 'Darlene signs. Witness 1 of 3.'], ['DARLENE', 'Now what can I get ya?', opts]]); }
-      return say([['DARLENE', 'Dan, baby, there is a RACCOON in my ice machine. Been in there since Sunday. He’s got a whole life in there now.'], ['DARLENE', 'Get him out and I’ll sign whatever you want. Anything else?', opts]], () => addQuest('ice', 'Get the raccoon out of the ice machine', false, 'darlene'));
+      return say([['DARLENE', 'Dan, baby, there is a RACCOON in my ice machine. Been in there since Sunday. He’s got a whole life in there now.'],         ['DARLENE', 'Get him out and I’ll sign whatever you want.', [
+          ['“I’ll get him out.”', () => [['DARLENE', 'My hero. Watch your face. He goes for the face.']]],
+          ['“What kinda raccoon we talkin’?”', () => [['DARLENE', 'The kind that hisses at customers and eats all the Slim Jims. Big boy.'], ['DAN', 'Say less.']]],
+          ['“Can I buy stuff first?”', () => [['DARLENE', 'Sure, hon. The raccoon ain’t going anywhere. That’s the PROBLEM.', opts]]]]]],
+        () => addQuest('ice', 'Get the raccoon out of the ice machine', false, 'darlene'));
     }
     if (Game.day === 4 && !Q('pants').done) opts.splice(2, 0, ['Buy “Formal Jorts” ($8)', () => { if (Game.money < 8) return [['DARLENE', 'They’re eight dollars, Dan.']]; Game.money -= 8; Game.flags.pants = true; done('pants'); return [['DARLENE', 'Formal Jorts. Black denim. For weddings, funerals, and arraignments.'], ['DAN', 'I feel like a lawyer.']]; }]);
     return say([['DARLENE', pick(['Welcome to the Gulp-N-Go, where the dogs are always rollin’.', 'Hey Dan. You look like hell. What’ll it be?', 'Pump 2 is broke. Pump 1 is haunted. What do you need?']), opts]]);
