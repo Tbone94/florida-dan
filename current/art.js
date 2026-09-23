@@ -69,6 +69,9 @@ const SWAPS = {
   bubba: { hat: PAL.orange, hatD: '#c9612a', tank: PAL.camo, tankD: PAL.camoD, stain: PAL.orange, jorts: PAL.tan, hair: PAL.hair, shades: PAL.shades, skin: '#e89a74', flip: PAL.black },
   skeeter: { hat: PAL.tan, hatD: PAL.tanD, tank: '#ff8fc0', tankD: PAL.teal, stain: PAL.yellow, jorts: PAL.white, hair: PAL.grey, shades: PAL.shades, skin: '#d98c62', flip: PAL.brown },
   lurleen: { hat: '#ff8fc0', hatD: PAL.hat, tank: '#bfe3e0', tankD: PAL.teal, stain: '#ff8fc0', jorts: '#bfe3e0', hair: '#c46a3a', shades: '#ff8fc0', skin: '#f2b48f', flip: '#ff8fc0' },
+  rita: { hat: '#c46a3a', hatD: '#8e4a26', tank: '#2ba59a', tankD: '#1b7d74', stain: PAL.white, jorts: PAL.greyD, hair: '#c46a3a', shades: PAL.skin, skin: '#e8a882', flip: PAL.white },
+  boomer: { hat: PAL.red, hatD: PAL.redD, tank: PAL.white, tankD: PAL.blue, stain: PAL.red, jorts: PAL.blue, hair: PAL.grey, shades: PAL.shades, skin: '#e0956a', flip: PAL.red },
+  earl: { hat: PAL.tan, hatD: PAL.tanD, tank: PAL.blue, tankD: PAL.blueD, stain: PAL.mudL, jorts: PAL.blueD, hair: PAL.white, shades: PAL.skin, skin: '#d99a74', flip: PAL.brown },
   tourist: { hat: PAL.white, hatD: PAL.tankD, tank: PAL.teal, tankD: '#1b8f83', stain: PAL.yellow, jorts: PAL.tankD, skin: '#ff9d8a', skinD: '#e0685a', hair: PAL.blonde },
 };
 

@@ -3,6 +3,16 @@
 // persist across playthroughs (localStorage), so the hunt continues after court.
 'use strict';
 const HEADLINES = [
+  // ---- Florida Man opportunities (side gigs) ----
+  ['gigBeer', /BAR THAT IS ALSO BASICALLY A BOAT/, 'Skeeter’s bar is thirsty.'],
+  ['gigPool', /ALLIGATOR FROM KIDDIE POOL/, 'Palmetto Pines has a pool problem.'],
+  ['gigMattress', /MOTEL MATTRESS/, 'Room 4 left something behind.'],
+  ['gigFireworks', /PRODUCT TESTS/, 'Boomer needs a tester with no eyebrows.'],
+  ['gigTrial', /LAKE SPEED RECORD/, 'Bubba’s lake record can be beaten.'],
+  ['gigCow', /HERDS ESCAPED COW/, 'Earl’s cow keeps getting out.'],
+  ['airboat', /BUYS AIRBOAT/, 'Bubba sells something with a very big fan.'],
+  ['recliner', /RECLINER ON PORCH/, 'Every office needs a chair.'],
+
   // ---- the Flamingo case ----
   ['fry', /DEEP-FRIES FROZEN TURKEY/, 'Merle, a frozen turkey, and hot oil.'],
   ['roof', /FALLS OFF ROOF/, 'Something that doesn’t belong is on your roof.'],

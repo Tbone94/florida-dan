@@ -67,10 +67,11 @@ function addQuest(id, text, opt, before) {
   if (Q(id)) return; const q = { id, text, opt: !!opt, done: false }, i = before ? Game.quests.findIndex(x => x.id === before) : -1;
   if (i >= 0) Game.quests.splice(i, 0, q); else Game.quests.push(q); renderQuests();
 }
-const currentQuest = () => Game.quests.find(q => !q.done && !q.opt);
+const currentQuest = () => Game.quests.find(q => !q.done && !q.opt) || Game.quests.find(q => !q.done && q.gig);   // a gig gets the arrow once the real objective is done
 // where the objective arrow points
 function questTarget(q) {
   const S_ = World.spots, who = id => Game.npcs.find(n => n.id === id);
+  if (q && q.gig) return Gigs.target(q);
   switch (q && q.id) {
     case 'boat': return Game.dan.ride === 'boat' ? null : Game.boat;
     case 'fish': return Game.dan.ride === 'boat' ? null : S_.dockEnd;
@@ -189,13 +190,17 @@ const Story = {
   // --- people ---
   talk(n) {
     if (Game.day >= 5 && Cases.talk(n)) return;
+    if (Gigs.talk(n)) return;
     const F = Game.flags, day = Game.day;
     if (n.id === 'merle') return this.merle();
     if (n.id === 'darlene') return this.darlene();
     if (n.id === 'rhonda') return this.rhonda();
     if (n.id === 'bubba') return say([['BUBBA', pick(['Bait, boats, bail. The three B’s. Four if you count beer.', 'Dan! My best bail customer. What’re we buyin’?', 'Everything’s a deal, nothing’s refundable, and I don’t know you.'])],
-      ['BUBBA', 'Whatcha need?', [['Browse the goods', () => { Game.mode = 'shop'; openShop('bubba'); return null; }], ['“Just lookin’.”', () => [['BUBBA', 'Lookin’ is free. Breathin’ near the airboat is five dollars.']]]]]]);
+      ['BUBBA', 'Whatcha need?', [['Browse the goods', () => { Game.mode = 'shop'; openShop('bubba'); return null; }], ...(Gigs.hasOffer('bubba') ? [['“Got any work?” ($)', () => Gigs.offerLines(n)]] : []), ['“Just lookin’.”', () => [['BUBBA', 'Lookin’ is free. Breathin’ near the airboat is five dollars.']]]]]]);
     if (n.id === 'skeeter') return say([['SKEETER', pick(['Welcome to the Leaky Tiki. It leaks. That’s the name.', 'Only bar in the county you gotta boat to. Keeps the riffraff out. Mostly.', 'The umbrella drink is free if you can say what’s in it. Nobody can.'])]]);
+    if (n.id === 'rita') return say([['RITA', pick(['Sunshine Motor Inn. Hourly, nightly, or “don’t ask.”', 'Ice machine’s broke. Pool’s a pond now. Welcome.', 'You look like a Room 6 kinda guy. Room 6 is a closet.'])]]);
+    if (n.id === 'boomer') return say([['BOOMER', pick(['Fireworks AND boiled peanuts. Two of God’s greatest gifts. Don’t mix ’em.', 'Every rocket here is legal in at least one state.', 'I lost two fingers to this business and I regret nothing.'])]]);
+    if (n.id === 'earl') return say([['EARL', pick(['Them’s my cows. Don’t spoon ’em.', 'Cow tippin’ is a myth, son. They just fall over on their own.', 'Bessie’s the one lookin’ at you funny. She does that.'])]]);
     if (n.id === 'lurleen') return say([['LURLEEN', pick(['Dan Dupree. You still owe me a lawn gnome.', 'Palmetto Pines ain’t fancy, but we got a pool. It’s a kiddie pool. It counts.', 'If you see my husband tell him the satellite dish is on the roof, not IN the roof.'])]]);
     if (n.id === 'tourist') return say(pick(TOURIST_TALKS));
     if (n.id === 'wayne') return say([['WAYNE', pick(['Duuude. Dan. My guy. You look like you need some... oregano.', 'Welcome to the Mystery Van. The mystery is what’s in the van. It’s weed.', 'Shhh. Rhonda’s got ears in the palm trees, man.'])],

@@ -32,7 +32,7 @@ function startDay() {
   spawn();
   Game.cam.x = Game.dan.x - VW / 2; Game.cam.y = Game.dan.y - VH / 2 - 10;
   Game.mode = 'play'; showHud(true);
-  Story.setupDay(Game.day);
+  Story.setupDay(Game.day); Gigs.newDay();
   save();
   Sound.setMusic(true);
 }
@@ -50,6 +50,9 @@ function spawn() {
     makeNPC('bubba', 'Bubba', S_.bubba.x, S_.bubba.y, 'down'),
     makeNPC('skeeter', 'Skeeter', S_.tiki.x, S_.tiki.y - 12, 'down'),
     makeNPC('lurleen', 'Lurleen', S_.park.x, S_.park.y, 'down', { wander: 30 }),
+    makeNPC('rita', 'Rita', 28.2 * TS, 51.2 * TS, 'down'),
+    makeNPC('boomer', 'Boomer', S_.fireworks.x, S_.fireworks.y, 'down'),
+    makeNPC('earl', 'Earl', 57.4 * TS, 46.3 * TS, 'down'),
   ];
   if (Game.day === 2) { Game.npcs[1].quest = true; Game.npcs[2].quest = true; Game.npcs[0].quest = true; }
   if (Game.day === 1) Game.npcs[0].quest = true;
@@ -81,6 +84,7 @@ function interaction() {
   const D = Game.dan, near = (o, r) => Math.hypot(D.x - o.x, D.y - o.y) < r;
   Game.tbFace = null;
   if (D.ride === 'lambo') return null;
+  const gi = Gigs.interactions(); if (gi) return gi;   // carrying a damp mattress outranks small talk
   if (D.hiding) return { label: 'Come out of the porta-potty', fn: () => { D.hiding = false; toast('Dan emerges. He will never be the same.'); } };
   if (Heat.cop && !D.ride && near(World.spots.hide || { x: 25.8 * TS, y: 43.3 * TS }, 22)) return { label: 'HIDE IN THE PORTA-POTTY', fn: () => { D.hiding = true; D.moving = false; toast('Dan hides in the porta-potty. It is... a lot in here.'); } };
   if (!D.ride) for (const n of Game.npcs) if (!n.hidden && near(n, 24)) return { label: `Talk to ${n.name}`, fn: () => Story.talk(n) };
@@ -181,6 +185,7 @@ function drawObjective(cx, cy, t) {
 
 function wrestleGator(a) {
   Wrestle.start({ foe: a.chuck ? 'chuck' : 'gator', arena: 'swamp', onWin: () => {
+    if (a.gig === 'pool') { Game.chill = Math.min(100, Game.chill + 25); return Gigs.complete('pool'); }
     a.stun = 10; a.state = 'flee'; a.timer = 12; a.cd = 12; a.belly = 1.8; Game.chill = Math.min(100, Game.chill + 25); Game.day_.wrestles++;
     if (a.chuck) { done('chuck'); headline('FLORIDA MAN WRESTLES ALLIGATOR NAMED "CHUCK," CALLS IT "A DISAGREEMENT BETWEEN FRIENDS"', 8); }
     else if (Game.day_.wrestles === 1) headline('FLORIDA MAN WRESTLES ALLIGATOR "FOR FUN"; ALLIGATOR "NOT HAVING FUN"', 6);
@@ -195,7 +200,7 @@ function grabPython(a) {
 function yell() {
   if (Game.gitCd > 0) return; Game.gitCd = .8; Game.day_.gits++; Sound.play('git');
   const D = Game.dan; Game.parts.push({ kind: 'text', x: D.x, y: D.y - 30, vx: 0, vy: -12, life: 1, text: pick(['GIT!', 'GO ON, GIT!', 'NOT TODAY, SATAN!', 'GIT OUTTA HERE!', 'SHOO, YOU SUMBITCH!']) });
-  for (const a of Game.animals) if (!a.pet && !a.spirit && Math.hypot(a.x - D.x, a.y - D.y) < (a.chuck ? 96 : 84)) { a.state = 'flee'; a.timer = 5; a.cd = a.type === 'gator' ? 14 : a.type === 'raccoon' ? 30 : 6;   // one GIT should buy real peace
+  for (const a of Game.animals) if (!a.pet && !a.spirit && Math.hypot(a.x - D.x, a.y - D.y) < (a.chuck ? 96 : 84)) { a.state = 'flee'; a.timer = a.herd ? 1.1 : 5; a.cd = a.type === 'gator' ? 14 : a.type === 'raccoon' ? 30 : 6;   // one GIT should buy real peace
     if (a.chuck) { done('chuck'); if (!Game.flags.chuckGit) { Game.flags.chuckGit = true; setTimeout(() => toast('Chuck hisses and backs off. You have Chuck’s respect. For now.'), 600); } } }
   for (const n of Game.npcs) if (n.canadian && Math.hypot(n.x - D.x, n.y - D.y) < 60) { n.canadian = false; Game.flags.canadianGone = true; n.hx = n.x - 200; n.wander = 0; n.x -= 40; toast('THE CANADIAN: Sorry! Sorry, eh! SO sorry!'); headline('FLORIDA MAN YELLS "GIT" AT CANADIAN OVER POOL CHAIR; CANADIAN APOLOGIZES ELEVEN TIMES', 3); }
   for (const n of Game.npcs) if (Math.hypot(n.x - D.x, n.y - D.y) < 50) { n.scared = 1; if (n.id === 'tourist' && !Game.day_.yelledTourist) { Game.day_.yelledTourist = true; headline('FLORIDA MAN YELLS "GIT" AT TOURIST FROM OHIO', 4); } }
@@ -237,7 +242,7 @@ function update(dt) {
   if (Game.storm > .3 && !Game.dan.ride) { const nx = Game.dan.x + Game.storm * 16 * dt; if (canWalk(nx, Game.dan.y)) Game.dan.x = nx; }
   tickWorld(dt);
   Story.tick(dt);
-  Events.tick(dt);
+  Events.tick(dt); Gigs.tick(dt);
   Heat.tick(dt);
   if (Input.tapped('b')) yell();
   if (Input.tapped('punch')) punch();
@@ -246,6 +251,7 @@ function update(dt) {
     if (p.kind === 'cowpie') continue;
     const d = Math.hypot(p.x - Game.dan.x, p.y - Game.dan.y);
     if (p.kind === 'trash' ? !(Game.dan.ride === 'boat' && d < 18) : (Game.dan.ride || d >= 12)) continue;
+    if (p.kind === 'mattress') { if (Game.dan.carry) continue; p.got = true; Game.dan.carry = 'mattress'; Sound.play('pickup'); toast('Dan hoists the mattress. It is damp. Do not think about why.'); continue; }
     if (p.kind === 'rollerdog') { if (Game.dan.carry) continue; p.got = true; Game.dan.carry = 'rollerdog'; Sound.play('pickup'); toast('Got the roller dog machine! Still warm. Take it back to Darlene.'); continue; }
     p.got = true; giveItem(p.kind); toast(pick(PICKUP_LINES[p.kind] || [`Got ${ITEMS[p.kind] ? ITEMS[p.kind].name : p.kind}.`]));
   }
@@ -349,7 +355,7 @@ function drawWorld() {
   if (Game.mode !== 'title') L.push([D.y + (D.ride === 'boat' ? 4 : 0), () => drawDan(D.x - cx, D.y - cy, t)]);
   L.sort((a, b) => a[0] - b[0]).forEach(e => e[1]());
   Heat.draw(cx, cy, t); Lambo.draw(cx, cy, t); BoatChase.draw(cx, cy, t);
-  drawProjectiles(cx, cy); drawParts(cx, cy);
+  drawProjectiles(cx, cy); drawParts(cx, cy); Gigs.draw(cx, cy, t);
   if (Game.mode !== 'title') Ambient.air(cx, cy, t);
   drawObjective(cx, cy, t);
   if (Game.fx.shroom > 0) for (const a of Game.animals) if (vis(a.x, a.y, 0) && !a.lurk && hash2(Math.floor(t / 4), a.x | 0) > .6) label(TALKY[Math.floor(hash2(Math.floor(t / 4), a.y | 0) * TALKY.length)], a.x - cx, a.y - cy - 24, PAL.neon, 6);

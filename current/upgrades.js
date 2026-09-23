@@ -30,6 +30,8 @@ Object.assign(ICONS, {
     'oooooooooo', 'owwwwwwwwo', 'owoooooowo', 'owgllllgwo', 'orgggggggo', 'owgggggwwo', 'owooooooow', 'owwwwwwwwo', 'oooooooooo', '..........'] },
   neon: { key: { o: 'ink', r: 'neon', b: 'blue', k: 'black' }, rows: [
     'oooooooooo', 'okkkkkkkko', 'okrrkrrkko', 'okrkkrkrko', 'okrrkrrkko', 'okkkkkkkko', 'okbbbbbbko', 'okkkkkkkko', 'oooooooooo', '..........'] },
+  mattress: { key: { o: 'ink', w: 'white', s: 'stain', b: 'tankD' }, rows: [
+    '..........', 'oooooooooo', 'owwbwwbwwo', 'owswwwwwwo', 'owwbwsbwwo', 'owwwwwssso', 'owwbwwbwwo', 'oooooooooo', '..........', '..........'] },
   recliner: { key: { o: 'ink', b: 'mudL', d: 'mud', w: 'woodD' }, rows: [
     'ooo.......', 'obbo......', 'obbo......', 'obbooooo..', 'obbbbbbbo.', 'odddddddo.', 'oooooooooo', '.ow....wo.', '.oo....oo.', '..........'] },
 });
