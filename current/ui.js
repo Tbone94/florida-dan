@@ -111,7 +111,10 @@ function resize() {
   const w = Math.floor(Math.min(vw, (portrait ? vh * .58 : vh) * 16 / 9)), h = Math.floor(w * 9 / 16);
   Object.assign(stage.style, { width: w + 'px', height: h + 'px', left: ((vw - w) / 2) + 'px', top: (portrait ? 8 : (vh - h) / 2) + 'px' });
   stage.style.setProperty('--u', Math.max(10, Math.min(17, w / 62)) + 'px');
-  const dpr = Math.min(2, devicePixelRatio || 1); screenCv.width = Math.round(w * dpr); screenCv.height = Math.round(h * dpr);
+  // Render at a whole-number multiple of the 320x180 art, capped at 4x (1280x720). The browser upscales the rest
+  // crisply (image-rendering: pixelated). Full-screen on a big display was pushing 5000+px-wide frames through the FX shader.
+  const dpr = devicePixelRatio || 1, k = clamp(Math.floor(w * dpr / VW), 1, window.TRAILER ? 6 : 4);
+  screenCv.width = VW * k; screenCv.height = VH * k;
   document.body.classList.toggle('portrait', portrait);
   $('rotate').hidden = !(portrait && isTouch);
 }
