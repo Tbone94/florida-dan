@@ -60,7 +60,29 @@ function toast(msg, secs = 3) { ui.toast.textContent = msg; ui.toast.hidden = fa
 function Q(id) { return Game.quests.find(q => q.id === id); }
 function done(id) { const q = Q(id); if (q && !q.done) { q.done = true; Sound.play('catch'); toast('✓ ' + q.text.replace(/\s*\(.*\)$/, '')); } renderQuests(); }
 function setQuests(list) { Game.quests = list.map(([id, text, opt]) => ({ id, text, opt: !!opt, done: false })); renderQuests(); }
-function addQuest(id, text, opt) { if (!Q(id)) Game.quests.push({ id, text, opt: !!opt, done: false }); renderQuests(); }
+function addQuest(id, text, opt, before) {
+  if (Q(id)) return; const q = { id, text, opt: !!opt, done: false }, i = before ? Game.quests.findIndex(x => x.id === before) : -1;
+  if (i >= 0) Game.quests.splice(i, 0, q); else Game.quests.push(q); renderQuests();
+}
+const currentQuest = () => Game.quests.find(q => !q.done && !q.opt);
+// where the objective arrow points
+function questTarget(q) {
+  const S_ = World.spots, who = id => Game.npcs.find(n => n.id === id);
+  switch (q && q.id) {
+    case 'boat': return Game.dan.ride === 'boat' ? null : Game.boat;
+    case 'fish': return Game.dan.ride === 'boat' ? null : S_.dockEnd;
+    case 'merle': case 'merle2': case 'party': return who('merle') || S_.merle;
+    case 'sleep1': case 'sleep2': case 'board': return S_.door;
+    case 'darlene': case 'stock': return who('darlene') || S_.darlene;
+    case 'ice': return S_.icemachine;
+    case 'rhonda': return who('rhonda') || S_.rhonda;
+    case 'sign': return { x: S_.door.x - 34, y: S_.door.y };
+    case 'plywood': return { x: 37.7 * TS, y: 40.6 * TS };
+    case 'manny': return Game.animals.find(a => a.spirit);
+    case 'court': return S_.court;
+  }
+  return null;
+}
 function questText(id, text) { const q = Q(id); if (q && q.text !== text) { q.text = text; renderQuests(); } }
 
 const PHONE_B = 'PHONE: BRENDA (PUBLIC DEFENDER)';
@@ -69,19 +91,18 @@ const Story = {
     const F = Game.flags;
     Game.cold = false; Game.storm = 0;
     if (n === 1) {
-      setQuests([['boat', 'Take the SS Budget out (dock, east of cabin)'], ['fish', 'Catch 3 fish (0/3)'], ['merle', "Bring 'em to Merle's fish fry (east island)"], ['chuck', 'Tell Chuck to GIT', true]]);
+      setQuests([['boat', 'Take the boat out'], ['fish', 'Catch 3 fish (0/3)'], ['merle', 'Bring the fish to Merle'], ['chuck', 'Yell GIT at Chuck', true]]);
       say([
         [PHONE_B, 'Dan. It’s Brenda. Your hearing is FRIDAY.'], ['DAN', 'Hey Brenda. Is this about the flamingo?'], [PHONE_B, 'It’s about the flamingo, Dan.'],
         ['DAN', 'That flamingo came at ME.'], [PHONE_B, 'It was a LAWN flamingo. It was plastic. You fought it in the Gulp-N-Go parking lot for forty minutes.'],
         [PHONE_B, 'The complaint literally says “defendant is a Florida Man.” Four days, Dan. No headlines. Act. NORMAL.'],
         ['DAN', 'I’m not a Florida Man, Brenda. I’m a man. Who lives in Florida. Big difference.'],
         ['TEXT: MERLE', 'fish fry 2nite. bring 3 fish. NOT gar. last time was a whole thing'], ['TEXT: MERLE', 'also u still owe me $40'],
-        ['', 'WASD move · E use/talk · Q yell GIT · F throw empties · 1–9 use items · SHIFT run · J to-do list'],
       ]);
     }
     if (n === 2) {
       F.stopSignOnRoof = true; Game.cold = true;
-      setQuests([['darlene', 'Witness 1: Darlene @ Gulp-N-Go (mainland)'], ['rhonda', 'Witness 2: Deputy Rhonda (County Rd 29)'], ['merle2', 'Witness 3: Merle (east island)'], ['python', 'Python bounty in the Glades: $25/ft', true]]);
+      setQuests([['darlene', 'Get Darlene to sign'], ['rhonda', 'Get Deputy Rhonda to sign'], ['merle2', 'Get Merle to sign'], ['python', 'Python bounty: $25/ft', true]]);
       say([
         ['', 'TUESDAY. 6:00 AM. 47°F. Florida is FREEZING. The iguanas are falling out of the trees.'], ['DAN', 'My nipples could cut glass.'],
         [PHONE_B, 'The judge wants CHARACTER WITNESSES. Three signatures. Upstanding members of the community.'], ['DAN', 'I know like four people, Brenda.'],
@@ -89,7 +110,7 @@ const Story = {
       ]);
     }
     if (n === 3) {
-      setQuests([['plywood', 'Get plywood (Gulp-N-Go dumpster)'], ['board', 'Board up the cabin windows'], ['stock', 'Hurricane supplies: 6 Swamp Lites (0/6)'], ['party', "Hurricane party at Merle's (after 4 PM)"]]);
+      setQuests([['plywood', 'Grab plywood from the dumpster'], ['board', 'Board up the cabin'], ['stock', 'Get 6 beers (0/6)'], ['party', 'Merle’s party (after 4 PM)']]);
       say([
         ['RADIO', '...Hurricane Wanda, Category Two, making landfall tonight. Residents are urged to evacuate, or at minimum, to not do anything stupid.'], ['DAN', 'Hurricane party.'],
         [PHONE_B, 'Dan. I can hear you thinking “hurricane party.” STAY. INSIDE.'],
@@ -98,14 +119,14 @@ const Story = {
     }
     if (n === 4) {
       Game.hour = 8;
-      setQuests([['court', 'Get to the County Courthouse by 10 AM (east end of 29)'], ['pants', 'Find “real pants” (Darlene might have some)', true]]);
+      setQuests([['court', 'Get to court by 10 AM'], ['pants', 'Find real pants', true]]);
       say([
         ['', 'THURSDAY IS A BLUR. NOBODY TALKS ABOUT THURSDAY.'], ['', 'FRIDAY. 8:00 AM. COURT AT 10.'],
         [PHONE_B, 'County Courthouse, east end of 29. Ten AM. Wear PANTS, Dan. Real ones.'], ['DAN', 'Jorts are pants.'], [PHONE_B, 'Jorts are HALF pants.'],
       ]);
     }
     if (n >= 5) {
-      setQuests([['free', 'Free roam. You’re legally not a Florida Man. Go be one.'], ['all', 'Collect every headline in the Rap Sheet (J)', true]]);
+      setQuests([['free', 'Free roam. Make headlines.', true]]);
       say([['', `DAY ${n}. The allegations are behind him. The swamp is ahead of him.`], ['DAN', pick(['Another beautiful day in paradise.', 'My head. My whole head.', 'Let’s make some news.'])]]);
     }
   },
@@ -119,11 +140,11 @@ const Story = {
     }
     if (Game.day === 2 && Game.cold && h > 11) { Game.cold = false; toast('It warmed up to 61°. The iguanas have stopped falling. Mostly.'); }
     if (Game.day === 2 && !F.bday2 && Q('darlene').done && Q('rhonda').done && Q('merle2').done) {
-      F.bday2 = true; addQuest('sleep2', 'Go home and sleep (cabin door)');
+      F.bday2 = true; addQuest('sleep2', 'Go home to bed');
       say([[PHONE_B, 'Three signatures?! Dan, I am... proud? Is this pride? It feels like indigestion.'], [PHONE_B, 'Tomorrow there’s a hurricane coming. You will STAY INSIDE.'], ['DAN', 'Totally. Yep. Inside. Hundred percent.']]);
     }
     if (Game.day === 3) {
-      questText('stock', `Hurricane supplies: 6 Swamp Lites (${Math.min(6, Game.inv.beer)}/6)`); if (Game.inv.beer >= 6) done('stock');
+      questText('stock', `Get 6 beers (${Math.min(6, Game.inv.beer)}/6)`); if (Game.inv.beer >= 6) done('stock');
       Game.storm = h < 13 ? 0 : clamp((h - 13) / 4, 0, 1);
       if (h > 16 && !F.partyNag) { F.partyNag = true; toast('TEXT FROM MERLE: WHERE U AT. THE GUMBO IS READY. WANDA IS HERE'); }
     }
@@ -160,7 +181,7 @@ const Story = {
         F.fry = true; Game.catchBag = Game.catchBag.filter(f => f.junk); Game.inv.fish = 0;
         headline('FLORIDA MAN’S COUSIN DEEP-FRIES FROZEN TURKEY, SUMMONS FIRE DEPARTMENT; FLORIDA MAN SAYS HE "WAS JUST STANDING THERE"', 8);
         say([['MERLE', '...Worth it.'], ['MERLE', 'Here. Found this in the bottom of the fryer. It’s yours now. Don’t ask.'], ['', 'Got: “Sinus Medicine” ×1 (slot 5)'],
-          ['DAN', 'It’s for my sinuses.'], ['MERLE', 'I didn’t ask, Danny.'], ['MERLE', 'Anyway you still owe me forty bucks.']], () => { giveItem('powder'); done('merle'); addQuest('sleep1', 'Go home and sleep it off (cabin door)'); });
+          ['DAN', 'It’s for my sinuses.'], ['MERLE', 'I didn’t ask, Danny.'], ['MERLE', 'Anyway you still owe me forty bucks.']], () => { giveItem('powder'); done('merle'); addQuest('sleep1', 'Go home to bed'); });
       });
     }
     if (day === 2 && !Q('merle2').done) {
@@ -178,7 +199,7 @@ const Story = {
     const opts = [['Shop', shop], ['Sell fish ($4 each)', sell], ['Leave', () => [['DARLENE', 'Bye, sugar. Don’t die.']]]];
     if (Game.day === 2 && !Q('darlene').done) {
       if (F.raccoonOut) { done('darlene'); return say([['DARLENE', 'You got it out! With your FACE! You’re a hero, Dan. A disgusting hero.'], ['', 'Darlene signs. Witness 1 of 3.'], ['DARLENE', 'Now what can I get ya?', opts]]); }
-      return say([['DARLENE', 'Dan, baby, there is a RACCOON in my ice machine. Been in there since Sunday. He’s got a whole life in there now.'], ['DARLENE', 'Get him out and I’ll sign whatever you want. Anything else?', opts]], () => addQuest('ice', 'Get the raccoon out of the ice machine'));
+      return say([['DARLENE', 'Dan, baby, there is a RACCOON in my ice machine. Been in there since Sunday. He’s got a whole life in there now.'], ['DARLENE', 'Get him out and I’ll sign whatever you want. Anything else?', opts]], () => addQuest('ice', 'Get the raccoon out of the ice machine', false, 'darlene'));
     }
     if (Game.day === 4 && !Q('pants').done) opts.splice(2, 0, ['Buy “Formal Jorts” ($8)', () => { if (Game.money < 8) return [['DARLENE', 'They’re eight dollars, Dan.']]; Game.money -= 8; Game.flags.pants = true; done('pants'); return [['DARLENE', 'Formal Jorts. Black denim. For weddings, funerals, and arraignments.'], ['DAN', 'I feel like a lawyer.']]; }]);
     return say([['DARLENE', pick(['Welcome to the Gulp-N-Go, where the dogs are always rollin’.', 'Hey Dan. You look like hell. What’ll it be?', 'Pump 2 is broke. Pump 1 is haunted. What do you need?']), opts]]);
@@ -189,7 +210,7 @@ const Story = {
     if (Game.day === 2 && !Q('rhonda').done) {
       if (Game.inv.sign) { Game.inv.sign = 0; F.stopSignOnRoof = false; done('rhonda'); return say([['RHONDA', '...That’s my stop sign.'], ['DAN', 'Found it. On a roof. Wild, right?'], ['RHONDA', 'I will sign that you RETURNED it. That is ALL I am signing, Dan.'], ['', 'Witness 2 of 3. Technically.']]); }
       return say([['RHONDA', 'Morning, Dan. Somebody stole the stop sign off 29 and Fifth.'], ['RHONDA', 'You wouldn’t know anything about that.', [['“Absolutely not.”', () => [['RHONDA', 'Uh huh.']]], ['“...Define ‘stole.’”', () => [['RHONDA', 'I’m gonna pretend you said no.']]], ['Offer her a Swamp Lite', () => [['RHONDA', 'I am IN UNIFORM, Dan.']]]]],
-        ['RHONDA', 'Bring it back and I’ll THINK about signing your little paper. Also—'], ...bounty()], () => addQuest('sign', 'Get the stop sign off your roof (ladder by the cabin)'));
+        ['RHONDA', 'Bring it back and I’ll THINK about signing your little paper. Also—'], ...bounty()], () => addQuest('sign', 'Grab the stop sign off your roof', false, 'rhonda'));
     }
     return say([['RHONDA', pick(['Dan.', 'Keep it under 40 on that cooler, Dan.', 'I’m watchin’ you, Dan.'])], ['RHONDA', 'Something you need?', [['Turn in pythons', bounty], ['Nothing, officer', () => [['RHONDA', 'That’s what I thought.']]]]]]);
   },
@@ -199,7 +220,7 @@ const Story = {
     say([['MERLE', 'WANDA! WANDA! WANDA!'], ['MERLE', 'Danny! You made it! Here — gumbo. Secret ingredient’s from the cow field.'],
       ['DAN', '', [['Eat the gumbo', () => [['DAN', '*slurp* ...Merle, what’s in this?'], ['MERLE', 'Forty percent mushrooms.']]], ['“I’m good, thanks.”', () => [['MERLE', 'More for Chuck then.'], ['', 'Dan drinks a Swamp Lite. The Swamp Lite was ALSO forty percent mushrooms. Merle is a menace.']]]]],
       ['', 'Wanda arrives. The wind screams. Somewhere, a lawn flamingo achieves flight.'], ['???', 'Daaaaniel... come to the waaater...']], () => {
-      Game.fx.shroom = 120; Sound.play('trip'); Game.flags.manny = true; addQuest('manny', '??? Follow the voice to the water (glowing)');
+      Game.fx.shroom = 120; Sound.play('trip'); Game.flags.manny = true; addQuest('manny', '??? Follow the voice to the water');
       Game.animals.push(makeCritter('manatee', World.spots.merle.x - 60, World.spots.merle.y + 70, { spirit: true }));
     });
   },

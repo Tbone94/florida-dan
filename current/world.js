@@ -112,11 +112,7 @@ let g;
 const R = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); };
 const OR = (x, y, w, h, c) => { R(x - 1, y - 1, w + 2, h + 2, PAL.ink); R(x, y, w, h, c); };   // outlined rect
 function shadow(x, y, w, h = 3) { g.globalAlpha = .28; g.fillStyle = PAL.ink; g.beginPath(); g.ellipse(Math.round(x), Math.round(y), w / 2, h / 2, 0, 0, 7); g.fill(); g.globalAlpha = 1; }
-function label(text, x, y, color = PAL.white, size = 7, align = 'center') {
-  g.font = `700 ${size}px "Pixelify Sans", monospace`; g.textAlign = align; g.textBaseline = 'alphabetic';
-  g.fillStyle = PAL.ink; for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) g.fillText(text, Math.round(x) + dx, Math.round(y) + dy);
-  g.fillStyle = color; g.fillText(text, Math.round(x), Math.round(y));
-}
+// label() lives in font.js (crisp 5x7 pixel font)
 
 function drawTiles(cx, cy, t) {
   const tx0 = Math.floor(cx / TS), ty0 = Math.floor(cy / TS);
@@ -211,8 +207,7 @@ function drawProp(p, cx, cy, t) {
       label('GULP-N-GO', x + w / 2, y - 10, PAL.yellow, 8);
       OR(x + 8, y + 2, 26, 16, PAL.waterL); R(x + 20, y + 2, 1, 16, PAL.ink); R(x + 10, y + 5, 8, 2, PAL.neon); R(x + 23, y + 8, 7, 2, PAL.yellow);
       OR(x + 42, y + 4, 14, 20, PAL.waterL); R(x + 48, y + 4, 1, 20, PAL.ink);
-      OR(x + 64, y + 4, 22, 10, PAL.white); g.font = '700 6px "Pixelify Sans", monospace'; g.textAlign = 'left'; g.fillStyle = PAL.red; g.fillText('LIVE BAIT', x + 65, y + 11);
-      OR(x + 64, y + 16, 22, 8, PAL.yellow); g.fillStyle = PAL.ink; g.fillText('BEER', x + 69, y + 23);
+      OR(x + 60, y + 3, 34, 22, PAL.white); R(x + 60, y + 13, 34, 1, PAL.tankD); label('BAIT', x + 77, y + 12, PAL.red, 7); label('BEER', x + 77, y + 23, PAL.blueD, 7);
       break;
     }
     case 'canopy': {
@@ -228,12 +223,12 @@ function drawProp(p, cx, cy, t) {
     }
     case 'dumpster': { shadow(x + 12, y + 16, 26); OR(x, y - 4, 24, 19, PAL.grassDD); R(x - 1, y - 6, 26, 3, PAL.gatorD); R(x + 4, y + 2, 16, 1, PAL.grassD); break; }
     case 'billboard': {
-      R(x + 12, y - 8, 3, 16, PAL.woodD); R(x + 64, y - 8, 3, 16, PAL.woodD);
-      OR(x, y - 44, 80, 36, PAL.white); R(x, y - 44, 80, 8, PAL.blue);
-      label('ACCUSED OF BEING', x + 40, y - 37, PAL.white, 6);
-      label('A FLORIDA MAN?', x + 40, y - 27, PAL.red, 8);
-      label('CALL BRENDA', x + 40, y - 18, PAL.ink === '' ? PAL.ink : PAL.blueD, 7);
-      label('1-800-NOT-ME', x + 40, y - 10, PAL.hatD, 6);
+      R(x + 16, y - 8, 3, 16, PAL.woodD); R(x + 86, y - 8, 3, 16, PAL.woodD);
+      OR(x - 12, y - 52, 128, 46, PAL.white); R(x - 12, y - 52, 128, 11, PAL.blue);
+      label('ACCUSED OF BEING', x + 52, y - 42, PAL.white, 7);
+      label('A FLORIDA MAN?', x + 52, y - 31, PAL.red, 7);
+      label('CALL BRENDA', x + 52, y - 21, PAL.blueD, 7);
+      label('1-800-NOT-ME', x + 52, y - 10, PAL.hatD, 7);
       break;
     }
     case 'courthouse': {
@@ -262,7 +257,7 @@ function drawProp(p, cx, cy, t) {
     }
     case 'grill': { shadow(x + 8, y + 15, 14); OR(x + 2, y - 2, 12, 8, PAL.greyD); R(x + 4, y + 6, 1, 8, PAL.ink); R(x + 11, y + 6, 1, 8, PAL.ink); break; }
     case 'flamingo': { shadow(x + 5, y + 7, 10); g.drawImage(SPR.flamingo, x, y - 12); break; }
-    case 'sign': { R(x + 7, y - 6, 2, 14, PAL.woodD); OR(x - 6, y - 16, 28, 11, PAL.woodL); label('NO TRESPASSIN', x + 8, y - 8, PAL.red, 5); break; }
+    case 'sign': { R(x + 7, y - 6, 2, 14, PAL.woodD); OR(x - 33, y - 19, 82, 12, PAL.woodL); label('NO TRESPASSIN', x + 8, y - 9, PAL.red, 7); break; }
     case 'porta': { shadow(x + 8, y + 16, 16); OR(x + 1, y - 10, 14, 26, PAL.teal); R(x + 1, y - 12, 14, 3, PAL.white); R(x + 10, y + 3, 2, 2, PAL.red); break; }
     case 'mailbox': { R(x + 3, y - 2, 2, 10, PAL.woodD); OR(x, y - 8, 9, 6, PAL.greyD); R(x + 8, y - 8, 2, 3, PAL.red); break; }
     case 'fence': { R(x, y - 6, TS, 2, PAL.woodL); R(x, y - 2, TS, 2, PAL.woodL); R(x + 1, y - 9, 2, 12, PAL.woodD); break; }

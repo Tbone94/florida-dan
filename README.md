@@ -22,11 +22,11 @@ Then open http://localhost:8811.
 |---|---|---|
 | Move | WASD / arrows | Left stick / d-pad |
 | Use / talk / reel / wrestle | E / Space | A |
+| Punch (or throw an empty) | F | X |
 | Yell “GIT!” | Q | B |
-| Use selected item | 1–9 | X (LB/RB to pick) |
-| Throw empties | F | LT |
+| Use an item | 1–9 | LT (LB/RB to pick) |
 | Run | Shift | RT |
-| Rap sheet | J | Y |
+| Rap sheet (to-do, controls, every headline) | J | Y |
 | Pause / mute | Esc / M | Start / Select |
 
 Touch: on-screen stick + buttons.
@@ -36,7 +36,7 @@ Touch: on-screen stick + buttons.
 - **Four-day story:** a fish fry that ends in a turkey-fryer fire, three character witnesses (one is a raccoon stuck in an ice machine), Hurricane Wanda, a manatee spirit named Manny, and a courtroom finale where Chuck bursts in.
 - **Substances change how the game looks and plays** (WebGL post shader): beer (double vision, blackouts that teleport you), doobies (slow-mo), cow-pie shrooms (melting world, reversed controls, talking animals), “sinus medicine” (2× speed, then a crash), roller dogs (find a toilet in 35 seconds).
 - **Headlines are the score.** Every Florida Man thing Dan does prints a BREAKING headline and raises the allegation meter. End of each day: the Swamp Gazette.
-- Blue Marlin-style side-view fishing, gator and python wrestling, a motorized cooler with headlights, Gulp-N-Go shop, save per day.
+- Punch gators (three hits and they give up — Chuck hits back), Blue Marlin-style side-view fishing, gator and python wrestling, a motorized cooler with headlights, Gulp-N-Go shop, save per day.
 
 ## Layout
 

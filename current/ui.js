@@ -1,7 +1,7 @@
 // FLORIDA DAN — HUD, menus, save, boot.
 'use strict';
 const ui = {};
-['hudTop', 'timeLabel', 'dayLabel', 'chillFill', 'buzzFill', 'allegeFill', 'allegeLabel', 'fxTags', 'quests', 'questList', 'questToggle', 'hotbar', 'money', 'nFish', 'nBait', 'nCan', 'nPy',
+['hudTop', 'timeLabel', 'dayLabel', 'chillFill', 'buzzFill', 'allegeFill', 'allegeLabel', 'fxTags', 'objective', 'hint', 'hotbar', 'money', 'nFish', 'nBait', 'nCan', 'nPy',
   'prompt', 'toast', 'banner', 'bannerText', 'talk', 'talkWho', 'talkLine', 'talkChoices', 'fishHud', 'tensionFill', 'fishMsg', 'card', 'cardK', 'cardN', 'cardW', 'cardQ',
   'wrestle', 'gripFill', 'wrestlePrompt', 'wrestleMsg', 'raccoon', 'raccoonFill', 'shop', 'shopList', 'shopMoney', 'journal', 'jQuests', 'jSheet', 'title', 'gazette', 'pad', 'urgent', 'continueBtn'].forEach(id => ui[id] = $(id));
 
@@ -19,15 +19,15 @@ function buildHotbar() {
 function updateHotbar() {
   for (const k of HOTBAR) { const el = slotEls[k], n = Game.inv[k] || 0; if (!el) continue; const s = el.querySelector('.n'); if (s.textContent !== String(n)) s.textContent = n; el.classList.toggle('empty', !n); el.classList.toggle('sel', Input.padActive && HOTBAR[Game.sel || 0] === k); }
 }
-function selSlot(d) { Game.sel = ((Game.sel || 0) + d + HOTBAR.length) % HOTBAR.length; updateHotbar(); Sound.play('pickup'); toast(`${ITEMS[HOTBAR[Game.sel]].name} ×${Game.inv[HOTBAR[Game.sel]] || 0}`, 1.2); }
+function selSlot(d) { let i = Game.sel || 0; for (let n = 0; n < HOTBAR.length; n++) { i = (i + d + HOTBAR.length) % HOTBAR.length; if (Game.inv[HOTBAR[i]] > 0) break; } Game.sel = i; updateHotbar(); Sound.play('pickup'); toast(`${ITEMS[HOTBAR[Game.sel]].name} ×${Game.inv[HOTBAR[Game.sel]] || 0}`, 1.2); }
 function flashSlot(k) { const el = slotEls[k]; if (!el) return; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
 
 // ---------- quests ----------
+// the HUD only shows what to do right now; the full list lives in the rap sheet
 function renderQuests() {
-  ui.questList.innerHTML = '';
-  for (const q of Game.quests) { const li = document.createElement('li'); li.textContent = (q.done ? '✓ ' : q.opt ? '◇ ' : '☐ ') + q.text; li.className = q.done ? 'done' : q.opt ? 'opt' : ''; ui.questList.append(li); }
+  const q = currentQuest(), v = q ? q.text : '';
+  if (ui.objective._v !== v) { ui.objective._v = v; ui.objective.textContent = v; ui.objective.hidden = !v || Game.mode === 'title'; if (v) { ui.objective.classList.remove('new'); void ui.objective.offsetWidth; ui.objective.classList.add('new'); } }
 }
-ui.questToggle.addEventListener('click', () => ui.quests.classList.toggle('open'));
 
 // ---------- headline banner ----------
 let bannerT = 0;
@@ -51,10 +51,11 @@ function hud() {
   if (F.powder > 0) tags.push(`“SINUSES” ${Math.ceil(F.powder)}s`); if (F.crash > 0) tags.push('CRASHING'); if (F.cig > 0) tags.push('SMOKIN');
   set(ui.fxTags, tags.join(' · '));
   ui.urgent.hidden = !(Game.urgent > 0); if (Game.urgent > 0) set(ui.urgent, `FIND A TOILET: ${Math.ceil(Game.urgent)}s`);
-  updateHotbar();
+  for (const [id, n] of [['statBait', Game.inv.bait], ['statCan', Game.inv.can], ['statPy', Game.pythons.length]]) $(id).hidden = !n;
+  updateHotbar(); renderQuests();
   if (Game.mode !== 'play') ui.prompt.hidden = true;
 }
-function showHud(on) { ['hudTop', 'quests', 'hotbar'].forEach(k => ui[k].hidden = !on); ui.pad.hidden = !(on && isTouch); }
+function showHud(on) { ['hudTop', 'hotbar'].forEach(k => ui[k].hidden = !on); ui.objective.hidden = !on || !ui.objective._v; if (!on) ui.hint.hidden = true; ui.pad.hidden = !(on && isTouch); }
 
 // ---------- shop ----------
 const SHOP = ['beer', 'cig', 'energy', 'hotdog', 'scratch', 'firework', 'bait'];
@@ -77,6 +78,8 @@ $('shopClose').addEventListener('click', closeShop);
 // ---------- journal / rap sheet ----------
 function openJournal() {
   Game.mode = 'journal'; ui.journal.hidden = false;
+  $('jControls').innerHTML = [['move', 'Move'], ['a', 'Use · talk · reel · wrestle'], ['punch', 'Punch (or throw an empty)'], ['b', 'Yell “GIT!”'], ['item', Input.padActive ? 'Use item (LB/RB to pick)' : 'Use an item'], ['run', 'Run'], ['journal', 'This rap sheet']]
+    .filter(([k]) => !(k === 'run' && isTouch && !Input.padActive)).map(([k, t]) => `<li>${K(k)} ${t}</li>`).join('');
   ui.jQuests.innerHTML = ''; for (const q of Game.quests) { const li = document.createElement('li'); li.textContent = (q.done ? '✓ ' : '☐ ') + q.text; if (q.done) li.className = 'done'; ui.jQuests.append(li); }
   ui.jSheet.innerHTML = '';
   if (!Game.headlines.length) { const li = document.createElement('li'); li.textContent = 'Clean record. For now.'; ui.jSheet.append(li); }
@@ -110,7 +113,7 @@ function resize() {
   const vw = innerWidth, vh = innerHeight, portrait = vh > vw * 1.05;
   const w = Math.floor(Math.min(vw, (portrait ? vh * .58 : vh) * 16 / 9)), h = Math.floor(w * 9 / 16);
   Object.assign(stage.style, { width: w + 'px', height: h + 'px', left: ((vw - w) / 2) + 'px', top: (portrait ? 8 : (vh - h) / 2) + 'px' });
-  stage.style.setProperty('--u', Math.max(10, Math.min(17, w / 62)) + 'px');
+  stage.style.setProperty('--u', Math.max(11, Math.min(21, w / 54)) + 'px');
   // Render at a whole-number multiple of the 320x180 art, capped at 4x (1280x720). The browser upscales the rest
   // crisply (image-rendering: pixelated). Full-screen on a big display was pushing 5000+px-wide frames through the FX shader.
   const dpr = devicePixelRatio || 1, k = clamp(Math.floor(w * dpr / VW), 1, window.TRAILER ? 6 : 4);
@@ -150,7 +153,7 @@ function frame(now) {
   if (!window.TRAILER) requestAnimationFrame(frame);
 }
 buildWorld(); bakeAll(); gatorMap(); resize(); Screen.init(screenCv, buf); buildHotbar();
-Input.bindStick($('stick'), $('nub')); Input.bindButton($('btnA'), 'a'); Input.bindButton($('btnB'), 'b'); Input.bindButton($('btnF'), 'throw');
+Input.bindStick($('stick'), $('nub')); Input.bindButton($('btnA'), 'a'); Input.bindButton($('btnB'), 'b'); Input.bindButton($('btnF'), 'punch');
 ['talk', 'card'].forEach(id => $(id).addEventListener('pointerdown', e => { if (e.target.closest('.choice')) return; Input.press('a'); }));
 Game.inv = { beer: 0 }; Game.day_ = freshDayLog(); spawn(); Game.mode = 'title';
 if (load()) { ui.continueBtn.hidden = false; ui.continueBtn.textContent = `Continue — Day ${load().day}`; }

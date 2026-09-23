@@ -65,6 +65,11 @@ function drawDan(x, y, t) {
   if (D.anim === 'beer' || D.anim === 'energy') { OR(hx, hy - 4, 3, 5, D.anim === 'beer' ? PAL.blue : PAL.black); R(hx, hy - 4, 3, 1, PAL.tin); }
   if (D.anim === 'cig' || D.anim === 'joint') { R(D.dir === 'left' ? x - 7 : x + 3, y - 14 + bob, 4, 1, PAL.white); R(D.dir === 'left' ? x - 8 : x + 7, y - 14 + bob, 1, 1, PAL.orange); }
   if (D.anim === 'hotdog') { OR(hx - 1, hy - 2, 5, 2, PAL.redD); }
+  if (D.punchT > 0) {   // the fist
+    const k = D.punchT / .18, reach = 5 + (1 - k) * 6, dx = D.dir === 'right' ? 1 : D.dir === 'left' ? -1 : 0, dy = D.dir === 'down' ? 1 : D.dir === 'up' ? -1 : 0;
+    const fx = x + dx * reach - 2, fy = y - 12 + dy * reach * .6 - 1;
+    OR(fx, fy, 4, 4, PAL.skin); if (k > .4) { R(fx - dx * 5, fy + 1, 3, 1, PAL.white); R(fx - dx * 4, fy + 3, 2, 1, PAL.white); }
+  }
   if (F.powder > 0) { R(x - 3, y - 13 + bob, 1, 1, PAL.white); }   // "sinus medicine" residue
   if (D.carry) { const s = SPR.icons[D.carry]; if (s) g.drawImage(s, Math.round(x - 5), Math.round(y - 33 + bob)); }
 }
@@ -86,7 +91,6 @@ function drawCooler(x, y, dir, t, withDan) {
   OR(x - 11, y + 1, 4, 4, PAL.ink); OR(x + 7, y + 1, 4, 4, PAL.ink);
   R(x - 8, y - 1 + jig, 3, 2, PAL.yellow); R(x + 5, y - 1 + jig, 3, 2, PAL.yellow);   // headlights. why does it have headlights
   if (withDan) g.drawImage(SPR.dan[Game.dan.dir][0], 0, 0, 16, 16, Math.round(x - 8), Math.round(y - 24 + jig), 16, 16);
-  else label('E', x, y - 12, PAL.yellow, 6);
 }
 
 // ---------- gators ----------

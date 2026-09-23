@@ -84,6 +84,8 @@ function interaction() {
     return { label: 'Cast a line', fn: () => Fishing.start(World.at(D.x, D.y), false) };
   }
   if (D.ride === 'cooler') return { label: 'Park the cooler', fn: () => { D.ride = null; D.y += 10; if (!canWalk(D.x, D.y)) D.y -= 10; } };
+  // vehicles you're standing right on top of beat anything else nearby (a cooler parked by the courthouse door)
+  if (near(Game.cooler, 13)) return { label: 'Ride the motorized cooler', fn: () => { D.ride = 'cooler'; D.x = Game.cooler.x; D.y = Game.cooler.y; Sound.play('engine'); if (Game.fx.buzz > 50 || Game.fx.powder > 0) Game.day_.dui = true; } };
   const st = Story.interactions(); if (st.length) return st[0];
   if (near(Game.boat, 26)) return { label: 'Board the SS Budget', fn: () => { D.ride = 'boat'; D.x = Game.boat.x; D.y = Game.boat.y; Sound.play('engine'); } };
   if (near(Game.cooler, 18)) return { label: 'Ride the motorized cooler', fn: () => { D.ride = 'cooler'; D.x = Game.cooler.x; D.y = Game.cooler.y; Sound.play('engine'); if (Game.fx.buzz > 50 || Game.fx.powder > 0) Game.day_.dui = true; } };
@@ -91,6 +93,76 @@ function interaction() {
   if (k === T.DEEP || k === T.WATER || (k === T.SHALLOW && here === T.DOCK)) return { label: 'Cast from here', fn: () => Fishing.start(k, true) };
   return null;
 }
+// ---------- punching (F / X / PUNCH) ----------
+const PUNCH_WORDS = ['POW!', 'WHAM!', 'BONK!', 'THWACK!', 'SMACK!'];
+function punch() {
+  const D = Game.dan; if (D.ride || Game.punchCd > 0) return;
+  Game.punchCd = .3; D.punchT = .18;
+  if (Game.fx.buzz > 70 && Math.random() < .3) { Sound.play('whiff'); hurtDan(3); toast(pick(['Dan swings at the air and falls on his ass.', 'Missed by a mile. Maybe two miles.', 'Dan punched a ghost. The ghost won.'])); return; }
+  const f = facingPoint(12), pow = Game.fx.powder > 0 ? 2 : 1;
+  let tgt = null, bd = 18;
+  for (const a of Game.animals) { if (a.pet || a.spirit || a.state === 'bagged') continue; const p = a.type === 'python' ? a.segs[0] : a, d = Math.hypot(p.x - f.x, p.y - f.y); if (d < bd) { bd = d; tgt = a; } }
+  let npcT = null; for (const n of Game.npcs) { const d = Math.hypot(n.x - f.x, n.y - f.y); if (d < Math.min(bd, 14)) { bd = d; npcT = n; } }
+  if (!tgt && !npcT) { if (Game.inv.can > 0) throwThing('can'); else Sound.play('whiff'); return; }
+  Sound.play('punch'); Game.shake = 3 * pow; Game.day_.punches = (Game.day_.punches || 0) + 1;
+  const hx = (npcT || tgt).x, hy = (npcT || tgt).y;
+  Game.parts.push({ kind: 'text', x: hx, y: hy - 18, vx: 0, vy: -16, life: .7, text: pick(PUNCH_WORDS) });
+  for (let i = 0; i < 6; i++) Game.parts.push({ kind: 'spark', x: hx, y: hy - 8, vx: rnd(-40, 40), vy: rnd(-50, -10), life: .3, c: PAL.yellow });
+  if (npcT) return punchNPC(npcT);
+  const a = tgt, dx = a.x - D.x, dy = a.y - D.y, dd = Math.hypot(dx, dy) || 1, kb = 16 * pow;
+  const nx = a.x + dx / dd * kb, ny = a.y + dy / dd * kb;
+  if (a.type === 'gator' ? gatorCan(nx, ny) : a.type === 'python' || WALKABLE(World.at(nx, ny))) { a.x = nx; a.y = ny; }
+  a.stun = 1.1 * pow; a.hits = (a.hits || 0) + pow;
+  if (a.type === 'gator') {
+    a.lurk = false;
+    if (a.hits >= 3) { a.hits = 0; a.state = 'flee'; a.timer = 7; a.cd = 9; a.stun = 1.5; toast(a.chuck ? 'Chuck backs off. Chuck will remember this.' : pick(['That gator has had ENOUGH.', 'Gator: humbled. Dan: undefeated.', 'The gator swims off to rethink its life.'])); if (a.chuck) done('chuck'); }
+    else if (Math.random() < (a.chuck ? .45 : .22)) { a.stun = .25; a.cd = 0; a.state = 'chase'; toast(a.chuck ? 'Chuck did NOT like that.' : 'Uh oh. It’s mad now.'); }
+    if (!Game.flags.punchedGator) { Game.flags.punchedGator = true; headline(a.chuck ? 'FLORIDA MAN PUNCHES GATOR NAMED CHUCK; CHUCK "WILL REMEMBER THIS"' : 'FLORIDA MAN PUNCHES ALLIGATOR IN THE FACE, SAYS IT "LOOKED AT HIM FUNNY"', 6); }
+  } else if (a.type === 'cow') { a.moo = 1.4; a.state = 'flee'; a.timer = 3; toast('You punched a cow. The cow did not deserve that.'); if (!Game.day_.cowPunch) { Game.day_.cowPunch = true; headline('FLORIDA MAN PUNCHES COW, IMMEDIATELY APOLOGIZES TO COW', 5); } }
+  else if (a.type === 'python') { a.stun = 2.5; toast('The python is dazed. GRAB IT.'); }
+  else { a.state = 'flee'; a.timer = 4; toast(a.type === 'raccoon' ? 'Raccoon: punched. Your dignity: also gone.' : a.type === 'pelican' ? 'You punched a pelican. It is somehow still smug.' : 'Iguana: bonked.'); }
+}
+function punchNPC(n) {
+  n.scared = 1.5;
+  const lines = { rhonda: ['RHONDA', 'Rhonda sidesteps it without looking up. “Try that again, Dan.”'], merle: ['MERLE', 'Not the FACE, Danny! I got a fish fry to host!'], darlene: ['DARLENE', 'I will ban you from this Gulp-N-Go, Daniel.'],
+    tourist: ['TOURIST', 'Oh my gosh. OH MY GOSH. This is the REAL Florida experience!'] };
+  const [who, line] = lines[n.id] || [n.name.toUpperCase(), 'HEY!'];
+  toast(`${who}: ${line}`, 3.5);
+  if (n.id === 'tourist' && !Game.day_.touristPunch) { Game.day_.touristPunch = true; headline('FLORIDA MAN PUNCHES TOURIST; TOURIST CALLS IT "THE MOST AUTHENTIC PART OF MY TRIP"', 6); }
+  if (n.id === 'rhonda') Game.allegations = Math.min(100, Game.allegations + 3);
+}
+
+// ---------- the key for an action, for whatever the player is holding ----------
+function K(action) {
+  const pad = Input.padActive, touch = isTouch && !pad;
+  const m = { a: ['E', 'A', 'E'], b: ['Q', 'B', 'GIT'], punch: ['F', 'X', 'PUNCH'], item: ['1-9', 'LT', 'TAP'], journal: ['J', 'Y', 'RAP SHEET'], move: ['WASD', 'STICK', 'STICK'], run: ['SHIFT', 'RT', ''] }[action];
+  return `<b class="key${pad ? ' pad' : ''}">${pad ? m[1] : touch ? m[2] : m[0]}</b>`;
+}
+// one-time tips, shown exactly when they're useful
+let hintT = 0;
+function hint(id, html, secs = 5.5) {
+  Game.flags.hints = Game.flags.hints || {}; if (Game.flags.hints[id]) return false;
+  Game.flags.hints[id] = true; ui.hint.innerHTML = html; ui.hint.hidden = false; hintT = secs; return true;
+}
+function hints() {
+  if (hintT > 0 && (hintT -= 1 / 60) <= 0) ui.hint.hidden = true;
+  if (hintT > 0 || Game.mode !== 'play') return;
+  const D = Game.dan, h = Game.flags.hints || {};
+  if (!h.move) return hint('move', `${K('move')} move &nbsp; ${K('a')} use · talk`);
+  if (!h.gator && Game.animals.some(a => a.type === 'gator' && !a.lurk && Math.hypot(a.x - D.x, a.y - D.y) < 90)) return hint('gator', `${K('punch')} punch &nbsp; ${K('b')} yell GIT &nbsp; ${K('a')} wrestle`, 6);
+  if (!h.items && Game.t > 25 && HOTBAR.some(k => Game.inv[k] > 0)) return hint('items', `${K('item')} use your stuff &nbsp; ${K('journal')} rap sheet`);
+}
+
+// ---------- objective arrow ----------
+function drawObjective(cx, cy, t) {
+  if (Game.mode !== 'play') return;
+  const q = currentQuest(), tg = questTarget(q); if (!tg) return;
+  const sx = tg.x - cx, sy = tg.y - cy - 30, b = Math.round(Math.sin(t * 6) * 2);
+  const tri = (x, y, a) => { g.save(); g.translate(Math.round(x), Math.round(y)); g.rotate(a); g.fillStyle = PAL.ink; g.beginPath(); g.moveTo(8, 0); g.lineTo(-5, -7); g.lineTo(-5, 7); g.fill(); g.fillStyle = PAL.yellow; g.beginPath(); g.moveTo(5, 0); g.lineTo(-3, -4.5); g.lineTo(-3, 4.5); g.fill(); g.restore(); };
+  if (sx > 8 && sx < VW - 8 && sy > 12 && sy < VH - 30) tri(sx, sy + b, Math.PI / 2);
+  else { const dx = sx - VW / 2, dy = sy - VH / 2, k = Math.min((VW / 2 - 12) / Math.max(1e-3, Math.abs(dx)), (VH / 2 - 16) / Math.max(1e-3, Math.abs(dy))); tri(VW / 2 + dx * k, VH / 2 + dy * k, Math.atan2(dy, dx)); }
+}
+
 function wrestleGator(a) {
   Wrestle.start({ foe: a.chuck ? 'chuck' : 'gator', arena: 'swamp', onWin: () => {
     a.stun = 10; a.state = 'flee'; a.timer = 12; a.cd = 12; Game.chill = Math.min(100, Game.chill + 25); Game.day_.wrestles++;
@@ -137,7 +209,7 @@ function update(dt) {
   tickFx(dt);
   Game.hour += dt / 30 * (Game.fx.high > 0 ? .6 : 1) * (Game.fx.powder > 0 ? 1.3 : 1);
   Game.chill = Math.max(0, Game.chill - dt * .2);
-  Game.gitCd = (Game.gitCd || 0) - dt;
+  Game.gitCd = (Game.gitCd || 0) - dt; Game.punchCd = (Game.punchCd || 0) - dt; Game.dan.punchT = (Game.dan.punchT || 0) - dt;
   if (Game.chill <= 0) { Game.chill = 40; headline('FLORIDA MAN SCREAMS AT PELICAN FOR 40 MINUTES; PELICAN UNBOTHERED', 4); return say([['', 'Dan has run out of chill.'], ['DAN', 'WHAT ARE YOU LOOKIN AT, PELICAN? HUH? YEAH, YOU. YOU AND YOUR STUPID FACE-BAG!'], ['', 'The pelican is unbothered. Dan feels better, weirdly.']]); }
   if (Game.hour >= 22) { Game.hour = 22; return say([['', 'It’s 10 PM. The mosquitoes have unionized.'], ['DAN', 'Aight. Bed. Wherever I’m standing is bed now.']], () => endDay('late')); }
   moveDan(dt);
@@ -146,14 +218,15 @@ function update(dt) {
   Story.tick(dt);
   Events.tick(dt);
   if (Input.tapped('b')) yell();
-  if (Input.tapped('throw')) throwThing('can');
+  if (Input.tapped('punch')) punch();
+  hints();
   for (const p of Game.pickups) if (p.kind !== 'cowpie' && !Game.dan.ride && Math.hypot(p.x - Game.dan.x, p.y - Game.dan.y) < 12) {
     p.got = true; giveItem(p.kind); toast(pick(PICKUP_LINES[p.kind] || [`Got ${ITEMS[p.kind] ? ITEMS[p.kind].name : p.kind}.`]));
   }
   Game.pickups = Game.pickups.filter(p => !p.got);
   if (Game.day_.dui && Game.dan.ride === 'cooler' && !Game.day_.duiDone) { const r = Game.npcs.find(n => n.id === 'rhonda'); if (r && Math.hypot(r.x - Game.dan.x, r.y - Game.dan.y) < 90) { Game.day_.duiDone = true; Sound.play('siren'); Game.dan.ride = null; headline('FLORIDA MAN CITED FOR DUI ON MOTORIZED COOLER; ASKS DEPUTY IF SHE "WANTS A COLD ONE"', 10); say([['RHONDA', '*WHOOP WHOOP* Pull that cooler OVER, Dan.'], ['DAN', 'It’s a cooler, Rhonda. It’s not a VEHICLE.'], ['RHONDA', 'It has a MOTOR. It has HEADLIGHTS, Dan. Why does it have headlights.'], ['DAN', '...Want a cold one? It’s right here. I’m sittin’ on ’em.'], ['RHONDA', 'I’m writing you a ticket AND I’m taking a beer.']], () => { if (Game.inv.beer > 0) Game.inv.beer--; }); } }
   const act = interaction();
-  ui.prompt.textContent = act ? `${Input.padActive ? 'Ⓐ ' : isTouch ? '' : '[E] '}${act.label}` : '';
+  const pv = act ? K('a') + ' ' + act.label : ''; if (ui.prompt._v !== pv) { ui.prompt._v = pv; ui.prompt.innerHTML = pv; }
   ui.prompt.hidden = !act;
   if (act && Input.tapped('a')) act.fn();
   const D = Game.dan, look = D.ride ? 26 : 12, lx = D.dir === 'right' ? look : D.dir === 'left' ? -look : 0, ly = D.dir === 'down' ? look * .6 : D.dir === 'up' ? -look * .6 : 0;
@@ -244,6 +317,7 @@ function drawWorld() {
   if (Game.mode !== 'title') L.push([D.y + (D.ride === 'boat' ? 4 : 0), () => drawDan(D.x - cx, D.y - cy, t)]);
   L.sort((a, b) => a[0] - b[0]).forEach(e => e[1]());
   drawProjectiles(cx, cy); drawParts(cx, cy);
+  drawObjective(cx, cy, t);
   if (Game.fx.shroom > 0) for (const a of Game.animals) if (vis(a.x, a.y, 0) && !a.lurk && hash2(Math.floor(t / 4), a.x | 0) > .6) label(TALKY[Math.floor(hash2(Math.floor(t / 4), a.y | 0) * TALKY.length)], a.x - cx, a.y - cy - 24, PAL.neon, 6);
   if (Game.storm > 0) drawStorm(t);
 }
@@ -264,7 +338,7 @@ function drawStorm(t) {
   const s = Game.storm;
   g.globalAlpha = .55 * s; for (let i = 0; i < 120 * s; i++) { const x = (hash2(i, 1) * 400 + t * 220) % 360 - 20, y = (hash2(i, 2) * 220 + t * 380) % 200 - 10; R(x, y, 1, 5, PAL.waterL); } g.globalAlpha = 1;
   if (s > .6 && Math.random() < .004) { Game.flash = .8; setTimeout(() => Sound.play('boom'), 250); }
-  if (s > .5 && Math.random() < .006) Game.parts.push({ kind: 'text', x: Game.cam.x - 10, y: Game.cam.y + rnd(20, 150), vx: 160, vy: -10, life: 2.5, text: pick(['🦩', 'a lawn chair', 'someone’s trampoline', 'a flamingo', 'Kevin']) });
+  if (s > .5 && Math.random() < .006) Game.parts.push({ kind: 'text', x: Game.cam.x - 10, y: Game.cam.y + rnd(20, 150), vx: 160, vy: -10, life: 2.5, text: pick(['a lawn chair', 'someone’s trampoline', 'a flamingo', 'Kevin']) });
 }
 
 function render() {

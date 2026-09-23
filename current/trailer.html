@@ -38,27 +38,30 @@
   .stats .cash { color: var(--green); }
   #journalBtn { font-size: .7em; font-weight: 700; letter-spacing: .1em; color: var(--ink); background: var(--yellow); border: 2px solid var(--ink); padding: .25em .6em; cursor: pointer; box-shadow: 2px 2px 0 var(--ink); }
 
-  #quests { position: absolute; left: .6em; top: 10.4em; width: 16em; padding: .45em .6em .55em; font-size: .72em; line-height: 1.35; }
-  #quests h3 { margin: 0 0 .3em; font-size: .92em; letter-spacing: .14em; color: var(--yellow); }
-  #questList { list-style: none; margin: 0; padding: 0; display: grid; gap: .2em; }
-  #questList li.done { color: #8d8a93; text-decoration: line-through; }
-  #questList li.opt { color: #c9c2b4; }
-  #questToggle { display: none; font-size: .7em; font-weight: 700; background: var(--yellow); color: var(--ink); border: 2px solid var(--ink); padding: .2em .5em; }
+  #objective { position: absolute; left: 50%; top: .6em; transform: translateX(-50%); max-width: 46%; padding: .3em .8em .35em 1.9em; font-weight: 700; font-size: .92em; color: var(--paper);
+    background: rgba(26, 20, 35, .88); border: 2px solid var(--yellow); box-shadow: 3px 3px 0 rgba(0, 0, 0, .45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #objective::before { content: "▶"; position: absolute; left: .6em; color: var(--yellow); }
+  #objective.new { animation: objNew .6s steps(3); }
+  @keyframes objNew { 0% { background: var(--yellow); color: var(--ink); } 100% { background: rgba(26, 20, 35, .88); } }
+  #hint { position: absolute; left: 50%; bottom: 10.6em; transform: translateX(-50%); padding: .35em .8em; font-weight: 700; font-size: .95em; background: rgba(15, 11, 21, .9); border: 2px solid var(--teal); color: var(--paper); white-space: nowrap; }
+  .key { display: inline-block; min-width: 1.5em; padding: 0 .35em; margin-right: .15em; text-align: center; background: var(--paper); color: var(--ink); border: 2px solid var(--ink); border-bottom-width: 4px; border-radius: 4px; font-size: .85em; line-height: 1.35; }
+  .key.pad { border-radius: 999px; background: var(--yellow); }
+  #jControls { list-style: none; margin: 0 0 .9em; padding: 0; display: grid; gap: .4em; font-size: .9em; }
 
   #hotbar { position: absolute; left: 50%; bottom: .5em; transform: translateX(-50%); display: flex; gap: .25em; padding: .25em; }
   .slot { position: relative; width: 2.6em; height: 2.6em; background: #2a2136; border: 2px solid #0c0a10; cursor: pointer; padding: 0; display: grid; place-items: center; }
   .slot img { width: 1.9em; height: 1.9em; image-rendering: pixelated; }
   .slot .key { position: absolute; left: .15em; top: 0; font-size: .55em; color: #8d8a93; font-weight: 700; }
   .slot .n { position: absolute; right: .15em; bottom: 0; font-size: .7em; font-weight: 700; color: var(--yellow); text-shadow: 1px 1px 0 #000; }
-  .slot.empty img { opacity: .28; filter: grayscale(1); } .slot.empty .n { color: #5d5a66; }
+  .slot.empty { display: none; }   /* only show what Dan actually has */
   .slot:hover { border-color: var(--yellow); }
   .slot.sel { border-color: var(--pink); box-shadow: 0 0 0 2px var(--pink); }
   .padfocus { outline: 3px solid var(--yellow) !important; outline-offset: 3px; }
   .slot.pop { animation: pop .35s steps(3); }
   @keyframes pop { 50% { transform: scale(1.25); background: var(--pink); } }
 
-  #prompt { position: absolute; left: 50%; bottom: 4.1em; transform: translateX(-50%); background: var(--yellow); color: var(--ink); font-weight: 700; padding: .25em .7em; font-size: .82em; letter-spacing: .06em; border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); white-space: nowrap; }
-  #toast { position: absolute; left: 50%; bottom: 6.2em; transform: translateX(-50%); width: 78%; text-align: center; font-weight: 700; font-size: .95em; color: var(--paper); text-shadow: 2px 2px 0 var(--ink), -1px -1px 0 var(--ink), 1px -1px 0 var(--ink), -1px 1px 0 var(--ink); }
+  #prompt { position: absolute; left: 50%; bottom: 4.1em; transform: translateX(-50%); background: rgba(15, 11, 21, .92); color: var(--paper); font-weight: 700; padding: .3em .8em .3em .45em; font-size: .92em; letter-spacing: .06em; border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); white-space: nowrap; }
+  #toast { position: absolute; left: 50%; bottom: 6.4em; transform: translateX(-50%); max-width: 80%; width: max-content; text-align: center; font-weight: 700; font-size: 1.12em; line-height: 1.3; color: var(--paper); background: rgba(15, 11, 21, .9); border: 2px solid var(--pink); box-shadow: 3px 3px 0 rgba(0, 0, 0, .45); padding: .35em .9em; }
   #urgent { position: absolute; left: 50%; top: 5.2em; transform: translateX(-50%); background: var(--red); color: var(--paper); font-weight: 700; padding: .2em .7em; font-size: .9em; animation: blink .5s steps(2) infinite; border: 2px solid var(--ink); }
   @keyframes blink { 50% { background: var(--yellow); color: var(--ink); } }
 
@@ -153,15 +156,13 @@
   #btnF { right: 100px; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); background: var(--teal); width: 54px; height: 54px; font-size: 12px; }
 
   @media (max-width: 760px) {
-    #quests { display: none; } #quests.open { display: block; }
-    #questToggle { display: block; position: absolute; left: .6em; top: 10.2em; }
-    #quests { top: 12.2em; }
+    #objective { max-width: 40%; font-size: .8em; }
   }
   body.portrait .stats span:not(.cash), body.portrait #fxTags, body.portrait #journalBtn { display: none; }
   body.portrait .clockBox { min-width: 8.5em; }
   #rotate { position: fixed; left: 16px; right: 16px; bottom: calc(160px + env(safe-area-inset-bottom, 0px)); text-align: center; font-size: 13px; color: var(--yellow); letter-spacing: .08em; pointer-events: none; }
   /* director-mode overlays */
-  #prompt { display: none !important; }
+  #prompt, #hint, #objective { display: none !important; }
   #banner { transition: none !important; width: min(40em, 70%); }
   #tdim, #tfade { position: absolute; inset: 0; background: #0f0b15; opacity: 0; pointer-events: none; z-index: 5; }
   #tfade { background: #000; z-index: 7; }
@@ -195,12 +196,12 @@
         <div id="fxTags"></div>
       </div>
       <div class="rightBox">
-        <div class="stats panel"><span class="cash" id="money">$0</span><span>FISH<b id="nFish">0</b></span><span>BAIT<b id="nBait">0</b></span><span>EMPTIES<b id="nCan">0</b></span><span>PYTHON<b id="nPy">0</b></span></div>
+        <div class="stats panel"><span class="cash" id="money">$0</span><span>FISH<b id="nFish">0</b></span><span id="statBait" hidden>BAIT<b id="nBait">0</b></span><span id="statCan" hidden>EMPTIES<b id="nCan">0</b></span><span id="statPy" hidden>PYTHON<b id="nPy">0</b></span></div>
         <button id="journalBtn">J · RAP SHEET</button>
       </div>
     </div>
-    <button id="questToggle" hidden>TO-DO</button>
-    <div id="quests" class="panel" hidden><h3>TO-DO</h3><ul id="questList"></ul></div>
+    <div id="objective" hidden></div>
+    <div id="hint" hidden></div>
     <div id="urgent" hidden></div>
     <div id="hotbar" class="panel" hidden></div>
     <div id="prompt" hidden></div>
@@ -221,10 +222,9 @@
   <div class="wrap">
     <div class="logo">Florida<br>Dan</div>
     <div class="sub">“I’m <em>not</em> a Florida Man.”</div>
-    <p class="tag">Dan, 44, lives in a cabin off County Road 29 with a jon boat, a motorized cooler, and a grudge against a gator named Chuck. He goes to court Friday for The Flamingo Incident. He has four days to prove he’s not a Florida Man. He is extremely a Florida Man.</p>
+    <p class="tag">Four days to prove he’s not a Florida Man.</p>
     <div class="btns"><button class="btn" id="startBtn">New Game</button><button class="btn alt" id="continueBtn" hidden>Continue</button></div>
-    <div class="keys">WASD move · E use / talk / reel / wrestle · Q yell “GIT!” · F throw empties<br>1–9 use items · SHIFT run · J rap sheet · M mute<br>🎮 A use · B “GIT!” · X use item · LB/RB pick item · LT throw · RT run · Y rap sheet</div>
-    <div class="warn">Contains swearing, cartoon substances, and Florida. No real alligators were harmed. Several were humbled.</div>
+    <div class="warn">Swearing, cartoon substances, and Florida.</div>
   </div>
 </div>
 
@@ -246,7 +246,7 @@
 </div>
 
 <div id="journal" class="sheet" hidden>
-  <div class="box"><h2>RAP SHEET</h2><h3>TO-DO</h3><ul id="jQuests"></ul><h3>EVERY HEADLINE, EVER</h3><ul id="jSheet"></ul><button class="btn alt" id="journalClose">Back to the swamp</button></div>
+  <div class="box"><h2>RAP SHEET</h2><h3>TO-DO</h3><ul id="jQuests"></ul><h3>CONTROLS</h3><ul id="jControls"></ul><h3>EVERY HEADLINE, EVER</h3><ul id="jSheet"></ul><button class="btn alt" id="journalClose">Back to the swamp</button></div>
 </div>
 
 <div id="credits" class="sheet" hidden>
@@ -258,12 +258,13 @@
   <div id="stick"><div id="nub"></div></div>
   <button class="tbtn" id="btnA" aria-label="Use">E</button>
   <button class="tbtn" id="btnB" aria-label="Yell GIT">GIT</button>
-  <button class="tbtn" id="btnF" aria-label="Throw">THROW</button>
+  <button class="tbtn" id="btnF" aria-label="Punch">PUNCH</button>
 </div>
 
 <script>window.TRAILER = true;</script>
 <script src="engine.js"></script>
 <script src="art.js"></script>
+<script src="font.js"></script>
 <script src="world.js"></script>
 <script src="actors.js"></script>
 <script src="items.js"></script>

@@ -24,7 +24,7 @@ function rng(seed) { let s = seed >>> 0; return () => ((s = (Math.imul(s, 166452
 const Input = (() => {
   const keys = new Set(), hit = new Set(), stick = { active: false, x: 0, y: 0, id: null };
   const MAP = { ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right',
-    KeyE: 'a', Space: 'a', Enter: 'a', KeyQ: 'b', ShiftLeft: 'run', ShiftRight: 'run', KeyF: 'throw', KeyM: 'mute', Escape: 'pause', KeyP: 'pause', KeyJ: 'journal',
+    KeyE: 'a', Space: 'a', Enter: 'a', KeyQ: 'b', ShiftLeft: 'run', ShiftRight: 'run', KeyF: 'punch', KeyM: 'mute', Escape: 'pause', KeyP: 'pause', KeyJ: 'journal',
     Digit1: 's1', Digit2: 's2', Digit3: 's3', Digit4: 's4', Digit5: 's5', Digit6: 's6', Digit7: 's7', Digit8: 's8', Digit9: 's9' };
   addEventListener('keydown', e => {
     const k = MAP[e.code]; if (!k) return;
@@ -51,8 +51,8 @@ const Input = (() => {
     ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => el.addEventListener(ev, () => keys.delete(k)));
   }
   // Controller: standard layout (Xbox / PlayStation / most Bluetooth pads).
-  // A use · B yell GIT · X use selected item · Y rap sheet · LB/RB pick item · LT throw · RT run · START pause · SELECT mute
-  const PAD = { 0: 'a', 1: 'b', 2: 'item', 3: 'journal', 4: 'prev', 5: 'next', 6: 'throw', 7: 'run', 8: 'mute', 9: 'pause', 12: 'up', 13: 'down', 14: 'left', 15: 'right' };
+  // A use · B yell GIT · X punch · Y rap sheet · LB/RB pick item · LT use item · RT run · START pause · SELECT mute
+  const PAD = { 0: 'a', 1: 'b', 2: 'punch', 3: 'journal', 4: 'prev', 5: 'next', 6: 'item', 7: 'run', 8: 'mute', 9: 'pause', 12: 'up', 13: 'down', 14: 'left', 15: 'right' };
   const padPrev = {}, padStick = { x: 0, y: 0 }, flick = { x: 0, y: 0 };
   let padActive = false, onPad = null;
   function poll() {
@@ -139,6 +139,8 @@ const Sound = (() => {
     siren: () => { for (let i = 0; i < 4; i++) tone(i % 2 ? 700 : 950, .22, 'sine', .08, 0, i * .22); },
     talk: () => tone(180 + Math.random() * 140, .035, 'square', .04),
     engine: () => tone(60 + Math.random() * 20, .08, 'sawtooth', .04),
+    punch: () => { noise(.07, .45, 150); tone(140, .12, 'square', .18, -80); noise(.05, .2, 2500, .02); },
+    whiff: () => { noise(.18, .12, 1800); },
     fail: () => { tone(300, .2, 'square', .1, -100); tone(200, .35, 'square', .1, -80, .2); },
   };
   // a lazy swamp loop: plucked bass + banjo-ish arps. procedural, very quiet.
@@ -154,7 +156,7 @@ const Sound = (() => {
     const note = bar[0] * 2 * Math.pow(2, [bar[1], bar[2], bar[3], 12, bar[3], bar[2], bar[1] + 12, bar[2]][st] / 12);
     if (st !== 3 && st !== 7) tone(note * (mood === 'trip' ? 1 + Math.sin(music.step * .7) * .06 : 1), beat * .9, 'square', .025);
   }
-  const RUMBLE = { chomp: [.7, 200], boom: [1, 450], hurt: [.45, 160], snap: [.5, 120], crack: [.15, 60], catch: [.3, 120], headline: [.25, 90] };
+  const RUMBLE = { punch: [.55, 110], chomp: [.7, 200], boom: [1, 450], hurt: [.45, 160], snap: [.5, 120], crack: [.15, 60], catch: [.3, 120], headline: [.25, 90] };
   return { unlock, play: n => { if (RUMBLE[n]) Input.rumble(...RUMBLE[n]); FX[n] && FX[n](); }, tone, music, setMusic: v => musicOn = v,
     toggleMute() { muted = !muted; return muted; }, get muted() { return muted; } };
 })();

@@ -73,26 +73,26 @@ const Fishing = {
   fight(dt, reel) {
     const f = this.f, fi = f.hooked;
     const dx = TIP.x - fi.x, dy = SURF + 4 - fi.y, d = Math.hypot(dx, dy) || 1, ux = dx / d, uy = dy / d;
-    if (f.surge > 0) f.surge -= dt; else if (!fi.sp.junk && Math.random() < dt * .22 * fi.power) { f.surge = .9; this.msg('RUN!', .8); }
-    const run = fi.power * 36 * (.3 + f.stam * .7) * (f.surge > 0 ? 1.8 : 1);
+    if (f.surge > 0) f.surge -= dt; else if (!fi.sp.junk && Math.random() < dt * .14 * fi.power) { f.surge = .7; this.msg('RUN!', .8); }
+    const run = fi.power * 30 * (.25 + f.stam * .75) * (f.surge > 0 ? 1.6 : 1);
     if (f.jump) {
       f.jump.t += dt; const k = f.jump.t / .95;
       fi.x = f.jump.x0 + k * 18; fi.y = SURF - Math.sin(Math.PI * Math.min(1, k)) * 38;
       if (k >= 1) { fi.y = SURF + 8; f.jump = null; Sound.play('splash'); }
-      if (reel) f.tension += dt * 1.5;
+      if (reel) f.tension += dt * .9;
     } else {
       fi.x -= ux * run * dt; fi.y += (-uy * run * .4 + Math.sin(f.t * 3) * 6) * dt;
-      if (reel) { fi.x += ux * 30 * dt; fi.y += uy * 30 * dt; if (Math.random() < dt * 14) Sound.play('reel'); }
+      if (reel) { fi.x += ux * 44 * dt; fi.y += uy * 44 * dt; if (Math.random() < dt * 14) Sound.play('reel'); }
       fi.x = clamp(fi.x, TIP.x, 314); fi.y = clamp(fi.y, SURF + 4, f.bottom - 5); fi.dir = dx > 0 ? -1 : 1;
       if (fi.sp.jump && fi.y < SURF + 50 && Math.random() < dt * fi.sp.jump * .4) { f.jump = { t: 0, x0: fi.x }; this.msg('JUMP! LET OFF!', .9); }
     }
-    f.tension += reel ? dt * (.22 + fi.power * f.stam * .5 + (f.surge > 0 ? .55 : 0)) : -dt * .55;
+    f.tension += reel ? dt * (.13 + fi.power * f.stam * .3 + (f.surge > 0 ? .35 : 0)) : -dt * .75;   // gentler: fishing should feel good, not like a chore
     f.tension = Math.max(0, f.tension);
-    if (f.tension > .15) f.stam = Math.max(0, f.stam - dt * (.05 + f.tension * .13));
+    if (f.tension > .1) f.stam = Math.max(0, f.stam - dt * (.09 + f.tension * .2));
     f.slack = f.tension < .08 ? f.slack + dt : 0;
     ui.tensionFill.style.height = Math.min(100, f.tension * 100) + '%';
     if (f.tension >= 1) { Sound.play('snap'); Game.chill = Math.max(0, Game.chill - 8); return this.lose(pick(['SNAP! GOD DAMMIT!', 'SNAP! Son of a—', 'SNAP.'])); }
-    if (f.slack > 2.8 && !fi.sp.junk) return this.lose('Spat the hook. Bastard.');
+    if (f.slack > 4 && !fi.sp.junk) return this.lose('Spat the hook. Bastard.');
     f.gatorT += dt;
     if (!f.gator && !fi.sp.junk && f.gatorT > 2.5 && Math.random() < dt * (f.merleZone ? .12 : .05)) { f.gator = { x: 330, y: Math.min(f.bottom - 12, fi.y + 20), chuck: f.merleZone, flee: false }; this.msg(f.merleZone ? 'CHUCK!! (Q = GIT)' : 'GATOR! (Q = GIT)', 1.6); }
     if (f.gator) {
@@ -103,7 +103,7 @@ const Fishing = {
       if (G.flee && G.x > 345) f.gator = null;
       else if (!G.flee && gd < 10) { Game.chill = Math.max(0, Game.chill - 12); f.fish = f.fish.filter(x => x !== fi); Sound.play('chomp'); return this.lose(`${G.chuck ? 'CHUCK' : 'A gator'} ATE YOUR ${fi.sp.name.toUpperCase()}.`); }
     }
-    if (d < 24 && (f.stam < .35 || fi.sp.junk)) this.land(fi);
+    if (d < 30 && (f.stam < .55 || fi.sp.junk)) this.land(fi);
   },
   land(fi) {
     const f = this.f; f.phase = 'card'; ui.fishHud.hidden = true; this.msg('');
