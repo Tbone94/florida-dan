@@ -158,7 +158,7 @@ function load() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); re
 
 // ---------- title / next day ----------
 function begin(fromSave) {
-  Sound.unlock(); ui.title.hidden = true;
+  Sound.unlock(); ui.title.hidden = true; if (window.PWA) PWA.immerse();
   if (fromSave) { const s = load(); World.load(s.region || 'swamp'); Object.assign(Game, { day: s.day, inv: s.inv, money: s.money, allegations: s.allegations, headlines: s.headlines, flags: s.flags, catchBag: s.catchBag || [], pythons: s.pythons || [] }); startDay(); }
   else newGame();
 }
@@ -179,9 +179,14 @@ $('creditsBtn').addEventListener('click', () => { $('credits').hidden = true; Ga
 // ---------- layout ----------
 function resize() {
   const vw = innerWidth, vh = innerHeight, portrait = vh > vw * 1.05;
-  const w = Math.floor(Math.min(vw, (portrait ? vh * .58 : vh) * 16 / 9)), h = Math.floor(w * 9 / 16);
+  let w, h;
+  if (!portrait && !window.TRAILER) {   // landscape: widen the world view (up to ~20:9) so wide phones show more swamp, not black bars
+    VW = clamp(Math.round(VH * vw / vh / 2) * 2, VW0, 400);
+    h = Math.min(vh, Math.floor(vw * VH / VW)); w = Math.min(vw, Math.round(h * VW / VH));
+  } else { VW = VW0; w = Math.floor(Math.min(vw, (portrait ? vh * .58 : vh) * 16 / 9)); h = Math.floor(w * 9 / 16); }
+  if (buf.width !== VW) { buf.width = VW; g.imageSmoothingEnabled = false; }
   Object.assign(stage.style, { width: w + 'px', height: h + 'px', left: ((vw - w) / 2) + 'px', top: (portrait ? 8 : (vh - h) / 2) + 'px' });
-  stage.style.setProperty('--u', Math.max(11, Math.min(21, w / 54)) + 'px');
+  stage.style.setProperty('--u', Math.max(11, Math.min(21, w / 54, h / 25)) + 'px');   // short landscape phones: size text by height too
   // Render at a whole-number multiple of the 320x180 art, capped at 4x (1280x720). The browser upscales the rest
   // crisply (image-rendering: pixelated). Full-screen on a big display was pushing 5000+px-wide frames through the FX shader.
   const dpr = devicePixelRatio || 1, k = clamp(Math.floor(w * dpr / VW), 1, window.TRAILER ? 6 : 4);

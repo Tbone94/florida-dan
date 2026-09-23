@@ -27,7 +27,8 @@ const Music = (() => {
     const lim = ctx.createDynamicsCompressor(); lim.threshold.value = -4; lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = .001; lim.release.value = .08;
     R.bus.gain.value = .8; R.bus.connect(R.lp); R.lp.connect(comp); comp.connect(lim); lim.connect(dest);
     R.pump = ctx.createGain(); R.pump.connect(R.bus);                       // sidechain: the kick ducks this
-    const len = Math.floor(ctx.sampleRate * 2.2), ir = ctx.createBuffer(2, len, ctx.sampleRate);
+    const lite = typeof isTouch !== 'undefined' && isTouch && !window.TRAILER;   // phones: a shorter reverb tail keeps the audio thread light
+    const len = Math.floor(ctx.sampleRate * (lite ? 1.3 : 2.2)), ir = ctx.createBuffer(2, len, ctx.sampleRate);
     for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.4); }
     R.verb = ctx.createConvolver(); R.verb.buffer = ir; const vg = ctx.createGain(); vg.gain.value = .32; R.verb.connect(vg); vg.connect(R.bus);
     R.dly = ctx.createDelay(2); const fb = ctx.createGain(), dlp = ctx.createBiquadFilter(), dg = ctx.createGain();

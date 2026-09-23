@@ -128,7 +128,7 @@ function shadow(x, y, w, h = 3) { g.globalAlpha = .28; g.fillStyle = PAL.ink; g.
 
 function drawTiles(cx, cy, t) {
   const tx0 = Math.floor(cx / TS), ty0 = Math.floor(cy / TS);
-  for (let ty = ty0; ty <= ty0 + 12; ty++) for (let tx = tx0; tx <= tx0 + 21; tx++) {
+  for (let ty = ty0; ty <= ty0 + 12; ty++) for (let tx = tx0; tx <= tx0 + Math.ceil(VW / TS); tx++) {
     const k = World.tile(tx, ty), x = tx * TS - cx, y = ty * TS - cy, hs = hash2(tx, ty);
     if (WET(k)) {
       const mia = MIAMI();

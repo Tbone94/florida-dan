@@ -1,7 +1,8 @@
 // FLORIDA DAN — engine: utils, input, sound, and the screen-FX shader that makes
 // every substance look and feel different.
 'use strict';
-const VW = 320, VH = 180;
+let VW = 320;                // the overworld widens on wide phones (see resize); fixed scenes still draw at VW0
+const VW0 = 320, VH = 180;
 const $ = id => document.getElementById(id);
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;

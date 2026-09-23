@@ -2,7 +2,7 @@
 // (Instagram/phone friendly) with a real snapshot from the day and a link back to the game.
 'use strict';
 const PLAY_URL = 'tbone94.github.io/florida-dan';
-function snapshot() { const c = document.createElement('canvas'); c.width = VW; c.height = VH; c.getContext('2d').drawImage(buf, 0, 0); return c; }
+function snapshot() { const c = document.createElement('canvas'); c.width = VW0; c.height = VH; c.getContext('2d').drawImage(buf, Math.floor((VW - VW0) / 2), 0, VW0, VH, 0, 0, VW0, VH); return c; }   // centre 320 of a wide frame
 function wrapText(x, text, maxW) {
   const words = text.split(' '), lines = []; let cur = '';
   for (const w of words) { const t = cur ? cur + ' ' + w : w; if (x.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t; }

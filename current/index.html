@@ -1,5 +1,15 @@
 <meta charset="utf-8">
 <title>Florida Dan</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0f0b15">
+<meta name="description" content="Four days to prove he’s not a Florida Man.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Florida Dan">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Pixelify+Sans:wght@400;600;700&display=swap">
@@ -107,7 +117,7 @@
 
   #title { background: linear-gradient(180deg, rgba(255, 94, 168, .5), rgba(255, 138, 61, .4) 45%, rgba(26, 20, 35, .85)); }
   #title .wrap { text-align: center; display: grid; gap: .9em; justify-items: center; padding-block: 1.5em; }
-  .logo { font-family: var(--display); font-size: clamp(64px, 14vw, 170px); line-height: .85; text-transform: uppercase; color: var(--yellow); text-shadow: 5px 5px 0 var(--pink), 10px 10px 0 var(--ink); letter-spacing: .01em; transform: rotate(-3deg); }
+  .logo { font-family: var(--display); font-size: clamp(52px, min(14vw, 19vh), 170px); line-height: .85; text-transform: uppercase; color: var(--yellow); text-shadow: 5px 5px 0 var(--pink), 10px 10px 0 var(--ink); letter-spacing: .01em; transform: rotate(-3deg); }
   .sub { font-family: var(--display); font-size: clamp(20px, 3.4vw, 36px); color: var(--paper); text-shadow: 3px 3px 0 var(--ink); text-transform: uppercase; }
   .sub em { color: var(--teal); font-style: normal; }
   #title .tag { max-width: 34em; line-height: 1.5; font-size: 1em; text-shadow: 2px 2px 0 var(--ink); }
@@ -200,6 +210,21 @@
   #rotate { position: fixed; left: 16px; right: 16px; bottom: calc(160px + env(safe-area-inset-bottom, 0px)); text-align: center; font-size: 13px; color: var(--yellow); letter-spacing: .08em; pointer-events: none; }
   /* phones: the stick lives in the bottom-left, so the comment box sits just above it */
   @media (pointer: coarse) { #toast { bottom: 11em; max-width: 45%; } #hint { bottom: 15em; } }
+  /* phones in landscape: the game fills the screen, so dialogue/prompts sit between the stick and the buttons, clear of the notch */
+  @media (pointer: coarse) and (orientation: landscape) {
+    #hudTop { left: calc(.6em + env(safe-area-inset-left, 0px)); right: calc(.6em + env(safe-area-inset-right, 0px)); }
+    #talk { left: calc(150px + env(safe-area-inset-left, 0px)); right: calc(185px + env(safe-area-inset-right, 0px)); width: auto; transform: none; max-width: none; }
+    #toast { left: calc(.6em + env(safe-area-inset-left, 0px)); bottom: calc(150px + env(safe-area-inset-bottom, 0px)); max-width: 40%; }
+    #hint { left: calc(.6em + env(safe-area-inset-left, 0px)); bottom: calc(150px + 4.5em + env(safe-area-inset-bottom, 0px)); }
+    #prompt { bottom: calc(22px + env(safe-area-inset-bottom, 0px)); }
+    #hotbar { bottom: calc(4px + env(safe-area-inset-bottom, 0px)); }
+    #stick { left: calc(18px + env(safe-area-inset-left, 0px)); }
+    #btnA { right: calc(18px + env(safe-area-inset-right, 0px)); }
+    #btnB, #btnF { right: calc(98px + env(safe-area-inset-right, 0px)); }
+    .tbtn { opacity: .88; }
+  }
+  @media (max-height: 520px) { #title .wrap { gap: .55em; padding-block: .6em; } #title .sub { font-size: 1.1em; } }
+  .iostip { font-size: .8em; color: var(--paper); background: rgba(15, 11, 21, .8); border: 2px solid var(--teal); padding: .35em .7em; letter-spacing: .04em; }
   @media (prefers-reduced-motion: reduce) { #banner { transition: none; } .slot.pop, #urgent, #wrestlePrompt { animation: none; } }
 </style>
 
@@ -243,7 +268,8 @@
     <div class="logo">Florida<br>Dan</div>
     <div class="sub">“I’m <em>not</em> a Florida Man.”</div>
     <p class="tag">Four days to prove he’s not a Florida Man.</p>
-    <div class="btns"><button class="btn" id="startBtn">New Game</button><button class="btn alt" id="continueBtn" hidden>Continue</button><button class="btn ghost" id="howtoBtn">How to Play</button></div>
+    <div class="btns"><button class="btn" id="startBtn">New Game</button><button class="btn alt" id="continueBtn" hidden>Continue</button><button class="btn ghost" id="howtoBtn">How to Play</button><button class="btn ghost" id="installBtn" hidden>Install</button></div>
+    <div class="iostip" id="iosTip" hidden>Play full screen: tap <b>Share</b> ⬆ then <b>Add to Home Screen</b></div>
     <div class="warn">Swearing, cartoon substances, and Florida.</div>
   </div>
 </div>
@@ -296,25 +322,26 @@
   <button class="tbtn" id="btnF" aria-label="Punch">PUNCH</button>
 </div>
 
-<script src="engine.js?v=202609230051"></script>
-<script src="songs.js?v=202609230051"></script>
-<script src="music.js?v=202609230051"></script>
-<script src="art.js?v=202609230051"></script>
-<script src="font.js?v=202609230051"></script>
-<script src="world.js?v=202609230051"></script>
-<script src="actors.js?v=202609230051"></script>
-<script src="items.js?v=202609230051"></script>
-<script src="headlines.js?v=202609230051"></script>
-<script src="story.js?v=202609230051"></script>
-<script src="minigames.js?v=202609230051"></script>
-<script src="court.js?v=202609230051"></script>
-<script src="cases.js?v=202609230051"></script>
-<script src="favors.js?v=202609230051"></script>
-<script src="court2.js?v=202609230051"></script>
-<script src="miami.js?v=202609230051"></script>
-<script src="cases45.js?v=202609230051"></script>
-<script src="miami2.js?v=202609230051"></script>
-<script src="chase.js?v=202609230051"></script>
-<script src="game.js?v=202609230051"></script>
-<script src="share.js?v=202609230051"></script>
-<script src="ui.js?v=202609230051"></script>
+<script src="engine.js?v=202609230115"></script>
+<script src="songs.js?v=202609230115"></script>
+<script src="music.js?v=202609230115"></script>
+<script src="art.js?v=202609230115"></script>
+<script src="font.js?v=202609230115"></script>
+<script src="world.js?v=202609230115"></script>
+<script src="actors.js?v=202609230115"></script>
+<script src="items.js?v=202609230115"></script>
+<script src="headlines.js?v=202609230115"></script>
+<script src="story.js?v=202609230115"></script>
+<script src="minigames.js?v=202609230115"></script>
+<script src="court.js?v=202609230115"></script>
+<script src="cases.js?v=202609230115"></script>
+<script src="favors.js?v=202609230115"></script>
+<script src="court2.js?v=202609230115"></script>
+<script src="miami.js?v=202609230115"></script>
+<script src="cases45.js?v=202609230115"></script>
+<script src="miami2.js?v=202609230115"></script>
+<script src="chase.js?v=202609230115"></script>
+<script src="game.js?v=202609230115"></script>
+<script src="share.js?v=202609230115"></script>
+<script src="ui.js?v=202609230115"></script>
+<script src="pwa.js?v=202609230115"></script>

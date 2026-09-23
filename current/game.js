@@ -363,12 +363,18 @@ function drawStorm(t) {
 
 function render() {
   g.setTransform(1, 0, 0, 1, 0, 0);
-  if (Game.mode === 'fish') Fishing.draw();
-  else if (Game.mode === 'wrestle') Wrestle.draw();
-  else if (Game.mode === 'raccoon') Minigame.drawRaccoon();
-  else if (Game.mode === 'dance') Dance.draw();
-  else if (Game.mode === 'objection' || Game.scene === 'parade' || Game.mode === 'court' || (Game.mode === 'talk' && Game.talk && Game.talk.prev === 'court') || (Game.mode === 'gazette' && Game.flags.inCourt)) Court.draw(Game.t);
-  else drawWorld();
+  const scene = Game.mode === 'fish' ? () => Fishing.draw() : Game.mode === 'wrestle' ? () => Wrestle.draw() : Game.mode === 'raccoon' ? () => Minigame.drawRaccoon()
+    : Game.mode === 'dance' ? () => Dance.draw()
+    : (Game.mode === 'objection' || Game.scene === 'parade' || Game.mode === 'court' || (Game.mode === 'talk' && Game.talk && Game.talk.prev === 'court') || (Game.mode === 'gazette' && Game.flags.inCourt)) ? () => Court.draw(Game.t) : null;
+  if (!scene) drawWorld();
+  else if (VW === VW0) scene();
+  else {   // wide screen: the fixed-layout scenes keep their 320px stage, centred between dark wings
+    const W = VW, off = Math.floor((W - VW0) / 2);
+    g.fillStyle = '#0f0b15'; g.fillRect(0, 0, W, VH);
+    VW = VW0; g.setTransform(1, 0, 0, 1, off, 0);
+    try { scene(); } finally { VW = W; g.setTransform(1, 0, 0, 1, 0, 0); }
+    g.fillStyle = '#0f0b15'; g.fillRect(0, 0, off, VH); g.fillRect(off + VW0, 0, W - off - VW0, VH);
+  }
   if (window.Trailer && Trailer.extra) Trailer.extra();
   const F = Game.fx, sky = Game.mode === 'title' ? [1, 1, 1] : skyTint(Game.hour), storm = 1 - Game.storm * .35;
   Screen.present({ t: Game.t, drunk: clamp((F.buzz - 25) / 60, 0, 1.3), high: F.high > 0 ? Math.min(1, F.high / 8) : 0, shroom: F.shroom > 0 ? Math.min(1, F.shroom / 6) : 0,
