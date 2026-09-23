@@ -31,6 +31,10 @@ s = s.replace('  @media (prefers-reduced-motion: reduce)', '''  /* director-mode
   #tcard .rap ol { margin: 0; padding: 0; list-style: none; }
   #tcard .rap li { font-family: var(--display); font-size: 66px; line-height: 1.08; text-transform: uppercase; transform-origin: left center; }
   #tcard .rap li::before { content: '✗ '; color: var(--red); }
+  #tcard .url { font-family: var(--pixel); font-weight: 700; font-size: 40px; color: var(--ink); background: var(--paper); border: 4px solid var(--ink); box-shadow: 6px 6px 0 var(--pink); padding: .12em .6em; margin-top: .25em; letter-spacing: .02em; }
+  #tcard .stk { position: absolute; top: 50%; font-family: var(--display); font-size: 64px; letter-spacing: .04em; color: var(--ink); background: var(--yellow); border: 5px solid var(--ink); box-shadow: 8px 8px 0 var(--ink); padding: .08em .45em .12em; }
+  #tcard .stk.l { left: 11%; transform: translateY(-50%) rotate(-8deg); }
+  #tcard .stk.r { right: 11%; transform: translateY(-50%) rotate(7deg); background: var(--teal); }
   #tstack { position: absolute; inset: 0; z-index: 6; }
   .clip { position: absolute; width: 44%; background: var(--paper); color: var(--ink); border: 5px solid var(--ink); box-shadow: 12px 12px 0 var(--red); padding: .35em .6em .5em; font-family: var(--display); font-size: 44px; line-height: 1.02; text-transform: uppercase; }
   .clip small { display: block; font-family: var(--pixel); font-size: 20px; letter-spacing: .2em; color: var(--red); margin-bottom: .2em; }

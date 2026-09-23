@@ -367,7 +367,7 @@ const V2 = {
 };
 const V1s = id => V1.find(s => s.id === id);
 Object.assign(V1s('cooler'), { dur: 2.0 }); Object.assign(V1s('fireworks'), { dur: 2.0 }); Object.assign(V1s('brenda'), { dur: 2.0 }); Object.assign(V1s('shroom'), { dur: 3.0 }); Object.assign(V1s('court'), { dur: 4.5 });
-Object.assign(V1s('end'), { setup() { base(); showCard('<div class="logo sm">Florida<br>Dan</div><div class="soon">COMING SOON</div><div class="tag">Gators. Jorts. Allegations. Miami.</div>', 'title end'); } });
+Object.assign(V1s('end'), { setup() { base(); showCard('<div class="stk l">FREE</div><div class="stk r">NO ADS</div><div class="logo sm">Florida<br>Dan</div><div class="soon">AVAILABLE NOW</div><div class="url">tbone94.github.io/florida-dan</div><div class="tag">In your browser · install on your phone</div>', 'title end'); } });
 const SHOTS = ['cozy', 'card1', 'cooler', 'fish', 'wrestle', 'iguana', 'brenda', 'blackout', 'powder', 'chase', 'shroom', 'court',
   'charges', 'objection', 'skunk', 'card3', 'lambo', 'abuela', 'race', 'party', 'dance', 'boat', 'stack', 'parade', 'black', 'title', 'button', 'end'].map(id => V2[id] ? { id, ...V2[id] } : V1s(id));
 let t = 0; for (const s of SHOTS) { s.start = t; t += s.dur; }
