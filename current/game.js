@@ -23,7 +23,7 @@ function newGame() {
 function startDay() {
   const S_ = World.spots;
   Object.assign(Game, { hour: 6, chill: 70, urgent: 0, storm: 0, heat: 0, parts: [], projectiles: [], day_: freshDayLog() });
-  Heat.end(); headlineQ.length = 0; Game.car = null; Game.racing = false; if (typeof Speedway !== 'undefined') { Speedway.on = false; Speedway.cars = []; } if (typeof Convoy !== 'undefined') Convoy.on = false; Game.dan.hiding = false; Game.dan.carry = null; Game.vehicles = []; BoatChase.boat = null; Race.on = false; Game.prints = []; Game.scene = null; Game.courtExtra = {};
+  Heat.end(); headlineQ.length = 0; hintT = 0; ui.hint.hidden = true; Game.car = null; Game.racing = false; if (typeof Speedway !== 'undefined') { Speedway.on = false; Speedway.cars = []; } if (typeof Convoy !== 'undefined') Convoy.on = false; Game.dan.hiding = false; Game.dan.carry = null; Game.vehicles = []; BoatChase.boat = null; Race.on = false; Game.prints = []; Game.scene = null; Game.courtExtra = {};
   Object.assign(Game.fx, { buzz: 0, high: 0, shroom: 0, powder: 0, crash: 0, cig: 0 });
   Object.assign(Game.dan, { x: S_.dan.x, y: S_.dan.y, dir: 'down', ride: null, hurt: 0 });
   Object.assign(Game.boat, { x: S_.boat.x, y: S_.boat.y, dir: 'right' });
@@ -33,7 +33,8 @@ function startDay() {
   Game.cam.x = Game.dan.x - VW / 2; Game.cam.y = Game.dan.y - VH / 2 - 10;
   Game.mode = 'play'; showHud(true);
   Story.setupDay(Game.day); Gigs.newDay();
-  save();
+  Game.dawn = null; save();
+  Game.dawn = { day: Game.day, money: Game.money, allegations: Game.allegations, headlines: Game.headlines.slice(), catchBag: Game.catchBag.slice(), pythons: Game.pythons.slice() };
   Sound.setMusic(true);
 }
 
@@ -101,7 +102,7 @@ function interaction() {
   }
   if (D.ride === 'cooler') return { label: 'Park the cooler', fn: () => { D.ride = null; D.y += 10; if (!canWalk(D.x, D.y)) D.y -= 10; } };
   // vehicles you're standing right on top of beat anything else nearby (a cooler parked by the courthouse door)
-  if (near(Game.cooler, 13)) return { label: 'Ride the motorized cooler', fn: () => { D.ride = 'cooler'; D.x = Game.cooler.x; D.y = Game.cooler.y; Sound.play('engine'); if (Game.fx.buzz > 50 || Game.fx.powder > 0) Game.day_.dui = true; } };
+  if (!D.ride && near(Game.cooler, 13)) return { label: 'Ride the motorized cooler', fn: () => { D.ride = 'cooler'; D.x = Game.cooler.x; D.y = Game.cooler.y; Sound.play('engine'); if (Game.fx.buzz > 50 || Game.fx.powder > 0) Game.day_.dui = true; } };
   if (!MIAMI() && hasUp('recliner') && !D.ride) { const rc = World.props.find(p => p.kind === 'recliner'); if (rc && near({ x: rc.x + 8, y: rc.y + 4 }, 18)) return { label: 'Nap in the recliner', fn: recliner }; }
   const st = Story.interactions(); if (st.length) return st[0];
   const tb = Game.flags.trashBaby && !D.ride && Game.animals.find(a => a.pet);
@@ -158,7 +159,7 @@ function punchNPC(n) {
 // ---------- the key for an action, for whatever the player is holding ----------
 function K(action) {
   const pad = Input.padActive, touch = isTouch && !pad;
-  const m = { a: ['E', 'A', 'E'], b: ['Q', 'B', 'GIT'], punch: ['F', 'X', 'PUNCH'], item: ['1-9', 'LT', 'TAP'], journal: ['J', 'Y', 'RAP SHEET'], move: ['WASD', 'STICK', 'STICK'], run: ['SHIFT', 'RT', ''] }[action];
+  const m = { a: ['E', 'A', 'E'], b: ['Q', 'B', 'GIT'], punch: ['F', 'X', 'PUNCH'], item: ['1-9', 'LT', 'TAP'], journal: ['J', 'Y', 'RAP SHEET'], move: ['WASD', 'STICK', 'STICK'], run: ['SHIFT', 'RT', 'PUSH STICK ALL THE WAY'] }[action];
   return `<b class="key${pad ? ' pad' : ''}">${pad ? m[1] : touch ? m[2] : m[0]}</b>`;
 }
 // one-time tips, shown exactly when they're useful
@@ -168,10 +169,13 @@ function hint(id, html, secs = 5.5) {
   Game.flags.hints[id] = true; ui.hint.innerHTML = html; ui.hint.hidden = false; hintT = secs; return true;
 }
 function hints() {
-  if (hintT > 0 && (hintT -= 1 / 60) <= 0) ui.hint.hidden = true;
-  if (hintT > 0 || Game.mode !== 'play') return;
+  if (Game.mode !== 'play') { if (hintT > 0) ui.hint.hidden = true; return; }   // a tip waits out minigames and menus
+  if (hintT > 0) { ui.hint.hidden = false; if ((hintT -= 1 / 60) <= 0) ui.hint.hidden = true; return; }
   const D = Game.dan, h = Game.flags.hints || {};
   if (!h.gator && Game.animals.some(a => a.type === 'gator' && !a.lurk && Math.hypot(a.x - D.x, a.y - D.y) < 90)) return hint('gator', `${K('punch')} punch &nbsp; ${K('b')} yell GIT &nbsp; ${K('a')} wrestle`, 6);
+  if (!h.gig && Game.npcs.some(n => !n.hidden && Gigs.offering(n) && Math.hypot(n.x - D.x, n.y - D.y) < 110)) return hint('gig', `A <b>$</b> over somebody = a paying side gig. Walk up and ${K('a')}`, 6);
+  if (!h.detector && typeof Detector !== 'undefined' && Detector.on()) return hint('detector', `Metal detector: faster beeps = closer. ${K('a')} to dig when it says so`, 6);
+  if (!h.nitro && D.ride === 'car' && hasUp('nitro')) return hint('nitro', `${K('run')} for nitrous`, 4);
 }
 
 // ---------- objective arrow ----------

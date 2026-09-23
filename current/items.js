@@ -82,7 +82,17 @@ function useItem(k) {
 }
 
 function blackout() {
-  const spots = [
+  const S_ = World.spots, at = (p, dx = 0, dy = 0) => p ? [p.x + dx, p.y + dy] : null;
+  const away = MIAMI() ? [   // Miami and Daytona wake-ups (the swamp spots don't exist there)
+    ['the Hotel Neon fountain', ...(at(S_.door, 0, 20) || []), 'FLORIDA MAN FOUND ASLEEP IN HOTEL FOUNTAIN, TOLD STAFF HE WAS "A WATER FEATURE"'],
+    ['the end of the pier, holding a stranger’s bait bucket', ...(at(S_.pier) || []), 'FLORIDA MAN WAKES UP ON PIER WITH STRANGER’S BAIT BUCKET, SAYS THEY’RE "CLOSE NOW"'],
+    ['Café Abuela’s patio, under a tablecloth', ...(at(S_.cafe, 0, 16) || []), 'FLORIDA MAN FOUND UNDER CAFÉ TABLECLOTH; ABUELA FED HIM ANYWAY'],
+  ] : DAYTONA() ? [
+    ['the Ocean Breeze ice machine', ...(at(S_.door, 0, 20) || []), 'FLORIDA MAN FOUND HUGGING MOTEL ICE MACHINE, CALLS IT "HIS PIT CREW"'],
+    ['the courthouse steps, wearing a checkered flag', ...(at(S_.court, 0, 20) || []), 'FLORIDA MAN SLEEPS ON COURTHOUSE STEPS WRAPPED IN CHECKERED FLAG'],
+    ['a bench at the bus station', ...(at(S_.stationDoor, 0, 20) || []), 'FLORIDA MAN FOUND ASLEEP AT BUS STATION, TELLS GREYHOUND "NOT TODAY"'],
+  ] : null;
+  const spots = away ? away.filter(s => s.length === 4) : [
     ['the roof of the Gulp-N-Go', World.spots.darlene.x + 10, World.spots.darlene.y - 30, 'FLORIDA MAN FOUND ASLEEP ON GAS STATION ROOF, CLAIMS HE "WAS GUARDING IT"'],
     ['the cow pasture, spooning a cow', World.spots.pasture.x, World.spots.pasture.y, 'FLORIDA MAN FOUND SPOONING COW; COW "DID NOT PRESS CHARGES"'],
     ['Merle’s porch, wearing a traffic cone', World.spots.merle.x - 20, World.spots.merle.y + 10, 'FLORIDA MAN WAKES UP IN TRAFFIC CONE, HAS "NO REGRETS"'],
@@ -90,10 +100,12 @@ function blackout() {
     ['the porta-potty', World.spots.darlene.x - 80, World.spots.darlene.y + 20, 'FLORIDA MAN SPENDS NIGHT IN PORTA-POTTY, CALLS IT "A STAYCATION"'],
   ];
   const [where, x, y, head] = pick(spots);
-  Game.dan.ride = null;
+  if (Game.car && typeof Car !== 'undefined') Car.exit(); Game.dan.ride = null;
   say([['', 'Everything goes black...'], ['', `Dan wakes up in ${where}. It's ${Math.min(20, Math.floor(Game.hour) + 3)}:00. His mouth tastes like a pennies.`],
     ['DAN', pick(['...Nobody saw that.', 'Where are my flip-flops. Where is my DIGNITY.', 'Brenda can never know about this.'])]], () => {
-    const p = [x, y]; if (canWalk(p[0], p[1] + 12)) { Game.dan.x = p[0]; Game.dan.y = p[1] + 12; } else { Game.dan.x = x; Game.dan.y = y; }
+    let p = [x, y + 12];   // nearest walkable spot to where he's supposed to wake up
+    for (let r = 0; r < 120 && !canWalk(p[0], p[1]); r += 4) for (let a = 0; a < 6.28; a += .5) { const q = [x + Math.cos(a) * r, y + Math.sin(a) * r]; if (canWalk(q[0], q[1])) { p = q; break; } }
+    Game.dan.x = p[0]; Game.dan.y = p[1];
     Game.hour = Math.min(20.5, Game.hour + 3); Game.fx.buzz = 20; Game.chill = 40;
     headline(head, 7);
     Story.event('blackout');

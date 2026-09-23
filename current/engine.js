@@ -86,7 +86,7 @@ const Input = (() => {
   }
   return {
     poll, rumble, get padActive() { return padActive; }, set onPad(fn) { onPad = fn; },
-    held: k => keys.has(k), tapped: k => hit.has(k), press: k => hit.add(k), endFrame: () => hit.clear(), bindStick, bindButton,
+    held: k => keys.has(k) || (k === 'run' && stick.active && Math.hypot(stick.x, stick.y) > .9), tapped: k => hit.has(k), press: k => hit.add(k), endFrame: () => hit.clear(), bindStick, bindButton,
     set: (k, on) => on ? keys.add(k) : keys.delete(k), releaseAll: () => keys.clear(),
     axis() {
       let x = (keys.has('right') ? 1 : 0) - (keys.has('left') ? 1 : 0), y = (keys.has('down') ? 1 : 0) - (keys.has('up') ? 1 : 0);

@@ -192,6 +192,7 @@ const Wrestle = {
   start(opts) {
     // opts: { foe: 'gator'|'python'|'chuck', onWin, onLose, arena: 'swamp'|'court' }
     const hard = opts.foe === 'chuck' ? 1.5 : opts.foe === 'python' ? .8 : 1;
+    ui.wrestle.querySelector('.hint').innerHTML = `MASH ${K('a')} · ${isTouch && !Input.padActive ? 'PUSH THE STICK THE ARROW’S WAY' : 'HIT THE ARROW'} WHEN HE THRASHES`;   // the right button for keys, pad or thumbs
     this.w = { ...opts, hard, grip: 35, t: 0, prompt: null, promptT: 1.4, thrash: 0, msgT: 0, over: false, overT: 0, won: false };
     Game.prevMode = Game.mode; Game.mode = 'wrestle'; ui.wrestle.hidden = false; padFor(true); ui.wrestlePrompt.textContent = ''; this.msg(opts.foe === 'python' ? 'GRAB THAT NOODLE!' : 'HOLD THE JAWS SHUT!');
     Sound.play('chomp');
@@ -251,7 +252,7 @@ const Wrestle = {
 const Minigame = {
   raccoon() {
     say([['', 'Dan reaches into the ice machine...'], ['', '...something reaches back.'], ['RACCOON', 'SKREEEEEEEEE'], ['', 'THE RACCOON IS ON DAN’S FACE.']], () => {
-      Game.mode = 'raccoon'; this.r = { t: 0, mash: 0 }; ui.raccoon.hidden = false; Sound.play('hurt');
+      Game.mode = 'raccoon'; this.r = { t: 0, mash: 0 }; ui.raccoon.hidden = false; ui.raccoon.querySelector('.hint').innerHTML = `MASH ${K('a')} TO PEEL IT OFF`; Sound.play('hurt');
     });
   },
   updateRaccoon(dt) {

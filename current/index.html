@@ -35,7 +35,8 @@
   #hudTop { position: absolute; left: .6em; top: .6em; right: .6em; display: flex; justify-content: space-between; align-items: flex-start; gap: .6em; }
   .clockBox { padding: .35em .6em .45em; display: grid; gap: .25em; min-width: 11.5em; }
   .clockBox .time { font-size: 1.5em; font-weight: 700; color: var(--yellow); line-height: 1; font-variant-numeric: tabular-nums; }
-  .clockBox .day { font-size: .68em; letter-spacing: .12em; color: var(--pink); font-weight: 700; }
+  .clockBox { max-width: 15em; }
+  .clockBox .day { font-size: .68em; letter-spacing: .12em; color: var(--pink); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .meter { display: grid; grid-template-columns: 4.6em 1fr auto; align-items: center; gap: .4em; font-size: .68em; letter-spacing: .08em; font-weight: 700; }
   .bar { height: .7em; background: #0c0a10; border: 1px solid #000; position: relative; }
   .bar i { position: absolute; inset: 0 auto 0 0; display: block; }
@@ -50,7 +51,7 @@
   .stats .cash { color: var(--green); }
   #journalBtn { font-size: .7em; font-weight: 700; letter-spacing: .1em; color: var(--ink); background: var(--yellow); border: 2px solid var(--ink); padding: .25em .6em; cursor: pointer; box-shadow: 2px 2px 0 var(--ink); }
 
-  #objective { position: absolute; left: 50%; top: .6em; transform: translateX(-50%); max-width: 46%; padding: .3em .8em .35em 1.9em; font-weight: 700; font-size: .92em; color: var(--paper);
+  #objective { position: absolute; left: 50%; top: .6em; transform: translateX(-50%); max-width: min(46%, 44vw); padding: .3em .8em .35em 1.9em; font-weight: 700; font-size: .92em; color: var(--paper);
     background: rgba(26, 20, 35, .88); border: 2px solid var(--yellow); box-shadow: 3px 3px 0 rgba(0, 0, 0, .45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #objective::before { content: "▶"; position: absolute; left: .6em; color: var(--yellow); }
   #objective.new { animation: objNew .6s steps(3); }
@@ -109,7 +110,9 @@
   @keyframes blink2 { 50% { color: var(--red); } }
   .hint { font-size: .72em; color: #c9c2b4; }
 
-  .sheet { position: fixed; inset: 0; z-index: 10; pointer-events: auto; display: grid; place-items: center; overflow: auto; padding-inline: 16px; font-size: 16px; }
+  .sheet { position: fixed; inset: 0; z-index: 10; pointer-events: auto; display: grid; justify-items: center; align-items: start; overflow: auto; padding: 1em 16px; font-size: 16px; }
+  .sheet > * { margin-block: auto !important; }   /* centred when it fits, top-aligned (never clipped) when it doesn't */
+  @media (max-height: 520px) and (min-width: 640px) { #shop .box { width: min(44em, 100%); } #shopList { grid-template-columns: 1fr 1fr; } }
   .btn { font: 700 1.05em var(--pixel); letter-spacing: .1em; text-transform: uppercase; background: var(--pink); color: var(--ink); border: 3px solid var(--ink); padding: .55em 1.2em; cursor: pointer; box-shadow: 4px 4px 0 var(--ink); }
   .btn.alt { background: var(--yellow); }
   .btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
@@ -145,6 +148,7 @@
   .ctl th { text-align: left; font-size: .75em; letter-spacing: .14em; color: var(--pink); padding: .2em .3em; }
   .ctl td { padding: .35em .3em; border-top: 1px solid #3b2f4a; }
   .ctl small { color: #8d8a93; margin-left: .3em; }
+  .touchTip { display: none; } @media (pointer: coarse) { .touchTip { display: block; } }
   .gist { font-size: .88em; line-height: 1.45; color: #c9c2b4; margin: 0 0 .9em; }
   .box { width: min(30em, 100%); padding: 1em 1.1em 1.1em; background: var(--ink2); border: 3px solid var(--paper); box-shadow: 6px 6px 0 var(--pink); margin-block: 1em; }
   .box h2 { margin: 0 0 .2em; font-family: var(--display); font-weight: 400; font-size: 2em; color: var(--yellow); letter-spacing: .02em; }
@@ -191,7 +195,7 @@
   #btnF { right: 100px; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); background: var(--teal); width: 54px; height: 54px; font-size: 12px; }
 
   @media (max-width: 760px) {
-    #objective { max-width: 40%; font-size: .8em; }
+    #objective { max-width: min(40%, 40vw); font-size: .8em; }
   }
   body.portrait .stats span:not(.cash), body.portrait #fxTags, body.portrait #journalBtn { display: none; }
   body.portrait .clockBox { min-width: 8.5em; }
@@ -363,6 +367,7 @@
       <tr><td>Run</td><td><b class="key">SHIFT</b></td><td><b class="key pad">RT</b></td></tr>
       <tr><td>Fridge (to-do, headlines)</td><td><b class="key">J</b></td><td><b class="key pad">Y</b></td></tr>
     </tbody></table>
+    <p class="gist touchTip">On a phone: the stick moves you (push it all the way to run), <b>E</b> does almost everything, tap an item in the bottom bar to use it.</p>
     <p class="gist">Follow the sticky note up top. Everything you do makes the news.</p>
     <button class="btn alt" id="howtoClose">Back</button></div>
 </div>
@@ -412,33 +417,33 @@
   <button class="tbtn" id="btnF" aria-label="Punch">PUNCH</button>
 </div>
 
-<script src="engine.js?v=202609231504"></script>
-<script src="songs.js?v=202609231504"></script>
-<script src="music.js?v=202609231504"></script>
-<script src="art.js?v=202609231504"></script>
-<script src="font.js?v=202609231504"></script>
-<script src="world.js?v=202609231504"></script>
-<script src="ambient.js?v=202609231504"></script>
-<script src="landmarks.js?v=202609231504"></script>
-<script src="gigs.js?v=202609231504"></script>
-<script src="actors.js?v=202609231504"></script>
-<script src="items.js?v=202609231504"></script>
-<script src="upgrades.js?v=202609231504"></script>
-<script src="money.js?v=202609231504"></script>
-<script src="headlines.js?v=202609231504"></script>
-<script src="story.js?v=202609231504"></script>
-<script src="minigames.js?v=202609231504"></script>
-<script src="court.js?v=202609231504"></script>
-<script src="cases.js?v=202609231504"></script>
-<script src="favors.js?v=202609231504"></script>
-<script src="court2.js?v=202609231504"></script>
-<script src="miami.js?v=202609231504"></script>
-<script src="cases45.js?v=202609231504"></script>
-<script src="miami2.js?v=202609231504"></script>
-<script src="daytona.js?v=202609231504"></script>
-<script src="daytona2.js?v=202609231504"></script>
-<script src="chase.js?v=202609231504"></script>
-<script src="game.js?v=202609231504"></script>
-<script src="share.js?v=202609231504"></script>
-<script src="ui.js?v=202609231504"></script>
-<script src="pwa.js?v=202609231504"></script>
+<script src="engine.js?v=202609231547"></script>
+<script src="songs.js?v=202609231547"></script>
+<script src="music.js?v=202609231547"></script>
+<script src="art.js?v=202609231547"></script>
+<script src="font.js?v=202609231547"></script>
+<script src="world.js?v=202609231547"></script>
+<script src="ambient.js?v=202609231547"></script>
+<script src="landmarks.js?v=202609231547"></script>
+<script src="gigs.js?v=202609231547"></script>
+<script src="actors.js?v=202609231547"></script>
+<script src="items.js?v=202609231547"></script>
+<script src="upgrades.js?v=202609231547"></script>
+<script src="money.js?v=202609231547"></script>
+<script src="headlines.js?v=202609231547"></script>
+<script src="story.js?v=202609231547"></script>
+<script src="minigames.js?v=202609231547"></script>
+<script src="court.js?v=202609231547"></script>
+<script src="cases.js?v=202609231547"></script>
+<script src="favors.js?v=202609231547"></script>
+<script src="court2.js?v=202609231547"></script>
+<script src="miami.js?v=202609231547"></script>
+<script src="cases45.js?v=202609231547"></script>
+<script src="miami2.js?v=202609231547"></script>
+<script src="daytona.js?v=202609231547"></script>
+<script src="daytona2.js?v=202609231547"></script>
+<script src="chase.js?v=202609231547"></script>
+<script src="game.js?v=202609231547"></script>
+<script src="share.js?v=202609231547"></script>
+<script src="ui.js?v=202609231547"></script>
+<script src="pwa.js?v=202609231547"></script>

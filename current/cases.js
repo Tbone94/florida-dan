@@ -107,7 +107,7 @@ const Cases = {
   talk(n) {
     const c = this.info(), F = Game.flags;
     if (MIAMI() && MiamiCases.talk(n)) return true;
-    if (DAYTONA()) return DaytonaCases.talk(n);
+    if (DAYTONA() && DaytonaCases.talk(n)) return true;   // endless Daytona days still fall through to favors
     if (n.id === 'kayden' && c.n === 2) {
       n.quest = false;
       if (!F.kaydenAsk) {

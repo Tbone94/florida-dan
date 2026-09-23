@@ -66,7 +66,7 @@ function hud() {
   const tt = Gigs.timer(), rh = typeof Speedway !== 'undefined' ? Speedway.hud() : ''; ui.urgent.hidden = !(Game.urgent > 0 || tt || rh); if (rh) set(ui.urgent, rh); else if (Game.urgent > 0) set(ui.urgent, `FIND A TOILET: ${Math.ceil(Game.urgent)}s`); else if (tt) set(ui.urgent, `BEAT THE RECORD: ${tt}s`);
   for (const [id, n] of [['statBait', Game.inv.bait], ['statCan', Game.inv.can], ['statPy', Game.pythons.length]]) $(id).hidden = !n;
   updateHotbar(); renderQuests();
-  if (Game.mode !== 'play') ui.prompt.hidden = true;
+  if (Game.mode !== 'play') { ui.prompt.hidden = true; ui.hint.hidden = true; }   // tips wait out minigames (hints() brings them back)
 }
 // touch controls must be up whenever a minigame needs input, even inside a cutscene (court) where the HUD is hidden
 function padFor(needed) { ui.pad.hidden = !(isTouch && (needed || !ui.hudTop.hidden)); }
@@ -132,7 +132,7 @@ function buy(k, b) {
   box.append(f); setTimeout(() => f.remove(), 950);
   b.classList.remove('bought'); void b.offsetWidth; b.classList.add('bought');
   shopMsg(`Bought: ${name} for $${price}.`);
-  if (!shopItems().includes(k)) { if (shopItems().length) renderShop(shopItems()[0]); else { closeShop(); toast(vendor === 'surf' ? 'Coral’s sold out. She’s closing early to go surf.' : 'Bubba’s sold out. You bought everything. He’s buying a boat.'); } } else refreshShop();
+  if (!shopItems().includes(k)) { if (shopItems().length) renderShop(shopItems()[0]); else { closeShop(); toast({ surf: 'Coral’s sold out. She’s closing early to go surf.', ink: 'Ink & Regret is out of regrets. For now.', speed: 'Wrench is out of parts. He’s eyeing your car.' }[vendor] || 'Bubba’s sold out. You bought everything. He’s buying a boat.'); } } else refreshShop();
   const w = $('wallet'); if (w) { w.classList.remove('tick'); void w.offsetWidth; w.classList.add('tick'); }
 }
 function shopMsg(msg, bad) { const el = $('shopMsg'); el.textContent = msg; el.className = bad ? 'bad' : 'good'; el.hidden = false; clearTimeout(shopMsg.t); shopMsg.t = setTimeout(() => el.hidden = true, 2200); }
@@ -181,7 +181,11 @@ $('journalClose').addEventListener('click', closeJournal);
 $('journalBtn').addEventListener('click', e => { e.currentTarget.blur(); if (Game.mode === 'play') openJournal(); });
 
 // ---------- save ----------
-function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ region: Game.region, day: Game.day, inv: Game.inv, money: Game.money, allegations: Game.allegations, headlines: Game.headlines, flags: Game.flags, catchBag: Game.catchBag, pythons: Game.pythons })); } catch (e) { } }
+// a save in the middle of a day (bus, purchase) keeps the dawn's headlines/catch/money, because Continue replays the day from the top
+function save() {
+  const d = Game.dawn && Game.dawn.day === Game.day ? Game.dawn : null;
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ region: Game.region, day: Game.day, inv: Game.inv, money: d ? Math.min(Game.money, d.money) : Game.money, allegations: d ? d.allegations : Game.allegations, headlines: d ? d.headlines : Game.headlines, flags: Game.flags, catchBag: d ? d.catchBag : Game.catchBag, pythons: d ? d.pythons : Game.pythons })); } catch (e) { }
+}
 function load() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); return s && s.day ? s : null; } catch (e) { return null; } }
 
 // ---------- title / next day ----------
@@ -200,9 +204,21 @@ $('nextBtn').addEventListener('click', () => {
   ui.gazette.hidden = true;
   const cp = Game.flags.creditsPending;
   if (cp) { Game.flags.creditsPending = 0; const [h, p, b] = CREDITS[cp]; $('credits').querySelector('h2').textContent = h; $('creditsText').innerHTML = p; $('creditsBtn').textContent = b; $('credits').hidden = false; $('creditsBtn').focus(); return; }
-  Game.day++; startDay();
+  nextDay();
 });
-$('creditsBtn').addEventListener('click', () => { $('credits').hidden = true; Game.day++; startDay(); });
+$('creditsBtn').addEventListener('click', () => { $('credits').hidden = true; nextDay(); });
+// the story never skips a step: miss a trial, the bus, or the one errand a case hangs on, and the day comes round again
+const MUST = { 4: F => F.acquitted, 7: F => F.case2Won, 10: F => F.case3Won, 11: () => MIAMI(), 13: F => F.case4Won, 14: F => F.flyer, 16: F => F.case5Won, 17: F => DAYTONA() && F.donutRun, 19: F => F.case6Won, 22: F => F.case7Won };
+const REDO = { 11: 'Brenda: The Greyhound waited. It is STILL waiting. Get on the bus, Dan.', 14: 'Brenda: Somebody has to post that FOUND flyer at the café, Dan. It’s you.', 17: 'Tammy Jo: Grand Marshal’s a no-show? We moved the pace lap. To TODAY.' };
+function nextDay() {
+  const ok = MUST[Game.day], redo = ok && !ok(Game.flags);
+  if (!redo) Game.day++;
+  else if (Game.day >= 12 && Game.day <= 16 && !MIAMI()) Game.day = 11;   // stranded in the wrong town (old saves): back to the bus
+  else if (Game.day >= 18 && Game.day <= 22 && !DAYTONA()) Game.day = 17;
+  else if (Game.day === 16 && !Game.flags.flyer) Game.day = 14;          // the trial can't open without the flyer
+  startDay();
+  if (redo) toast(REDO[Game.day] || 'Brenda: You MISSED COURT. I got it rescheduled. To TODAY. Please.', 7);
+}
 
 // ---------- layout ----------
 function resize() {

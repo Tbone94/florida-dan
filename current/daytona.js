@@ -161,7 +161,7 @@ const Daytona = {
     const D = Game.dan, S_ = World.spots, list = [], near = (p, r) => p && Math.hypot(D.x - p.x, D.y - p.y) < r;
     list.push(...DaytonaCases.interactions());
     if (D.ride) return list;
-    if (near(S_.door, 18)) list.push({ label: 'Go to your room (sleep)', fn: () => sleep() });
+    if (near(S_.door, 18) && sleepReady()) list.push({ label: 'Go to your room (sleep)', fn: () => sleep() });
     if (near(S_.court, 22)) { const cs = Cases.courtCase(); list.push({ label: cs ? 'Enter the courthouse' : 'Volusia County Courthouse (closed)', fn: () => cs ? Court.start(cs) : toast('The Volusia County Courthouse. There’s a NASCAR flag on the flagpole. Under the other flag.') }); }
     if (near(S_.stationDoor, 22)) list.push({ label: 'Greyhound', fn: () => busMenu() });
     if (Game.urgent > 0 && near(S_.hide, 22)) list.push({ label: 'USE THE TOILET', fn: () => { Game.urgent = 0; Sound.play('splash'); toast('Made it. A speedway porta-potty on race week. Dan will not describe it.'); Game.chill = 100; } });

@@ -98,13 +98,17 @@ const Speedway = {
     const P = pathPts(), N = P.length, seg = 1936 / N, v = Game.car, D = Game.dan;
     if (this.count > 0) { const c0 = Math.ceil(this.count); this.count -= dt; if (Math.ceil(this.count) !== c0 && this.count > 0) Sound.tone(660, .15, 'square', .08); if (this.count <= 0) { Sound.tone(990, .4, 'square', .1); toast('GO GO GO!', 1.2); } return; }
     this.t += dt;
-    if (!v || D.ride !== 'car') { this.abort('Dan got out of the car mid-race. The crowd boos. Talk to Rusty to try again.'); return; }
+    if (!v || D.ride !== 'car') { this.abort('Dan got out of the car mid-race. The crowd boos. Get back in the #29 to try again.'); return; }
     const [i] = nearestIdx(v.x, v.y, this.me.idx); let d = i - this.me.idx; if (d > N / 2) d -= N; if (d < -N / 2) d += N; this.me.idx = i; this.me.prog += d;
     for (const c of this.cars) {   // the field: rubber-banded a little so it's always a race
       const gap = this.me.prog - c.prog, sp = c.sp + clamp(gap * 1.5, -18, 26);
       c.prog += sp * dt / seg; const k = ((Math.floor(c.prog) % N) + N) % N, f = c.prog - Math.floor(c.prog), p = P[k], q = P[(k + 1) % N], a = Math.atan2(q.y - p.y, q.x - p.x);
       c.x = p.x + (q.x - p.x) * f + Math.cos(a + Math.PI / 2) * c.lane; c.y = p.y + (q.y - p.y) * f + Math.sin(a + Math.PI / 2) * c.lane; c.a = a;
-      if (Math.hypot(c.x - v.x, c.y - v.y) < 13) { v.v *= .9; Game.shake = 2; if (Math.random() < dt * 4) Sound.play('hurt'); }
+      const bd = Math.hypot(c.x - v.x, c.y - v.y);
+      if (bd < 13) {   // trading paint: a shove sideways and a little speed lost (same at 60 or 120 Hz)
+        v.v *= Math.pow(.97, dt * 60); Game.shake = 2; if (Math.random() < dt * 4) Sound.play('hurt');
+        const px = v.x + (v.x - c.x) / (bd || 1) * 40 * dt, py = v.y + (v.y - c.y) / (bd || 1) * 40 * dt; if (canDrive(px, py)) { v.x = px; v.y = py; }
+      }
     }
     const lap = Math.floor(this.me.prog / N) + 1;
     if (this.me.prog >= this.laps * N) return this.finish();
@@ -220,7 +224,7 @@ const DaytonaCases = {
     const F = Game.flags;
     if (mode === 'qualify') {
       if (t <= 18) { done('qualify'); F.qualified = true; addQuest('bed', 'Rest up at the Ocean Breeze Motel', true); headline('FLORIDA MAN QUALIFIES FOR DAYTONA 250 IN CAR SPONSORED BY SWAMP LITE', 4); react('cheer'); say([[PHONE_T, `${t.toFixed(1)} seconds! You’re IN, Dan!`], ['RUSTY', '(in the background) THAT’S MY DRIVER!']]); }
-      else say([[PHONE_T, `${t.toFixed(1)} seconds. Need eighteen, hon. Line it up again.`]], () => Speedway.start('qualify'));
+      else say([[PHONE_T, `${t.toFixed(1)} seconds. Need eighteen, hon.`, [['“Again.”', () => { Game.afterTalk = () => Speedway.start('qualify'); return null; }], ['“Gimme a minute.”', () => { Car.exit(); return [[PHONE_T, 'The #29’s on pit road whenever you’re ready.']]; }]]]]);
       return;
     }
     if (place === 1) {
@@ -229,7 +233,7 @@ const DaytonaCases = {
       say([['', 'CHECKERED FLAG. DAN DUPREE WINS THE DAYTONA 250.'], ['TAMMY JO', 'YOU DID IT! YOU ACTUALLY DID IT!'], ['RUSTY', 'I’m crying. I’m not crying. It’s gasoline. In my eyes.'], ['', 'Chip Sterling storms into victory lane with a lawyer and a cease-and-desist.'],
         ['CHIP STERLING', 'I’m SUING. Unlicensed racing, unauthorized burnouts, and emotional damages. MY emotions.'], [PHONE_B, 'Dan, I just heard. Courthouse. Now. I’m already here.']], () => addQuest('court', 'Chip is suing you. Volusia County Courthouse, NOW.'));
     } else {
-      say([[PHONE_T, `P${place}. So close, Dan. Rusty says he’s got another set of tires.`], ['RUSTY', 'Again! Get back in the car!']], () => { const v = Game.vehicles.find(v => v.id === 'car29'); if (v && Game.car !== v) Car.enter(v); Speedway.start('race'); });
+      say([[PHONE_T, `P${place}. So close, Dan. Rusty says he’s got another set of tires.`], ['RUSTY', 'Go again?', [['“Again!”', () => { Game.afterTalk = () => { const v = Game.vehicles.find(v => v.id === 'car29'); if (v && Game.car !== v) Car.enter(v); Speedway.start('race'); }; return null; }], ['“Gimme a minute.”', () => { Car.exit(); return [['RUSTY', 'She’s on pit road. Don’t let the tires get cold.']]; }]]]]);
     }
   },
   talk(n) {
@@ -285,7 +289,7 @@ const DaytonaCases = {
   armWrestle(win, lose) { Mash.start({ kind: 'arm', title: 'ARM WRESTLE TINY', need: 40, time: 9, sound: 'punch', onWin: win, onLose: lose }); },
   interactions() {
     const D = Game.dan, list = [], near = (p, r) => p && Math.hypot(D.x - p.x, D.y - p.y) < r, c = this.c(), F = Game.flags;
-    if (D.ride === 'car') { if (!Speedway.on) list.push({ label: 'Hop out of the car', fn: () => { Car.exit(); if (Convoy.on) toast('The whole field stops and waits. Forty engines, idling. For you.'); } }); return list; }
+    if (D.ride === 'car') { if (Speedway.on && !Speedway.frozen()) list.push({ label: 'Quit (hop out)', fn: () => Car.exit() }); if (!Speedway.on) list.push({ label: 'Hop out of the car', fn: () => { Car.exit(); if (Convoy.on) toast('The whole field stops and waits. Forty engines, idling. For you.'); } }); return list; }
     if (D.ride) return list;
     for (const v of Game.vehicles || []) if (v.kind === 'car' && near(v, 24)) {
       if (v.id === 'pace') list.push({ label: 'Get in the pace car', fn: () => { Car.enter(v); Convoy.on = true; Convoy.hist = []; toast('The whole field falls in behind you. Forty cars. Go slow.'); } });

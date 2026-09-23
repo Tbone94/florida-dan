@@ -28,6 +28,10 @@ const MiamiCases = {
   // ---------- the days ----------
   setupDay(n) {
     const c = Cases.info(n), F = Game.flags;
+    if (c.n === 4 && c.d === 1 && MIAMI()) {   // continued a day-11 save that was made after the bus ride
+      setQuests(F.lamboSunk ? [['bed', 'Go back to the Hotel Neon (sleep)']] : F.checkedIn ? [['valet', 'Talk to the valet out front']] : [['checkin', 'Check in at the Hotel Neon (Ocean Drive)']]);
+      return say([['', 'SOUTH BEACH. Dan wakes up on a bench outside the Hotel Neon. He is not sure how.']]);
+    }
     if (c.n === 4 && c.d === 1) {
       setQuests([['bus', 'Catch the Greyhound to Miami (bus stop by the mailbox)']]);
       return say([['', 'A letter arrives. It is laminated.'], ['LETTER', 'CONGRATULATIONS, FLORIDA MAN OF THE YEAR! Your prize: one (1) free weekend at the HOTEL NEON, South Beach. Greyhound ticket enclosed.'],

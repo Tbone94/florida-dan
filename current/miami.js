@@ -155,7 +155,7 @@ const Miami = {
     const D = Game.dan, S_ = World.spots, list = [], near = (p, r) => p && Math.hypot(D.x - p.x, D.y - p.y) < r;
     if (D.ride) return list;
     list.push(...MiamiCases.interactions());
-    if (near(S_.door, 18) && Game.flags.checkedIn !== false) list.push({ label: 'Go up to your room (sleep)', fn: () => sleep() });
+    if (near(S_.door, 18) && Game.flags.checkedIn !== false && sleepReady()) list.push({ label: 'Go up to your room (sleep)', fn: () => sleep() });
     if (near(S_.court, 22)) { const cs = Cases.courtCase(); list.push({ label: cs ? 'Enter the courthouse' : 'Miami-Dade Courthouse (closed)', fn: () => cs ? Court.start(cs) : toast('The Miami-Dade Courthouse. Dan salutes it. Force of habit.') }); }
     if (near(S_.stationDoor, 22)) list.push({ label: Cases.info().n >= 4 && Cases.info().n <= 5 ? 'Greyhound (can’t leave mid-case)' : 'Greyhound', fn: () => busMenu() });
     if (Game.urgent > 0 && near(S_.hide, 22)) list.push({ label: 'USE THE TOILET', fn: () => { Game.urgent = 0; Sound.play('splash'); toast('...Made it. A beach porta-potty in July. Dan has seen God, and God is sweaty.'); Game.chill = 100; } });
@@ -180,7 +180,7 @@ function travel(to) {
     if (to === 'daytona' && !Game.flags.daytonaFirst) { Game.flags.daytonaFirst = true; headline('FLORIDA MAN ARRIVES IN DAYTONA; SPEEDWAY "ON HIGH ALERT"', 2); }
     if (typeof MiamiCases !== 'undefined') MiamiCases.arrived(to);
     if (typeof DaytonaCases !== 'undefined') DaytonaCases.arrived(to);
-    if (!Gigs.active()) Gigs.newDay();   // new town, new people with work
+    Gigs.drop(); Gigs.newDay();   // a gig can't follow you onto the bus; new town, new people with work
     save();
   });
 }

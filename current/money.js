@@ -63,7 +63,7 @@ const Detector = {
 Object.assign(UPGRADES, {
   detector: { name: 'Metal Detector', price: 45, desc: 'Beeps faster near buried loot on any beach. Dig it up.', shop: 'surf' },
   cigboat: { name: 'Cigarette Boat Engine', price: 120, desc: 'Bolt it on the SS Budget. Way faster on Miami water.', shop: 'surf' },
-  aviators: { name: 'Gold Aviators', price: 25, desc: 'Pure drip. Tourists tip a little more.', shop: 'surf' },
+  aviators: { name: 'Gold Aviators', price: 25, desc: 'Pure drip. Does nothing. Worth it.', shop: 'surf' },
 });
 for (const k of ['detector', 'cigboat', 'aviators']) ITEMS[k] = { ...UPGRADES[k], upgrade: true };
 Object.assign(ICONS, {

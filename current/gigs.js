@@ -47,6 +47,7 @@ const Gigs = {
   offering: n => { const G = G_(); return !G.active && !!G.offers[n.id]; },
   hasOffer: id => Gigs.offering({ id }),
   active: () => G_().active,
+  drop() { const G = G_(); if (!G.active) return; G.active = null; Game.quests = Game.quests.filter(q => !q.gig); renderQuests(); toast('Side gig abandoned. They’ll get over it.'); },
   // the offer conversation
   offerLines(n) {
     const id = G_().offers[n.id], d = GIGS[id], last = d.offer[d.offer.length - 1];
@@ -109,7 +110,7 @@ const Gigs = {
   },
   // race buoys (only while the trial is on)
   draw(cx, cy, t) {
-    const G = G_(); if (G.active !== 'trial') return;
+    const G = G_(); if (G.active !== 'trial' || !World.spots.bubbaDock) return;
     trialPoints().forEach((p, i) => {
       if (i === 0 && G.cp >= 1 && G.cp < 3) return;
       const x = Math.round(p.x - cx), y = Math.round(p.y - cy + Math.sin(t * 3 + i)), next = (G.cp === -1 && i === 0) || G.cp === i;

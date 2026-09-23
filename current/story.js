@@ -295,7 +295,7 @@ const Story = {
     if (D.ride) return list;
     if (near(S_.door, 18)) {
       if (Game.day === 3 && Game.inv.plywood >= 2 && !F.boarded) list.push({ label: 'Board up the windows', fn: () => { Game.inv.plywood -= 2; F.boarded = true; Sound.play('chomp'); done('board'); toast('Boarded. Dan used the stop sign as a third board. Rhonda will never know.'); } });
-      else list.push({ label: 'Hit the hay', fn: () => sleep() });
+      else if (sleepReady()) list.push({ label: 'Hit the hay', fn: () => sleep() });
     }
     if (F.stopSignOnRoof && !Game.inv.sign && near({ x: S_.door.x - 34, y: S_.door.y }, 18)) list.push({ label: 'Climb the ladder to the roof', fn: () => say([['', 'Dan climbs onto the roof. He grabs the stop sign.'], ['', 'Dan falls off the roof.'], ['DAN', 'I MEANT to do that.']], () => { Game.inv.sign = 1; F.stopSignOnRoof = false; hurtDan(5); done('sign'); headline('FLORIDA MAN FALLS OFF ROOF WHILE RETRIEVING STOLEN STOP SIGN HE "DID NOT STEAL"', 5); }) });
     if (Game.day === 2 && !F.raccoonOut && near(S_.icemachine, 20)) list.push({ label: 'Reach into the ice machine', fn: () => Minigame.raccoon() });
@@ -327,6 +327,8 @@ const Story = {
   },
 };
 
+// the bed only offers itself in the evening or when bed is the objective (no "sleep" button under your thumb at 6 AM)
+const sleepReady = () => { const q = currentQuest(); return Game.hour >= 17 || (!!q && ['bed', 'sleep1', 'sleep2'].includes(q.id)); };
 function sleep() {
   if (Game.day >= 5) { const why = Cases.sleepBlock(); if (why) return toast(why); return say([['DAN', pick(['Welp. That’s a day.', 'Nite, swamp.', 'Another one for the books. The police books.'])]], () => endDay('sleep')); }
   const F = Game.flags;
