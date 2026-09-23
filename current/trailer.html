@@ -43,7 +43,7 @@
   #objective::before { content: "▶"; position: absolute; left: .6em; color: var(--yellow); }
   #objective.new { animation: objNew .6s steps(3); }
   @keyframes objNew { 0% { background: var(--yellow); color: var(--ink); } 100% { background: rgba(26, 20, 35, .88); } }
-  #hint { position: absolute; left: 50%; bottom: 10.6em; transform: translateX(-50%); padding: .35em .8em; font-weight: 700; font-size: .95em; background: rgba(15, 11, 21, .9); border: 2px solid var(--teal); color: var(--paper); white-space: nowrap; }
+  #hint { position: absolute; left: .6em; bottom: 4.4em; padding: .3em .6em; font-weight: 700; font-size: .82em; background: rgba(15, 11, 21, .9); border: 2px solid var(--teal); color: var(--paper); white-space: nowrap; }
   .key { display: inline-block; min-width: 1.5em; padding: 0 .35em; margin-right: .15em; text-align: center; background: var(--paper); color: var(--ink); border: 2px solid var(--ink); border-bottom-width: 4px; border-radius: 4px; font-size: .85em; line-height: 1.35; }
   .key.pad { border-radius: 999px; background: var(--yellow); }
   #jControls { list-style: none; margin: 0 0 .9em; padding: 0; display: grid; gap: .4em; font-size: .9em; }
@@ -61,7 +61,7 @@
   @keyframes pop { 50% { transform: scale(1.25); background: var(--pink); } }
 
   #prompt { position: absolute; left: 50%; bottom: 4.1em; transform: translateX(-50%); background: rgba(15, 11, 21, .92); color: var(--paper); font-weight: 700; padding: .3em .8em .3em .45em; font-size: .92em; letter-spacing: .06em; border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); white-space: nowrap; }
-  #toast { position: absolute; left: 50%; bottom: 6.4em; transform: translateX(-50%); max-width: 80%; width: max-content; text-align: center; font-weight: 700; font-size: 1.12em; line-height: 1.3; color: var(--paper); background: rgba(15, 11, 21, .9); border: 2px solid var(--pink); box-shadow: 3px 3px 0 rgba(0, 0, 0, .45); padding: .35em .9em; }
+  #toast { position: absolute; left: .6em; bottom: .6em; max-width: 30%; width: max-content; text-align: left; font-weight: 700; font-size: .92em; line-height: 1.3; color: var(--paper); background: rgba(15, 11, 21, .9); border: 2px solid var(--pink); box-shadow: 3px 3px 0 rgba(0, 0, 0, .45); padding: .3em .6em; }
   #urgent { position: absolute; left: 50%; top: 5.2em; transform: translateX(-50%); background: var(--red); color: var(--paper); font-weight: 700; padding: .2em .7em; font-size: .9em; animation: blink .5s steps(2) infinite; border: 2px solid var(--ink); }
   @keyframes blink { 50% { background: var(--yellow); color: var(--ink); } }
 
@@ -128,7 +128,13 @@
   .gmeter i { position: absolute; inset: 0 auto 0 0; background: repeating-linear-gradient(90deg, var(--red) 0 6px, #ff7a5c 6px 12px); }
   #gzMeterLabel { font-family: var(--display); font-size: 1.4em; }
 
-  #shop, #journal, #credits { background: rgba(15, 11, 21, .88); }
+  #shop, #journal, #credits, #howto { background: rgba(15, 11, 21, .9); }
+  .btn.ghost { background: transparent; color: var(--paper); border-color: var(--paper); box-shadow: 4px 4px 0 var(--ink); }
+  .ctl { width: 100%; border-collapse: collapse; font-size: .92em; margin-bottom: .8em; }
+  .ctl th { text-align: left; font-size: .75em; letter-spacing: .14em; color: var(--pink); padding: .2em .3em; }
+  .ctl td { padding: .35em .3em; border-top: 1px solid #3b2f4a; }
+  .ctl small { color: #8d8a93; margin-left: .3em; }
+  .gist { font-size: .88em; line-height: 1.45; color: #c9c2b4; margin: 0 0 .9em; }
   .box { width: min(30em, 100%); padding: 1em 1.1em 1.1em; background: var(--ink2); border: 3px solid var(--paper); box-shadow: 6px 6px 0 var(--pink); margin-block: 1em; }
   .box h2 { margin: 0 0 .2em; font-family: var(--display); font-weight: 400; font-size: 2em; color: var(--yellow); letter-spacing: .02em; }
   .box .sub2 { font-size: .8em; color: #c9c2b4; margin-bottom: .7em; }
@@ -161,6 +167,8 @@
   body.portrait .stats span:not(.cash), body.portrait #fxTags, body.portrait #journalBtn { display: none; }
   body.portrait .clockBox { min-width: 8.5em; }
   #rotate { position: fixed; left: 16px; right: 16px; bottom: calc(160px + env(safe-area-inset-bottom, 0px)); text-align: center; font-size: 13px; color: var(--yellow); letter-spacing: .08em; pointer-events: none; }
+  /* phones: the stick lives in the bottom-left, so the comment box sits just above it */
+  @media (pointer: coarse) { #toast { bottom: 11em; max-width: 45%; } #hint { bottom: 15em; } }
   /* director-mode overlays */
   #prompt, #hint, #objective { display: none !important; }
   #banner { transition: none !important; width: min(40em, 70%); }
@@ -223,9 +231,24 @@
     <div class="logo">Florida<br>Dan</div>
     <div class="sub">“I’m <em>not</em> a Florida Man.”</div>
     <p class="tag">Four days to prove he’s not a Florida Man.</p>
-    <div class="btns"><button class="btn" id="startBtn">New Game</button><button class="btn alt" id="continueBtn" hidden>Continue</button></div>
+    <div class="btns"><button class="btn" id="startBtn">New Game</button><button class="btn alt" id="continueBtn" hidden>Continue</button><button class="btn ghost" id="howtoBtn">How to Play</button></div>
     <div class="warn">Swearing, cartoon substances, and Florida.</div>
   </div>
+</div>
+
+<div id="howto" class="sheet" hidden>
+  <div class="box"><h2>HOW TO PLAY</h2>
+    <table class="ctl"><thead><tr><th></th><th>Keyboard</th><th>Controller</th></tr></thead><tbody>
+      <tr><td>Move</td><td><b class="key">WASD</b></td><td><b class="key pad">STICK</b></td></tr>
+      <tr><td>Use · talk · reel · wrestle</td><td><b class="key">E</b></td><td><b class="key pad">A</b></td></tr>
+      <tr><td>Punch</td><td><b class="key">F</b></td><td><b class="key pad">X</b></td></tr>
+      <tr><td>Yell “GIT!”</td><td><b class="key">Q</b></td><td><b class="key pad">B</b></td></tr>
+      <tr><td>Use an item</td><td><b class="key">1–9</b></td><td><b class="key pad">LT</b> <small>LB/RB pick</small></td></tr>
+      <tr><td>Run</td><td><b class="key">SHIFT</b></td><td><b class="key pad">RT</b></td></tr>
+      <tr><td>Rap sheet · to-do</td><td><b class="key">J</b></td><td><b class="key pad">Y</b></td></tr>
+    </tbody></table>
+    <p class="gist">Follow the yellow arrow. Every Florida Man thing you do makes the news. On a phone, use the on-screen stick and buttons.</p>
+    <button class="btn alt" id="howtoClose">Back</button></div>
 </div>
 
 <div id="gazette" class="sheet" hidden>

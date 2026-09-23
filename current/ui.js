@@ -100,6 +100,9 @@ function begin(fromSave) {
   else newGame();
 }
 $('startBtn').addEventListener('click', () => begin(false));
+$('howtoBtn').addEventListener('click', () => { ui.title.hidden = true; $('howto').hidden = false; $('howtoClose').focus(); });
+const closeHowto = () => { $('howto').hidden = true; ui.title.hidden = false; $('howtoBtn').focus(); };
+$('howtoClose').addEventListener('click', closeHowto);
 ui.continueBtn.addEventListener('click', () => begin(true));
 $('nextBtn').addEventListener('click', () => {
   ui.gazette.hidden = true;
@@ -125,7 +128,7 @@ addEventListener('resize', resize);
 
 // ---------- controller menus: d-pad/stick moves focus, A presses, B backs out ----------
 function openMenu() {
-  for (const id of ['credits', 'gazette', 'shop', 'journal', 'title']) { const el = $(id); if (!el.hidden) return el; }
+  for (const id of ['howto', 'credits', 'gazette', 'shop', 'journal', 'title']) { const el = $(id); if (!el.hidden) return el; }
   if (Game.mode === 'talk' && ui.talkChoices.childElementCount) return ui.talkChoices;
   return null;
 }
@@ -139,6 +142,7 @@ function menuNav() {
   if (Input.tapped('up') || Input.tapped('left')) move(-1);
   if ((Input.tapped('a') || Input.tapped('pause')) && Input.padActive) { const b = i >= 0 ? btns[i] : btns[0]; Input.endFrame(); b.click(); }
   if (Input.tapped('b') && m.id === 'shop') closeShop();
+  if ((Input.tapped('b') || Input.tapped('pause')) && m.id === 'howto') closeHowto();
 }
 Input.onPad = on => { document.body.classList.toggle('pad', on); if (on && Game.mode !== 'title') toast('Controller connected. Hell yeah.', 2); };
 

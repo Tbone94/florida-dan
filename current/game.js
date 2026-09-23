@@ -148,9 +148,7 @@ function hints() {
   if (hintT > 0 && (hintT -= 1 / 60) <= 0) ui.hint.hidden = true;
   if (hintT > 0 || Game.mode !== 'play') return;
   const D = Game.dan, h = Game.flags.hints || {};
-  if (!h.move) return hint('move', `${K('move')} move &nbsp; ${K('a')} use · talk`);
   if (!h.gator && Game.animals.some(a => a.type === 'gator' && !a.lurk && Math.hypot(a.x - D.x, a.y - D.y) < 90)) return hint('gator', `${K('punch')} punch &nbsp; ${K('b')} yell GIT &nbsp; ${K('a')} wrestle`, 6);
-  if (!h.items && Game.t > 25 && HOTBAR.some(k => Game.inv[k] > 0)) return hint('items', `${K('item')} use your stuff &nbsp; ${K('journal')} rap sheet`);
 }
 
 // ---------- objective arrow ----------
