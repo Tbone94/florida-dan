@@ -147,8 +147,18 @@
   .shopRow:disabled { opacity: .45; cursor: default; }
   #jQuests, #jSheet { list-style: none; margin: 0 0 .9em; padding: 0; display: grid; gap: .35em; font-size: .9em; line-height: 1.35; }
   #jQuests li.done { color: #8d8a93; text-decoration: line-through; }
-  #jSheet { max-height: 40vh; overflow: auto; }
-  #jSheet b { color: var(--pink); margin-right: .4em; }
+  #journal .box { width: min(46em, 100%); }
+  #jSheet { max-height: 46vh; overflow: auto; grid-template-columns: repeat(auto-fill, minmax(15em, 1fr)); padding-right: .3em; }
+  #jSheet li { padding: .45em .6em .5em; line-height: 1.25; }
+  #jSheet li b { display: block; font-size: .7em; letter-spacing: .14em; margin-bottom: .2em; }
+  #jSheet li.got { background: var(--paper); color: var(--ink); font-family: var(--display); font-size: .95em; box-shadow: 3px 3px 0 var(--red); }
+  #jSheet li.got b { color: var(--red); font-family: var(--pixel); }
+  #jSheet li.locked { border: 2px dashed #5d5a66; color: #8d8a93; font-size: .85em; }
+  #jSheet li.locked b { color: #5d5a66; }
+  #jCount { color: var(--yellow); margin-left: .4em; letter-spacing: .1em; }
+  #banner.fresh { box-shadow: 5px 5px 0 var(--yellow); }
+  #banner.fresh .kick { background: var(--yellow); color: var(--ink); }
+  .gzBtns { display: flex; gap: .8em; flex-wrap: wrap; }
   .box h3 { margin: .2em 0 .4em; font-size: .8em; letter-spacing: .16em; color: var(--pink); }
   #credits .box { text-align: center; }
   #credits p { line-height: 1.6; }
@@ -195,7 +205,7 @@
     <div id="hotbar" class="panel" hidden></div>
     <div id="prompt" hidden></div>
     <div id="toast" hidden></div>
-    <div id="banner"><span class="kick">BREAKING · SWAMP GAZETTE</span><div id="bannerText"></div></div>
+    <div id="banner"><span class="kick" id="bannerKick">BREAKING · SWAMP GAZETTE</span><div id="bannerText"></div></div>
     <div id="fishHud" hidden><span>SNAP</span><div id="tension"><div id="tensionFill"></div></div><span>SLACK</span></div>
     <div id="fishMsg"></div>
     <div id="card" hidden><div id="cardK">CAUGHT</div><div id="cardN"></div><div id="cardW"></div><div id="cardQ"></div><div class="tap">E / tap to keep it</div></div>
@@ -240,7 +250,7 @@
       <div><h4>Police Blotter</h4><ul id="gzBlotter"></ul></div>
       <div><h4>Florida Man Allegation Meter</h4><div class="gmeter"><i id="gzMeter"></i></div><div id="gzMeterLabel"></div></div>
     </div>
-    <button class="btn" id="nextBtn">Sleep it off</button>
+    <div class="gzBtns"><button class="btn alt" id="shareBtn">Save front page</button><button class="btn" id="nextBtn">Sleep it off</button></div>
   </div>
 </div>
 
@@ -249,7 +259,7 @@
 </div>
 
 <div id="journal" class="sheet" hidden>
-  <div class="box"><h2>RAP SHEET</h2><h3>TO-DO</h3><ul id="jQuests"></ul><h3>CONTROLS</h3><ul id="jControls"></ul><h3>EVERY HEADLINE, EVER</h3><ul id="jSheet"></ul><button class="btn alt" id="journalClose">Back to the swamp</button></div>
+  <div class="box"><h2>RAP SHEET</h2><h3>TO-DO</h3><ul id="jQuests"></ul><h3>CONTROLS</h3><ul id="jControls"></ul><h3>HEADLINE COLLECTION <span id="jCount"></span></h3><ul id="jSheet"></ul><button class="btn alt" id="journalClose">Back to the swamp</button></div>
 </div>
 
 <div id="credits" class="sheet" hidden>
@@ -270,8 +280,10 @@
 <script src="world.js"></script>
 <script src="actors.js"></script>
 <script src="items.js"></script>
+<script src="headlines.js"></script>
 <script src="story.js"></script>
 <script src="minigames.js"></script>
 <script src="court.js"></script>
 <script src="game.js"></script>
+<script src="share.js"></script>
 <script src="ui.js"></script>

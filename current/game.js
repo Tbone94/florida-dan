@@ -119,8 +119,8 @@ function punch() {
     else if (Math.random() < (a.chuck ? .45 : .22)) { a.stun = .25; a.cd = 0; a.state = 'chase'; toast(a.chuck ? 'Chuck did NOT like that.' : 'Uh oh. It’s mad now.'); }
     if (!Game.flags.punchedGator) { Game.flags.punchedGator = true; headline(a.chuck ? 'FLORIDA MAN PUNCHES GATOR NAMED CHUCK; CHUCK "WILL REMEMBER THIS"' : 'FLORIDA MAN PUNCHES ALLIGATOR IN THE FACE, SAYS IT "LOOKED AT HIM FUNNY"', 6); }
   } else if (a.type === 'cow') { a.moo = 1.4; a.state = 'flee'; a.timer = 3; toast('You punched a cow. The cow did not deserve that.'); if (!Game.day_.cowPunch) { Game.day_.cowPunch = true; headline('FLORIDA MAN PUNCHES COW, IMMEDIATELY APOLOGIZES TO COW', 5); } }
-  else if (a.type === 'python') { a.stun = 2.5; toast('The python is dazed. GRAB IT.'); }
-  else { a.state = 'flee'; a.timer = 4; toast(a.type === 'raccoon' ? 'Raccoon: punched. Your dignity: also gone.' : a.type === 'pelican' ? 'You punched a pelican. It is somehow still smug.' : 'Iguana: bonked.'); }
+  else if (a.type === 'python') { a.stun = 2.5; toast('The python is dazed. GRAB IT.'); headline('FLORIDA MAN PUNCHES PYTHON, APOLOGIZES, THEN BAGS IT', 4); }
+  else { if (a.type === 'pelican') headline('FLORIDA MAN PUNCHES PELICAN; PELICAN "STILL SMUG"', 4); a.state = 'flee'; a.timer = 4; toast(a.type === 'raccoon' ? 'Raccoon: punched. Your dignity: also gone.' : a.type === 'pelican' ? 'You punched a pelican. It is somehow still smug.' : 'Iguana: bonked.'); }
 }
 function punchNPC(n) {
   n.scared = 1.5;

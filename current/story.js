@@ -7,7 +7,7 @@ function headline(text, allege = 5) {
   if (Game.day_.headlines.includes(text)) return;
   Game.day_.headlines.push(text); Game.headlines.push({ day: Game.day, text });
   Game.allegations = Math.min(100, Game.allegations + allege);
-  headlineQ.push(text);
+  headlineQ.push({ text, isNew: Sheet.mark(text) });
 }
 
 // ---------- dialogue ----------
@@ -282,7 +282,9 @@ const Story = {
     if (name === 'shroom' && Game.day !== 3) {
       if (!Game.animals.some(a => a.spirit) && Game.flags.mannyMet !== true && Math.random() < .5) toast('...something is glowing out in the water.');
     }
-    if (name === 'caught') { const f = Game.catchBag[Game.catchBag.length - 1]; if (f && f.id === 'cart') headline('FLORIDA MAN RETURNS SHOPPING CART VIA SWAMP; STORE "DOES NOT WANT IT"', 3); if (f && f.legend) headline('FLORIDA MAN LANDS LEGENDARY “BIG RONNIE,” WEEPS OPENLY AT DOCK', 5); }
+    if (name === 'caught') { const f = Game.catchBag[Game.catchBag.length - 1]; if (f && f.id === 'cart') headline('FLORIDA MAN RETURNS SHOPPING CART VIA SWAMP; STORE "DOES NOT WANT IT"', 3); if (f && f.legend) headline('FLORIDA MAN LANDS LEGENDARY “BIG RONNIE,” WEEPS OPENLY AT DOCK', 5);
+      if (f && f.id === 'phone') headline('FLORIDA MAN FISHES IPHONE OUT OF SWAMP, IGNORES 17 MISSED CALLS FROM "MOM"', 3);
+      if (f && !f.junk && Game.fx.buzz > 60) headline('FLORIDA MAN CATCHES FISH WHILE DRUNK, CALLS IT "A TECHNIQUE"', 4); }
   },
   hitNPC(n) {
     n.scared = 2;
@@ -303,6 +305,7 @@ function sleep() {
 }
 
 function endDay(reason) {
+  Game.photo = snapshot();   // the front-page photo
   Game.mode = 'gazette';
   Gazette.show(reason);
 }

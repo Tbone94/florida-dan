@@ -1,0 +1,67 @@
+// FLORIDA DAN — the collectible Rap Sheet. Every headline the game can print, how to
+// recognize it, and a vague hint for the ones you haven't earned yet. Found headlines
+// persist across playthroughs (localStorage), so the hunt continues after court.
+'use strict';
+const HEADLINES = [
+  // ---- the Flamingo case ----
+  ['fry', /DEEP-FRIES FROZEN TURKEY/, 'Merle, a frozen turkey, and hot oil.'],
+  ['roof', /FALLS OFF ROOF/, 'Something that doesn’t belong is on your roof.'],
+  ['raccoonFace', /ICE MACHINE USING HIS FACE/, 'Darlene’s ice machine has a tenant.'],
+  ['manatee', /RIDING MANATEE/, 'A sea cow of truth appears during the storm.'],
+  ['acquitted', /ACQUITTED OF BEING A FLORIDA MAN/, 'Friday. Court. A familiar visor.'],
+  // ---- gators ----
+  ['wrestleGator', /WRESTLES ALLIGATOR "FOR FUN"/, 'Get hands-on with a gator.'],
+  ['wrestleChuck', /ALLIGATOR NAMED "CHUCK," CALLS IT/, 'Chuck needs a hug. A firm one.'],
+  ['punchGator', /PUNCHES ALLIGATOR IN THE FACE/, 'Gators respect one thing.'],
+  ['punchChuck', /PUNCHES GATOR NAMED CHUCK/, 'Chuck needs a knuckle sandwich.'],
+  ['bitten3', /BITTEN BY GATORS THREE TIMES/, 'Let the gators win. Thrice.'],
+  // ---- substances ----
+  ['sixBeers', /SIX BEERS/, 'Hydrate. A lot.'],
+  ['sinus', /SINUS MEDICINE/, 'It’s for your sinuses.'],
+  ['ascend', /ASCENDS/, 'Sinus medicine + something from a cow pie.'],
+  ['munchies', /EXTREMELY HIGH/, 'The munchies want a roller dog.'],
+  ['incident', /HAS "INCIDENT"/, 'Never trust a roller dog. Never trust a toilet to be close.'],
+  ['bo_roof', /GAS STATION ROOF/, 'Drink until everything goes black. (1/5)'],
+  ['bo_cow', /SPOONING COW/, 'Drink until everything goes black. (2/5)'],
+  ['bo_cone', /TRAFFIC CONE/, 'Drink until everything goes black. (3/5)'],
+  ['bo_road', /NAPPING IN MIDDLE OF COUNTY ROAD/, 'Drink until everything goes black. (4/5)'],
+  ['bo_potty', /NIGHT IN PORTA-POTTY/, 'Drink until everything goes black. (5/5)'],
+  ['drunkFish', /CATCHES FISH WHILE DRUNK/, 'Fishing is easier with a buzz. Right?'],
+  // ---- the law ----
+  ['coolerDUI', /DUI ON MOTORIZED COOLER/, 'The cooler has headlights for a reason.'],
+  ['canCop', /HITS DEPUTY WITH BEER CAN/, 'Greet Rhonda the family way.'],
+  // ---- wildlife ----
+  ['pythonHands', /PYTHON WITH BARE HANDS/, 'The Glades have noodles.'],
+  ['pythonBounty', /FEET OF PYTHON, SAYS/, 'Rhonda pays by the foot. Bring a lot.'],
+  ['punchPython', /PUNCHES PYTHON/, 'Stun a noodle the hard way.'],
+  ['iguana', /FROZEN IGUANA/, 'It’s cold. Stand under a palm.'],
+  ['punchCow', /PUNCHES COW/, 'The pasture has an innocent victim.'],
+  ['punchPelican', /PUNCHES PELICAN/, 'Wipe the smug off a bird.'],
+  ['pelicanTheft', /PELICAN STEALS/, 'Walk the dock with a fish in your bag.'],
+  ['raccoonTheft', /RACCOON ROBS/, 'Trash pandas know where your pockets are.'],
+  ['pelicanScream', /SCREAMS AT PELICAN/, 'Run completely out of chill.'],
+  // ---- tourists ----
+  ['gitTourist', /YELLS "GIT" AT TOURIST/, 'Not all visitors are welcome. Tell them.'],
+  ['canTourist', /THROWS EMPTY AT TOURIST/, 'Welcome a visitor with a projectile.'],
+  ['punchTourist', /PUNCHES TOURIST/, 'Give a visitor the REAL Florida experience.'],
+  // ---- fishing & luck ----
+  ['ronnie', /BIG RONNIE/, 'A legend lurks in deep water near Merle’s.'],
+  ['cart', /SHOPPING CART VIA SWAMP/, 'Something with wheels is on the bottom.'],
+  ['phone', /IPHONE OUT OF SWAMP/, 'Somebody’s mom keeps calling from the bottom of the swamp.'],
+  ['scratch100', /WINS \$100/, 'Feeling lucky? Keep scratching.'],
+  ['fireworks', /SETS OFF FIREWORKS/, 'Freedom Rockets aren’t just for the 4th.'],
+];
+const SHEET_KEY = 'floridaDan.sheet';
+const Sheet = {
+  found: (() => { try { return JSON.parse(localStorage.getItem(SHEET_KEY)) || {}; } catch (e) { return {}; } })(),
+  total: () => HEADLINES.length,
+  count() { return HEADLINES.filter(([k]) => this.found[k]).length; },
+  keyFor(text) { const h = HEADLINES.find(([, re]) => re.test(text.toUpperCase())); return h ? h[0] : null; },
+  // returns true the first time this headline is ever earned
+  mark(text) {
+    const k = this.keyFor(text); if (!k || this.found[k]) return false;
+    this.found[k] = { day: Game.day, text };
+    try { localStorage.setItem(SHEET_KEY, JSON.stringify(this.found)); } catch (e) { }
+    return true;
+  },
+};

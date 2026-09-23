@@ -219,8 +219,8 @@ function updateCritter(c, dt) {
     c.x += dx / (dist || 1) * 44 * dt; c.y += dy / (dist || 1) * 44 * dt; c.flip = dx < 0;
     if (dist < 10) {
       c.state = 'flee'; c.timer = 4;
-      if (c.type === 'pelican' && Game.inv.fish > 0) { Game.inv.fish--; const f = Game.catchBag.pop(); toast(`A pelican just swallowed your ${f ? f.name.toLowerCase() : 'fish'} WHOLE. Fly away, you beaky bastard.`); Game.day_.pelican++; }
-      else if (c.type === 'raccoon') { const k = ['hotdog', 'beer', 'cig', 'scratch'].find(i => Game.inv[i] > 0); if (k) { Game.inv[k]--; toast(`Raccoon snatched your ${ITEMS[k].name.toLowerCase()} and ran. Little bandit.`); } else toast('The raccoon checked your pockets. Found nothing. Looked disappointed in you.'); }
+      if (c.type === 'pelican' && Game.inv.fish > 0) { Game.inv.fish--; const f = Game.catchBag.pop(); toast(`A pelican just swallowed your ${f ? f.name.toLowerCase() : 'fish'} WHOLE. Fly away, you beaky bastard.`); Game.day_.pelican++; headline('PELICAN STEALS FLORIDA MAN’S FISH, FLIES OFF "LAUGHING"', 3); }
+      else if (c.type === 'raccoon') { const k = ['hotdog', 'beer', 'cig', 'scratch'].find(i => Game.inv[i] > 0); if (k) { Game.inv[k]--; toast(`Raccoon snatched your ${ITEMS[k].name.toLowerCase()} and ran. Little bandit.`); headline('RACCOON ROBS FLORIDA MAN IN BROAD DAYLIGHT; POLICE "NOT INVOLVED"', 3); } else toast('The raccoon checked your pockets. Found nothing. Looked disappointed in you.'); }
     }
     return;
   }

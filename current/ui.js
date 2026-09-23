@@ -2,7 +2,7 @@
 'use strict';
 const ui = {};
 ['hudTop', 'timeLabel', 'dayLabel', 'chillFill', 'buzzFill', 'allegeFill', 'allegeLabel', 'fxTags', 'objective', 'hint', 'hotbar', 'money', 'nFish', 'nBait', 'nCan', 'nPy',
-  'prompt', 'toast', 'banner', 'bannerText', 'talk', 'talkWho', 'talkLine', 'talkChoices', 'fishHud', 'tensionFill', 'fishMsg', 'card', 'cardK', 'cardN', 'cardW', 'cardQ',
+  'prompt', 'toast', 'banner', 'bannerText', 'bannerKick', 'talk', 'talkWho', 'talkLine', 'talkChoices', 'fishHud', 'tensionFill', 'fishMsg', 'card', 'cardK', 'cardN', 'cardW', 'cardQ',
   'wrestle', 'gripFill', 'wrestlePrompt', 'wrestleMsg', 'raccoon', 'raccoonFill', 'shop', 'shopList', 'shopMoney', 'journal', 'jQuests', 'jSheet', 'title', 'gazette', 'pad', 'urgent', 'continueBtn'].forEach(id => ui[id] = $(id));
 
 // ---------- hotbar ----------
@@ -33,7 +33,12 @@ function renderQuests() {
 let bannerT = 0;
 function updateHeadlineBanner(dt) {
   if (bannerT > 0) { bannerT -= dt; if (bannerT <= 0) ui.banner.classList.remove('show'); return; }
-  if (headlineQ.length && Game.mode !== 'title') { ui.bannerText.textContent = headlineQ.shift(); ui.banner.classList.add('show'); bannerT = 5.5; Sound.play('headline'); Game.shake = 3; }
+  if (headlineQ.length && Game.mode !== 'title') {
+    const h = headlineQ.shift(), it = typeof h === 'string' ? { text: h } : h;
+    ui.bannerText.textContent = it.text; ui.bannerKick.textContent = it.isNew ? `NEW ON YOUR RAP SHEET · ${Sheet.count()}/${Sheet.total()}` : 'BREAKING · SWAMP GAZETTE';
+    ui.banner.classList.toggle('fresh', !!it.isNew); ui.banner.classList.add('show'); bannerT = it.isNew ? 6.5 : 5.5;
+    Sound.play('headline'); if (it.isNew) setTimeout(() => Sound.play('catch'), 250); Game.shake = 3;
+  }
 }
 
 // ---------- HUD tick ----------
@@ -82,8 +87,13 @@ function openJournal() {
     .filter(([k]) => !(k === 'run' && isTouch && !Input.padActive)).map(([k, t]) => `<li>${K(k)} ${t}</li>`).join('');
   ui.jQuests.innerHTML = ''; for (const q of Game.quests) { const li = document.createElement('li'); li.textContent = (q.done ? '✓ ' : '☐ ') + q.text; if (q.done) li.className = 'done'; ui.jQuests.append(li); }
   ui.jSheet.innerHTML = '';
-  if (!Game.headlines.length) { const li = document.createElement('li'); li.textContent = 'Clean record. For now.'; ui.jSheet.append(li); }
-  Game.headlines.slice().reverse().forEach(h => { const li = document.createElement('li'); li.innerHTML = `<b>DAY ${h.day}</b> ${h.text}`; ui.jSheet.append(li); });
+  $('jCount').textContent = `${Sheet.count()} / ${Sheet.total()} HEADLINES`;
+  const rows = HEADLINES.map(([k, , hint]) => [k, hint, Sheet.found[k]]).sort((a, b) => (b[2] ? 1 : 0) - (a[2] ? 1 : 0));
+  for (const [, hint, f] of rows) {
+    const li = document.createElement('li'); li.className = f ? 'got' : 'locked';
+    const b = document.createElement('b'), sp = document.createElement('span');
+    b.textContent = f ? `DAY ${f.day}` : '???'; sp.textContent = f ? f.text : hint; li.append(b, sp); ui.jSheet.append(li);
+  }
 }
 function closeJournal() { ui.journal.hidden = true; Game.mode = 'play'; }
 $('journalClose').addEventListener('click', closeJournal);
@@ -104,6 +114,7 @@ $('howtoBtn').addEventListener('click', () => { ui.title.hidden = true; $('howto
 const closeHowto = () => { $('howto').hidden = true; ui.title.hidden = false; $('howtoBtn').focus(); };
 $('howtoClose').addEventListener('click', closeHowto);
 ui.continueBtn.addEventListener('click', () => begin(true));
+$('shareBtn').addEventListener('click', shareFrontPage);
 $('nextBtn').addEventListener('click', () => {
   ui.gazette.hidden = true;
   if (Game.flags.acquitted && !Game.flags.credits) { Game.flags.credits = true; $('credits').hidden = false; return; }

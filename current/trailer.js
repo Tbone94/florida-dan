@@ -250,7 +250,7 @@ Trailer.frame = function (i) {
   if (sh.sim !== false || k === 0) { render(); hud(); }
   ui.prompt.hidden = true;
   // BREAKING banner: any headline the game fires gets the trailer slam
-  if (headlineQ.length) { banner.text = headlineQ.shift(); banner.t0 = T; headlineQ.length = 0; ui.bannerText.textContent = banner.text; }
+  if (headlineQ.length) { const h = headlineQ.shift(); banner.text = h.text || h; banner.t0 = T; headlineQ.length = 0; ui.bannerText.textContent = banner.text; ui.bannerKick.textContent = 'BREAKING · SWAMP GAZETTE'; ui.banner.classList.remove('fresh'); }
   const bk = T - banner.t0, on = banner.text && bk < 2.1;
   ui.banner.style.transform = on ? `translate(-50%, ${bk < .12 ? (-160 + 160 * ease(bk / .12)).toFixed(1) : 0}%) rotate(-1deg) scale(${bk < .2 ? (1.12 - (bk / .2) * .12).toFixed(3) : 1})` : 'translate(-50%,-170%) rotate(-1deg)';
   Input.endFrame();

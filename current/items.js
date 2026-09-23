@@ -53,7 +53,7 @@ function useItem(k) {
     case 'energy': F.powder = Math.max(F.powder, 12); Sound.play('crack'); toast('GATOR JUICE. My heart is doin’ a drum solo.'); break;
     case 'hotdog': {
       Sound.play('munch'); L.hotdogs++;
-      if (F.high > 0) { Game.chill = 100; toast('The munchies have been SLAIN. Best hot dog of Dan’s life.'); break; }
+      if (F.high > 0) { Game.chill = 100; toast('The munchies have been SLAIN. Best hot dog of Dan’s life.'); headline('FLORIDA MAN EATS GAS STATION ROLLER DOG WHILE "EXTREMELY HIGH," RATES IT 11 OUT OF 10', 4); break; }
       if (Math.random() < .45) { Game.urgent = 35; toast('Oh no. Oh NO. That dog was NOT right. FIND A TOILET.'); Sound.play('fail'); }
       else { Game.chill = Math.min(100, Game.chill + 25); toast(pick(['Been spinnin’ since Thursday. Perfect.', 'Tastes like gas station. Delicious.'])); }
       break;
