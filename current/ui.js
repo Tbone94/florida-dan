@@ -181,7 +181,7 @@ function resize() {
   const vw = innerWidth, vh = innerHeight, portrait = vh > vw * 1.05;
   let w, h;
   if (!portrait && !window.TRAILER) {   // landscape: widen the world view (up to ~20:9) so wide phones show more swamp, not black bars
-    VW = clamp(Math.round(VH * vw / vh / 2) * 2, VW0, 400);
+    VW = clamp(Math.round(VH * vw / vh / 2) * 2, VW0, 440);
     h = Math.min(vh, Math.floor(vw * VH / VW)); w = Math.min(vw, Math.round(h * VW / VH));
   } else { VW = VW0; w = Math.floor(Math.min(vw, (portrait ? vh * .58 : vh) * 16 / 9)); h = Math.floor(w * 9 / 16); }
   if (buf.width !== VW) { buf.width = VW; g.imageSmoothingEnabled = false; }
