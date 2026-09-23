@@ -86,6 +86,25 @@ function questTarget(q) {
 function questText(id, text) { const q = Q(id); if (q && q.text !== text) { q.text = text; renderQuests(); } }
 
 const PHONE_B = 'PHONE: BRENDA (PUBLIC DEFENDER)';
+// each tourist question comes with its own answers
+const TOURIST_TALKS = [
+  [['TOURIST', 'Oh my gosh, are you a REAL Florida Man? Can I get a selfie?'], ['DAN', '', [
+    ['Pose for the selfie', () => { Game.chill = Math.min(100, Game.chill + 8); return [['', '*click* Dan’s face will be on a fridge in Ohio forever.']]; }],
+    ['“I’m NOT a Florida Man.”', () => [['TOURIST', 'That’s EXACTLY what a Florida Man would say!!']]],
+    ['Offer them a roller dog', () => [['TOURIST', 'I... I’m going to go.']]]]]],
+  [['TOURIST', 'Excuse me, which way to Disney?'], ['DAN', '', [
+    ['Point at the swamp', () => [['TOURIST', 'Through... the alligators?'], ['DAN', 'Shortcut.']]],
+    ['“Take a left at the gator. Keep goin’ till you regret it.”', () => [['TOURIST', 'Thank you so much!'], ['', 'The tourist heads confidently toward the gator.']]],
+    ['“Disney? In THIS economy?”', () => [['TOURIST', '...Honestly? Fair.']]]]]],
+  [['TOURIST', 'Is it safe to swim here?'], ['DAN', '', [
+    ['“Totally.”', () => [['TOURIST', 'Great!'], ['DAN', '(It is not.)']]],
+    ['“Only if you’re faster than Chuck.”', () => [['TOURIST', 'Who’s Chuck?'], ['DAN', 'You’ll know.']]],
+    ['Point at the nearest gator', () => [['TOURIST', '...I’m gonna stay in the rental car.']]]]]],
+  [['TOURIST', 'What IS that smell?'], ['DAN', '', [
+    ['“That’s the swamp, bud.”', () => [['TOURIST', 'Does it always smell like that?'], ['DAN', 'Only on days that end in Y.']]],
+    ['“That’s me.”', () => [['TOURIST', '...Oh.']]],
+    ['“Freedom.”', () => [['TOURIST', 'It smells like feet.'], ['DAN', 'Same thing.']]]]]],
+];
 const Story = {
   setupDay(n) {
     const F = Game.flags;
@@ -167,8 +186,7 @@ const Story = {
     if (n.id === 'merle') return this.merle();
     if (n.id === 'darlene') return this.darlene();
     if (n.id === 'rhonda') return this.rhonda();
-    if (n.id === 'tourist') return say([['TOURIST', pick(['Oh my gosh, are you a REAL Florida Man? Can I get a selfie?', 'Excuse me, which way to Disney?', 'Is it safe to swim here?'])],
-      ['DAN', '', [['Pose for the selfie', () => { Game.chill += 8; return [['', '*click* Dan’s face will be on a fridge in Ohio forever.']]; }], ['“I’m NOT a Florida Man.”', () => [['TOURIST', 'That’s exactly what a Florida Man would say!!']]], ['Offer them a Roller Dog', () => [['TOURIST', 'I... I’m going to go.']]]]]]);
+    if (n.id === 'tourist') return say(pick(TOURIST_TALKS));
   },
   merle() {
     const F = Game.flags, day = Game.day, real = Game.catchBag.filter(f => !f.junk);
