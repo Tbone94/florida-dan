@@ -97,7 +97,7 @@ function renderShop(focusKey) {
   for (const k of shopItems()) {
     const { price, name, desc } = shopInfo(k), b = document.createElement('button');
     b.className = 'shopRow'; b.dataset.k = k;
-    b.innerHTML = `<img alt="" src="${SPR.iconURL[k === 'jortsXXXL' || k === 'suit' ? 'jorts' : k]}"><span class="nm">${name}<small>${desc}</small></span><span class="own">have <b>0</b></span><span class="pr">$${price}</span>`;
+    b.innerHTML = `<img alt="" src="${SPR.iconURL[k === 'jortsXXXL' || k === 'suit' ? 'jorts' : k]}"><span class="nm">${name}<small>${desc}</small></span><span class="own">×<b>0</b></span><span class="pr">$${price}</span>`;
     b.addEventListener('click', () => buy(k, b)); ui.shopList.append(b);
   }
   refreshShop();
@@ -105,11 +105,12 @@ function renderShop(focusKey) {
   if (f) { f.focus(); f.classList.toggle('padfocus', Input.padActive); }
 }
 function refreshShop() {
-  ui.shopMoney.innerHTML = `Wallet: <b id="wallet">$${Game.money}</b>`;
+  ui.shopMoney.innerHTML = `You have <b id="wallet">$${Game.money}</b>`;
   for (const b of ui.shopList.children) {
     const k = b.dataset.k, broke = Game.money < shopInfo(k).price;
     b.classList.toggle('broke', broke); b.setAttribute('aria-disabled', broke);
-    b.querySelector('.own b').textContent = k === 'jortsXXXL' ? (Game.flags.xxxl ? 1 : 0) : k === 'suit' ? (Game.flags.suit ? 1 : 0) : (Game.inv[k] || 0);
+    const own = k === 'jortsXXXL' ? (Game.flags.xxxl ? 1 : 0) : k === 'suit' ? (Game.flags.suit ? 1 : 0) : (Game.inv[k] || 0);
+    b.querySelector('.own b').textContent = own; b.querySelector('.own').classList.toggle('none', !own);
   }
 }
 function buy(k, b) {
@@ -135,28 +136,42 @@ function closeShop() { ui.shop.hidden = true; Game.mode = 'play'; }
 $('shopClose').addEventListener('click', closeShop);
 
 // ---------- journal / rap sheet ----------
+// the fridge: to-do on a sticky note, your headlines as clippings you flip through, one rumor for a headline you haven't found
+const Fridge = { found: [], i: 0 };
 function openJournal() {
-  Game.mode = 'journal'; ui.journal.hidden = false; tbButton();
-  $('jControls').innerHTML = [['move', 'Move'], ['a', 'Use · talk · reel · wrestle'], ['punch', 'Punch (or throw an empty)'], ['b', 'Yell “GIT!”'], ['item', Input.padActive ? 'Use item (LB/RB to pick)' : 'Use an item'], ['run', 'Run'], ['journal', 'This rap sheet']]
-    .filter(([k]) => !(k === 'run' && isTouch && !Input.padActive)).map(([k, t]) => `<li>${K(k)} ${t}</li>`).join('');
-  ui.jQuests.innerHTML = ''; for (const q of Game.quests) { const li = document.createElement('li'); li.textContent = (q.done ? '✓ ' : '☐ ') + q.text; if (q.done) li.className = 'done'; ui.jQuests.append(li); }
-  ui.jSheet.innerHTML = '';
-  $('jCount').textContent = `${Sheet.count()} / ${Sheet.total()} HEADLINES`;
-  const rows = HEADLINES.map(([k, , hint]) => [k, hint, Sheet.found[k]]).sort((a, b) => (b[2] ? 1 : 0) - (a[2] ? 1 : 0));
-  for (const [, hint, f] of rows) {
-    const li = document.createElement('li'); li.className = f ? 'got' : 'locked';
-    const b = document.createElement('b'), sp = document.createElement('span');
-    b.textContent = f ? `DAY ${f.day}` : '???'; sp.textContent = f ? f.text : hint; li.append(b, sp); ui.jSheet.append(li);
-  }
+  Game.mode = 'journal'; ui.journal.hidden = false; soundButtons();
+  ui.jQuests.innerHTML = ''; for (const q of Game.quests) { const li = document.createElement('li'); li.textContent = q.text; if (q.done) li.className = 'done'; ui.jQuests.append(li); }
+  if (!Game.quests.length) ui.jQuests.innerHTML = '<li>nothing. enjoy it.</li>';
+  Fridge.found = HEADLINES.map(([k]) => Sheet.found[k]).filter(Boolean).sort((a, b) => b.day - a.day); Fridge.i = 0; showClip();
+  const locked = HEADLINES.filter(([k]) => !Sheet.found[k]);
+  $('rumor').hidden = !locked.length; if (locked.length) $('rumorText').textContent = pick(locked)[2];
 }
+function showClip() {
+  const f = Fridge.found[Fridge.i], n = Fridge.found.length;
+  $('clipText').textContent = f ? f.text : 'Nothing in the paper yet. Go be Florida.';
+  $('clipDay').textContent = f ? `THE SWAMP GAZETTE · DAY ${f.day}` : 'THE SWAMP GAZETTE';
+  document.querySelector('.clip').classList.toggle('empty', !f);
+  $('jCount').textContent = `${n} of ${Sheet.total()}`;
+  $('clipPrev').disabled = Fridge.i <= 0; $('clipNext').disabled = Fridge.i >= n - 1;
+}
+function flipClip(d) { const n = Fridge.found.length; if (!n) return; const k = clamp(Fridge.i + d, 0, n - 1); if (k !== Fridge.i) { Fridge.i = k; showClip(); Sound.play('talk'); } }
+$('clipPrev').addEventListener('click', e => { e.stopPropagation(); flipClip(-1); });
+$('clipNext').addEventListener('click', e => { e.stopPropagation(); flipClip(1); });
+function soundButtons() {
+  const s = $('soundBtn'), m = $('musicBtn');
+  s.textContent = Sound.muted ? 'sound: off' : 'sound: on'; s.classList.toggle('off', Sound.muted);
+  m.textContent = Sound.musicPref ? 'music: on' : 'music: off'; m.classList.toggle('off', !Sound.musicPref);
+}
+$('soundBtn').addEventListener('click', e => { e.stopPropagation(); Sound.toggleMute(); soundButtons(); });
+$('musicBtn').addEventListener('click', e => { e.stopPropagation(); Sound.toggleMusic(); soundButtons(); });
+// Trash Baby: face him to send him home (he waddles back to the cabin porch); walk up to him there to bring him along again
 function setTrashBaby(stay) {
   Game.flags.tbStay = stay; const tb = Game.animals.find(a => a.pet);
-  if (tb) { tb.hx = stay ? tb.x : undefined; tb.hy = stay ? tb.y : undefined; }
-  toast(stay ? 'Trash Baby sits. She will wait right here. Judging you.' : 'Trash Baby scampers after you. Reunited.'); Sound.play(stay ? 'talk' : 'pickup'); save();
-  tbButton();
+  if (stay && MIAMI()) { Game.animals = Game.animals.filter(a => a !== tb); toast('Trash Baby hops a Greyhound back to the swamp. He’ll be on the porch.'); }
+  else if (stay) { const d = World.spots.door; if (tb) { tb.hx = d.x + 22; tb.hy = d.y + 8; } toast('Trash Baby waddles home to the porch. Judging you the whole way.'); }
+  else { if (tb) tb.hx = tb.hy = undefined; toast('Trash Baby scampers after you. Reunited.'); }
+  Sound.play(stay ? 'talk' : 'pickup'); save();
 }
-function tbButton() { const b = $('tbBtn'); b.hidden = !Game.flags.trashBaby; b.textContent = Game.flags.tbStay ? 'Trash Baby: staying put · call her' : 'Trash Baby: following · tell her to stay'; }
-$('tbBtn').addEventListener('click', e => { e.stopPropagation(); setTrashBaby(!Game.flags.tbStay); });
 function closeJournal() { ui.journal.hidden = true; Game.mode = 'play'; }
 $('journalClose').addEventListener('click', closeJournal);
 $('journalBtn').addEventListener('click', e => { e.currentTarget.blur(); if (Game.mode === 'play') openJournal(); });

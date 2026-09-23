@@ -219,7 +219,7 @@ function updateCritter(c, dt) {
     if (Game.flags.tbStay) {                                  // ...unless she's been told to stay: potter around her spot
       if (c.hx === undefined) { c.hx = c.x; c.hy = c.y; }
       const hx = c.hx - c.x, hy = c.hy - c.y, hd = Math.hypot(hx, hy);
-      if (hd > 3) { c.x += hx / hd * 30 * dt; c.y += hy / hd * 30 * dt; c.flip = hx < 0; c.moving = true; } else c.moving = false;
+      if (hd > 3) { const sp = hd > 60 ? 70 : 30; c.x += hx / hd * sp * dt; c.y += hy / hd * sp * dt; c.flip = hx < 0; c.moving = true; } else c.moving = false;
       return;
     }
     if (dist > 22) { c.x += dx / dist * Math.min(dist * 3, 70) * dt; c.y += dy / dist * Math.min(dist * 3, 70) * dt; c.flip = dx < 0; c.moving = true; } else c.moving = false;
@@ -262,7 +262,9 @@ function drawCritter(c, cx, cy, t) {
   g.drawImage(s, x - (s.width >> 1), y - s.height - c.z + hop);
   if (c.stun > 0 && c.type !== 'iguana') label('✶', x, y - s.height - 4, PAL.yellow, 7);
   if (c.type === 'cow' && c.moo > 0) label('MOO', x + 6, y - 14, PAL.white, 6);
-  if (c.pet) label('TRASH BABY', x, y - s.height - 4, PAL.grey, 5);
+  if (c.pet && Game.tbFace === c && Game.mode === 'play') {   // an E bubble over his head when you're looking at him
+    const by = y - s.height - 14 + Math.round(Math.sin(t * 5)); OR(x - 6, by - 6, 12, 11, PAL.ink); R(x - 1, by + 5, 3, 2, PAL.ink); label(Input.padActive ? 'A' : 'E', x + .5, by + 3, PAL.yellow, 7);
+  } else if (c.pet) label('TRASH BABY', x, y - s.height - 4, PAL.grey, 5);
 }
 
 // ---------- people ----------

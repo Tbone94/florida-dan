@@ -76,6 +76,7 @@ function spawn() {
 function facingPoint(dist) { const D = Game.dan, d = D.dir; return { x: D.x + (d === 'right' ? dist : d === 'left' ? -dist : 0), y: D.y + (d === 'down' ? dist : d === 'up' ? -dist : 0) }; }
 function interaction() {
   const D = Game.dan, near = (o, r) => Math.hypot(D.x - o.x, D.y - o.y) < r;
+  Game.tbFace = null;
   if (D.ride === 'lambo') return null;
   if (D.hiding) return { label: 'Come out of the porta-potty', fn: () => { D.hiding = false; toast('Dan emerges. He will never be the same.'); } };
   if (Heat.cop && !D.ride && near(World.spots.hide || { x: 25.8 * TS, y: 43.3 * TS }, 22)) return { label: 'HIDE IN THE PORTA-POTTY', fn: () => { D.hiding = true; D.moving = false; toast('Dan hides in the porta-potty. It is... a lot in here.'); } };
@@ -94,7 +95,12 @@ function interaction() {
   // vehicles you're standing right on top of beat anything else nearby (a cooler parked by the courthouse door)
   if (near(Game.cooler, 13)) return { label: 'Ride the motorized cooler', fn: () => { D.ride = 'cooler'; D.x = Game.cooler.x; D.y = Game.cooler.y; Sound.play('engine'); if (Game.fx.buzz > 50 || Game.fx.powder > 0) Game.day_.dui = true; } };
   const st = Story.interactions(); if (st.length) return st[0];
-  if (Game.flags.tbStay) { const tb = Game.animals.find(a => a.pet); if (tb && near(tb, 20)) return { label: 'Come on, Trash Baby', fn: () => setTrashBaby(false) }; }
+  const tb = Game.flags.trashBaby && !D.ride && Game.animals.find(a => a.pet);
+  if (tb && Game.flags.tbStay && near(tb, 20)) { Game.tbFace = tb; return { label: 'Come on, Trash Baby', fn: () => setTrashBaby(false) }; }
+  if (tb && !Game.flags.tbStay) {   // only when Dan turns around and actually looks at him, so he never hogs the E button
+    const dx = tb.x - D.x, dy = tb.y - D.y, d = Math.hypot(dx, dy), f = facingPoint(1);
+    if (d < 30 && dx * (f.x - D.x) + dy * (f.y - D.y) > d * .5) { Game.tbFace = tb; return { label: 'Send Trash Baby home', fn: () => say([['DAN', 'Go on home, buddy. I got Florida Man stuff to do.'], ['TRASH BABY', '*disappointed chittering*']], () => setTrashBaby(true)) }; }
+  }
   if (near(Game.boat, 26)) return { label: 'Board the SS Budget', fn: () => { D.ride = 'boat'; D.x = Game.boat.x; D.y = Game.boat.y; Sound.play('engine'); } };
   if (near(Game.cooler, 18)) return { label: 'Ride the motorized cooler', fn: () => { D.ride = 'cooler'; D.x = Game.cooler.x; D.y = Game.cooler.y; Sound.play('engine'); if (Game.fx.buzz > 50 || Game.fx.powder > 0) Game.day_.dui = true; } };
   const p = facingPoint(16), k = World.at(p.x, p.y), here = World.at(D.x, D.y);
@@ -207,7 +213,7 @@ function update(dt) {
     case 'objection': Objection.update(dt); return;
     case 'dance': Dance.update(dt); return;
     case 'shop': if (Input.tapped('pause') || Input.tapped('b')) closeShop(); return;
-    case 'journal': if (Input.tapped('journal') || Input.tapped('pause') || Input.tapped('a') || Input.tapped('b')) closeJournal(); return;
+    case 'journal': if (Input.tapped('left')) flipClip(-1); if (Input.tapped('right')) flipClip(1); if (Input.tapped('journal') || Input.tapped('pause') || Input.tapped('a') || Input.tapped('b')) closeJournal(); return;
     case 'gazette': return;
   }
   // --- play ---
@@ -316,7 +322,7 @@ const TALKY = ['The swamp remembers, Dan.', 'Moo is a state of mind.', 'I’m no
 
 function drawWorld() {
   const cx = Math.round(clamp(Game.cam.x, 0, MW * TS - VW) + (Math.random() - .5) * Game.shake), cy = Math.round(clamp(Game.cam.y, 0, MH * TS - VH) + (Math.random() - .5) * Game.shake), t = Game.t;
-  drawTiles(cx, cy, t);
+  drawTiles(cx, cy, t); Ambient.water(cx, cy, t);
   const vis = (x, y, m = 60) => x > cx - m && x < cx + VW + m && y > cy - m && y < cy + VH + m * 1.5;
   for (const p of World.props) if (p.kind === 'lily' && vis(p.x, p.y)) drawProp(p, cx, cy, t);
   for (const f of Game.prints || []) if (vis(f.x, f.y)) g.drawImage(SPR.footprint, Math.round(f.x - cx - 2), Math.round(f.y - cy - 2));
@@ -338,6 +344,7 @@ function drawWorld() {
   L.sort((a, b) => a[0] - b[0]).forEach(e => e[1]());
   Heat.draw(cx, cy, t); Lambo.draw(cx, cy, t); BoatChase.draw(cx, cy, t);
   drawProjectiles(cx, cy); drawParts(cx, cy);
+  if (Game.mode !== 'title') Ambient.air(cx, cy, t);
   drawObjective(cx, cy, t);
   if (Game.fx.shroom > 0) for (const a of Game.animals) if (vis(a.x, a.y, 0) && !a.lurk && hash2(Math.floor(t / 4), a.x | 0) > .6) label(TALKY[Math.floor(hash2(Math.floor(t / 4), a.y | 0) * TALKY.length)], a.x - cx, a.y - cy - 24, PAL.neon, 6);
   if (Game.storm > 0) drawStorm(t);

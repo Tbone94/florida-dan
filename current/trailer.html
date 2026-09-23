@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Pixelify+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Permanent+Marker&family=Pixelify+Sans:wght@400;600;700&display=swap">
 <style>
   /* One committed look: a sweaty gas-station-neon HUD over a pixel swamp. Single theme on purpose. */
   :root {
@@ -58,7 +58,6 @@
   #hint { position: absolute; left: .6em; bottom: 4.4em; padding: .3em .6em; font-weight: 700; font-size: .82em; background: rgba(15, 11, 21, .9); border: 2px solid var(--teal); color: var(--paper); white-space: nowrap; }
   .key { display: inline-block; min-width: 1.5em; padding: 0 .35em; margin-right: .15em; text-align: center; background: var(--paper); color: var(--ink); border: 2px solid var(--ink); border-bottom-width: 4px; border-radius: 4px; font-size: .85em; line-height: 1.35; }
   .key.pad { border-radius: 999px; background: var(--yellow); }
-  #jControls { list-style: none; margin: 0 0 .9em; padding: 0; display: grid; gap: .4em; font-size: .9em; }
 
   #hotbar { position: absolute; left: 50%; bottom: .5em; transform: translateX(-50%); display: flex; gap: .25em; padding: .25em; }
   .slot { position: relative; width: 2.6em; height: 2.6em; background: #2a2136; border: 2px solid #0c0a10; cursor: pointer; padding: 0; display: grid; place-items: center; }
@@ -172,17 +171,6 @@
   @keyframes tick { 0% { color: var(--red); transform: scale(1.35); } 100% { transform: scale(1); } }
   #shopMsg { font-weight: 700; margin: -.3em 0 .6em; font-size: .92em; }
   #shopMsg.good { color: var(--green); } #shopMsg.bad { color: var(--red); }
-  #jQuests, #jSheet { list-style: none; margin: 0 0 .9em; padding: 0; display: grid; gap: .35em; font-size: .9em; line-height: 1.35; }
-  #jQuests li.done { color: #8d8a93; text-decoration: line-through; }
-  #journal .box { width: min(46em, 100%); }
-  #jSheet { max-height: 46vh; overflow: auto; grid-template-columns: repeat(auto-fill, minmax(15em, 1fr)); padding-right: .3em; }
-  #jSheet li { padding: .45em .6em .5em; line-height: 1.25; }
-  #jSheet li b { display: block; font-size: .7em; letter-spacing: .14em; margin-bottom: .2em; }
-  #jSheet li.got { background: var(--paper); color: var(--ink); font-family: var(--display); font-size: .95em; box-shadow: 3px 3px 0 var(--red); }
-  #jSheet li.got b { color: var(--red); font-family: var(--pixel); }
-  #jSheet li.locked { border: 2px dashed #5d5a66; color: #8d8a93; font-size: .85em; }
-  #jSheet li.locked b { color: #5d5a66; }
-  #jCount { color: var(--yellow); margin-left: .4em; letter-spacing: .1em; }
   #banner.fresh { box-shadow: 5px 5px 0 var(--yellow); }
   #banner.fresh .kick { background: var(--yellow); color: var(--ink); }
   .gzBtns { display: flex; gap: .8em; flex-wrap: wrap; }
@@ -260,6 +248,94 @@
   .clip { position: absolute; width: 44%; background: var(--paper); color: var(--ink); border: 5px solid var(--ink); box-shadow: 12px 12px 0 var(--red); padding: .35em .6em .5em; font-family: var(--display); font-size: 44px; line-height: 1.02; text-transform: uppercase; }
   .clip small { display: block; font-family: var(--pixel); font-size: 20px; letter-spacing: .2em; color: var(--red); margin-bottom: .2em; }
   @media (prefers-reduced-motion: reduce) { #banner { transition: none; } .slot.pop, #urgent, #wrestlePrompt { animation: none; } }
+
+  /* ---------- Dan's fridge door: every menu is junk from Dan's life (stickers, receipts, clippings, magnets) ---------- */
+  :root { --marker: "Permanent Marker", "Comic Sans MS", cursive; --enamel: #efe8d8; --enamelD: #d6ccb6; --sticky: #ffe56b; --receipt: #fbf8f1; --news: #f1ebdc; --inkT: #2b2530; --tape: rgba(236, 222, 178, .95); }
+  .sheet { background: rgba(12, 9, 16, .74); }
+  @media (max-height: 520px) { .sheet { font-size: 13px; } }
+  /* buttons are stickers */
+  .btn { font: 400 1.15em var(--marker); letter-spacing: .01em; text-transform: none; color: var(--inkT); background: var(--pink); border: 3px solid var(--inkT); border-radius: 10px; padding: .3em 1em .38em; box-shadow: 0 4px 0 var(--inkT); transform: rotate(-1.5deg); }
+  .btn:nth-child(2n) { transform: rotate(1.2deg); }
+  .btn:active { transform: translateY(3px) rotate(-1deg); box-shadow: 0 1px 0 var(--inkT); }
+  .btn.alt { background: var(--sticky); }
+  .btn.ghost { background: var(--enamel); color: var(--inkT); border-color: var(--inkT); box-shadow: 0 4px 0 var(--inkT); }
+  #title .btn.ghost { background: var(--receipt); }
+  .iostip { background: var(--tape); color: var(--inkT); border: none; transform: rotate(-1deg); }
+  /* cards taped up: how-to, shop, credits */
+  .box { background: var(--receipt); color: var(--inkT); border: none; border-radius: 3px; box-shadow: 0 12px 28px rgba(0, 0, 0, .5); position: relative; transform: rotate(-.6deg); }
+  .box::before { content: ""; position: absolute; left: 50%; top: -.7em; width: 6.5em; height: 1.4em; transform: translateX(-50%) rotate(-3deg); background: var(--tape); box-shadow: 0 1px 2px rgba(0, 0, 0, .2); }
+  .box h2 { font: 400 1.9em var(--marker); color: var(--inkT); letter-spacing: 0; margin-bottom: .3em; }
+  .box .sub2, .gist, .ctl small { color: #6b6470; }
+  .ctl { color: var(--inkT); } .ctl th { color: var(--red); } .ctl td { color: var(--inkT); border-top: 1px solid rgba(43, 37, 48, .14); }
+  /* shop: price stickers on the counter; the fine print only shows for the item you're on */
+  #shop h2 { display: inline-block; font: 400 1.7em var(--display); color: var(--sticky); background: var(--red); border: 3px solid var(--inkT); padding: .05em .5em; transform: rotate(-2deg); letter-spacing: .03em; }
+  .shopRow { background: #fff; color: var(--inkT); border: 2px solid rgba(43, 37, 48, .16); border-radius: 6px; grid-template-columns: 2em 1fr auto 2.9em; }
+  .shopRow .nm { font-weight: 700; }
+  .shopRow small { display: none; color: #6b6470; font-weight: 400; }
+  .shopRow:hover small, .shopRow:focus small, .shopRow.padfocus small { display: block; }
+  .shopRow:hover:not(:disabled), .shopRow:focus { border-color: var(--inkT); outline: none; }
+  .shopRow .own { color: #6b6470; } .shopRow .own b { color: var(--inkT); } .shopRow .own.none { visibility: hidden; }
+  .shopRow .pr { display: grid; place-items: center; width: 2.7em; height: 2.7em; border-radius: 50%; background: #ff8a3d; color: var(--inkT); border: 2px solid var(--inkT); font: 400 .95em var(--marker); transform: rotate(-10deg); }
+  @keyframes bought { 0% { background: var(--sticky); transform: scale(1.03); } 100% { background: #fff; } }
+  #shopMsg.good { color: #2d7d36; }
+  #wallet { color: #2d7d36; }
+  /* court papers */
+  #credits h2 { display: inline-block; font: 400 2.2em var(--display); color: var(--red); border: 4px solid var(--red); padding: 0 .4em; transform: rotate(-5deg); letter-spacing: .05em; }
+  #credits .small { color: #6b6470; }
+  /* dialogue: a receipt with a price-sticker name tag; choices are coupons */
+  #talk { --pc: var(--receipt); background: var(--pc); color: var(--inkT); border: none; border-radius: 0; box-shadow: 0 10px 18px rgba(0, 0, 0, .35); padding: .8em 1em .85em; }
+  #talk::before, #talk::after { content: ""; position: absolute; left: 0; right: 0; height: 6px; background-size: 12px 12px; background-repeat: repeat-x; }
+  #talk::before { top: -6px; background-image: linear-gradient(45deg, var(--pc) 50%, transparent 50%), linear-gradient(315deg, var(--pc) 50%, transparent 50%); background-position: 0 100%; }
+  #talk::after { bottom: -6px; background-image: linear-gradient(135deg, var(--pc) 50%, transparent 50%), linear-gradient(225deg, var(--pc) 50%, transparent 50%); background-position: 0 0; }
+  #talk.phone { --pc: #dcf3ee; border: none; box-shadow: 0 10px 18px rgba(0, 0, 0, .35); }
+  #talkWho { position: absolute; left: .8em; top: -1.05em; font: 400 .95em var(--marker); letter-spacing: 0; color: var(--inkT); background: #ff9c52; padding: .02em .6em .08em; border-radius: 4px; transform: rotate(-2deg); box-shadow: 0 2px 0 rgba(0, 0, 0, .3); }
+  #talk.phone #talkWho { color: var(--inkT); background: var(--teal); }
+  #talkLine { margin-top: .15em; }
+  .choice { background: #fff6cf; color: var(--inkT); border: 2px dashed rgba(43, 37, 48, .5); border-radius: 3px; }
+  .choice:hover, .choice:focus-visible, .choice.padfocus { background: var(--sticky); color: var(--inkT); border: 2px solid var(--inkT); }
+  .objbar { background: rgba(43, 37, 48, .12); border-color: rgba(43, 37, 48, .3); } .objbar i { background: var(--red); } .objhint { color: #6b6470; }
+  /* little notes on the screen */
+  #objective { font: 400 .95em var(--marker); color: var(--inkT); background: var(--sticky); border: none; box-shadow: 0 3px 6px rgba(0, 0, 0, .35); transform: translateX(-50%) rotate(-1deg); padding: .15em .9em .2em 1.7em; }
+  #objective::before { color: var(--red); top: .12em; }
+  #objective.new { animation: objPop .45s steps(3); }
+  @keyframes objPop { 0% { transform: translateX(-50%) rotate(-1deg) scale(1.2); } }
+  #toast { background: var(--tape); color: var(--inkT); border: none; box-shadow: 0 3px 6px rgba(0, 0, 0, .3); padding: .4em 1em; clip-path: polygon(0 10%, 4% 0, 50% 5%, 96% 0, 100% 12%, 98.5% 50%, 100% 90%, 95% 100%, 50% 95%, 4% 100%, 0 88%, 1.5% 50%); }
+  #hint { background: var(--sticky); color: var(--inkT); border: none; box-shadow: 0 3px 6px rgba(0, 0, 0, .3); transform: rotate(-1.5deg); }
+  #prompt { background: var(--receipt); color: var(--inkT); border: 2px solid var(--inkT); border-radius: 6px; box-shadow: 0 3px 0 var(--inkT); }
+  #banner, #banner.fresh { background: var(--news); border: none; box-shadow: 0 6px 14px rgba(0, 0, 0, .4); }
+  #journalBtn { font: 400 .85em var(--marker); letter-spacing: 0; color: var(--inkT); background: var(--enamel); border: 2px solid var(--inkT); border-radius: 999px; padding: .05em .7em .1em; box-shadow: 0 2px 0 var(--inkT); }
+  #journalBtn .jk { font: 700 .75em var(--pixel); background: var(--inkT); color: var(--enamel); border-radius: 3px; padding: 0 .3em; margin-left: .2em; }
+  @media (pointer: coarse) { #journalBtn .jk { display: none; } }
+  .paper { background: var(--news); box-shadow: 0 16px 36px rgba(0, 0, 0, .5); }
+  #card { background: #fff; border: none; box-shadow: 0 12px 24px rgba(0, 0, 0, .45); padding: .8em 1.2em 1.3em; }
+  /* the fridge (pause) */
+  .fridge { position: relative; width: min(44em, 100%); margin-block: 1em; padding: 1.5em 1.6em 1.1em 2.8em; color: var(--inkT); border-radius: 22px;
+    background: linear-gradient(90deg, var(--enamelD), var(--enamel) 10%, #f8f4ea 55%, var(--enamel) 90%, var(--enamelD));
+    box-shadow: inset 0 0 0 3px rgba(43, 37, 48, .22), 0 18px 44px rgba(0, 0, 0, .6);
+    display: grid; grid-template-columns: 1fr 1.3fr; grid-template-areas: "todo clip" "rumor clip" "mags mags"; gap: 1.1em 1.6em; }
+  .fridge .handle { position: absolute; left: .9em; top: 16%; bottom: 16%; width: .7em; border-radius: 1em; background: linear-gradient(90deg, #8b9098, #eef1f4 45%, #9aa0a8); box-shadow: 0 2px 3px rgba(0, 0, 0, .3); }
+  .fridge .brand { position: absolute; right: 1.4em; top: .55em; font: 700 .6em var(--pixel); letter-spacing: .35em; color: rgba(43, 37, 48, .3); }
+  .sticky { grid-area: todo; align-self: start; background: var(--sticky); padding: .8em 1em .9em; transform: rotate(-2.5deg); box-shadow: 0 6px 10px rgba(0, 0, 0, .22); }
+  .sticky h3, .scrap b { font: 400 1.3em var(--marker); color: var(--inkT); letter-spacing: 0; margin: 0 0 .25em; }
+  #jQuests { list-style: none; margin: 0; padding: 0; display: grid; gap: .25em; font: 400 1em var(--marker); line-height: 1.25; }
+  #jQuests li::before { content: "☐ "; } #jQuests li.done { text-decoration: line-through; color: rgba(43, 37, 48, .45); } #jQuests li.done::before { content: "☑ "; }
+  .scrap { grid-area: rumor; align-self: start; background: #fff; padding: .6em .9em .7em; transform: rotate(1.5deg); box-shadow: 0 4px 8px rgba(0, 0, 0, .18); font-size: .9em; line-height: 1.35; }
+  .scrap b { display: block; font-size: 1.05em; }
+  .clipWrap { grid-area: clip; display: grid; gap: .7em; justify-items: center; align-content: start; }
+  .clip { position: relative; width: 100%; background: var(--news); padding: 1.1em 1.1em 1.2em; transform: rotate(1.5deg); box-shadow: 0 6px 12px rgba(0, 0, 0, .25); }
+  .clip small { display: block; font: 700 .62em var(--pixel); letter-spacing: .2em; color: var(--red); border-bottom: 2px solid var(--inkT); padding-bottom: .3em; margin-bottom: .45em; }
+  #clipText { font-family: var(--display); font-size: 1.5em; line-height: 1.05; text-transform: uppercase; text-wrap: balance; min-height: 3.2em; }
+  .clip.empty #clipText { font: 400 1.1em var(--marker); text-transform: none; color: #6b6470; }
+  .magnet { position: absolute; top: -.6em; left: 50%; width: 1.5em; height: 1.5em; border-radius: 50%; transform: translateX(-50%); background: radial-gradient(circle at 35% 30%, #ffb3d4, var(--pink) 55%, #b8326f); box-shadow: 0 3px 4px rgba(0, 0, 0, .35); }
+  .clipNav { display: flex; align-items: center; gap: .8em; font: 400 1em var(--marker); }
+  .clipNav button { font: 400 1.3em/1 var(--marker); width: 1.8em; height: 1.8em; border-radius: 50%; border: 3px solid var(--inkT); background: var(--enamel); color: var(--inkT); cursor: pointer; box-shadow: 0 3px 0 var(--inkT); }
+  .clipNav button:disabled { opacity: .25; cursor: default; }
+  .mags { grid-area: mags; display: flex; gap: .6em; flex-wrap: wrap; align-items: center; }
+  .mag { font: 400 .95em var(--marker); color: var(--inkT); background: var(--c, var(--teal)); border: 3px solid var(--inkT); border-radius: 999px; padding: .15em .9em .2em; cursor: pointer; box-shadow: 0 3px 0 var(--inkT); }
+  .mag:nth-child(2) { --c: var(--sticky); } .mag:nth-child(3) { --c: #ffb3d4; } .mag:nth-child(4) { --c: #b7e3a0; }
+  .mag.off { background: #d9d3c6; color: #6b6470; }
+  #journalClose { margin-left: auto; }
+  @media (max-width: 620px) { .fridge { grid-template-columns: 1fr; grid-template-areas: "clip" "todo" "rumor" "mags"; padding-left: 2.2em; } }
 </style>
 
 <div id="stage">
@@ -277,7 +353,7 @@
       </div>
       <div class="rightBox">
         <div class="stats panel"><span class="cash" id="money">$0</span><span>FISH<b id="nFish">0</b></span><span id="statBait" hidden>BAIT<b id="nBait">0</b></span><span id="statCan" hidden>EMPTIES<b id="nCan">0</b></span><span id="statPy" hidden>PYTHON<b id="nPy">0</b></span></div>
-        <button id="journalBtn">J · RAP SHEET</button>
+        <button id="journalBtn">Fridge <span class="jk">J</span></button>
       </div>
     </div>
     <div id="objective" hidden></div>
@@ -302,7 +378,6 @@
   <div class="wrap">
     <div class="logo">Florida<br>Dan</div>
     <div class="sub">“I’m <em>not</em> a Florida Man.”</div>
-    <p class="tag">Four days to prove he’s not a Florida Man.</p>
     <div class="btns"><button class="btn" id="startBtn">New Game</button><button class="btn alt" id="continueBtn" hidden>Continue</button><button class="btn ghost" id="howtoBtn">How to Play</button><button class="btn alt" id="installBtn" hidden>Install app</button></div>
     <div class="iostip" id="iosTip" hidden>Play full screen: tap <b>Share</b> ⬆ then <b>Add to Home Screen</b></div>
     <div class="warn">Swearing, cartoon substances, and Florida.</div>
@@ -319,9 +394,9 @@
       <tr><td>Yell “GIT!”</td><td><b class="key">Q</b></td><td><b class="key pad">B</b></td></tr>
       <tr><td>Use an item</td><td><b class="key">1–9</b></td><td><b class="key pad">LT</b> <small>LB/RB pick</small></td></tr>
       <tr><td>Run</td><td><b class="key">SHIFT</b></td><td><b class="key pad">RT</b></td></tr>
-      <tr><td>Rap sheet · to-do</td><td><b class="key">J</b></td><td><b class="key pad">Y</b></td></tr>
+      <tr><td>Fridge (to-do, headlines)</td><td><b class="key">J</b></td><td><b class="key pad">Y</b></td></tr>
     </tbody></table>
-    <p class="gist">Follow the yellow arrow. Every Florida Man thing you do makes the news. On a phone, use the on-screen stick and buttons.</p>
+    <p class="gist">Follow the sticky note up top. Everything you do makes the news.</p>
     <button class="btn alt" id="howtoClose">Back</button></div>
 </div>
 
@@ -343,7 +418,19 @@
 </div>
 
 <div id="journal" class="sheet" hidden>
-  <div class="box"><h2>RAP SHEET</h2><button class="btn alt" id="tbBtn" hidden></button><button class="btn alt" id="installBtn2" hidden>Install the app</button><h3>TO-DO</h3><ul id="jQuests"></ul><h3>CONTROLS</h3><ul id="jControls"></ul><h3>HEADLINE COLLECTION <span id="jCount"></span></h3><ul id="jSheet"></ul><button class="btn alt" id="journalClose">Back to the swamp</button></div>
+  <div class="fridge">
+    <i class="handle"></i><span class="brand">FRIGIDMAIRE</span>
+    <div class="sticky"><h3>to do</h3><ul id="jQuests"></ul></div>
+    <div class="scrap" id="rumor"><b>word around the swamp</b><span id="rumorText"></span></div>
+    <div class="clipWrap">
+      <div class="clip"><i class="magnet"></i><small id="clipDay">THE SWAMP GAZETTE</small><div id="clipText"></div></div>
+      <div class="clipNav"><button id="clipPrev" aria-label="Previous headline">‹</button><span id="jCount"></span><button id="clipNext" aria-label="Next headline">›</button></div>
+    </div>
+    <div class="mags">
+      <button class="mag" id="soundBtn"></button><button class="mag" id="musicBtn"></button><button class="mag" id="installBtn2" hidden>install app</button>
+      <button class="btn ghost" id="journalClose">Close fridge</button>
+    </div>
+  </div>
 </div>
 
 <div id="credits" class="sheet" hidden>
@@ -359,27 +446,28 @@
 </div>
 
 <script>window.TRAILER = true;</script>
-<script src="engine.js?v=202609230211"></script>
-<script src="songs.js?v=202609230211"></script>
-<script src="music.js?v=202609230211"></script>
-<script src="art.js?v=202609230211"></script>
-<script src="font.js?v=202609230211"></script>
-<script src="world.js?v=202609230211"></script>
-<script src="actors.js?v=202609230211"></script>
-<script src="items.js?v=202609230211"></script>
-<script src="headlines.js?v=202609230211"></script>
-<script src="story.js?v=202609230211"></script>
-<script src="minigames.js?v=202609230211"></script>
-<script src="court.js?v=202609230211"></script>
-<script src="cases.js?v=202609230211"></script>
-<script src="favors.js?v=202609230211"></script>
-<script src="court2.js?v=202609230211"></script>
-<script src="miami.js?v=202609230211"></script>
-<script src="cases45.js?v=202609230211"></script>
-<script src="miami2.js?v=202609230211"></script>
-<script src="chase.js?v=202609230211"></script>
-<script src="game.js?v=202609230211"></script>
-<script src="share.js?v=202609230211"></script>
-<script src="ui.js?v=202609230211"></script>
-<script src="trailer.js?v=202609230211"></script>
-<script src="pwa.js?v=202609230211"></script>
+<script src="engine.js?v=202609230953"></script>
+<script src="songs.js?v=202609230953"></script>
+<script src="music.js?v=202609230953"></script>
+<script src="art.js?v=202609230953"></script>
+<script src="font.js?v=202609230953"></script>
+<script src="world.js?v=202609230953"></script>
+<script src="ambient.js?v=202609230953"></script>
+<script src="actors.js?v=202609230953"></script>
+<script src="items.js?v=202609230953"></script>
+<script src="headlines.js?v=202609230953"></script>
+<script src="story.js?v=202609230953"></script>
+<script src="minigames.js?v=202609230953"></script>
+<script src="court.js?v=202609230953"></script>
+<script src="cases.js?v=202609230953"></script>
+<script src="favors.js?v=202609230953"></script>
+<script src="court2.js?v=202609230953"></script>
+<script src="miami.js?v=202609230953"></script>
+<script src="cases45.js?v=202609230953"></script>
+<script src="miami2.js?v=202609230953"></script>
+<script src="chase.js?v=202609230953"></script>
+<script src="game.js?v=202609230953"></script>
+<script src="share.js?v=202609230953"></script>
+<script src="ui.js?v=202609230953"></script>
+<script src="trailer.js?v=202609230953"></script>
+<script src="pwa.js?v=202609230953"></script>

@@ -100,7 +100,8 @@ const Input = (() => {
 
 // ---------- sound: everything is synthesized, no files ----------
 const Sound = (() => {
-  let ac = null, master = null, muted = false, musicOn = false, musicT = 0;
+  let ac = null, master = null, muted = false, musicOn = false, musicT = 0, musicPref = true;
+  try { musicPref = localStorage.getItem('floridaDan.music') !== 'off'; } catch (e) { }
   function unlock() {
     if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
     try { ac = new (window.AudioContext || window.webkitAudioContext)(); master = ac.createGain(); master.gain.value = .5; master.connect(ac.destination); } catch (e) { ac = null; }
@@ -147,7 +148,7 @@ const Sound = (() => {
   // the soundtrack lives in music.js + songs.js; the mood picks the song (or the remix)
   let musicBus = null;
   function music(dt, mood) {
-    if (!ac || muted || !musicOn) return;
+    if (!ac || muted || !musicOn || !musicPref) return;
     if (!musicBus) { musicBus = ac.createGain(); musicBus.gain.value = .55; musicBus.connect(master); }
     Music.tick(ac, musicBus, mood);
   }
@@ -165,7 +166,8 @@ const Sound = (() => {
   }
   const RUMBLE = { punch: [.55, 110], chomp: [.7, 200], boom: [1, 450], hurt: [.45, 160], snap: [.5, 120], crack: [.15, 60], catch: [.3, 120], headline: [.25, 90] };
   return { unlock, play: n => { if (RUMBLE[n]) Input.rumble(...RUMBLE[n]); FX[n] && FX[n](); }, tone, music, voice, setMusic: v => musicOn = v,
-    toggleMute() { muted = !muted; return muted; }, get muted() { return muted; } };
+    toggleMute() { muted = !muted; return muted; }, get muted() { return muted; },
+    toggleMusic() { musicPref = !musicPref; try { localStorage.setItem('floridaDan.music', musicPref ? 'on' : 'off'); } catch (e) { } if (musicBus) musicBus.gain.value = musicPref ? .55 : 0; return musicPref; }, get musicPref() { return musicPref; } };
 })();
 
 // ---------- screen FX ----------
@@ -194,6 +196,7 @@ const Screen = (() => {
       if (drunk > .01) c = mix(c, S(u + vec2(.012 + sin(t*.9)*.008, cos(t*.7)*.006) * drunk), .42 * min(1., drunk));
       if (powder > .01) { float o = .0035 * powder; c.r = S(u + vec2(o, 0.)).r; c.b = S(u - vec2(o, 0.)).b; }
       c *= tint;
+      { float L0 = dot(c, vec3(.299, .587, .114)); c *= mix(vec3(.93, 1., 1.05), vec3(1.05, 1., .92), smoothstep(.15, .85, L0)); c = c * .96 + vec3(.035, .028, .02); }   // Florida postcard: warm highs, teal lows, faded blacks
       float l = dot(c, vec3(.299, .587, .114));
       c = mix(vec3(l), c, 1. + .45*high + .7*shroom + .3*powder - .75*crash);
       if (shroom > .01) c = mix(c, hue(c, t*1.1 + u.y*5. + u.x*2.), .6 * shroom);
