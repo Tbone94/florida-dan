@@ -66,18 +66,51 @@ function showHud(on) { ['hudTop', 'hotbar'].forEach(k => ui[k].hidden = !on); ui
 // ---------- shop ----------
 const SHOP = ['beer', 'cig', 'energy', 'hotdog', 'scratch', 'firework', 'bait'];
 function openShop() {
-  ui.shop.hidden = false; ui.talk.hidden = true; renderShop();
+  ui.shop.hidden = false; ui.talk.hidden = true; $('shopMsg').hidden = true; renderShop(shopItems()[0]);
 }
-function renderShop() {
-  ui.shopMoney.textContent = `Wallet: $${Game.money}`; ui.shopList.innerHTML = '';
-  for (const k of SHOP.concat(Game.day >= 5 ? Cases.shopExtras() : [])) {
-    const price = k === 'bait' ? 2 : k === 'cig' ? 5 : ITEMS[k].price, qty = k === 'cig' ? 5 : 1, name = k === 'bait' ? 'Nightcrawlers' : ITEMS[k].name + (k === 'cig' ? ' ×5' : '');
-    const b = document.createElement('button'); b.className = 'shopRow'; b.disabled = Game.money < price;
-    b.innerHTML = `<img alt="" src="${SPR.iconURL[k === 'jortsXXXL' ? 'jorts' : k]}"><span class="nm">${name}<small>${k === 'bait' ? 'Fish bite a lot more.' : ITEMS[k].desc}</small></span><span class="pr">$${price}</span>`;
-    b.addEventListener('click', () => { if (Game.money < price) return; Game.money -= price; giveItem(k, qty); if (Game.day >= 5) Cases.bought(k); Sound.play('cash'); renderShop(); });
-    ui.shopList.append(b);
+// the shop keeps your place: rows are built once, then updated in place after each purchase
+const shopItems = () => SHOP.concat(Game.day >= 5 ? Cases.shopExtras() : []);
+function shopInfo(k) {
+  return { price: k === 'bait' ? 2 : k === 'cig' ? 5 : ITEMS[k].price, qty: k === 'cig' ? 5 : 1,
+    name: k === 'bait' ? 'Nightcrawlers' : ITEMS[k].name + (k === 'cig' ? ' ×5' : ''), desc: k === 'bait' ? 'Fish bite a lot more.' : ITEMS[k].desc };
+}
+function renderShop(focusKey) {
+  ui.shopList.innerHTML = '';
+  for (const k of shopItems()) {
+    const { price, name, desc } = shopInfo(k), b = document.createElement('button');
+    b.className = 'shopRow'; b.dataset.k = k;
+    b.innerHTML = `<img alt="" src="${SPR.iconURL[k === 'jortsXXXL' ? 'jorts' : k]}"><span class="nm">${name}<small>${desc}</small></span><span class="own">have <b>0</b></span><span class="pr">$${price}</span>`;
+    b.addEventListener('click', () => buy(k, b)); ui.shopList.append(b);
+  }
+  refreshShop();
+  const f = focusKey && [...ui.shopList.children].find(b => b.dataset.k === focusKey);
+  if (f) { f.focus(); f.classList.toggle('padfocus', Input.padActive); }
+}
+function refreshShop() {
+  ui.shopMoney.innerHTML = `Wallet: <b id="wallet">$${Game.money}</b>`;
+  for (const b of ui.shopList.children) {
+    const k = b.dataset.k, broke = Game.money < shopInfo(k).price;
+    b.classList.toggle('broke', broke); b.setAttribute('aria-disabled', broke);
+    b.querySelector('.own b').textContent = k === 'jortsXXXL' ? (Game.flags.xxxl ? 1 : 0) : (Game.inv[k] || 0);
   }
 }
+function buy(k, b) {
+  const { price, qty, name } = shopInfo(k);
+  if (Game.money < price) {
+    Sound.play('fail'); b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope');
+    return shopMsg(`Not enough cash. You need $${price - Game.money} more.`, true);
+  }
+  Game.money -= price; giveItem(k, qty, true); if (Game.day >= 5) Cases.bought(k); Sound.play('cash');
+  // feedback you can see: the row flashes, the price floats up, the wallet ticks down
+  const box = ui.shop.querySelector('.box'), r = b.getBoundingClientRect(), br = box.getBoundingClientRect(), f = document.createElement('span');
+  f.className = 'floatCost'; f.textContent = `−$${price}`; f.style.left = (r.right - br.left - 70) + 'px'; f.style.top = (r.top - br.top - 6) + 'px';
+  box.append(f); setTimeout(() => f.remove(), 950);
+  b.classList.remove('bought'); void b.offsetWidth; b.classList.add('bought');
+  shopMsg(`Bought: ${name} for $${price}.`);
+  if (!shopItems().includes(k)) renderShop(shopItems()[0]); else refreshShop();
+  const w = $('wallet'); if (w) { w.classList.remove('tick'); void w.offsetWidth; w.classList.add('tick'); }
+}
+function shopMsg(msg, bad) { const el = $('shopMsg'); el.textContent = msg; el.className = bad ? 'bad' : 'good'; el.hidden = false; clearTimeout(shopMsg.t); shopMsg.t = setTimeout(() => el.hidden = true, 2200); }
 function closeShop() { ui.shop.hidden = true; Game.mode = 'play'; }
 $('shopClose').addEventListener('click', closeShop);
 
@@ -170,7 +203,7 @@ function frame(now) {
   Input.endFrame();
   if (!window.TRAILER) requestAnimationFrame(frame);
 }
-buildWorld(); bakeAll(); gatorMap(); resize(); Screen.init(screenCv, buf); buildHotbar();
+bakeAll(); World.load('swamp'); Cases.places(); resize(); Screen.init(screenCv, buf); buildHotbar();
 Input.bindStick($('stick'), $('nub')); Input.bindButton($('btnA'), 'a'); Input.bindButton($('btnB'), 'b'); Input.bindButton($('btnF'), 'punch');
 ['talk', 'card'].forEach(id => $(id).addEventListener('pointerdown', e => { if (e.target.closest('.choice')) return; Input.press('a'); }));
 Game.inv = { beer: 0 }; Game.day_ = freshDayLog(); spawn(); Game.mode = 'title';
