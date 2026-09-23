@@ -25,7 +25,8 @@ self.addEventListener('fetch', e => {
   const req = e.request; if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (req.mode === 'navigate') {   // the page: fresh when online, cached when not
-    e.respondWith(fetch(req).then(r => { const cp = r.clone(); caches.open(CACHE).then(c => c.put('./index.html', cp)); return r; }).catch(() => caches.match('./index.html')));
+    // always revalidate the page with GitHub, never trust a stale HTTP copy
+    e.respondWith(fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' }).then(r => { const cp = r.clone(); caches.open(CACHE).then(c => c.put('./index.html', cp)); return r; }).catch(() => caches.match('./index.html')));
     return;
   }
   const font = /fonts\.(googleapis|gstatic)\.com$/.test(url.hostname);
