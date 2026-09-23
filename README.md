@@ -33,9 +33,15 @@ Touch: on-screen stick + buttons.
 
 ## What’s in the swamp
 
-- **Four-day story:** a fish fry that ends in a turkey-fryer fire, three character witnesses (one is a raccoon stuck in an ice machine), Hurricane Wanda, a manatee spirit named Manny, and a courtroom finale where Chuck bursts in.
+- **Three court cases:**
+  - *The Flamingo Incident* — a fish fry, three character witnesses, Hurricane Wanda, a manatee spirit, and a gator in the courtroom.
+  - *The Manatee Matter* — the ride went viral (40M views). Pay a teenager in content, clean a lagoon, feed Manny lettuce, and OBJECT at the prosecutor's lies.
+  - *The Skunk Ape Affair* — charged with impersonating a cryptid. Find Gary the Skunk Ape, bait him with roller dogs, get him into XXXL formal jorts, win, and become Florida Man of the Year.
+- **Then it never ends:** daily favors for the locals, the headline hunt, and Deputy Rhonda.
+- **Original four-day story:** a fish fry that ends in a turkey-fryer fire, three character witnesses (one is a raccoon stuck in an ice machine), Hurricane Wanda, a manatee spirit named Manny, and a courtroom finale where Chuck bursts in.
 - **Substances change how the game looks and plays** (WebGL post shader): beer (double vision, blackouts that teleport you), doobies (slow-mo), cow-pie shrooms (melting world, reversed controls, talking animals), “sinus medicine” (2× speed, then a crash), roller dogs (find a toilet in 35 seconds).
-- **Headlines are the score.** Every Florida Man thing Dan does prints a BREAKING headline and raises the allegation meter. End of each day: the Swamp Gazette.
+- **Headlines are the score** — and a 60+ headline collection that carries across playthroughs, with a shareable front page every night. Rack up heat and Rhonda chases you (the cruiser can't swim).
+- **Old headline note:** Every Florida Man thing Dan does prints a BREAKING headline and raises the allegation meter. End of each day: the Swamp Gazette.
 - Punch gators (three hits and they give up — Chuck hits back), Blue Marlin-style side-view fishing, gator and python wrestling, a motorized cooler with headlights, Gulp-N-Go shop, save per day.
 
 ## Layout

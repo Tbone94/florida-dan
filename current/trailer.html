@@ -163,6 +163,10 @@
   .gzBtns { display: flex; gap: .8em; flex-wrap: wrap; }
   .box h3 { margin: .2em 0 .4em; font-size: .8em; letter-spacing: .16em; color: var(--pink); }
   #credits .box { text-align: center; }
+  #credits .small { font-size: .8em; color: #c9c2b4; }
+  .objbar { height: .55em; background: #0c0a10; border: 1px solid #5d5a66; margin-top: .5em; position: relative; }
+  .objbar i { position: absolute; inset: 0 auto 0 0; background: var(--yellow); }
+  .objhint { font-size: .8em; margin-top: .4em; color: #c9c2b4; }
   #credits p { line-height: 1.6; }
 
   #pad { position: fixed; inset: 0; pointer-events: none; z-index: 6; }
@@ -286,7 +290,7 @@
 </div>
 
 <div id="credits" class="sheet" hidden>
-  <div class="box"><h2>NOT GUILTY</h2><p>Dan is legally not a Florida Man.<br>(He is.)</p><p>Starring Dan, Merle, Darlene, Deputy Rhonda, Brenda, Trash Baby, Manny, and Chuck as himself.</p><p>The swamp is still out there. So are the headlines.</p><button class="btn" id="creditsBtn">Keep being Dan</button></div>
+  <div class="box"><h2>NOT GUILTY</h2><p id="creditsText"></p><p class="small">Starring Dan, Merle, Darlene, Deputy Rhonda, Brenda, Kayden, Dr. Pam, Kevin, Trash Baby, Manny, Gary the Skunk Ape, and Chuck as himself.</p><button class="btn" id="creditsBtn">Next case</button></div>
 </div>
 
 <div id="rotate" hidden>TURN YOUR PHONE SIDEWAYS FOR THE FULL SWAMP</div>
@@ -308,6 +312,9 @@
 <script src="story.js"></script>
 <script src="minigames.js"></script>
 <script src="court.js"></script>
+<script src="cases.js"></script>
+<script src="favors.js"></script>
+<script src="court2.js"></script>
 <script src="chase.js"></script>
 <script src="game.js"></script>
 <script src="share.js"></script>

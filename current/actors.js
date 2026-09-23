@@ -243,6 +243,13 @@ function updateCritter(c, dt) {
 function drawCritter(c, cx, cy, t) {
   const x = Math.round(c.x - cx), y = Math.round(c.y - cy), s = SPR[c.type + (c.flip ? 'L' : '')];
   if (!s) return;
+  if (c.type === 'skunkape') {   // big boy, drawn at 1.6x with a glow when it's dark
+    const w = s.width * 1.6, h = s.height * 1.6, bob = c.state === 'run' ? Math.round(Math.sin(t * 16)) : 0;
+    shadow(x, y + 1, 22, 5); g.drawImage(s, Math.round(x - w / 2), Math.round(y - h + bob), w, h);
+    if (Game.hour >= 19) { g.globalAlpha = .5 + Math.sin(t * 3) * .2; R(x - 5, y - h + 7, 3, 2, '#fff7b0'); R(x + 2, y - h + 7, 3, 2, '#fff7b0'); g.globalAlpha = 1; }
+    if (Game.flags.apeFriend) label('GARY', x, y - h - 3, PAL.yellow, 7);
+    return;
+  }
   if (c.type === 'pelican' && c.state !== 'wander') { const f = Math.sin(t * 14) > 0; shadow(x, y + 8, 12, 3); g.drawImage(s, x - 7, y - 26 + (f ? -2 : 0)); return; }
   shadow(x, y + 1, s.width);
   const hop = c.moving ? (Math.floor(t * 8) % 2) : 0;
@@ -256,6 +263,11 @@ function drawCritter(c, cx, cy, t) {
 function makeNPC(id, name, x, y, dir = 'down', extra = {}) { return { id, name, sprite: id, x, y, hx: x, hy: y, dir, frame: 0, t: 0, wander: 0, ...extra }; }
 function updateNPC(n, dt) {
   n.t += dt;
+  if (n.follow) {   // a tourist tagging along to see a gator
+    const D = Game.dan, dx = D.x - n.x, dy = D.y - n.y, d = Math.hypot(dx, dy);
+    n.moving = d > 26; if (n.moving) { n.x += dx / d * Math.min(80, d * 2) * dt; n.y += dy / d * Math.min(80, d * 2) * dt; n.dir = dirOf(dx, dy); if (Math.floor(n.t * 6) % 2 !== n.frame) n.frame ^= 1; }
+    return;
+  }
   const D = Game.dan, dist = Math.hypot(D.x - n.x, D.y - n.y);
   if (dist < 40) { n.dir = dirOf(D.x - n.x, D.y - n.y); n.moving = false; return; }
   if (!n.wander) return;

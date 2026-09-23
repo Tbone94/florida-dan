@@ -5,7 +5,9 @@ const OBJECTIONS = [
   'OBJECTION! Leading the witness! There ain’t even a witness!', 'OBJECTION! That cow and I have an understanding.', 'OBJECTION! Your Honor, have YOU ever been to a hurricane party?',
 ];
 const Court = {
-  start() {
+  start(cs) {
+    if (cs === 'manatee') return CourtCases.manatee();
+    if (cs === 'skunk') return CourtCases.skunk();
     Game.mode = 'court'; Game.courtChuck = 0; showHud(false);
     const hs = Game.headlines.map(h => h.text), picks = hs.slice(-4);
     const ev = picks.length ? picks.flatMap((h, i) => [['PROSECUTOR VANCE', `Exhibit ${'ABCD'[i]}: “${h}”`], ['DAN', OBJECTIONS[i % OBJECTIONS.length]], ['JUDGE HARLAN', i % 2 ? 'Overruled.' : 'Overruled. ...Did you really spoon a cow?']])
@@ -54,7 +56,7 @@ const Court = {
       ['JUDGE HARLAN', 'NOT GUILTY. On all counts.'], ['JUDGE HARLAN', 'Also, I’m keeping the alligator.'], ['CHUCK', '*happy hiss*'],
       ['DAN', 'See, Brenda? Told you. NOT a Florida Man.'], ['BRENDA', 'Dan. You are holding an alligator. In a courtroom. In jorts.'],
       ['DAN', '...Wanna get a Swamp Lite?'], ['BRENDA', '...Yeah. Yeah I do.'],
-    ], () => { Game.flags.acquitted = true; endDay('court'); });
+    ], () => { Game.flags.acquitted = true; Game.flags.creditsPending = 1; endDay('court'); });
   },
   update(dt) { },
   drawRoom(t, fighting) {
@@ -77,7 +79,8 @@ const Court = {
     label('IN GOD WE TRUST (MOSTLY)', 160, 12, PAL.yellow, 5);
   },
   draw(t) {
-    this.drawRoom(t, false);
+    if (Game.scene === 'parade') return drawParade(t);
+    this.drawRoom(t, false); drawCourtExtras(t);
     if (Game.courtChuck === 1 && Game.mode === 'talk') { g.save(); g.translate(270, 140); for (let i = 0; i < 1; i++); g.restore(); OR(246, 132, 50, 12, PAL.gator); OR(290, 134, 16, 8, PAL.gator); OR(236, 135, 12, 6, PAL.gatorD); OR(254, 128, 10, 3, PAL.hat); }
     if (Game.courtChuck === 2) { OR(180, 130, 50, 12, PAL.gator); OR(226, 132, 16, 8, PAL.gator); OR(186, 126, 10, 3, PAL.hat); label('NOT GUILTY', VW / 2, 90, PAL.yellow, 14); }
   },

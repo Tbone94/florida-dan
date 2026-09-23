@@ -9,6 +9,8 @@ const ITEMS = {
   energy: { name: 'Gator Juice Energy', price: 4, desc: 'Speed boost. Heart goes brrrrr.' },
   hotdog: { name: 'Roller Dog (Day 4)', price: 2, desc: 'Big chill... or big trouble. Keep a toilet in mind.' },
   scratch: { name: 'Scratch-Off', price: 3, desc: 'Florida Frenzy! Win up to $100. You won’t.' },
+  lettuce: { name: 'Head of Lettuce', price: 1, desc: 'A vegetable. At the Gulp-N-Go. Somehow.' },
+  jortsXXXL: { name: 'Formal Jorts, XXXL', price: 8, desc: 'Black denim. For weddings, funerals, and cryptid testimony.' },
   firework: { name: 'Freedom Rocket', price: 10, desc: 'Throw it. Boom. Everything within a mile respects you now.' },
 };
 const HOTBAR = ['beer', 'cig', 'joint', 'shroom', 'powder', 'energy', 'hotdog', 'scratch', 'firework'];

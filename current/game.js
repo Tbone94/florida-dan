@@ -23,7 +23,7 @@ function newGame() {
 function startDay() {
   const S_ = World.spots;
   Object.assign(Game, { hour: 6, chill: 70, urgent: 0, storm: 0, heat: 0, parts: [], projectiles: [], day_: freshDayLog() });
-  Heat.end(); Game.dan.hiding = false;
+  Heat.end(); Game.dan.hiding = false; Game.dan.carry = null; Game.prints = []; Game.scene = null; Game.courtExtra = {};
   Object.assign(Game.fx, { buzz: 0, high: 0, shroom: 0, powder: 0, crash: 0, cig: 0 });
   Object.assign(Game.dan, { x: S_.dan.x, y: S_.dan.y, dir: 'down', ride: null, hurt: 0 });
   Object.assign(Game.boat, { x: S_.boat.x, y: S_.boat.y, dir: 'right' });
@@ -67,6 +67,7 @@ function spawn() {
   if (Game.day === 2) put('firework', 47 * TS, 13.6 * TS);
   for (let i = 0; i < 7; i++) { const x = rnd(55, 66) * TS, y = rnd(48.5, 56) * TS; P.push({ kind: 'cowpie', x, y }); }
   for (let i = 0, k = 0; i < 7 && k < 600; k++) { const x = rnd(3, MW - 3) * TS, y = rnd(3, MH - 3) * TS; const t = World.at(x, y); if ((t === T.GRASS || t === T.SAND) && !World.solidAt(x, y)) { P.push({ kind: pick(['beer', 'beer', 'cig', 'bait', 'scratch', 'hotdog', 'energy']), x, y }); i++; } }
+  if (Game.day >= 5) Cases.spawn();
 }
 
 // ---------- interaction ----------
@@ -77,7 +78,7 @@ function interaction() {
   if (Heat.cop && !D.ride && near({ x: 25.8 * TS, y: 43.3 * TS }, 22)) return { label: 'HIDE IN THE PORTA-POTTY', fn: () => { D.hiding = true; D.moving = false; toast('Dan hides in the porta-potty. It is... a lot in here.'); } };
   if (!D.ride) for (const n of Game.npcs) if (!n.hidden && near(n, 24)) return { label: `Talk to ${n.name}`, fn: () => Story.talk(n) };
   for (const a of Game.animals) {
-    if (a.spirit && near(a, 56) && Game.fx.shroom > 0) return { label: 'Approach the glowing manatee', fn: () => Story.manny() };
+    if (a.spirit && near(a, 56) && (Game.fx.shroom > 0 || a.sober)) return { label: 'Approach the glowing manatee', fn: () => a.sober ? Cases.manny2() : Story.manny() };
     if (D.ride) continue;
     if (a.type === 'gator' && !a.lurk && a.stun <= 0 && near(a, 24)) return { label: a.chuck ? 'WRESTLE CHUCK' : 'WRESTLE THE GATOR', fn: () => wrestleGator(a) };
     if (a.type === 'python' && a.state !== 'bagged' && near(a.segs[0], 20)) return { label: 'GRAB THE PYTHON', fn: () => grabPython(a) };
@@ -104,7 +105,7 @@ function punch() {
   if (Game.fx.buzz > 70 && Math.random() < .3) { Sound.play('whiff'); hurtDan(3); toast(pick(['Dan swings at the air and falls on his ass.', 'Missed by a mile. Maybe two miles.', 'Dan punched a ghost. The ghost won.'])); return; }
   const f = facingPoint(12), pow = Game.fx.powder > 0 ? 2 : 1;
   let tgt = null, bd = 18;
-  for (const a of Game.animals) { if (a.pet || a.spirit || a.state === 'bagged') continue; const p = a.type === 'python' ? a.segs[0] : a, d = Math.hypot(p.x - f.x, p.y - f.y); if (d < bd) { bd = d; tgt = a; } }
+  for (const a of Game.animals) { if (a.pet || a.spirit || a.ape || a.state === 'bagged') continue; const p = a.type === 'python' ? a.segs[0] : a, d = Math.hypot(p.x - f.x, p.y - f.y); if (d < bd) { bd = d; tgt = a; } }
   let npcT = null; for (const n of Game.npcs) { const d = Math.hypot(n.x - f.x, n.y - f.y); if (d < Math.min(bd, 14)) { bd = d; npcT = n; } }
   if (!tgt && !npcT) { if (Game.inv.can > 0) throwThing('can'); else Sound.play('whiff'); return; }
   Sound.play('punch'); Game.shake = 3 * pow; Game.hitstop = .055 * pow; Game.kick = 1; Game.day_.punches = (Game.day_.punches || 0) + 1;
@@ -198,6 +199,7 @@ function update(dt) {
     case 'wrestle': Wrestle.update(dt); tickFx(dt); return;
     case 'raccoon': Minigame.updateRaccoon(dt); return;
     case 'court': return;
+    case 'objection': Objection.update(dt); return;
     case 'shop': if (Input.tapped('pause') || Input.tapped('b')) closeShop(); return;
     case 'journal': if (Input.tapped('journal') || Input.tapped('pause') || Input.tapped('a') || Input.tapped('b')) closeJournal(); return;
     case 'gazette': return;
@@ -223,7 +225,11 @@ function update(dt) {
   if (Input.tapped('b')) yell();
   if (Input.tapped('punch')) punch();
   hints();
-  for (const p of Game.pickups) if (p.kind !== 'cowpie' && !Game.dan.ride && Math.hypot(p.x - Game.dan.x, p.y - Game.dan.y) < 12) {
+  for (const p of Game.pickups) {
+    if (p.kind === 'cowpie') continue;
+    const d = Math.hypot(p.x - Game.dan.x, p.y - Game.dan.y);
+    if (p.kind === 'trash' ? !(Game.dan.ride === 'boat' && d < 18) : (Game.dan.ride || d >= 12)) continue;
+    if (p.kind === 'rollerdog') { if (Game.dan.carry) continue; p.got = true; Game.dan.carry = 'rollerdog'; Sound.play('pickup'); toast('Got the roller dog machine! Still warm. Take it back to Darlene.'); continue; }
     p.got = true; giveItem(p.kind); toast(pick(PICKUP_LINES[p.kind] || [`Got ${ITEMS[p.kind] ? ITEMS[p.kind].name : p.kind}.`]));
   }
   Game.pickups = Game.pickups.filter(p => !p.got);
@@ -243,7 +249,7 @@ function tickFx(dt) {
   const D = Game.dan; if (D.animT > 0 && (D.animT -= dt) <= 0) D.anim = null; D.hurt -= dt;
 }
 function tickWorld(dt) {
-  for (const a of Game.animals) { if (a.type === 'gator') updateGator(a, dt); else if (a.type === 'python') updatePython(a, dt); else if (a.type !== 'manatee') updateCritter(a, dt); }
+  for (const a of Game.animals) { if (a.type === 'gator') updateGator(a, dt); else if (a.type === 'python') updatePython(a, dt); else if (a.type !== 'manatee' && a.type !== 'skunkape') updateCritter(a, dt); }
   for (const n of Game.npcs) { if (n.scared > 0) { n.scared -= dt; continue; } updateNPC(n, dt); }
   updateProjectiles(dt); updateParts(dt);
 }
@@ -251,6 +257,7 @@ const PICKUP_LINES = {
   beer: ['Found a warm Swamp Lite. Still counts.', 'A beer! In the grass! Easter egg for adults.'], cig: ['Found a loose menthol. Score.', 'Cigarette. Slightly damp. Still good.'],
   joint: ['Found a doobie in the couch cushions. Merry Christmas, Dan.'], bait: ['Tub of nightcrawlers. Still wiggly.', 'Bait! Mostly alive!'],
   scratch: ['A scratch-off! Unscratched! Destiny!'], hotdog: ['A roller dog. On the ground. Wrapped. ...Mostly wrapped.'], energy: ['Gator Juice! Half full! Nobody’s spit in it! Probably!'],
+  trash: ['A tire.', 'A whole recliner. In the lagoon. Why.', 'A single Croc.', 'A bag full of more bags.', 'A wedding ring! ...Nope. Pull tab.', 'Steve? ...Steve says hi.'],
   firework: ['A Freedom Rocket! Merle’s “hurricane supply.” (Slot 9, throws it)'],
 };
 
@@ -303,6 +310,7 @@ function drawWorld() {
   drawTiles(cx, cy, t);
   const vis = (x, y, m = 60) => x > cx - m && x < cx + VW + m && y > cy - m && y < cy + VH + m * 1.5;
   for (const p of World.props) if (p.kind === 'lily' && vis(p.x, p.y)) drawProp(p, cx, cy, t);
+  for (const f of Game.prints || []) if (vis(f.x, f.y)) g.drawImage(SPR.footprint, Math.round(f.x - cx - 2), Math.round(f.y - cy - 2));
   for (const a of Game.animals) if (a.type === 'gator' && a.lurk && vis(a.x, a.y)) drawGator(a, cx, cy, t);
   const L = [];
   for (const p of World.props) if (p.kind !== 'lily' && vis(p.x, p.y, 90)) L.push([p.y + p.h, () => drawProp(p, cx, cy, t)]);
@@ -350,7 +358,7 @@ function render() {
   if (Game.mode === 'fish') Fishing.draw();
   else if (Game.mode === 'wrestle') Wrestle.draw();
   else if (Game.mode === 'raccoon') Minigame.drawRaccoon();
-  else if (Game.mode === 'court' || (Game.mode === 'talk' && Game.talk && Game.talk.prev === 'court') || (Game.mode === 'gazette' && Game.flags.inCourt)) Court.draw(Game.t);
+  else if (Game.mode === 'objection' || Game.scene === 'parade' || Game.mode === 'court' || (Game.mode === 'talk' && Game.talk && Game.talk.prev === 'court') || (Game.mode === 'gazette' && Game.flags.inCourt)) Court.draw(Game.t);
   else drawWorld();
   if (window.Trailer && Trailer.extra) Trailer.extra();
   const F = Game.fx, sky = Game.mode === 'title' ? [1, 1, 1] : skyTint(Game.hour), storm = 1 - Game.storm * .35;

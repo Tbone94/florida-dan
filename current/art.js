@@ -50,6 +50,9 @@ const SWAPS = {
   rhonda: { hat: PAL.tan, hatD: PAL.tanD, tank: PAL.tan, tankD: PAL.tanD, stain: PAL.yellow, jorts: PAL.cop, hair: PAL.brown, flip: PAL.black },
   darlene: { hat: PAL.blonde, hatD: PAL.blondeD, tank: PAL.purple, tankD: PAL.purpleD, stain: PAL.neon, jorts: PAL.greyD, hair: PAL.blondeD, shades: PAL.neon, skin: '#f2b48f', flip: PAL.neon },
   judge: { hat: PAL.white, hatD: PAL.grey, tank: PAL.robe, tankD: PAL.robeL, stain: PAL.robeL, jorts: PAL.robe, hair: PAL.white, shades: PAL.skin, flip: PAL.black },
+  kayden: { hat: PAL.teal, hatD: '#1b8f83', tank: PAL.purple, tankD: PAL.purpleD, stain: PAL.neon, jorts: PAL.black, hair: PAL.blonde, shades: PAL.skin, skin: '#f2c29a', flip: PAL.white },
+  pam: { hat: PAL.tan, hatD: PAL.tanD, tank: PAL.teal, tankD: '#1b8f83', stain: PAL.white, jorts: PAL.tan, hair: PAL.grey, shades: PAL.skin, flip: PAL.brown },
+  kevin: { hat: PAL.greyD, hatD: PAL.inkL, tank: PAL.mudL, tankD: PAL.mud, stain: PAL.mudD, jorts: PAL.greyD, hair: PAL.hairL, shades: PAL.skin, skin: '#d9a07a', flip: PAL.black },
   tourist: { hat: PAL.white, hatD: PAL.tankD, tank: PAL.teal, tankD: '#1b8f83', stain: PAL.yellow, jorts: PAL.tankD, skin: '#ff9d8a', skinD: '#e0685a', hair: PAL.blonde },
 };
 
@@ -87,6 +90,12 @@ const CRITTERS = {
   mushroom: { key: { o: 'ink', r: 'red', w: 'white', t: 'tankD' }, rows: [
     '..oooo..', '.orwrro.', 'orrrwrro', 'owrrrrwo', '.oooooo.', '..owwo..', '..owto..', '..oooo..'] },
   cowpie: { key: { o: 'ink', m: 'mud', d: 'mudD' }, rows: ['..ooo...', '.ommmoo.', 'ommdmmmo', 'ommmmdmo', '.oooooo.'] },
+  skunkape: { key: { o: 'ink', h: '#5b4a33', l: '#7a6545', y: '#ffe066', m: '#2a1f14' }, rows: [
+    '......oooooo......', '....oohhhhhhoo....', '...ohhhhhhhhhho...', '...ohhyyhhyyhho...', '...ohhhhhhhhhho...', '...ohhhmmmmhhho...',
+    '..ohhhhlhhlhhhho..', '.ohhhhlhhhhlhhhho.', 'ohhhhhhhhhhhhhhhho', 'ohhohhhhlhhhhhohho', 'ohhohhhlhhlhhhohho', 'ohhohhhhhhhhhhohho',
+    'ohhoohhhhhhhhoohho', '.hh..ohhhhhho..hh.', '.....ohhhhhho.....', '.....ohhhhhho.....', '.....ohhooohho....', '.....ohho..ohho...',
+    '.....ohho..ohho...', '....ohhho..ohhho..', '....ooooo..ooooo..'] },
+  footprint: { key: { o: '#3a2f22' }, rows: ['.oo..', 'oooo.', '.ooo.', '..o..', '.oo..'] },
   manatee: { key: { o: 'ink', m: 'manatee', d: 'manateeD', k: 'black', g: 'glow', w: 'white' }, rows: [
     '......oooooooooo........', '....oommmmmmmmmmoo......', '...ommmmmmmmmmmmmmo.....', '..ommmmmmmmmmmmmmmmoo...', '.okmmmmmmmmmmmmmmmmmmo..',
     'ommmmdmmmmmmmmmmmmmmmmoo', 'owwmmmmmmdmmmmmmmmmmmddo', '.ommmmmmmmmmmmmmmmmmdddo', '..oodmmmoommmmmmmmoodddo', '....ooooo.oooooooo..ooo.'] },
@@ -118,6 +127,16 @@ const ICONS = {
     '..........', '..........', '...oooo...', 'o.oggggo..', 'oooggkggo.', 'ogggggggo.', 'ooobbbbbo.', 'o.obbbbo..', '...oooo...', '..........'] },
   cash: { key: { o: 'ink', g: 'grassL', d: 'grassD' }, rows: [
     '..........', '..........', 'oooooooooo', 'ogggggdggo', 'ogdggdgdgo', 'oggdddggdo', 'ogdggdgdgo', 'ogggggdggo', 'oooooooooo', '..........'] },
+  lettuce: { key: { o: 'ink', g: 'grassL', d: 'grass', w: 'white' }, rows: [
+    '..........', '...oooo...', '..oggdgo..', '.ogdgggdo.', '.oggwggdo.', '.odggdggo.', '.oggdgggo.', '..odggdo..', '...oooo...', '..........'] },
+  trash: { key: { o: 'ink', g: 'grey', d: 'greyD', w: 'white' }, rows: [
+    '..........', '...oooo...', '..owwwwo..', '.owgwwgwo.', '.owwwwwwo.', '.owgwgwwo.', '.owwwwwwo.', '..odddo...', '...ooo....', '..........'] },
+  pool: { key: { o: 'ink', b: 'blue', w: 'white', y: 'yellow' }, rows: [
+    '..........', '..........', '.oooooooo.', 'obbwbbwbbo', 'obbbbbbbbo', 'oyyyyyyyyo', '.oooooooo.', '..........', '..........', '..........'] },
+  jorts: { key: { o: 'ink', b: 'black', g: 'greyD' }, rows: [
+    '..........', '.oooooooo.', '.obbbbbbo.', '.obbggbbo.', '.obbbbbbo.', '.obbo.bbo.', '.obbo.bbo.', '.oooo.ooo.', '..........', '..........'] },
+  rollerdog: { key: { o: 'ink', s: 'tin', r: 'redD', y: 'yellow', g: 'greyD' }, rows: [
+    '..........', '.oooooooo.', '.ossssss o'.replace(' ', 's'), '.orrrrrro.', '.oyyyyyyo.', '.orrrrrro.', '.ossssss o'.replace(' ', 's'), '.oggggggo.', '.oooooooo.', '..........'] },
   sign: { key: { o: 'ink', r: 'red', w: 'white', g: 'grey' }, rows: [
     '..oooooo..', '.orrrrrro.', 'orrrrrrrro', 'orwwrwwrro', 'orrwrwrrro', 'orwwrwwrro', 'orrrrrrrro', '.orrrrrro.', '..oooooo..', '....oo....'] },
 };

@@ -47,7 +47,7 @@ function clock() { const h = Math.floor(Game.hour), m = Math.floor(Game.hour % 1
 function hud() {
   if (Game.mode === 'title' || Game.mode === 'gazette') return;
   const set = (el, v) => { v = String(v); if (el._v !== v) { el._v = v; el.textContent = v; } };
-  set(ui.timeLabel, clock()); set(ui.dayLabel, `${days[Game.day] || 'DAY ' + Game.day} · DAY ${Game.day}${Game.cold ? ' · 47°F' : Game.storm > .3 ? ' · HURRICANE WANDA' : ''}`);
+  set(ui.timeLabel, clock()); set(ui.dayLabel, `${Game.day <= 4 ? days[Game.day] : Cases.name()} · DAY ${Game.day}${Game.cold ? ' · 47°F' : Game.storm > .3 ? ' · HURRICANE WANDA' : ''}`);
   ui.chillFill.style.width = Game.chill + '%'; ui.buzzFill.style.width = Math.min(100, Game.fx.buzz) + '%'; ui.allegeFill.style.width = Game.allegations + '%';
   set(ui.allegeLabel, Game.allegations + '%');
   set(ui.money, '$' + Game.money); set(ui.nFish, Game.inv.fish || 0); set(ui.nBait, Game.inv.bait || 0); set(ui.nCan, Game.inv.can || 0); set(ui.nPy, Game.pythons.length ? Game.pythons.reduce((a, b) => a + b, 0).toFixed(0) + 'ft' : '0');
@@ -70,11 +70,11 @@ function openShop() {
 }
 function renderShop() {
   ui.shopMoney.textContent = `Wallet: $${Game.money}`; ui.shopList.innerHTML = '';
-  for (const k of SHOP) {
+  for (const k of SHOP.concat(Game.day >= 5 ? Cases.shopExtras() : [])) {
     const price = k === 'bait' ? 2 : k === 'cig' ? 5 : ITEMS[k].price, qty = k === 'cig' ? 5 : 1, name = k === 'bait' ? 'Nightcrawlers' : ITEMS[k].name + (k === 'cig' ? ' ×5' : '');
     const b = document.createElement('button'); b.className = 'shopRow'; b.disabled = Game.money < price;
-    b.innerHTML = `<img alt="" src="${SPR.iconURL[k]}"><span class="nm">${name}<small>${k === 'bait' ? 'Fish bite a lot more.' : ITEMS[k].desc}</small></span><span class="pr">$${price}</span>`;
-    b.addEventListener('click', () => { if (Game.money < price) return; Game.money -= price; giveItem(k, qty); Sound.play('cash'); renderShop(); });
+    b.innerHTML = `<img alt="" src="${SPR.iconURL[k === 'jortsXXXL' ? 'jorts' : k]}"><span class="nm">${name}<small>${k === 'bait' ? 'Fish bite a lot more.' : ITEMS[k].desc}</small></span><span class="pr">$${price}</span>`;
+    b.addEventListener('click', () => { if (Game.money < price) return; Game.money -= price; giveItem(k, qty); if (Game.day >= 5) Cases.bought(k); Sound.play('cash'); renderShop(); });
     ui.shopList.append(b);
   }
 }
@@ -118,7 +118,8 @@ ui.continueBtn.addEventListener('click', () => begin(true));
 $('shareBtn').addEventListener('click', shareFrontPage);
 $('nextBtn').addEventListener('click', () => {
   ui.gazette.hidden = true;
-  if (Game.flags.acquitted && !Game.flags.credits) { Game.flags.credits = true; $('credits').hidden = false; return; }
+  const cp = Game.flags.creditsPending;
+  if (cp) { Game.flags.creditsPending = 0; const [h, p, b] = CREDITS[cp]; $('credits').querySelector('h2').textContent = h; $('creditsText').innerHTML = p; $('creditsBtn').textContent = b; $('credits').hidden = false; $('creditsBtn').focus(); return; }
   Game.day++; startDay();
 });
 $('creditsBtn').addEventListener('click', () => { $('credits').hidden = true; Game.day++; startDay(); });

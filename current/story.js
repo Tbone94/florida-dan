@@ -82,7 +82,7 @@ function questTarget(q) {
     case 'manny': return Game.animals.find(a => a.spirit);
     case 'court': return S_.court;
   }
-  return null;
+  return typeof caseTarget === 'function' ? caseTarget(q) : null;
 }
 function questText(id, text) { const q = Q(id); if (q && q.text !== text) { q.text = text; renderQuests(); } }
 
@@ -109,6 +109,12 @@ const TOURIST_TALKS = [
 const Story = {
   setupDay(n) {
     const F = Game.flags;
+    if (n >= 5) {   // Cases 2-3 and the endless swamp live in cases.js
+      Game.favors = []; const c = Cases.info(n);
+      if (c.d === 1 && c.n) F['caseStart' + c.n] = Game.headlines.length;
+      Cases.setupDay(n); if ((c.n === 2 || c.n === 3) && c.d < 3) Favors.roll(1);
+      return;
+    }
     Game.cold = false; Game.storm = 0;
     if (n === 1) {
       setQuests([['boat', 'Take the boat out'], ['fish', 'Catch 3 fish (0/3)'], ['merle', 'Bring the fish to Merle'], ['chuck', 'Yell GIT at Chuck', true]]);
@@ -145,14 +151,11 @@ const Story = {
         [PHONE_B, 'County Courthouse, east end of 29. Ten AM. Wear PANTS, Dan. Real ones.'], ['DAN', 'Jorts are pants.'], [PHONE_B, 'Jorts are HALF pants.'],
       ]);
     }
-    if (n >= 5) {
-      setQuests([['free', 'Free roam. Make headlines.', true]]);
-      say([['', `DAY ${n}. The allegations are behind him. The swamp is ahead of him.`], ['DAN', pick(['Another beautiful day in paradise.', 'My head. My whole head.', 'Let’s make some news.'])]]);
-    }
   },
 
   tick(dt) {
     const F = Game.flags, D = Game.dan, h = Game.hour;
+    if (Game.day >= 5) Cases.tick(dt);
     if (Game.day === 1) {
       if (D.ride === 'boat') done('boat');
       const n = Game.catchBag.filter(f => !f.junk).length;
@@ -183,6 +186,7 @@ const Story = {
 
   // --- people ---
   talk(n) {
+    if (Game.day >= 5 && Cases.talk(n)) return;
     const F = Game.flags, day = Game.day;
     if (n.id === 'merle') return this.merle();
     if (n.id === 'darlene') return this.darlene();
@@ -274,7 +278,8 @@ const Story = {
       toast(pick(['Nothing but regret in there.', 'Kevin says hi.', 'A raccoon hissed at you. Fair.']));
     } });
     if (Game.urgent > 0 && (near({ x: 25.8 * TS, y: 43.3 * TS }, 20) || near(S_.door, 20))) list.push({ label: 'USE THE TOILET', fn: () => { Game.urgent = 0; Sound.play('splash'); toast('...Made it. Dan has never been closer to God.'); Game.chill = 100; } });
-    if (near(S_.court, 22)) list.push({ label: Game.day === 4 ? 'Enter the courthouse' : 'Courthouse (closed)', fn: () => { if (Game.day === 4) Court.start(); else toast(Game.day > 4 ? 'Dan waves at the courthouse. The courthouse does not wave back.' : 'Not till Friday. Dan is in no hurry.'); } });
+    if (near(S_.court, 22)) { const cs = Cases.courtCase(); list.push({ label: cs ? 'Enter the courthouse' : 'Courthouse (closed)', fn: () => { if (cs) Court.start(cs); else toast(Game.day > 4 ? 'Dan waves at the courthouse. The courthouse does not wave back.' : 'Not till Friday. Dan is in no hurry.'); } }); }
+    if (Game.day >= 5) list.push(...Cases.interactions());
     for (const p of Game.pickups) if (p.kind === 'cowpie' && near(p, 14)) list.push({ label: 'Pick the mushroom off the cow pie', fn: () => { p.got = true; giveItem('shroom'); toast(pick(['Harvested one (1) cow pie mushroom. Organic.', 'Dan wipes it on his tank top. Clean enough.'])); } });
     return list;
   },
@@ -296,6 +301,7 @@ const Story = {
 };
 
 function sleep() {
+  if (Game.day >= 5) { const why = Cases.sleepBlock(); if (why) return toast(why); return say([['DAN', pick(['Welp. That’s a day.', 'Nite, swamp.', 'Another one for the books. The police books.'])]], () => endDay('sleep')); }
   const F = Game.flags;
   if (Game.day === 1 && !F.fry) return toast('Can’t sleep. Merle’s fish fry. Three fish. It’s the only thing Dan’s ever been asked to do.');
   if (Game.day === 2 && !F.bday2 && Game.hour < 19) return toast('Still need those three signatures. Brenda’s counting on you. God help her.');
@@ -316,7 +322,7 @@ const Gazette = {
     const L = Game.day_, hs = L.headlines.slice();
     if (!hs.length) hs.push(pick(['FLORIDA MAN HAS NORMAL DAY; EXPERTS BAFFLED', 'LOCAL MAN DOES NOTHING NEWSWORTHY, NEIGHBORS "CONCERNED"']));
     const days = ['', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'FRIDAY'];
-    $('gzMeta').textContent = `${days[Game.day] || 'DAY ' + Game.day} EDITION · 50¢ · COLLIER COUNTY`;
+    $('gzMeta').textContent = `${Game.day <= 4 ? days[Game.day] : 'DAY ' + Game.day} EDITION · ${Cases.name()} · 50¢`;
     $('gzHead').textContent = hs[hs.length - 1];
     const more = $('gzMore'); more.innerHTML = '';
     hs.slice(0, -1).reverse().forEach(h => { const li = document.createElement('li'); li.textContent = h; more.append(li); });

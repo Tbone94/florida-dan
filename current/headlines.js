@@ -9,6 +9,26 @@ const HEADLINES = [
   ['raccoonFace', /ICE MACHINE USING HIS FACE/, 'Darlene’s ice machine has a tenant.'],
   ['manatee', /RIDING MANATEE/, 'A sea cow of truth appears during the storm.'],
   ['acquitted', /ACQUITTED OF BEING A FLORIDA MAN/, 'Friday. Court. A familiar visor.'],
+  // ---- the Manatee Matter ----
+  ['kaydenContent', /THREE FLORIDA MAN THINGS TO GET ONE/, 'Pay a teenager in content.'],
+  ['lagoon', /CLEANS UP LAGOON/, 'Dr. Pam wants the lagoon clean.'],
+  ['lettuceBuy', /BUYS LETTUCE/, 'Buy a vegetable. Shock a clerk.'],
+  ['mannyMidnight', /FEEDING LETTUCE TO MANATEE/, 'Midnight snack for a sea cow.'],
+  ['mannyCourt', /MANATEE TESTIFIES IN COURT/, 'Win Case Two.'],
+  ['objectAll', /OBJECTS AT EVERY LIE/, 'Object at every lie. Only the lies.'],
+  ['cleanCase', /BARELY ANY HEADLINES/, 'Get through a whole case without making the paper. Much.'],
+  // ---- the Skunk Ape Affair ----
+  ['trailcam', /TRAIL CAM CAPTURES/, 'There’s a camera in the Glades.'],
+  ['apeBeer', /SHARES BEER WITH SKUNK APE/, 'Offer the big guy a cold one.'],
+  ['apePunch', /PUNCHES SKUNK APE/, 'Offer the big guy a knuckle sandwich.'],
+  ['reunion', /REUNITE AFTER 30 YEARS/, 'Two old friends, one swamp.'],
+  ['apeCourt', /SKUNK APE APPEARS IN COURT/, 'Win Case Three.'],
+  ['fmoty', /FLORIDA MAN OF THE YEAR/, 'The highest honor in the state.'],
+  // ---- favors ----
+  ['heist', /ROLLER DOG MACHINE FROM RACCOON CARTEL/, 'Darlene’s machine went missing.'],
+  ['tour', /BETTER THAN DISNEY/, 'Show a visitor the real Florida.'],
+  ['kevinWin', /DUMPSTER A RUG/, 'Kevin has a lottery feeling.'],
+  ['tenFavors', /TEN FAVORS/, 'Be a good neighbor. Ten times.'],
   // ---- gators ----
   ['wrestleGator', /WRESTLES ALLIGATOR "FOR FUN"/, 'Get hands-on with a gator.'],
   ['wrestleChuck', /ALLIGATOR NAMED "CHUCK," CALLS IT/, 'Chuck needs a hug. A firm one.'],
