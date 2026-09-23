@@ -193,7 +193,7 @@ function update(dt) {
     case 'title': Game.cam.x = 300 + Math.sin(Game.t * .05) * 260; Game.cam.y = 180 + Math.sin(Game.t * .04) * 120; for (const a of Game.animals) if (a.type === 'gator') updateGator(a, dt); return;
     case 'talk': updateTalk(dt); tickWorld(dt * .0); return;
     case 'fish': Fishing.update(dt); tickFx(dt); updateParts(dt); return;
-    case 'wrestle': Wrestle.update(dt); return;
+    case 'wrestle': Wrestle.update(dt); tickFx(dt); return;
     case 'raccoon': Minigame.updateRaccoon(dt); return;
     case 'court': return;
     case 'shop': if (Input.tapped('pause') || Input.tapped('b')) closeShop(); return;

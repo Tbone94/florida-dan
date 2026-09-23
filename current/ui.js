@@ -147,7 +147,8 @@ let last = performance.now();
 function frame(now) {
   const dt = Math.min(.05, (now - last) / 1000); last = now;
   Input.poll(); menuNav();
-  update(dt); render(); hud();
+  // one bad frame should never freeze the swamp on its last image; log it and keep going
+  try { update(dt); render(); hud(); } catch (e) { console.error('frame error', e); }
   Sound.music(dt, Game.fx.powder > 0 ? 'speed' : Game.fx.high > 0 ? 'slow' : Game.fx.shroom > 0 ? 'trip' : 'norm');
   Input.endFrame();
   if (!window.TRAILER) requestAnimationFrame(frame);

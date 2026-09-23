@@ -40,7 +40,7 @@ function useItem(k) {
       setTimeout(() => { if (Game.fx.high > 0) toast('MUNCHIES. Dan would kill a man for a roller dog.'); }, 14000);
       break;
     case 'shroom':
-      F.shroom = 70; L.shrooms++; Sound.play('trip');
+      F.shroom = 45; L.shrooms++; Sound.play('trip');
       toast(pick(['Uh oh. The trees are lookin’ at me.', 'Colors have SOUNDS now.', 'Why is my hand so... interesting.']));
       Story.event('shroom');
       break;

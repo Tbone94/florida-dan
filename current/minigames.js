@@ -35,7 +35,7 @@ const Fishing = {
   exit() { Game.mode = 'play'; ui.fishHud.hidden = true; ui.card.hidden = true; this.msg(''); this.f = null; },
   lose(text) { const f = this.f; f.phase = 'done'; f.endT = 1.8; f.hooked = null; ui.fishHud.hidden = true; this.msg(text, 1.8); Sound.play('fail'); },
   update(dt) {
-    const f = this.f; if (!f) return;
+    const f = this.f; if (!f) { Game.mode = 'play'; ui.fishHud.hidden = true; ui.card.hidden = true; return; }
     f.t += dt;
     if (f.msgT > 0 && (f.msgT -= dt) <= 0 && f.phase !== 'card') this.msg('');
     const reel = Input.held('a');
@@ -177,12 +177,14 @@ const Wrestle = {
     // opts: { foe: 'gator'|'python'|'chuck', onWin, onLose, arena: 'swamp'|'court' }
     const hard = opts.foe === 'chuck' ? 1.5 : opts.foe === 'python' ? .8 : 1;
     this.w = { ...opts, hard, grip: 35, t: 0, prompt: null, promptT: 1.4, thrash: 0, msgT: 0, over: false, overT: 0, won: false };
-    Game.prevMode = Game.mode; Game.mode = 'wrestle'; ui.wrestle.hidden = false; this.msg(opts.foe === 'python' ? 'GRAB THAT NOODLE!' : 'HOLD THE JAWS SHUT!');
+    Game.prevMode = Game.mode; Game.mode = 'wrestle'; ui.wrestle.hidden = false; ui.wrestlePrompt.textContent = ''; this.msg(opts.foe === 'python' ? 'GRAB THAT NOODLE!' : 'HOLD THE JAWS SHUT!');
     Sound.play('chomp');
   },
   msg(s) { ui.wrestleMsg.textContent = s; },
   update(dt) {
-    const w = this.w; w.t += dt;
+    const w = this.w;
+    if (!w) { Game.mode = 'play'; ui.wrestle.hidden = true; ui.wrestlePrompt.textContent = ''; return; }   // never strand the player in an empty fight
+    w.t += dt;
     if (w.over) { if ((w.overT -= dt) <= 0) this.finish(); return; }
     if (Input.tapped('a')) { w.grip += 5.5 / w.hard * (Game.fx.powder > 0 ? 1.6 : 1) * (Game.fx.buzz > 60 ? .8 : 1); Sound.play('reel'); Game.shake = 1.5; }
     w.grip -= dt * 7 * w.hard;
@@ -201,7 +203,7 @@ const Wrestle = {
   },
   swipe() { const a = Input.axis(); if (!Game._swipeLock && Math.hypot(a.x, a.y) > .8) { Game._swipeLock = true; return dirOf(a.x, a.y); } if (Math.hypot(a.x, a.y) < .3) Game._swipeLock = false; return null; },
   finish() {
-    const w = this.w; this.w = null; ui.wrestle.hidden = true; Game.mode = Game.prevMode === 'wrestle' ? 'play' : Game.prevMode;
+    const w = this.w; this.w = null; ui.wrestle.hidden = true; ui.wrestlePrompt.textContent = '';   // the ▶ lives outside the panel; clear it or it blinks forever Game.mode = Game.prevMode === 'wrestle' ? 'play' : Game.prevMode;
     if (w.won) w.onWin && w.onWin(); else w.onLose && w.onLose();
   },
   draw() {
