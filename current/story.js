@@ -138,7 +138,7 @@ const Story = {
       ]);
     }
     if (n === 3) {
-      setQuests([['plywood', 'Grab plywood from the dumpster'], ['board', 'Board up the cabin'], ['stock', 'Get 6 beers (0/6)'], ['party', 'Merle’s party (after 4 PM)']]);
+      setQuests([['plywood', 'Grab plywood from the dumpster'], ['board', 'Board up the cabin'], ['stock', 'Get 6 beers (0/6)'], ['party', 'Merle’s party (4 PM, or wait at Merle’s)']]);
       say([
         ['RADIO', '...Hurricane Wanda, Category Two, making landfall tonight. Residents are urged to evacuate, or at minimum, to not do anything stupid.'], ['DAN', 'Hurricane party.'],
         [PHONE_B, 'Dan. I can hear you thinking “hurricane party.” STAY. INSIDE.'],
@@ -216,7 +216,12 @@ const Story = {
       return say([['MERLE', 'Sign your paper? Sure. Soon as I see my forty dollars, Danny.'], ['MERLE', 'Sell some fish to Darlene. Bag some pythons for Rhonda. Scratch some tickets. I don’t care. Forty.'], ['DAN', `I got $${Game.money}.`], ['MERLE', 'Then you got ' + (40 - Game.money) + ' problems.']]);
     }
     if (day === 3 && Game.hour >= 16 && !F.party) return this.party();
-    if (day === 3) return say([['MERLE', 'Party don’t start till 4, Danny. Wanda’s fashionably late.'], ['MERLE', 'Bring beer. Six. Minimum. It’s a CATEGORY TWO.']]);
+    if (day === 3) {   // no standing around till 4: you can wait it out on Merle's porch
+      return say([['MERLE', 'Party don’t start till 4, Danny. Wanda’s fashionably late.'], ['MERLE', 'Bring beer. Six. Minimum. It’s a CATEGORY TWO.', [
+        ['Wait for Wanda on Merle’s porch', () => { F.waitParty = true; return [['', 'Dan sits on Merle’s porch. Merle talks about his other trailer for five straight hours. The sky turns green.']]; }],
+        ['“Be back later.”', () => [['MERLE', 'Don’t forget the beer, Danny.']]],
+      ]]], () => { if (F.waitParty) { F.waitParty = false; F.partyNag = true; Game.hour = Math.max(Game.hour, 16); Game.storm = .75; this.party(); } });
+    }
     return say([['MERLE', pick(['You seen Chuck? He was eyein’ my flamingo again.', 'Don’t make it weird, Danny. Go fish.', 'I’m thinkin’ about gettin’ a second trailer. For my other trailer.', 'Did you know gators got weak jaw-openin’ muscles? You can hold ’em shut with one hand. Or two. I used two.'])]]);
   },
   darlene() {

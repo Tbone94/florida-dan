@@ -49,7 +49,7 @@ const Dance = {
   s: null,
   start(then) {
     const seq = []; for (let i = 0; i < 16; i++) seq.push({ dir: pick(['up', 'down', 'left', 'right']), t: 1.4 + i * .6, hit: null });
-    this.s = { seq, t: 0, score: 0, then, flash: '', flashT: 0 }; Game.mode = 'dance';
+    this.s = { seq, t: 0, score: 0, then, flash: '', flashT: 0 }; Game.mode = 'dance'; padFor(true);
     ui.wrestle.hidden = false; ui.wrestleMsg.textContent = 'DANCE-OFF!'; ui.gripFill.style.width = '0%';
     ui.wrestle.querySelector('.hint').textContent = 'HIT THE ARROW WHEN IT REACHES THE BOX · 11 OF 16 TO WIN';
     Sound.play('headline');
@@ -69,7 +69,7 @@ const Dance = {
     if (s.t > s.seq[s.seq.length - 1].t + .9) this.finish();
   },
   finish() {
-    const s = this.s; this.s = null; ui.wrestle.hidden = true; ui.wrestle.querySelector('.hint').textContent = 'MASH E · HIT THE ARROW WHEN HE THRASHES'; Game.mode = 'play';
+    const s = this.s; this.s = null; padFor(false); ui.wrestle.hidden = true; ui.wrestle.querySelector('.hint').textContent = 'MASH E · HIT THE ARROW WHEN HE THRASHES'; Game.mode = 'play';
     if (s.score >= 11) s.then();
     else say([['DJ FLAMINGO', `${s.score} out of 16? My GRANDMA hits more beats than that.`], ['DJ FLAMINGO', 'Again. From the top?', [['“Hit it.”', () => { s.again = true; }], ['“Gimme a minute.”', () => [['DJ FLAMINGO', 'Take your time, abuelo. The floor ain’t goin’ nowhere.']]]]]], () => { if (s.again) Dance.start(s.then); });
   },

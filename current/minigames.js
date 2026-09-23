@@ -193,7 +193,7 @@ const Wrestle = {
     // opts: { foe: 'gator'|'python'|'chuck', onWin, onLose, arena: 'swamp'|'court' }
     const hard = opts.foe === 'chuck' ? 1.5 : opts.foe === 'python' ? .8 : 1;
     this.w = { ...opts, hard, grip: 35, t: 0, prompt: null, promptT: 1.4, thrash: 0, msgT: 0, over: false, overT: 0, won: false };
-    Game.prevMode = Game.mode; Game.mode = 'wrestle'; ui.wrestle.hidden = false; ui.wrestlePrompt.textContent = ''; this.msg(opts.foe === 'python' ? 'GRAB THAT NOODLE!' : 'HOLD THE JAWS SHUT!');
+    Game.prevMode = Game.mode; Game.mode = 'wrestle'; ui.wrestle.hidden = false; padFor(true); ui.wrestlePrompt.textContent = ''; this.msg(opts.foe === 'python' ? 'GRAB THAT NOODLE!' : 'HOLD THE JAWS SHUT!');
     Sound.play('chomp');
   },
   msg(s) { ui.wrestleMsg.textContent = s; },
@@ -219,7 +219,7 @@ const Wrestle = {
   },
   swipe() { const a = Input.axis(); if (!Game._swipeLock && Math.hypot(a.x, a.y) > .8) { Game._swipeLock = true; return dirOf(a.x, a.y); } if (Math.hypot(a.x, a.y) < .3) Game._swipeLock = false; return null; },
   finish() {
-    const w = this.w; this.w = null; ui.wrestle.hidden = true; ui.wrestlePrompt.textContent = '';   // the ▶ lives outside the panel; clear it or it blinks forever
+    const w = this.w; this.w = null; ui.wrestle.hidden = true; ui.wrestlePrompt.textContent = ''; padFor(false);   // the ▶ lives outside the panel; clear it or it blinks forever
     Game.mode = Game.prevMode === 'wrestle' ? 'play' : (Game.prevMode || 'play');
     if (w.won) w.onWin && w.onWin(); else w.onLose && w.onLose();
   },

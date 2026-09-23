@@ -5,7 +5,7 @@
 // ---------- OBJECTION! (object only to the lies; 3 seconds per statement) ----------
 const Objection = {
   s: null,
-  run(list, then) { this.s = { list, i: 0, t: 0, phase: 'show', score: 0, then }; Game.mode = 'objection'; this.show(); },
+  run(list, then) { this.s = { list, i: 0, t: 0, phase: 'show', score: 0, then }; Game.mode = 'objection'; padFor(true); this.show(); },
   show() {
     const it = this.s.list[this.s.i];
     ui.talk.hidden = false; ui.talk.classList.remove('phone'); ui.talkWho.hidden = false; ui.talkWho.textContent = this.speaker || 'PROSECUTOR VANCE'; ui.talkLine.textContent = it.text;
@@ -27,7 +27,7 @@ const Objection = {
     setTimeout(() => Sound.play(right ? 'cash' : 'fail'), 120);
   },
   finish() {
-    const s = this.s; this.s = null; this.speaker = null; ui.talk.hidden = true; ui.fishMsg.textContent = ''; Game.mode = 'court';
+    const s = this.s; this.s = null; this.speaker = null; padFor(false); ui.talk.hidden = true; ui.fishMsg.textContent = ''; Game.mode = 'court';
     if (s.score === s.list.length) headline('FLORIDA MAN OBJECTS AT EVERY LIE, IS RIGHT EVERY TIME; LAWYERS "FURIOUS"', 3);
     s.then(s.score, s.list.length);
   },

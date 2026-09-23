@@ -68,6 +68,8 @@ function hud() {
   updateHotbar(); renderQuests();
   if (Game.mode !== 'play') ui.prompt.hidden = true;
 }
+// touch controls must be up whenever a minigame needs input, even inside a cutscene (court) where the HUD is hidden
+function padFor(needed) { ui.pad.hidden = !(isTouch && (needed || !ui.hudTop.hidden)); }
 function showHud(on) { ['hudTop', 'hotbar'].forEach(k => ui[k].hidden = !on); ui.objective.hidden = !on || !ui.objective._v; if (!on) ui.hint.hidden = true; ui.pad.hidden = !(on && isTouch); }
 
 // ---------- shop ----------
