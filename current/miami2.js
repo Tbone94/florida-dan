@@ -104,6 +104,7 @@ const Race = {
     if (r.y >= this.finish) this.end(false);
   },
   end(won) {
+    this.lastWon = won;
     this.on = false; const r = Game.npcs.find(n => n.id === 'raul'); if (r) { r.race = false; r.skate = 1; }
     if (won) { done('raul'); Game.flags.witRaul = true; headline('FLORIDA MAN BEATS ROLLERBLADER IN OCEAN DRIVE RACE; ROLLERBLADER "DEVASTATED," DEMANDS REMATCH', 3); say([['RAUL', 'NO WAY. NO WAY, BRO. You beat me. I’ll testify. I’ll testify SO hard.']]); }
     else say([['RAUL', 'Too slow, Florida Man! Grab a cafecito and try again, bro. I’ll be skating.']]);

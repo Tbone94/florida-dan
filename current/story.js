@@ -5,7 +5,7 @@
 const headlineQ = [];
 function headline(text, allege = 5) {
   if (Game.day_.headlines.includes(text)) return;
-  Game.day_.headlines.push(text); Game.headlines.push({ day: Game.day, text });
+  Game.day_.headlines.push(text); Game.headlines.push({ day: Game.day, text }); (Game.day_.allege || (Game.day_.allege = {}))[text] = allege;
   Game.allegations = Math.min(100, Game.allegations + allege);
   headlineQ.push({ text, isNew: Sheet.mark(text) });
   if (typeof Heat !== 'undefined' && Game.mode !== 'court') Heat.add(allege >= 8 ? 2 : 1);
@@ -189,8 +189,9 @@ const Story = {
 
   // --- people ---
   talk(n) {
-    if (Game.day >= 5 && Cases.talk(n)) return;
     if (Gigs.talk(n)) return;
+    if (n.id === 'coral') return say([['CORAL', pick(['Surf & Dive! We sell gear. The engine in the back is “for display.”', 'You look like a guy who’d buy a metal detector. That’s a compliment.', 'Waves are flat, prices are fair, questions are discouraged.'])], ['CORAL', 'Wanna look?', [['Browse', () => { Game.mode = 'shop'; openShop('surf'); return null; }], ['“Nah.”', () => [['CORAL', 'Hang loose. Or don’t. Free country.']]]]]]);
+    if (Game.day >= 5 && Cases.talk(n)) return;
     const F = Game.flags, day = Game.day;
     if (n.id === 'merle') return this.merle();
     if (n.id === 'darlene') return this.darlene();

@@ -44,13 +44,13 @@ const Heat = {
   end() { this.cop = null; const r = Game.npcs.find(n => n.id === 'rhonda'); if (r) r.hidden = false; },
   busted() {
     this.end(); Sound.play('siren'); react('flop');
-    const fine = Math.min(Game.money, 20), took = ['beer', 'joint', 'shroom', 'powder'].filter(k => Game.inv[k] > 0);
-    Game.money -= fine; took.forEach(k => Game.inv[k] = 0); Game.dan.ride = null;
-    headline(pick(['FLORIDA MAN LEADS DEPUTY ON LOW-SPEED CHASE, CAUGHT HIDING BEHIND A LAWN FLAMINGO', 'FLORIDA MAN ARRESTED AFTER TELLING DEPUTY "YOU CAN’T ARREST ME, I’M ON THE CLOCK"']), 6);
-    Game.heat = 0;
-    say([['RHONDA', pick(['Gotcha. You run like a wet sock, Dan.', 'End of the line, Dan. Hands where I can see ’em. Not THERE.', 'Dan. You were jogging. I was DRIVING.'])],
-      ['RHONDA', `That’s a $${fine} fine${took.length ? `, and I’m confiscating the ${took.map(k => ITEMS[k].name).join(', ')}` : ''}.`],
-      ['DAN', pick(['This is entrapment.', 'I want to speak to Brenda.', 'Can I at least keep one beer. For my nerves.'])], ['RHONDA', 'Go home, Dan.']]);
+    const mia = MIAMI(), cop = mia ? 'OFFICER' : 'RHONDA', fine = Math.min(Game.money, 20), took = ['beer', 'joint', 'shroom', 'powder'].filter(k => Game.inv[k] > 0), bribe = mia ? 40 : 25;
+    Game.dan.ride = null; Game.heat = 0;
+    const takeFine = () => { Game.money -= fine; took.forEach(k => Game.inv[k] = 0); headline(pick(['FLORIDA MAN LEADS DEPUTY ON LOW-SPEED CHASE, CAUGHT HIDING BEHIND A LAWN FLAMINGO', 'FLORIDA MAN ARRESTED AFTER TELLING DEPUTY "YOU CAN’T ARREST ME, I’M ON THE CLOCK"']), 6);
+      return [[cop, `That’s a $${fine} fine${took.length ? `, and I’m confiscating the ${took.map(k => ITEMS[k].name).join(', ')}` : ''}.`], ['DAN', pick(['This is entrapment.', 'I want to speak to Brenda.', 'Can I at least keep one beer. For my nerves.'])], [cop, 'Go home, Dan.']]; };
+    const payOff = () => { Game.money -= bribe; Sound.play('cash'); return [['', `Dan folds $${bribe} into a handshake. A long handshake.`], [cop, pick(['...I didn’t see anything. I was looking at a bird.', 'Huh. Must’ve been some other Florida Man.', 'This never happened, Dan. And wash your hands.'])]]; };
+    say([[cop, pick(['Gotcha. You run like a wet sock, Dan.', 'End of the line, Dan. Hands where I can see ’em. Not THERE.', 'Dan. You were jogging. I was DRIVING.'])],
+      ...(Game.money >= bribe ? [['DAN', '', [[`Slip ${mia ? 'him' : 'her'} $${bribe} (keep your stuff, no headline)`, payOff], ['Take the fine', takeFine]]]] : takeFine())]);
   },
   escaped(how) {
     this.end();

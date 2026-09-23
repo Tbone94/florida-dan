@@ -52,6 +52,7 @@ function buildMiami() {
     boutique: { x: 48 * TS, y: 42.4 * TS }, stationDoor: { x: 18 * TS, y: 53.4 * TS },
     merle: { x: -999, y: -999 }, darlene: { x: -999, y: -999 }, rhonda: { x: -999, y: -999 }, icemachine: { x: -999, y: -999 }, dockEnd: { x: 80 * TS, y: 30 * TS }, ramp: { x: 8 * TS, y: 36 * TS }, pasture: { x: -999, y: -999 },
   };
+  if (typeof addMiamiExtras === 'function') Object.assign(W.spots, addMiamiExtras(add));   // surf shack, Gazette box (money.js)
 }
 
 // ---------- drawing the city ----------
@@ -138,6 +139,7 @@ const Miami = {
     if (Game.flags.trashBaby && !Game.flags.tbStay) A.push(makeCritter('raccoon', Game.dan.x + 14, Game.dan.y, { pet: true }));
     const P = Game.pickups = [];
     for (let i = 0, k = 0; i < 8 && k < 400; k++) { const x = rnd(12, 71) * TS, y = rnd(2, 58) * TS, tt = World.at(x, y); if ((tt === T.SAND || tt === T.SIDEWALK || tt === T.PLAZA || tt === T.GRASS) && !World.solidAt(x, y)) { P.push({ kind: pick(['beer', 'cafecito', 'scratch', 'hotdog', 'cig', 'bait']), x, y }); i++; } }
+    Game.npcs.push(makeNPC('coral', 'Coral', S_.surf.x, S_.surf.y, 'down'));
     if (typeof MiamiCases !== 'undefined') MiamiCases.spawn();
   },
   // Raul skates the Ocean Drive sidewalk, forever
@@ -178,6 +180,7 @@ function travel(to) {
     if (to === 'miami' && !Game.flags.miamiFirst) { Game.flags.miamiFirst = true; headline('FLORIDA MAN ARRIVES IN MIAMI WITH A COOLER AND "NO PLAN"; CITY "BRACES"', 3); }
     toast(to === 'miami' ? 'Welcome to MIAMI. Everything is pink and costs $19.' : 'Home sweet swamp.', 3.5);
     if (typeof MiamiCases !== 'undefined') MiamiCases.arrived(to);
+    if (!Gigs.active()) Gigs.newDay();   // new town, new people with work
     save();
   });
 }

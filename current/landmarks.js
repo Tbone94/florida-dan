@@ -22,7 +22,7 @@ function addLandmarks(add) {
   // Sunshine Motor Inn + fireworks stand: the empty strip south of the road
   World.fill(27, 51, 38, 53, T.CONCRETE);
   add('motel', 27, 48, 11, 2.2); add('motelsign', 38.6, 50.8, 1, .6); add('icebox', 26, 50.2, 1, 1);
-  addCabinJunk(add);
+  addCabinJunk(add); add('newsbox', 21.3, 42.2, .7, .6);
   add('fireworks', 44.6, 47.6, 4, 1.8); add('pot', 49, 48.9, 1, 1);
   return {
     bubba: { x: 57.6 * TS, y: 41.2 * TS }, bubbaDock: { x: 58.5 * TS, y: 32.5 * TS }, tiki: { x: 66 * TS, y: 18.9 * TS }, tikiDock: { x: 61 * TS, y: 19.5 * TS },

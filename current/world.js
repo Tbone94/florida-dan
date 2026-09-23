@@ -328,7 +328,7 @@ function drawProp(p, cx, cy, t) {
       break;
     }
     case 'reeds': { for (let i = 0; i < 5; i++) { const rx = x + 2 + i * 3 + p.s * 2, sw = Math.sin(t * 1.5 + i + p.s * 5); R(rx + sw * .6, y + 2 + (i % 2) * 3, 1, 11 - (i % 2) * 3, PAL.camo); } R(x + 5 + p.s * 3, y, 2, 5, PAL.brown); break; }
-    default: if (typeof drawLandmark === 'function' && drawLandmark(p, x, y, w, h, t)) break; if (typeof drawMiamiProp === 'function') drawMiamiProp(p, x, y, w, h, t); break;
+    default: if (typeof drawLandmark === 'function' && drawLandmark(p, x, y, w, h, t)) break; if (typeof drawMoneyProp === 'function' && drawMoneyProp(p, x, y, w, h, t)) break; if (typeof drawMiamiProp === 'function') drawMiamiProp(p, x, y, w, h, t); break;
     case 'lily': { R(x + 4, y + 6, 8, 5, PAL.grassDD); R(x + 5, y + 6, 7, 4, PAL.grass); R(x + 8, y + 6, 1, 2, PAL.waterD); if (p.s > .7) R(x + 6, y + 5, 2, 2, PAL.hat); break; }
   }
 }

@@ -242,7 +242,7 @@ function update(dt) {
   if (Game.storm > .3 && !Game.dan.ride) { const nx = Game.dan.x + Game.storm * 16 * dt; if (canWalk(nx, Game.dan.y)) Game.dan.x = nx; }
   tickWorld(dt);
   Story.tick(dt);
-  Events.tick(dt); Gigs.tick(dt);
+  Events.tick(dt); Gigs.tick(dt); Detector.tick(dt);
   Heat.tick(dt);
   if (Input.tapped('b')) yell();
   if (Input.tapped('punch')) punch();

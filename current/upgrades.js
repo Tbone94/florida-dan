@@ -37,7 +37,7 @@ Object.assign(ICONS, {
 });
 
 const Upgrades = {
-  forSale: () => Object.keys(UPGRADES).filter(k => !hasUp(k)),
+  forSale: (shop = 'bubba') => Object.keys(UPGRADES).filter(k => !hasUp(k) && (UPGRADES[k].shop || 'bubba') === shop),
   buy(k) {
     Game.flags.up = Game.flags.up || {}; Game.flags.up[k] = true;
     const H = { airboat: 'FLORIDA MAN BUYS AIRBOAT; NEIGHBORS "CAN’T HEAR THEMSELVES THINK"', billy: 'FLORIDA MAN BUYS SINGING FISH, CALLS IT "HOME DECOR"', recliner: 'FLORIDA MAN INSTALLS RECLINER ON PORCH, CALLS IT "THE OFFICE"' };

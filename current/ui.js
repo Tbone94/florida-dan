@@ -79,7 +79,8 @@ const VENDORS = {
   van: { title: 'WAYNE’S MYSTERY VAN', sub: 'Cash only. No cops. No Rhondas. Buying here gets you noticed (+1★).', items: () => ['joint', 'gummy'], shady: true },
   clinic: { title: 'DR. SNIFFLES’ SINUS CLINIC', sub: 'Medical grade. Allegedly. Buying here gets you noticed (+1★).', items: () => ['powder', 'cafecito'], shady: true },
   suits: { title: 'PASTEL SUITS', sub: 'Miami formal. For crimes, weddings, and crimes at weddings.', items: () => ['suit'] },
-  bubba: { title: 'BUBBA’S', sub: 'Boats, bait, and bail. Mostly bail.', items: () => Upgrades.forSale() },
+  bubba: { title: 'BUBBA’S', sub: 'Boats, bait, and bail. Mostly bail.', items: () => Upgrades.forSale('bubba') },
+  surf: { title: 'SURF & DIVE', sub: 'Wax, gear, and one extremely illegal engine.', items: () => Upgrades.forSale('surf') },
   cafe: { title: 'CAFÉ ABUELA', sub: 'Ventanita open. Pay in cash or compliments.', items: () => ['cafecito', 'pastelito'] },
 };
 let vendor = 'gulp';
@@ -129,7 +130,7 @@ function buy(k, b) {
   box.append(f); setTimeout(() => f.remove(), 950);
   b.classList.remove('bought'); void b.offsetWidth; b.classList.add('bought');
   shopMsg(`Bought: ${name} for $${price}.`);
-  if (!shopItems().includes(k)) { if (shopItems().length) renderShop(shopItems()[0]); else { closeShop(); toast('Bubba’s sold out. You bought everything. He’s buying a boat.'); } } else refreshShop();
+  if (!shopItems().includes(k)) { if (shopItems().length) renderShop(shopItems()[0]); else { closeShop(); toast(vendor === 'surf' ? 'Coral’s sold out. She’s closing early to go surf.' : 'Bubba’s sold out. You bought everything. He’s buying a boat.'); } } else refreshShop();
   const w = $('wallet'); if (w) { w.classList.remove('tick'); void w.offsetWidth; w.classList.add('tick'); }
 }
 function shopMsg(msg, bad) { const el = $('shopMsg'); el.textContent = msg; el.className = bad ? 'bad' : 'good'; el.hidden = false; clearTimeout(shopMsg.t); shopMsg.t = setTimeout(() => el.hidden = true, 2200); }

@@ -72,6 +72,7 @@ const SWAPS = {
   rita: { hat: '#c46a3a', hatD: '#8e4a26', tank: '#2ba59a', tankD: '#1b7d74', stain: PAL.white, jorts: PAL.greyD, hair: '#c46a3a', shades: PAL.skin, skin: '#e8a882', flip: PAL.white },
   boomer: { hat: PAL.red, hatD: PAL.redD, tank: PAL.white, tankD: PAL.blue, stain: PAL.red, jorts: PAL.blue, hair: PAL.grey, shades: PAL.shades, skin: '#e0956a', flip: PAL.red },
   earl: { hat: PAL.tan, hatD: PAL.tanD, tank: PAL.blue, tankD: PAL.blueD, stain: PAL.mudL, jorts: PAL.blueD, hair: PAL.white, shades: PAL.skin, skin: '#d99a74', flip: PAL.brown },
+  coral: { hat: PAL.yellow, hatD: PAL.orange, tank: '#ff5ea8', tankD: '#c23a7d', stain: PAL.yellow, jorts: '#7fe0d6', hair: PAL.blonde, shades: PAL.shades, skin: '#c98a62', flip: PAL.yellow },
   tourist: { hat: PAL.white, hatD: PAL.tankD, tank: PAL.teal, tankD: '#1b8f83', stain: PAL.yellow, jorts: PAL.tankD, skin: '#ff9d8a', skinD: '#e0685a', hair: PAL.blonde },
 };
 

@@ -12,6 +12,11 @@ const HEADLINES = [
   ['gigCow', /HERDS ESCAPED COW/, 'Earl’s cow keeps getting out.'],
   ['airboat', /BUYS AIRBOAT/, 'Bubba sells something with a very big fan.'],
   ['recliner', /RECLINER ON PORCH/, 'Every office needs a chair.'],
+  ['gigCafecito', /CAFECITO TO SOUTH BEACH LIFEGUARDS/, 'Abuela worries about the lifeguards.'],
+  ['gigRematch', /BEATS ROLLERBLADER TWICE/, 'Raul wants a rematch.'],
+  ['gigPickles', /IGUANA IN BOW TIE/, 'Sheila lost a very dapper lizard.'],
+  ['ring', /FINDS WEDDING RING WITH METAL DETECTOR/, 'The beach hides things. Bring the right tool.'],
+  ['doubloon', /FINDS PIRATE GOLD/, 'Somewhere under the sand, there’s real treasure.'],
 
   // ---- the Flamingo case ----
   ['fry', /DEEP-FRIES FROZEN TURKEY/, 'Merle, a frozen turkey, and hot oil.'],

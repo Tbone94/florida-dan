@@ -28,7 +28,7 @@ function moveDan(dt) {
   let sp = 56 * (F.powder > 0 ? 1.9 : 1) * (F.crash > 0 ? .55 : 1) * (F.high > 0 ? .85 : 1) * (Input.held('run') ? 1.35 : 1);
   if (D.ride === 'boat') {
     const air = hasUp('airboat'), k0 = World.at(D.x, D.y);
-    sp = (air ? (k0 === T.SAWGRASS ? 70 : k0 === T.SHALLOW ? 84 : 116) : k0 === T.SHALLOW ? 42 : 78) * (F.powder > 0 ? 1.6 : 1);
+    sp = (air ? (k0 === T.SAWGRASS ? 70 : k0 === T.SHALLOW ? 84 : 116) : k0 === T.SHALLOW ? 42 : 78) * (F.powder > 0 ? 1.6 : 1) * (MIAMI() && hasUp('cigboat') ? 1.6 : 1);
     const nx = D.x + ax * sp * dt, ny = D.y + ay * sp * dt;
     if (canBoat(nx, D.y)) D.x = nx; if (canBoat(D.x, ny)) D.y = ny;
     Object.assign(Game.boat, { x: D.x, y: D.y, dir: D.dir });
@@ -91,6 +91,8 @@ function drawDan(x, y, t) {
     OR(fx, fy, 4, 4, PAL.skin); if (k > .4) { R(fx - dx * 5, fy + 1, 3, 1, PAL.white); R(fx - dx * 4, fy + 3, 2, 1, PAL.white); }
   }
   if (F.powder > 0) { R(x - 3, y - 13 + bob, 1, 1, PAL.white); }   // "sinus medicine" residue
+  if (hasUp('aviators') && D.dir !== 'up') R(x - 4, y - 16 + bob, 8, 1, PAL.yellow);   // gold aviators
+  Detector.draw(x, y, t);
   if (D.carry) { const s = SPR.icons[D.carry]; if (s) g.drawImage(s, Math.round(x - 5), Math.round(y - 33 + bob)); }
 }
 
@@ -298,6 +300,7 @@ function drawCritter(c, cx, cy, t) {
   if (c.pet && Game.tbFace === c && Game.mode === 'play') {   // an E bubble over his head when you're looking at him
     const by = y - s.height - 14 + Math.round(Math.sin(t * 5)); OR(x - 6, by - 6, 12, 11, PAL.ink); R(x - 1, by + 5, 3, 2, PAL.ink); label(Input.padActive ? 'A' : 'E', x + .5, by + 3, PAL.yellow, 7);
   } else if (c.pet) label('TRASH BABY', x, y - s.height - 4, PAL.grey, 5);
+  if (c.tag) label(c.tag, x, y - s.height - 6, PAL.yellow, 5);
 }
 
 // ---------- people ----------
