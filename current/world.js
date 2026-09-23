@@ -211,6 +211,10 @@ function drawProp(p, cx, cy, t) {
       for (let i = 0; i < w + 8; i += 4) R(x - 4 + i, y - 30, 1, 18, PAL.tinD);
       R(x + 10, y - 26, 12, 6, PAL.rust); R(x + 50, y - 20, 9, 5, PAL.rust);
       if (Game.flags.stopSignOnRoof) { OR(x + 30, y - 40, 12, 12, PAL.red); R(x + 33, y - 35, 6, 2, PAL.white); R(x + 35, y - 28, 2, 8, PAL.grey); }
+      if (Game.flags.stopSignOnRoof) {   // the ladder, so you can find your way up
+        R(x + 3, y - 30, 2, 48, PAL.woodD); R(x + 11, y - 30, 2, 48, PAL.woodD);
+        for (let ly = y - 26; ly < y + 16; ly += 6) R(x + 3, ly, 10, 2, PAL.woodL);
+      }
       OR(x + 36, y + h - 20, 12, 20, PAL.woodD); R(x + 45, y + h - 11, 2, 2, PAL.yellow);   // door
       OR(x + 9, y + 2, 14, 11, PAL.yellow); R(x + 15, y + 2, 1, 11, PAL.ink); R(x + 9, y + 7, 14, 1, PAL.ink);
       OR(x + 56, y + 2, 12, 11, PAL.yellow); R(x + 61, y + 2, 1, 11, PAL.ink);
