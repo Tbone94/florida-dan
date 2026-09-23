@@ -62,7 +62,7 @@ function spawn() {
   A.push(makeCritter('pelican', S_.dockEnd.x - 20, S_.dockEnd.y - 8), makeCritter('pelican', S_.ramp.x + 10, S_.ramp.y + 30));
   for (let i = 0; i < 4; i++) A.push(makeCritter('iguana', rnd(24, 70) * TS, rnd(38.5, 42.5) * TS));
   for (let i = 0; i < 5; i++) A.push(makeCritter('cow', rnd(52, 67) * TS, rnd(48.5, 56) * TS));
-  if (Game.flags.trashBaby) A.push(makeCritter('raccoon', Game.dan.x + 14, Game.dan.y, { pet: true }));
+  if (Game.flags.trashBaby) A.push(Game.flags.tbStay ? makeCritter('raccoon', S_.door.x + 22, S_.door.y + 8, { pet: true }) : makeCritter('raccoon', Game.dan.x + 14, Game.dan.y, { pet: true }));
   const P = Game.pickups = [], put = (kind, x, y) => { if (WALKABLE(World.at(x, y)) && World.at(x, y) !== T.SHALLOW && !World.solidAt(x, y)) P.push({ kind, x, y }); };
   put('beer', 23 * TS, 18.6 * TS); put('bait', S_.dockEnd.x - 40, S_.dockEnd.y + 1); put('bait', S_.ramp.x, 38.5 * TS); put('cig', 14 * TS, 19.4 * TS);
   if (Game.day === 1) put('joint', 22 * TS, 16.5 * TS);
@@ -94,6 +94,7 @@ function interaction() {
   // vehicles you're standing right on top of beat anything else nearby (a cooler parked by the courthouse door)
   if (near(Game.cooler, 13)) return { label: 'Ride the motorized cooler', fn: () => { D.ride = 'cooler'; D.x = Game.cooler.x; D.y = Game.cooler.y; Sound.play('engine'); if (Game.fx.buzz > 50 || Game.fx.powder > 0) Game.day_.dui = true; } };
   const st = Story.interactions(); if (st.length) return st[0];
+  if (Game.flags.tbStay) { const tb = Game.animals.find(a => a.pet); if (tb && near(tb, 20)) return { label: 'Come on, Trash Baby', fn: () => setTrashBaby(false) }; }
   if (near(Game.boat, 26)) return { label: 'Board the SS Budget', fn: () => { D.ride = 'boat'; D.x = Game.boat.x; D.y = Game.boat.y; Sound.play('engine'); } };
   if (near(Game.cooler, 18)) return { label: 'Ride the motorized cooler', fn: () => { D.ride = 'cooler'; D.x = Game.cooler.x; D.y = Game.cooler.y; Sound.play('engine'); if (Game.fx.buzz > 50 || Game.fx.powder > 0) Game.day_.dui = true; } };
   const p = facingPoint(16), k = World.at(p.x, p.y), here = World.at(D.x, D.y);

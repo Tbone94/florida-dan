@@ -25,6 +25,12 @@ s = s.replace('  @media (prefers-reduced-motion: reduce)', '''  /* director-mode
   #tcard.miami { background: linear-gradient(180deg, #2a0f3d 0%, #7b2a8c 45%, #ff4fd8 75%, #ffb36b 100%); }
   #tcard.miami .big { text-shadow: 7px 7px 0 #27c6b4, 14px 14px 0 #1a0b24; }
   #tcard.miami .big em { color: #ffd23f; }
+  #tcard.raps { background: #1a1423; }
+  #tcard .rap { background: var(--paper); color: var(--ink); border: 6px solid var(--ink); box-shadow: 16px 16px 0 var(--red); padding: .5em 1.1em .6em; transform: rotate(-1.5deg); text-align: left; max-width: 80%; }
+  #tcard .rh { font-family: var(--pixel); font-weight: 700; font-size: 34px; letter-spacing: .15em; color: var(--red); margin-bottom: .4em; }
+  #tcard .rap ol { margin: 0; padding: 0; list-style: none; }
+  #tcard .rap li { font-family: var(--display); font-size: 66px; line-height: 1.08; text-transform: uppercase; transform-origin: left center; }
+  #tcard .rap li::before { content: '✗ '; color: var(--red); }
   #tstack { position: absolute; inset: 0; z-index: 6; }
   .clip { position: absolute; width: 44%; background: var(--paper); color: var(--ink); border: 5px solid var(--ink); box-shadow: 12px 12px 0 var(--red); padding: .35em .6em .5em; font-family: var(--display); font-size: 44px; line-height: 1.02; text-transform: uppercase; }
   .clip small { display: block; font-family: var(--pixel); font-size: 20px; letter-spacing: .2em; color: var(--red); margin-bottom: .2em; }

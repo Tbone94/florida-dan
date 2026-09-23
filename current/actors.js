@@ -216,6 +216,12 @@ function updateCritter(c, dt) {
   c.timer -= dt; c.stun -= dt;
   if (c.stun > 0) return;
   if (c.type === 'raccoon' && c.pet) {                      // Trash Baby follows Dan, judges him silently
+    if (Game.flags.tbStay) {                                  // ...unless she's been told to stay: potter around her spot
+      if (c.hx === undefined) { c.hx = c.x; c.hy = c.y; }
+      const hx = c.hx - c.x, hy = c.hy - c.y, hd = Math.hypot(hx, hy);
+      if (hd > 3) { c.x += hx / hd * 30 * dt; c.y += hy / hd * 30 * dt; c.flip = hx < 0; c.moving = true; } else c.moving = false;
+      return;
+    }
     if (dist > 22) { c.x += dx / dist * Math.min(dist * 3, 70) * dt; c.y += dy / dist * Math.min(dist * 3, 70) * dt; c.flip = dx < 0; c.moving = true; } else c.moving = false;
     return;
   }

@@ -147,7 +147,7 @@ const Music = (() => {
     if (drums) {
       let k = hit(S.kick); if (o.night && k !== '.' && st !== 0) k = '.';
       if (k !== '.') I.kick(R, t, k === 'o' ? 1 : .82);
-      const sn = hit(S.snare); if (sn !== '.' && !o.night) I.snare(R, t, sn === 'o' ? 1 : .6, song.gated);
+      const sn = hit(S.snare); if (sn !== '.' && !o.night) I.snare(R, t, sn === 'o' ? 1 : .6, song.gated || o.gated);
       if (hit(S.clap) !== '.') I.clap(R, t, o.night ? .5 : 1);
       if (hit(S.rim) !== '.') I.rim(R, t);
       const h = o.fast ? (st % 2 ? 'x' : 'o') : hit(S.hat);
@@ -168,8 +168,8 @@ const Music = (() => {
     }
     if (S.banjo && !(o.lofi && st % 2)) { const r = ROLLS[S.banjo] || ROLLS.fwd; I.banjo(R, t, N(ch.v[r[st] % ch.v.length]) * (o.trip ? 1 + Math.sin(t * 5) * .015 : 1), st % 4 === 0 ? 1 : .75, st % 2 ? .3 : -.3); }
     if (S.twangArp && st % 2 === 0) I.twang(R, t, N(ch.v[[0, 1, 2, 3, 2, 1, 0, 1][st / 2 % 8]]), s16 * 2, .45);
-    if (S.arp && !o.lofi) I.arp(R, t, N(ch.v[[0, 1, 2, 3, 2, 3, 1, 2][st % 8]] + (st >= 8 ? 12 : 0)), .8);
-    if (S.pad && st === 0) I.pad(R, t, ch.v.slice(0, 3), s16 * 16, o.trip ? 1.4 : 1);
+    if ((S.arp || o.arp) && !o.lofi) I.arp(R, t, N(ch.v[[0, 1, 2, 3, 2, 3, 1, 2][st % 8]] + (st >= 8 ? 12 : 0)), .8);
+    if ((S.pad || o.pad) && st === 0) I.pad(R, t, ch.v.slice(0, 3), s16 * 16, o.trip ? 1.4 : 1);
     if (S.sirens && st === 0 && bar % 2 === 0) { I.siren(R, t, 950, s16 * 3); I.siren(R, t + s16 * 4, 700, s16 * 3); I.siren(R, t + s16 * 8, 950, s16 * 3); I.siren(R, t + s16 * 12, 700, s16 * 3); }
   }
   // the song's full arrangement laid out bar by bar: [[section, barInSection], ...]

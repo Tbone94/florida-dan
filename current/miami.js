@@ -135,7 +135,7 @@ const Miami = {
     for (let i = 0; i < 7; i++) A.push(makeCritter('iguana', rnd(58, 71) * TS, rnd(3, 57) * TS));   // Miami is 40% iguana
     A.push(makeCritter('pelican', 76 * TS, 29 * TS), makeCritter('pelican', 8.5 * TS, 24 * TS), makeCritter('pelican', 70 * TS, 30.3 * TS));
     A.push(makeGator(3 * TS, 26 * TS, false));
-    if (Game.flags.trashBaby) A.push(makeCritter('raccoon', Game.dan.x + 14, Game.dan.y, { pet: true }));
+    if (Game.flags.trashBaby && !Game.flags.tbStay) A.push(makeCritter('raccoon', Game.dan.x + 14, Game.dan.y, { pet: true }));
     const P = Game.pickups = [];
     for (let i = 0, k = 0; i < 8 && k < 400; k++) { const x = rnd(12, 71) * TS, y = rnd(2, 58) * TS, tt = World.at(x, y); if ((tt === T.SAND || tt === T.SIDEWALK || tt === T.PLAZA || tt === T.GRASS) && !World.solidAt(x, y)) { P.push({ kind: pick(['beer', 'cafecito', 'scratch', 'hotdog', 'cig', 'bait']), x, y }); i++; } }
     if (typeof MiamiCases !== 'undefined') MiamiCases.spawn();

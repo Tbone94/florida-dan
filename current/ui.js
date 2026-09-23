@@ -127,7 +127,7 @@ $('shopClose').addEventListener('click', closeShop);
 
 // ---------- journal / rap sheet ----------
 function openJournal() {
-  Game.mode = 'journal'; ui.journal.hidden = false;
+  Game.mode = 'journal'; ui.journal.hidden = false; tbButton();
   $('jControls').innerHTML = [['move', 'Move'], ['a', 'Use · talk · reel · wrestle'], ['punch', 'Punch (or throw an empty)'], ['b', 'Yell “GIT!”'], ['item', Input.padActive ? 'Use item (LB/RB to pick)' : 'Use an item'], ['run', 'Run'], ['journal', 'This rap sheet']]
     .filter(([k]) => !(k === 'run' && isTouch && !Input.padActive)).map(([k, t]) => `<li>${K(k)} ${t}</li>`).join('');
   ui.jQuests.innerHTML = ''; for (const q of Game.quests) { const li = document.createElement('li'); li.textContent = (q.done ? '✓ ' : '☐ ') + q.text; if (q.done) li.className = 'done'; ui.jQuests.append(li); }
@@ -140,6 +140,14 @@ function openJournal() {
     b.textContent = f ? `DAY ${f.day}` : '???'; sp.textContent = f ? f.text : hint; li.append(b, sp); ui.jSheet.append(li);
   }
 }
+function setTrashBaby(stay) {
+  Game.flags.tbStay = stay; const tb = Game.animals.find(a => a.pet);
+  if (tb) { tb.hx = stay ? tb.x : undefined; tb.hy = stay ? tb.y : undefined; }
+  toast(stay ? 'Trash Baby sits. She will wait right here. Judging you.' : 'Trash Baby scampers after you. Reunited.'); Sound.play(stay ? 'talk' : 'pickup'); save();
+  tbButton();
+}
+function tbButton() { const b = $('tbBtn'); b.hidden = !Game.flags.trashBaby; b.textContent = Game.flags.tbStay ? 'Trash Baby: staying put · call her' : 'Trash Baby: following · tell her to stay'; }
+$('tbBtn').addEventListener('click', e => { e.stopPropagation(); setTrashBaby(!Game.flags.tbStay); });
 function closeJournal() { ui.journal.hidden = true; Game.mode = 'play'; }
 $('journalClose').addEventListener('click', closeJournal);
 $('journalBtn').addEventListener('click', e => { e.currentTarget.blur(); if (Game.mode === 'play') openJournal(); });
