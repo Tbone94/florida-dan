@@ -55,6 +55,7 @@ function hud() {
   if (F.buzz > 25) tags.push(F.buzz > 80 ? 'WASTED' : 'BUZZED'); if (F.high > 0) tags.push(`HIGH ${Math.ceil(F.high)}s`); if (F.shroom > 0) tags.push(`TRIPPIN ${Math.ceil(F.shroom)}s`);
   if (F.powder > 0) tags.push(`“SINUSES” ${Math.ceil(F.powder)}s`); if (F.crash > 0) tags.push('CRASHING'); if (F.cig > 0) tags.push('SMOKIN');
   set(ui.fxTags, tags.join(' · '));
+  const hs = Math.ceil((Game.heat || 0) - .05); $('heat').hidden = hs <= 0; set($('heat'), '★'.repeat(hs) + '☆'.repeat(5 - Math.max(0, hs)) + (Heat.cop ? '  WANTED' : '')); $('heat').classList.toggle('hot', !!Heat.cop);
   ui.urgent.hidden = !(Game.urgent > 0); if (Game.urgent > 0) set(ui.urgent, `FIND A TOILET: ${Math.ceil(Game.urgent)}s`);
   for (const [id, n] of [['statBait', Game.inv.bait], ['statCan', Game.inv.can], ['statPy', Game.pythons.length]]) $(id).hidden = !n;
   updateHotbar(); renderQuests();
@@ -164,7 +165,7 @@ function frame(now) {
   Input.poll(); menuNav();
   // one bad frame should never freeze the swamp on its last image; log it and keep going
   try { update(dt); render(); hud(); } catch (e) { console.error('frame error', e); }
-  Sound.music(dt, Game.fx.powder > 0 ? 'speed' : Game.fx.high > 0 ? 'slow' : Game.fx.shroom > 0 ? 'trip' : 'norm');
+  Sound.music(dt, Heat.cop ? 'chase' : Game.fx.powder > 0 ? 'speed' : Game.fx.high > 0 ? 'slow' : Game.fx.shroom > 0 ? 'trip' : (Game.hour >= 20.5 || Game.hour < 6) ? 'night' : 'norm');
   Input.endFrame();
   if (!window.TRAILER) requestAnimationFrame(frame);
 }

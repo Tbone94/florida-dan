@@ -14,7 +14,7 @@ function hideUI() {
   ui.fishMsg.textContent = ''; ui.wrestlePrompt.textContent = '';
 }
 function base(o = {}) {
-  Game.day = 5; Game.flags = {}; Game.catchBag = []; Game.pythons = []; Game.money = 40;
+  Game.day = 5; Game.flags = { noChase: true }; Heat.end(); Game.heat = 0; Game.catchBag = []; Game.pythons = []; Game.money = 40;
   Game.inv = { beer: 9, cig: 5, joint: 2, shroom: 2, powder: 2, energy: 1, hotdog: 1, scratch: 1, firework: 2, bait: 3, fish: 0, can: 3, plywood: 0, sign: 0 };
   Game.mode = 'play'; Game.day_ = freshDayLog(); Game.day_.duiDone = true;
   Object.assign(Game.fx, { buzz: 0, high: 0, shroom: 0, powder: 0, crash: 0, cig: 0 });

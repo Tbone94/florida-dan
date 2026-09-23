@@ -30,6 +30,11 @@ const HEADLINES = [
   // ---- the law ----
   ['coolerDUI', /DUI ON MOTORIZED COOLER/, 'The cooler has headlights for a reason.'],
   ['canCop', /HITS DEPUTY WITH BEER CAN/, 'Greet Rhonda the family way.'],
+  ['caught', /LOW-SPEED CHASE|YOU CAN’T ARREST ME/, 'Get three stars of heat, then get caught.'],
+  ['escHide', /HIDES FROM POLICE IN PORTA-POTTY/, 'Lose Rhonda somewhere that smells.'],
+  ['escBoat', /ESCAPES POLICE IN JON BOAT/, 'Her cruiser can’t swim.'],
+  ['escCooler', /EVADES DEPUTY ON MOTORIZED COOLER/, 'Outrun the law on something with headlights.'],
+  ['escRun', /OUTRUNS DEPUTY IN FLIP-FLOPS/, 'Lose Rhonda on foot. Somehow.'],
   // ---- wildlife ----
   ['pythonHands', /PYTHON WITH BARE HANDS/, 'The Glades have noodles.'],
   ['pythonBounty', /FEET OF PYTHON, SAYS/, 'Rhonda pays by the foot. Bring a lot.'],

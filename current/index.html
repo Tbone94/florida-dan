@@ -31,6 +31,8 @@
   .bar i { position: absolute; inset: 0 auto 0 0; display: block; }
   .chill i { background: var(--teal); } .buzz i { background: var(--yellow); } .allege i { background: repeating-linear-gradient(90deg, var(--red) 0 4px, #ff7a5c 4px 8px); }
   .allege { color: var(--red); }
+  #heat { font-size: .95em; letter-spacing: .12em; color: var(--red); text-shadow: 1px 1px 0 #000; }
+  #heat.hot { animation: blink .5s steps(2) infinite; }
   #fxTags { font-size: .66em; color: var(--pink); letter-spacing: .08em; font-weight: 700; min-height: 1em; }
   .rightBox { display: flex; flex-direction: column; align-items: flex-end; gap: .35em; }
   .stats { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .7em; padding: .3em .6em; font-size: .78em; font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -192,6 +194,7 @@
         <div class="meter chill"><span>CHILL</span><div class="bar"><i id="chillFill"></i></div><span></span></div>
         <div class="meter buzz"><span>BUZZ</span><div class="bar"><i id="buzzFill"></i></div><span></span></div>
         <div class="meter allege"><span>FLA MAN</span><div class="bar"><i id="allegeFill"></i></div><span id="allegeLabel">0%</span></div>
+        <div id="heat" hidden></div>
         <div id="fxTags"></div>
       </div>
       <div class="rightBox">
@@ -284,6 +287,7 @@
 <script src="story.js"></script>
 <script src="minigames.js"></script>
 <script src="court.js"></script>
+<script src="chase.js"></script>
 <script src="game.js"></script>
 <script src="share.js"></script>
 <script src="ui.js"></script>

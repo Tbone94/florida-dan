@@ -15,6 +15,7 @@ const dirOf = (x, y) => Math.abs(x) > Math.abs(y) ? (x > 0 ? 'right' : 'left') :
 // ---------- Dan ----------
 function moveDan(dt) {
   const D = Game.dan, F = Game.fx; let { x: ax, y: ay } = Input.axis();
+  if (D.hiding) { D.moving = false; return; }
   if (F.shroom > .4 && (ax || ay)) { ax = -ax * (Math.sin(Game.t * .3) > .6 ? 1 : -1); ay = ay; }    // left is right now. deal with it
   if (F.buzz > 55 && (ax || ay)) {
     const a = Math.atan2(ay, ax) + Math.sin(Game.t * 2.3) * (F.buzz - 55) / 45 * .9, m = Math.hypot(ax, ay);
@@ -52,7 +53,7 @@ function bonk() { if (Game.t - bonkT < .8) return; bonkT = Game.t; Game.shake = 
 
 function drawDan(x, y, t) {
   const D = Game.dan, F = Game.fx;
-  if (D.hurt > 0 && Math.floor(t * 20) % 2) return;
+  if (D.hiding || (D.hurt > 0 && Math.floor(t * 20) % 2)) return;
   const spr = SPR.dan[D.dir][D.moving ? D.frame : 0];
   if (D.ride === 'boat') return drawBoat(x, y, Game.boat.dir, t, true);
   if (D.ride === 'cooler') return drawCooler(x, y, Game.cooler.dir, t, true);
@@ -110,6 +111,7 @@ const gatorCan = (x, y) => { const tx = Math.floor(x / TS), ty = Math.floor(y / 
 function updateGator(gt, dt) {
   const D = Game.dan, dx = D.x - gt.x, dy = D.y - gt.y, dist = Math.hypot(dx, dy);
   gt.cd -= dt; gt.chomp -= dt; gt.timer -= dt; gt.stun -= dt;
+  if (gt.belly > 0) { gt.belly -= dt; gt.lurk = false; return; }   // lying belly-up, thinking about its choices
   if (gt.stun > 0) { gt.lurk = false; return; }
   const range = gt.chuck ? 110 : 76, active = Game.mode === 'play';
   if (gt.state === 'flee') { if (gt.timer <= 0) gt.state = 'wander'; }
@@ -154,7 +156,12 @@ function drawGator(gt, cx, cy, t) {
   const parts = [];
   const put = (u, v, lu, lv, c) => parts.push([u * big, v * big, lu * big, lv * big, c]);
   const sw = Math.sin(t * (gt.state === 'chase' ? 12 : 4) + gt.seed * 7);
-  if (gt.lurk) {
+  if (gt.belly > 0) {   // belly-up: pale tummy, legs in the air, eyes xx'd
+    const wig = Math.sin(t * 22) * 1.2;
+    put(-18, -1.5, 12, 3, PAL.gator); put(-8, -5, 16, 10, PAL.belly); for (let i = -6; i < 8; i += 3) put(i, -4, 1, 8, PAL.sandD);
+    put(8, -4, 12, 8, PAL.belly); put(-5, -9 + wig, 3, 4, PAL.gatorD); put(3, -9 - wig, 3, 4, PAL.gatorD); put(-5, 5 - wig, 3, 4, PAL.gatorD); put(3, 5 + wig, 3, 4, PAL.gatorD);
+    put(12, -3, 1, 1, PAL.ink); put(13, -2, 1, 1, PAL.ink); put(12, 2, 1, 1, PAL.ink); put(13, 1, 1, 1, PAL.ink);
+  } else if (gt.lurk) {
     put(-10, -1.5, 14, 3, PAL.gatorD); for (let i = -8; i < 4; i += 3) put(i, -1.5, 1, 1, PAL.gatorL);
     put(8, -3, 3, 2, PAL.gatorD); put(8, 1, 3, 2, PAL.gatorD); put(9, -3, 1, 1, PAL.yellow); put(9, 2, 1, 1, PAL.yellow);
     put(12, -1.5, 6, 3, PAL.gatorD);
@@ -259,6 +266,7 @@ function updateNPC(n, dt) {
   if (n.moving && Math.floor(n.t * 6) % 2 !== n.frame) n.frame ^= 1;
 }
 function drawNPC(n, cx, cy, t) {
+  if (n.hidden) return;
   const x = Math.round(n.x - cx), y = Math.round(n.y - cy), s = SPR[n.sprite][n.dir][n.moving ? n.frame : 0];
   shadow(x, y + 1, 12); g.drawImage(s, x - 8, y - 21 + (n.moving ? 0 : Math.round(Math.sin(t * 2 + n.x) * .5)));
   if (n.quest) { const b = Math.sin(t * 5) * 2; label('!', x, y - 26 + b, PAL.yellow, 10); }

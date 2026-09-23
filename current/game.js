@@ -22,7 +22,8 @@ function newGame() {
 }
 function startDay() {
   const S_ = World.spots;
-  Object.assign(Game, { hour: 6, chill: 70, urgent: 0, storm: 0, parts: [], projectiles: [], day_: freshDayLog() });
+  Object.assign(Game, { hour: 6, chill: 70, urgent: 0, storm: 0, heat: 0, parts: [], projectiles: [], day_: freshDayLog() });
+  Heat.end(); Game.dan.hiding = false;
   Object.assign(Game.fx, { buzz: 0, high: 0, shroom: 0, powder: 0, crash: 0, cig: 0 });
   Object.assign(Game.dan, { x: S_.dan.x, y: S_.dan.y, dir: 'down', ride: null, hurt: 0 });
   Object.assign(Game.boat, { x: S_.boat.x, y: S_.boat.y, dir: 'right' });
@@ -72,7 +73,9 @@ function spawn() {
 function facingPoint(dist) { const D = Game.dan, d = D.dir; return { x: D.x + (d === 'right' ? dist : d === 'left' ? -dist : 0), y: D.y + (d === 'down' ? dist : d === 'up' ? -dist : 0) }; }
 function interaction() {
   const D = Game.dan, near = (o, r) => Math.hypot(D.x - o.x, D.y - o.y) < r;
-  if (!D.ride) for (const n of Game.npcs) if (near(n, 24)) return { label: `Talk to ${n.name}`, fn: () => Story.talk(n) };
+  if (D.hiding) return { label: 'Come out of the porta-potty', fn: () => { D.hiding = false; toast('Dan emerges. He will never be the same.'); } };
+  if (Heat.cop && !D.ride && near({ x: 25.8 * TS, y: 43.3 * TS }, 22)) return { label: 'HIDE IN THE PORTA-POTTY', fn: () => { D.hiding = true; D.moving = false; toast('Dan hides in the porta-potty. It is... a lot in here.'); } };
+  if (!D.ride) for (const n of Game.npcs) if (!n.hidden && near(n, 24)) return { label: `Talk to ${n.name}`, fn: () => Story.talk(n) };
   for (const a of Game.animals) {
     if (a.spirit && near(a, 56) && Game.fx.shroom > 0) return { label: 'Approach the glowing manatee', fn: () => Story.manny() };
     if (D.ride) continue;
@@ -104,7 +107,7 @@ function punch() {
   for (const a of Game.animals) { if (a.pet || a.spirit || a.state === 'bagged') continue; const p = a.type === 'python' ? a.segs[0] : a, d = Math.hypot(p.x - f.x, p.y - f.y); if (d < bd) { bd = d; tgt = a; } }
   let npcT = null; for (const n of Game.npcs) { const d = Math.hypot(n.x - f.x, n.y - f.y); if (d < Math.min(bd, 14)) { bd = d; npcT = n; } }
   if (!tgt && !npcT) { if (Game.inv.can > 0) throwThing('can'); else Sound.play('whiff'); return; }
-  Sound.play('punch'); Game.shake = 3 * pow; Game.day_.punches = (Game.day_.punches || 0) + 1;
+  Sound.play('punch'); Game.shake = 3 * pow; Game.hitstop = .055 * pow; Game.kick = 1; Game.day_.punches = (Game.day_.punches || 0) + 1;
   const hx = (npcT || tgt).x, hy = (npcT || tgt).y;
   Game.parts.push({ kind: 'text', x: hx, y: hy - 18, vx: 0, vy: -16, life: .7, text: pick(PUNCH_WORDS) });
   for (let i = 0; i < 6; i++) Game.parts.push({ kind: 'spark', x: hx, y: hy - 8, vx: rnd(-40, 40), vy: rnd(-50, -10), life: .3, c: PAL.yellow });
@@ -115,7 +118,7 @@ function punch() {
   a.stun = 1.1 * pow; a.hits = (a.hits || 0) + pow;
   if (a.type === 'gator') {
     a.lurk = false;
-    if (a.hits >= 3) { a.hits = 0; a.state = 'flee'; a.timer = 7; a.cd = 9; a.stun = 1.5; toast(a.chuck ? 'Chuck backs off. Chuck will remember this.' : pick(['That gator has had ENOUGH.', 'Gator: humbled. Dan: undefeated.', 'The gator swims off to rethink its life.'])); if (a.chuck) done('chuck'); }
+    if (a.hits >= 3) { a.hits = 0; a.state = 'flee'; a.timer = 7; a.cd = 9; a.stun = 1.5; a.belly = 1.5; toast(a.chuck ? 'Chuck backs off. Chuck will remember this.' : pick(['That gator has had ENOUGH.', 'Gator: humbled. Dan: undefeated.', 'The gator swims off to rethink its life.'])); if (a.chuck) done('chuck'); }
     else if (Math.random() < (a.chuck ? .45 : .22)) { a.stun = .25; a.cd = 0; a.state = 'chase'; toast(a.chuck ? 'Chuck did NOT like that.' : 'Uh oh. It’s mad now.'); }
     if (!Game.flags.punchedGator) { Game.flags.punchedGator = true; headline(a.chuck ? 'FLORIDA MAN PUNCHES GATOR NAMED CHUCK; CHUCK "WILL REMEMBER THIS"' : 'FLORIDA MAN PUNCHES ALLIGATOR IN THE FACE, SAYS IT "LOOKED AT HIM FUNNY"', 6); }
   } else if (a.type === 'cow') { a.moo = 1.4; a.state = 'flee'; a.timer = 3; toast('You punched a cow. The cow did not deserve that.'); if (!Game.day_.cowPunch) { Game.day_.cowPunch = true; headline('FLORIDA MAN PUNCHES COW, IMMEDIATELY APOLOGIZES TO COW', 5); } }
@@ -163,7 +166,7 @@ function drawObjective(cx, cy, t) {
 
 function wrestleGator(a) {
   Wrestle.start({ foe: a.chuck ? 'chuck' : 'gator', arena: 'swamp', onWin: () => {
-    a.stun = 10; a.state = 'flee'; a.timer = 12; a.cd = 12; Game.chill = Math.min(100, Game.chill + 25); Game.day_.wrestles++;
+    a.stun = 10; a.state = 'flee'; a.timer = 12; a.cd = 12; a.belly = 1.8; Game.chill = Math.min(100, Game.chill + 25); Game.day_.wrestles++;
     if (a.chuck) { done('chuck'); headline('FLORIDA MAN WRESTLES ALLIGATOR NAMED "CHUCK," CALLS IT "A DISAGREEMENT BETWEEN FRIENDS"', 8); }
     else if (Game.day_.wrestles === 1) headline('FLORIDA MAN WRESTLES ALLIGATOR "FOR FUN"; ALLIGATOR "NOT HAVING FUN"', 6);
     toast(pick(['Gator: humbled.', 'Dan flexes at nobody.', 'That’s what I thought, lizard.']));
@@ -183,7 +186,8 @@ function yell() {
 
 // ---------- update ----------
 function update(dt) {
-  Game.t += dt;
+  if (Game.hitstop > 0) { Game.hitstop -= dt; return; }   // punch freeze-frame
+  Game.t += dt; Game.kick = Math.max(0, (Game.kick || 0) - dt * 7);
   if (toastT > 0 && (toastT -= dt) <= 0) ui.toast.hidden = true;
   Game.flash = Math.max(0, Game.flash - dt * 2); Game.shake = Math.max(0, Game.shake - dt * 18);
   updateHeadlineBanner(dt);
@@ -215,6 +219,7 @@ function update(dt) {
   tickWorld(dt);
   Story.tick(dt);
   Events.tick(dt);
+  Heat.tick(dt);
   if (Input.tapped('b')) yell();
   if (Input.tapped('punch')) punch();
   hints();
@@ -314,6 +319,7 @@ function drawWorld() {
   if (D.ride !== 'cooler') L.push([Game.cooler.y + 3, () => drawCooler(Game.cooler.x - cx, Game.cooler.y - cy, Game.cooler.dir, t, false)]);
   if (Game.mode !== 'title') L.push([D.y + (D.ride === 'boat' ? 4 : 0), () => drawDan(D.x - cx, D.y - cy, t)]);
   L.sort((a, b) => a[0] - b[0]).forEach(e => e[1]());
+  Heat.draw(cx, cy, t);
   drawProjectiles(cx, cy); drawParts(cx, cy);
   drawObjective(cx, cy, t);
   if (Game.fx.shroom > 0) for (const a of Game.animals) if (vis(a.x, a.y, 0) && !a.lurk && hash2(Math.floor(t / 4), a.x | 0) > .6) label(TALKY[Math.floor(hash2(Math.floor(t / 4), a.y | 0) * TALKY.length)], a.x - cx, a.y - cy - 24, PAL.neon, 6);
@@ -350,5 +356,5 @@ function render() {
   const F = Game.fx, sky = Game.mode === 'title' ? [1, 1, 1] : skyTint(Game.hour), storm = 1 - Game.storm * .35;
   Screen.present({ t: Game.t, drunk: clamp((F.buzz - 25) / 60, 0, 1.3), high: F.high > 0 ? Math.min(1, F.high / 8) : 0, shroom: F.shroom > 0 ? Math.min(1, F.shroom / 6) : 0,
     powder: F.powder > 0 ? Math.min(1, F.powder / 4) : 0, crash: F.crash > 0 ? Math.min(1, F.crash / 5) : 0, cig: F.cig > 0 ? 1 : 0, flash: Game.flash,
-    night: Game.hour > 20 || Game.hour < 6 ? .8 : Game.hour > 18.5 ? .4 : 0, tint: sky.map(v => v * storm), view: Game.view });
+    night: Game.hour > 20 || Game.hour < 6 ? .8 : Game.hour > 18.5 ? .4 : 0, tint: sky.map(v => v * storm), view: Game.view || (Game.kick > 0 ? ((z) => [.5 - .5 / z, .5 - .5 / z, 1 / z])(1 + Game.kick * .05) : undefined) });
 }

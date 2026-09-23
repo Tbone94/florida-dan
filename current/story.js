@@ -8,6 +8,7 @@ function headline(text, allege = 5) {
   Game.day_.headlines.push(text); Game.headlines.push({ day: Game.day, text });
   Game.allegations = Math.min(100, Game.allegations + allege);
   headlineQ.push({ text, isNew: Sheet.mark(text) });
+  if (typeof Heat !== 'undefined' && Game.mode !== 'court') Heat.add(allege >= 8 ? 2 : 1);
 }
 
 // ---------- dialogue ----------
@@ -35,7 +36,7 @@ function updateTalk(dt) {
   const T_ = Game.talk;
   if (T_.typed < T_.full.length) {
     const before = Math.floor(T_.typed); T_.typed += dt * (Game.fx.powder > 0 ? 140 : 55);
-    if (Math.floor(T_.typed) !== before && Math.floor(T_.typed) % 3 === 0) Sound.play('talk');
+    if (Math.floor(T_.typed) !== before && Math.floor(T_.typed) % 3 === 0 && T_.full[Math.floor(T_.typed)] !== ' ') Sound.voice(ui.talkWho.textContent);
     ui.talkLine.textContent = T_.full.slice(0, Math.floor(T_.typed));
     if (Input.tapped('a')) { T_.typed = T_.full.length; ui.talkLine.textContent = T_.full; }
     return;
