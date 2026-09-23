@@ -191,7 +191,8 @@ function grabPython(a) {
 function yell() {
   if (Game.gitCd > 0) return; Game.gitCd = .8; Game.day_.gits++; Sound.play('git');
   const D = Game.dan; Game.parts.push({ kind: 'text', x: D.x, y: D.y - 30, vx: 0, vy: -12, life: 1, text: pick(['GIT!', 'GO ON, GIT!', 'NOT TODAY, SATAN!', 'GIT OUTTA HERE!', 'SHOO, YOU SUMBITCH!']) });
-  for (const a of Game.animals) if (!a.pet && !a.spirit && Math.hypot(a.x - D.x, a.y - D.y) < (a.chuck ? 96 : 84)) { a.state = 'flee'; a.timer = 3.5; a.cd = 4; if (a.chuck) { done('chuck'); if (!Game.flags.chuckGit) { Game.flags.chuckGit = true; setTimeout(() => toast('Chuck hisses and backs off. You have Chuck’s respect. For now.'), 600); } } }
+  for (const a of Game.animals) if (!a.pet && !a.spirit && Math.hypot(a.x - D.x, a.y - D.y) < (a.chuck ? 96 : 84)) { a.state = 'flee'; a.timer = 5; a.cd = a.type === 'gator' ? 14 : a.type === 'raccoon' ? 30 : 6;   // one GIT should buy real peace
+    if (a.chuck) { done('chuck'); if (!Game.flags.chuckGit) { Game.flags.chuckGit = true; setTimeout(() => toast('Chuck hisses and backs off. You have Chuck’s respect. For now.'), 600); } } }
   for (const n of Game.npcs) if (n.canadian && Math.hypot(n.x - D.x, n.y - D.y) < 60) { n.canadian = false; Game.flags.canadianGone = true; n.hx = n.x - 200; n.wander = 0; n.x -= 40; toast('THE CANADIAN: Sorry! Sorry, eh! SO sorry!'); headline('FLORIDA MAN YELLS "GIT" AT CANADIAN OVER POOL CHAIR; CANADIAN APOLOGIZES ELEVEN TIMES', 3); }
   for (const n of Game.npcs) if (Math.hypot(n.x - D.x, n.y - D.y) < 50) { n.scared = 1; if (n.id === 'tourist' && !Game.day_.yelledTourist) { Game.day_.yelledTourist = true; headline('FLORIDA MAN YELLS "GIT" AT TOURIST FROM OHIO', 4); } }
 }
@@ -262,6 +263,7 @@ function tickFx(dt) {
   const D = Game.dan; if (D.animT > 0 && (D.animT -= dt) <= 0) D.anim = null; D.hurt -= dt;
 }
 function tickWorld(dt) {
+  Game.raccoonCd = (Game.raccoonCd || 0) - dt; Game.gatorCalm = (Game.gatorCalm || 0) - dt;
   for (const a of Game.animals) { if (a.type === 'gator') updateGator(a, dt); else if (a.type === 'python') updatePython(a, dt); else if (a.type !== 'manatee' && a.type !== 'skunkape') updateCritter(a, dt); }
   for (const n of Game.npcs) { if (n.scared > 0) { n.scared -= dt; continue; } if (MIAMI() && Miami.tickNPC(n, dt)) continue; updateNPC(n, dt); }
   updateProjectiles(dt); updateParts(dt);

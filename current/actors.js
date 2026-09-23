@@ -115,10 +115,12 @@ function updateGator(gt, dt) {
   if (gt.stun > 0) { gt.lurk = false; return; }
   const range = gt.chuck ? 110 : 76, active = Game.mode === 'play';
   if (gt.state === 'flee') { if (gt.timer <= 0) gt.state = 'wander'; }
-  else if (active && gt.cd <= 0 && dist < range && gatorCan(D.x, D.y + 2)) {
+  else if (active && gt.cd <= 0 && (Game.gatorCalm || 0) <= 0 && dist < range && gatorCan(D.x, D.y + 2) && (gt.chaseT || 0) < 7) {
     if (gt.state !== 'chase') { if (gt.chuck && !Game.day_.chuckSeen) { Game.day_.chuckSeen = true; toast("Oh hell no. It's CHUCK."); } }
     gt.state = 'chase';
   } else if (gt.state === 'chase') gt.state = 'wander';
+  gt.chaseT = gt.state === 'chase' ? (gt.chaseT || 0) + dt : 0;
+  if (gt.chaseT >= 7) { gt.state = 'wander'; gt.cd = 10; gt.chaseT = 0; }   // gave up; it's hot out
   let vx = 0, vy = 0, sp = 0;
   if (gt.state === 'chase') { vx = dx / dist; vy = dy / dist; sp = (gt.chuck ? 46 : 38) * (Game.fx.high > 0 ? .6 : 1); }
   else if (gt.state === 'flee') { vx = -dx / (dist || 1); vy = -dy / (dist || 1); sp = 60; }
@@ -134,7 +136,7 @@ function updateGator(gt, dt) {
   if (gt.state === 'chase' && dist < (gt.chuck ? 14 : 11) && gt.cd <= 0 && active && D.hurt <= 0) gatorBite(gt, dx, dy, dist);
 }
 function gatorBite(gt, dx, dy, dist) {
-  gt.chomp = .45; gt.cd = 5; gt.state = 'wander';
+  gt.chomp = .45; gt.cd = 14; gt.state = 'wander'; Game.gatorCalm = 6;   // after a bite every gator gives Dan a moment
   knockback(dx / dist, dy / dist, 22);
   Sound.play('chomp'); hurtDan(15);
   Game.day_.bites++;
@@ -226,14 +228,16 @@ function updateCritter(c, dt) {
     return;
   }
   if (c.type === 'iguana' && c.falling) { c.z -= c.vz * dt; c.vz += 260 * dt; if (c.z <= 0) { c.z = 0; c.falling = false; c.stun = 5; Sound.play('chomp'); if (dist < 12) { hurtDan(6); toast(pick(['AN IGUANA JUST FELL ON MY HEAD.', 'Frozen iguana to the dome. Classic Tuesday.', 'It’s raining lizards, Brenda!'])); Game.day_.iguanaHits++; if (Game.day_.iguanaHits === 1) headline('FLORIDA MAN STRUCK BY FROZEN IGUANA, CALLS IT "A SIGN FROM GOD"', 4); } } return; }
-  if (c.type === 'raccoon' && !c.pet && dist < 60 && c.state !== 'flee') c.state = 'steal';
+  c.cd = (c.cd || 0) - dt;
+  const loot = ['hotdog', 'beer', 'cig', 'scratch'].some(i => Game.inv[i] > 0);
+  if (c.type === 'raccoon' && !c.pet && c.state !== 'flee' && c.state !== 'steal' && dist < 60 && loot && c.cd <= 0 && (Game.raccoonCd || 0) <= 0 && Game.mode === 'play') { c.state = 'steal'; Game.raccoonCd = 25; }   // one bandit at a time, ~25s apart
   if (c.type === 'pelican' && Game.inv.fish > 0 && dist < 90 && c.state !== 'flee') c.state = 'steal';
   if (c.state === 'steal') {
     c.x += dx / (dist || 1) * 44 * dt; c.y += dy / (dist || 1) * 44 * dt; c.flip = dx < 0;
     if (dist < 10) {
-      c.state = 'flee'; c.timer = 4;
+      c.state = 'flee'; c.timer = 6; if (c.type === 'raccoon') c.cd = 60;
       if (c.type === 'pelican' && Game.inv.fish > 0) { Game.inv.fish--; const f = Game.catchBag.pop(); toast(`A pelican just swallowed your ${f ? f.name.toLowerCase() : 'fish'} WHOLE. Fly away, you beaky bastard.`); Game.day_.pelican++; headline('PELICAN STEALS FLORIDA MAN’S FISH, FLIES OFF "LAUGHING"', 3); }
-      else if (c.type === 'raccoon') { const k = ['hotdog', 'beer', 'cig', 'scratch'].find(i => Game.inv[i] > 0); if (k) { Game.inv[k]--; toast(`Raccoon snatched your ${ITEMS[k].name.toLowerCase()} and ran. Little bandit.`); headline('RACCOON ROBS FLORIDA MAN IN BROAD DAYLIGHT; POLICE "NOT INVOLVED"', 3); } else toast('The raccoon checked your pockets. Found nothing. Looked disappointed in you.'); }
+      else if (c.type === 'raccoon') { const k = ['hotdog', 'beer', 'cig', 'scratch'].find(i => Game.inv[i] > 0); if (k) { Game.inv[k]--; toast(`Raccoon snatched your ${ITEMS[k].name.toLowerCase()} and ran. Little bandit.`); headline('RACCOON ROBS FLORIDA MAN IN BROAD DAYLIGHT; POLICE "NOT INVOLVED"', 3); } }
     }
     return;
   }
