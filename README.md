@@ -6,6 +6,7 @@ He is extremely a Florida Man.
 
 An unhinged pixel-art swamp game in plain HTML/JS — no build step, no engine, no asset files. Every sprite is hand-pixeled in code and every sound is synthesized.
 
+▶ **Play:** https://tbone94.github.io/florida-dan/  
 ▶ **Trailer:** [`promo/florida-dan-trailer.mp4`](promo/florida-dan-trailer.mp4)
 
 ## Play it locally
