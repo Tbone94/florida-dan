@@ -171,7 +171,7 @@ function travel(to) {
     const a = to === 'swamp' ? { x: 20.5 * TS, y: 43.8 * TS } : World.spots.arrive;
     Object.assign(Game.dan, { x: a.x, y: a.y, ride: null, dir: 'down', hiding: false, carry: null });
     Object.assign(Game.boat, { x: World.spots.boat.x, y: World.spots.boat.y, dir: 'right' });
-    Object.assign(Game.cooler, { x: a.x + 24, y: a.y + 6, dir: 'down' });
+    Object.assign(Game.cooler, { x: a.x + 24, y: a.y + 6, dir: 'down', home: null });
     Heat.end(); Game.heat = 0; Game.prints = [];
     spawn();
     Game.cam.x = Game.dan.x - VW / 2; Game.cam.y = Game.dan.y - VH / 2 - 10; Game.flash = .7;

@@ -203,6 +203,37 @@ function drawTiles(cx, cy, t) {
   }
 }
 
+// ---------- palm trees: a leaning ringed trunk and arched, drooping fronds, baked once per look ----------
+const PALMS = {};
+function palmSprite(v, sway) {
+  const key = v * 4 + sway; if (PALMS[key]) return PALMS[key];
+  const W = 60, H = 60, cv = document.createElement('canvas'); cv.width = W; cv.height = H; const c = cv.getContext('2d');
+  const px = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(Math.round(x), Math.round(y), w, h); };
+  const lean = (v % 2 ? 1 : -1) * (3 + (v % 3)), bx = 30, by = 56, n = 9, sw = (sway - 1.5) * .8;
+  // trunk: bottom to top, bending into the lean; ringed bark, lit on one side
+  let tx = bx, ty = by;
+  for (let i = 0; i < n; i++) {
+    const k = i / (n - 1), x = bx + lean * k * k + sw * k * k, y = by - i * 4.2, w = i < 2 ? 6 : i < 6 ? 5 : 4;
+    px(x - w / 2 - 1, y - 5, w + 2, 6, PAL.ink);
+    px(x - w / 2, y - 4, w, 4, i % 2 ? PAL.mud : PAL.mudL); px(x - w / 2, y - 1, w, 1, PAL.mudD); px(x + w / 2 - 1, y - 4, 1, 3, PAL.tan);
+    tx = x; ty = y - 5;
+  }
+  // fronds: [angle, length, droop]; a slow sway tilts the whole crown
+  const FR = [[-3.05, 19, 9], [-2.55, 17, 7], [-2.0, 13, 4], [-1.15, 13, 4], [-.6, 17, 7], [-.1, 19, 9], [2.75, 12, 5], [.4, 12, 5], [-1.57, 9, 2]];
+  const rot = (v % 3 - 1) * .08 + sw * .05;
+  for (const pass of [0, 1]) for (const [a0, L, droop] of FR) {
+    const a = a0 + rot;
+    for (let s = 1; s <= L; s++) {
+      const f = s / L, x = tx + Math.cos(a) * s, y = ty + Math.sin(a) * s * .8 + droop * f * f;
+      if (pass === 0) { px(x - 1, y - 1, 3, 4 - f * 1.5, PAL.ink); continue; }   // ink outline first
+      px(x, y, 1, 1, PAL.grassD);                                                // the rib
+      if (f < .9) { px(x, y + 1, 1, 1, s % 2 ? PAL.grass : PAL.grassL); if (f < .7 && s % 2 === 0) px(x, y + 2, 1, 1, PAL.grassDD); }   // leaflets hanging off it
+    }
+  }
+  // coconuts tucked under the crown
+  for (const [dx, dy] of [[-2, 1], [1, 2], [-4, 3]]) { px(tx + dx - 1, ty + dy - 1, 4, 4, PAL.ink); px(tx + dx, ty + dy, 2, 2, PAL.brown); }
+  return PALMS[key] = { cv, bx, by, cx: tx, cy: ty };
+}
 function drawProp(p, cx, cy, t) {
   const x = Math.round(p.x - cx), y = Math.round(p.y - cy), w = p.w, h = p.h;
   switch (p.kind) {
@@ -319,12 +350,9 @@ function drawProp(p, cx, cy, t) {
       break;
     }
     case 'palm': {
-      const sw = Math.sin(t * .9 + p.s * 9) * 1.6;
-      shadow(x + 5, y + 6, 18, 5);
-      for (let i = 0; i < 7; i++) { R(x + 1 + i * .5, y - i * 5 - 1, 7, 6, PAL.ink); R(x + 2 + i * .5, y - i * 5, 5, 5, i % 2 ? PAL.mudL : PAL.mud); }
-      const tx = x + 6 + sw, ty = y - 34;
-      for (const [dx, dy, ww] of [[-16, 0, 15], [2, 0, 15], [-11, -6, 10], [2, -6, 10], [-18, 4, 5], [14, 4, 5], [-3, -9, 7]]) OR(tx + dx, ty + dy, ww, 3, PAL.grassD);
-      R(tx - 2, ty - 1, 3, 3, PAL.brown); R(tx + 1, ty + 1, 3, 3, PAL.brown);
+      const ps = p.s !== undefined ? p.s : hash2(p.x, p.y), v = Math.floor(ps * 6) % 6, sway = Math.floor((Math.sin(t * .9 + ps * 9) + 1) * 1.99), P = palmSprite(v, sway);
+      shadow(x + 5, y + 6, 18, 5); g.drawImage(P.cv, Math.round(x + 4 - P.bx), Math.round(y + 5 - P.by));
+      const tx = Math.round(x + 4 - P.bx + P.cx), ty = Math.round(y + 5 - P.by + P.cy);
       if (Game.cold && hash2(p.x, p.y) > .5) { OR(tx - 6, ty + 3, 8, 3, PAL.gatorL); }   // iguana, waiting to fall
       break;
     }

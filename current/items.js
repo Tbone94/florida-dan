@@ -69,7 +69,7 @@ function useItem(k) {
       break;
     }
     case 'scratch': {
-      const r = Math.random(), win = r < .02 ? 100 : r < .1 ? 20 : r < .3 ? 5 : 0;
+      const r = Math.random() * (hasUp('lucky') ? .45 : 1), win = r < .02 ? 100 : r < .1 ? 20 : r < .3 ? 5 : 0;
       Game.money += win; Sound.play(win ? 'cash' : 'fail'); L.scratchers++;
       toast(win ? (win === 100 ? '$100!!! DAN IS RICH. DAN IS A MILLIONAIRE (HUNDREDAIRE)!' : `Won $${win}. Dan’s a financial genius.`) : pick(['Nothin’. Florida Frenzy my ass.', 'Lost. The state of Florida thanks you.', 'Zip. Zilch. Scratch dust.']));
       if (win >= 20) react('cheer');

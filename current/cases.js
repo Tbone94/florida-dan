@@ -37,7 +37,8 @@ const Cases = {
     if (n === 2 && day === 5) Game.npcs.push(makeNPC('kayden', 'Kayden', P.kayden.x, P.kayden.y, 'down', { wander: 12, quest: true }));
     if (n >= 2 || n === 0) Game.npcs.push(makeNPC('pam', 'Dr. Pam', P.pam.x, P.pam.y, 'down', { wander: 16, quest: n === 2 && day === 5 }));
     if (n === 2 && day === 5) for (let i = 0; i < 6; i++) { const s = findTile(k => k === T.WATER || k === T.DEEP, 26, 12, 40, 30, 100 + i * 13); if (s) Game.pickups.push({ kind: 'trash', x: s.x, y: s.y, bob: i }); }
-    if (n === 3 && day >= 9 && Game.flags.apeFriend) { const ape = this.makeApe(P.den.x, P.den.y); ape.state = 'den'; Game.animals.push(ape); }
+    if (n === 3 && day >= 9) { // missed him on day 8? he's home at the den anyway
+      const ape = this.makeApe(P.den.x, P.den.y); ape.state = 'den'; Game.animals.push(ape); }
   },
   makeApe(x, y) { return makeCritter('skunkape', x, y, { state: 'lurk', timer: 0, ape: true }); },
 
@@ -164,10 +165,14 @@ const Cases = {
     if (k === 'jortsXXXL') { Game.flags.xxxl = true; Game.inv.jortsXXXL = 0; toast('Formal Jorts, XXXL. Darlene didn’t ask. Darlene has never looked more tired.'); }
   },
 
+  // the next step only happens after dark (and night work isn't cut off at 10 PM)
+  needsDark() { const c = this.info(); return !MIAMI() && !DAYTONA() && ((c.n === 2 && c.d === 2 && qOpen('manny2')) || (c.n === 3 && c.d === 1 && qDone('dogs') && qOpen('lure')) || (c.n === 3 && c.d === 2 && qDone('rehearse') && qOpen('reunion'))); },
+  darkAt() { const c = this.info(); return c.n === 3 && c.d === 2 ? 18 : 20; },
+  waitDark() { return this.needsDark() && Game.hour < this.darkAt(); },
+  nightWork() { const c = this.info(); return !MIAMI() && !DAYTONA() && (this.needsDark() || (c.n === 3 && c.d === 1 && qOpen('track'))); },
   interactions() {
     const D = Game.dan, c = this.info(), F = Game.flags, P = this.places(), list = MiamiCases.interactions(), near = (p, r) => Math.hypot(D.x - p.x, D.y - p.y) < r;
-    const needsDark = (c.n === 2 && c.d === 2 && qOpen('manny2')) || (c.n === 3 && c.d === 1 && qDone('dogs') && qOpen('lure')) || (c.n === 3 && c.d === 2 && qOpen('reunion'));
-    if (needsDark && Game.hour < (c.n === 3 && c.d === 2 ? 18 : 20) && near(P.couch, 24)) list.push({ label: 'Sit on the couch till dark', fn: () => {
+    if (this.waitDark() && near(P.couch, 24)) list.push({ label: 'Sit on the couch till dark', fn: () => {
       say([['', 'Dan sits on the couch. He opens a Swamp Lite. The sun goes down. It is beautiful. He will never tell anyone.']], () => { Game.hour = c.n === 3 && c.d === 2 ? 18.2 : 20.2; });
     } });
     if (c.n === 3 && c.d === 1) {
@@ -185,7 +190,7 @@ const Cases = {
       } });
     }
     for (const a of Game.animals) if (a.ape && a.state === 'den' && near(a, 30)) {
-      if (c.n === 3 && c.d === 1 && !F.apeFriend) list.push({ label: 'Approach the Skunk Ape', fn: () => this.apeMeet(a) });
+      if (c.n === 3 && !F.apeFriend) list.push({ label: 'Approach the Skunk Ape', fn: () => this.apeMeet(a) });
       else if (c.n === 3 && c.d === 2 && qOpen('rehearse')) list.push({ label: 'Rehearse the testimony', fn: () => this.rehearse() });
       else if (c.n === 3 && c.d === 2 && qDone('rehearse') && qOpen('reunion')) list.push({ label: Game.hour >= 18 ? 'Hang out with the Skunk Ape' : 'Hang out (after 6 PM)', fn: () => Game.hour >= 18 ? this.reunion(a) : toast('The Skunk Ape is asleep. He sleeps like Dan: face down, one flip-flop on.') });
       else list.push({ label: 'Talk to the Skunk Ape', fn: () => say([['SKUNK APE', pick(['HRRM.', 'HRRRRM?', '*offers Dan a half-eaten roller dog*', '*points at the moon, then at Dan, then nods slowly*'])]]) });
@@ -231,7 +236,7 @@ const Cases = {
     if (c.n === 6 && c.d === 1 && !Game.flags.donutRun) return 'Brenda: the Grand Marshal thing is TODAY, Dan. Daytona. Go.';
     if (c.n === 7 && c.d === 3 && !Game.flags.raceWon) return 'Sleep? It’s RACE DAY.';
     if (c.n === 2 || c.n === 3) return open.length ? `Still got stuff to do: ${open[0].text.toLowerCase().replace(/\s*\(.*\)$/, '')}.` : null;
-    return Game.hour < 17 ? 'Too early. Even for Dan.' : null;
+    return Game.hour < 17 && open.length ? 'Too early. Even for Dan.' : null;   // story's done for today? bed whenever you like
   },
   event(name) { Favors.event(name); },
 };

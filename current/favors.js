@@ -11,7 +11,7 @@ const FAVORS = {
     pay() { Game.dan.carry = null; Game.money += 20; giveItem('hotdog', 3, true); headline('FLORIDA MAN RECOVERS STOLEN ROLLER DOG MACHINE FROM RACCOON CARTEL', 4); return 'My BABY. Twenty bucks and three dogs, hon. They’ve been rollin’ since Tuesday.'; } },
   bounty: { giver: 'rhonda', text: 'Bag 15 ft of python for Rhonda', ask: 'The Glades are crawling with Burmese pythons. Bring me fifteen feet, Dan. And I’ll forget about a few things.',
     ready: () => Game.pythons.reduce((a, b) => a + b, 0) >= 15,
-    pay() { const ft = Game.pythons.reduce((a, b) => a + b, 0); Game.pythons = []; Game.money += Math.round(ft * 25); Game.heat = Math.max(0, (Game.heat || 0) - 2); return `${ft.toFixed(1)} feet. $${Math.round(ft * 25)}. And your heat just cooled off. We never talked.`; } },
+    pay() { const ft = Game.pythons.reduce((a, b) => a + b, 0); Game.pythons = []; Game.money += Math.round(ft * 4); Game.heat = Math.max(0, (Game.heat || 0) - 2); return `${ft.toFixed(1)} feet. $${Math.round(ft * 4)}. And your heat just cooled off. We never talked.`; } },
   tour: { giver: 'tourist', text: 'Show the tourist a REAL gator', ask: 'Excuse me, are there REAL alligators around here? Can you show me one? From a safe distance?',
     setup() { const t = Game.npcs.find(n => n.id === 'tourist' && !n.follow); if (t) { t.follow = true; t.wander = 0; } },
     tick() { const t = Game.npcs.find(n => n.follow); if (!t) return; if (Game.animals.some(a => a.type === 'gator' && Math.hypot(a.x - t.x, a.y - t.y) < 70)) Favors.complete('tour'); },

@@ -2,20 +2,42 @@
 // Upgrades are one-time buys kept in Game.flags.up; the effects are checked where the thing happens (hasUp).
 'use strict';
 const UPGRADES = {
-  airboat: { name: 'Airboat', price: 150, desc: 'Giant fan, zero brakes. Way faster, and it skims right over sawgrass.' },
-  rod: { name: 'The Ugly Stick', price: 60, desc: 'Line almost never snaps, and the big ones bite.' },
-  boombox: { name: 'Boombox Cooler', price: 50, desc: 'Faster cooler. Plays music. Rhonda hates it.' },
-  waders: { name: 'Gator-Proof Waders', price: 45, desc: 'Gator bites hurt half as much. Mostly.' },
-  fanny: { name: 'Fanny Pack', price: 15, desc: 'Zipped tight. Raccoons can’t rob you anymore.' },
-  billy: { name: 'Big Mouth Billy Bass', price: 20, desc: 'For the cabin wall. It sings when you walk by.', cabin: true },
-  neon: { name: 'Neon Beer Sign', price: 30, desc: 'For the cabin. Glows at night. Classy.', cabin: true },
-  recliner: { name: 'Porch Recliner', price: 40, desc: 'Nap on the porch: skip 2 hours, get your chill back.', cabin: true },
+  // prices: a few good days of fishing, gigs and pythons each. Some only show up once Dan's cleared a case.
+  fanny: { name: 'Fanny Pack', price: 40, desc: 'Zipped tight. Raccoons can’t rob you anymore.' },
+  chum: { name: 'Chum Bucket', price: 70, desc: 'Fish bite way faster. Smells like a crime scene.' },
+  billy: { name: 'Big Mouth Billy Bass', price: 60, desc: 'For the cabin wall. It sings when you walk by.', cabin: true },
+  neon: { name: 'Neon Beer Sign', price: 80, desc: 'For the cabin. Glows at night. Classy.', cabin: true },
+  zapper: { name: 'Bug Zapper', price: 90, desc: 'For the porch. Chill drains half as fast. The zaps are soothing.', cabin: true },
+  recliner: { name: 'Porch Recliner', price: 110, desc: 'Nap on the porch: skip 2 hours, get your chill back.', cabin: true },
+  waders: { name: 'Gator-Proof Waders', price: 120, desc: 'Gator bites hurt half as much. Mostly.' },
+  boombox: { name: 'Boombox Cooler', price: 140, desc: 'Faster cooler. Plays music. Rhonda hates it.' },
+  tooth: { name: 'Gator Tooth Necklace', price: 150, desc: 'Gators think twice before biting. Chuck thinks it’s rude.', after: 'acquitted' },
+  rod: { name: 'The Ugly Stick', price: 180, desc: 'Line almost never snaps, and the big ones bite.' },
+  keg: { name: 'Kegerator', price: 200, desc: 'For the cabin. Wakes you up with 3 free Swamp Lites every morning.', cabin: true, after: 'acquitted' },
+  lucky: { name: 'Lucky Scratch-Off Penny', price: 220, desc: 'Scratch-offs win way more often. It’s a penny from a slot machine.', after: 'case2Won' },
+  scanner: { name: 'Police Scanner', price: 260, desc: 'Hear ’em coming: your ★ cool off twice as fast.', after: 'case2Won' },
+  bail: { name: 'Bubba’s Bail Card', price: 300, desc: 'Busted? Flash it: walk away free, keep your stuff. Once a day.', after: 'case3Won' },
+  airboat: { name: 'Airboat', price: 450, desc: 'Giant fan, zero brakes. Way faster, and it skims right over sawgrass.' },
 };
 for (const [k, u] of Object.entries(UPGRADES)) ITEMS[k] = { ...u, upgrade: true };
 const hasUp = k => !!(Game.flags && Game.flags.up && Game.flags.up[k]);
 
 // 10x10 icons, same recipe as the rest (art.js bakes them)
 Object.assign(ICONS, {
+  chum: { key: { o: 'ink', g: 'grey', r: 'red', d: 'redD' }, rows: [
+    '..........', '.oooooooo.', 'oggggggggo', 'orrdrrdrro', 'ordrrrrdro', '.orrdrrro.', '.orrrrdro.', '.orrrrrro.', '..oooooo..', '..........'] },
+  zapper: { key: { o: 'ink', b: 'blue', w: 'white', y: 'yellow' }, rows: [
+    '....oo....', '...owwo...', '..obbbbo..', '..obwbwo..', '..obbbbo..', '..obwbwo..', '..obbbbo..', '...oyyo...', '....oo....', '..........'] },
+  tooth: { key: { o: 'ink', w: 'white', t: 'tan' }, rows: [
+    'o........o', '.o......o.', '..o....o..', '...tttt...', '...owwo...', '...owwo...', '....ww....', '....ow....', '.....o....', '..........'] },
+  keg: { key: { o: 'ink', g: 'grey', d: 'greyD', y: 'yellow', r: 'red' }, rows: [
+    '..oooooo..', '.oggggggo.', '.ogddddgo.', '.oggrrggo.', '.oggyyggo.', '.oggggggo.', '.ogddddgo.', '.oggggggo.', '..oooooo..', '..........'] },
+  lucky: { key: { o: 'ink', c: 'mudL', y: 'yellow', d: 'mud' }, rows: [
+    '..........', '...oooo...', '..occcco..', '.occddcco.', '.ocdccdco.', '.ocdccdco.', '.occddcco.', '..occcco..', '...oooo...', '..........'] },
+  scanner: { key: { o: 'ink', k: 'black', g: 'greyD', r: 'red', y: 'yellow' }, rows: [
+    '.......o..', '.......o..', '.oooooooo.', '.okkkkkko.', '.okrrkyko.', '.okkkkkko.', '.oggggggo.', '.ogkgkgko.', '.oooooooo.', '..........'] },
+  bail: { key: { o: 'ink', w: 'white', y: 'yellow', r: 'red' }, rows: [
+    '..........', 'oooooooooo', 'oyyyyyyyyo', 'oyrrryyyyo', 'oyyyyyyyyo', 'owwwwwwwwo', 'owrrwrrwwo', 'owwwwwwwwo', 'oooooooooo', '..........'] },
   airboat: { key: { o: 'ink', g: 'grey', d: 'greyD', w: 'white', b: 'blue' }, rows: [
     '......ooo.', '.....owdwo', '.....odwdo', '.....owdwo', '......ooo.', '.oooooooo.', 'oggggggggo', 'oddddddddo', '.oooooooo.', 'bbbbbbbbbb'] },
   rod: { key: { o: 'ink', w: 'woodL', d: 'woodD', r: 'red', g: 'grey' }, rows: [
@@ -37,7 +59,7 @@ Object.assign(ICONS, {
 });
 
 const Upgrades = {
-  forSale: (shop = 'bubba') => Object.keys(UPGRADES).filter(k => !hasUp(k) && (UPGRADES[k].shop || 'bubba') === shop),
+  forSale: (shop = 'bubba') => Object.keys(UPGRADES).filter(k => !hasUp(k) && (UPGRADES[k].shop || 'bubba') === shop && (!UPGRADES[k].after || Game.flags[UPGRADES[k].after])),
   buy(k) {
     Game.flags.up = Game.flags.up || {}; Game.flags.up[k] = true;
     const H = { airboat: 'FLORIDA MAN BUYS AIRBOAT; NEIGHBORS "CAN’T HEAR THEMSELVES THINK"', billy: 'FLORIDA MAN BUYS SINGING FISH, CALLS IT "HOME DECOR"', recliner: 'FLORIDA MAN INSTALLS RECLINER ON PORCH, CALLS IT "THE OFFICE"' };

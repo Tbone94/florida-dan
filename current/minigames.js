@@ -61,7 +61,7 @@ const Fishing = {
       const L = f.lure;
       if (reel) { L.x -= 34 * dt; L.y = Math.max(SURF + 3, L.y - 8 * dt); if (Math.random() < dt * 12) Sound.play('reel'); } else L.y = Math.min(f.bottom - 5, L.y + 22 * dt);
       if (L.x < TIP.x + 10) { this.lose('Nothin’.'); f.endT = 1; return; }
-      const rate = (f.bait ? 1 : .55) * (reel ? 1.6 : 1) * (Game.fx.high > 0 ? 1.6 : 1);
+      const rate = (f.bait ? 1 : .55) * (reel ? 1.6 : 1) * (Game.fx.high > 0 ? 1.6 : 1) * (hasUp('chum') ? 1.7 : 1);
       if (!f.fish.some(fi => fi.want > 1)) for (const fi of f.fish) {
         const d = Math.hypot(fi.x - L.x, fi.y - L.y);
         if (d < (fi.sp.junk ? 10 : 55)) fi.want += dt * rate * (fi.sp.junk ? 3 : rnd(.45, .75));

@@ -403,12 +403,12 @@ const DaytonaGigs = {
 
 // ---------- Ink & Regret, Wrench's Speed Shop ----------
 Object.assign(UPGRADES, {
-  tatmom: { name: '“MOM” Heart Tattoo', price: 20, desc: 'Classic. Timeless. Mom will not be impressed.', shop: 'ink' },
-  tatgator: { name: 'Gator Tattoo', price: 30, desc: 'A gator. On your arm. It looks like Chuck.', shop: 'ink' },
-  tatflorida: { name: 'Florida Outline Tattoo', price: 25, desc: 'The whole state. Upside down. Needles was drunk.', shop: 'ink' },
-  nitro: { name: 'Nitrous Kit', price: 80, desc: 'Hold RUN in the cooler or any car: a lot faster, a little on fire.', shop: 'speed' },
-  stripes: { name: 'Racing Stripes', price: 25, desc: 'For the cooler. Adds 0 mph. Adds 100% cool.', shop: 'speed' },
-  horn: { name: 'Dixie Horn', price: 15, desc: 'Yell GIT on the cooler: it plays a horn. Everything scatters.', shop: 'speed' },
+  tatmom: { name: '“MOM” Heart Tattoo', price: 60, desc: 'Classic. Timeless. Mom will not be impressed.', shop: 'ink' },
+  tatgator: { name: 'Gator Tattoo', price: 90, desc: 'A gator. On your arm. It looks like Chuck.', shop: 'ink' },
+  tatflorida: { name: 'Florida Outline Tattoo', price: 75, desc: 'The whole state. Upside down. Needles was drunk.', shop: 'ink' },
+  nitro: { name: 'Nitrous Kit', price: 250, desc: 'Hold RUN in the cooler or any car: a lot faster, a little on fire.', shop: 'speed' },
+  stripes: { name: 'Racing Stripes', price: 70, desc: 'For the cooler. Adds 0 mph. Adds 100% cool.', shop: 'speed' },
+  horn: { name: 'Dixie Horn', price: 45, desc: 'Yell GIT on the cooler: it plays a horn. Everything scatters.', shop: 'speed' },
 });
 for (const k of ['tatmom', 'tatgator', 'tatflorida', 'nitro', 'stripes', 'horn']) ITEMS[k] = { ...UPGRADES[k], upgrade: true };
 Object.assign(ICONS, {

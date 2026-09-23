@@ -163,7 +163,7 @@ function updateGator(gt, dt) {
   if (gt.state === 'chase' && dist < (gt.chuck ? 14 : 11) && gt.cd <= 0 && active && D.hurt <= 0) gatorBite(gt, dx, dy, dist);
 }
 function gatorBite(gt, dx, dy, dist) {
-  gt.chomp = .45; gt.cd = 14; gt.state = 'wander'; Game.gatorCalm = 6;   // after a bite every gator gives Dan a moment
+  gt.chomp = .45; gt.cd = hasUp('tooth') ? 24 : 14; gt.state = 'wander'; Game.gatorCalm = 6;   // after a bite every gator gives Dan a moment
   knockback(dx / dist, dy / dist, hasUp('waders') ? 12 : 22);
   Sound.play('chomp'); hurtDan(hasUp('waders') ? 7 : 15); react('flop');
   Game.day_.bites++;
@@ -327,6 +327,6 @@ function drawNPC(n, cx, cy, t) {
   if (n.hidden) return;
   const x = Math.round(n.x - cx), y = Math.round(n.y - cy), s = SPR[n.sprite][n.dir][n.moving ? n.frame : 0];
   shadow(x, y + 1, 12); g.drawImage(s, x - 8, y - 21 + (n.moving ? 0 : Math.round(Math.sin(t * 2 + n.x) * .5)));
-  if (n.quest) { const b = Math.sin(t * 5) * 2; label('!', x, y - 26 + b, PAL.yellow, 10); } else drawGigBubble(n, x, y, t);
+  if (n.quest) { const b = Math.sin(t * 5) * 2; label('!', x, y - 26 + b, PAL.yellow, 10); } else if (Game.mode === 'play' && Arcs.offering(n)) { const b = Math.sin(t * 4 + 1) * 2; label('!', x, y - 26 + b, PAL.hat, 10); } else drawGigBubble(n, x, y, t);
   if (n.id === 'rhonda') R(x - 5, y - 17, 10, 1, PAL.shades);
 }

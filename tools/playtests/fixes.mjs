@@ -32,6 +32,14 @@ const out = await p.evaluate(() => {
   // 6 mid-day save keeps dawn headlines
   go('swamp', 25); const h0 = Game.headlines.length; headline('FLORIDA MAN TEST SAVE HEADLINE', 5); step(400); save(); const s = JSON.parse(localStorage.getItem('floridaDan.save') || localStorage.getItem(SAVE_KEY));
   ok('mid-day save keeps dawn headlines', s.headlines.length === h0);
+  // 7 Skunk Ape: night work isn't cut off at 10 PM; missed him on day 8? he's at the den on day 9
+  go('swamp', 8, { case2Won: true }); Game.flags.apeFriend = false; done('trailcam'); done('dogs'); Game.hour = 21.99; step(90); ok('10 PM waits for the Skunk Ape', Game.mode === 'play' && Game.hour > 22);
+  ok('before dark the arrow goes to the couch', (() => { Game.hour = 12; const t = questTarget(currentQuest()); return t && t === Cases.places().couch; })());
+  go('swamp', 9, { case2Won: true }); Game.flags.apeFriend = false; { const ape = Game.animals.find(a => a.ape); Game.dan.x = ape.x + 14; Game.dan.y = ape.y; step(2); const a1 = interaction(); a1 && a1.fn(); talk(); step(2); const a2 = interaction(); ok('day 9 without day 8: meet then rehearse', a1 && /Approach/.test(a1.label) && a2 && /Rehearse/.test(a2.label)); }
+  // 8 bed as soon as the day's story is done
+  go('miami', 15, { case4Won: true }); Game.quests.forEach(q => q.done = true); Game.hour = 9; ok('sleep early once the story is done', !Cases.sleepBlock() && sleepReady());
+  // 9 the Gazette bribe cools you way down
+  go('swamp', 25); headline('FLORIDA MAN TEST BRIBE HEADLINE', 8); Game.heat = 4; const al = Game.allegations; Game.money = 200; Bribe.bury('FLORIDA MAN TEST BRIBE HEADLINE'); ok('bribe: -3 stars, double allegations back', Game.heat <= 1 && al - Game.allegations >= 16);
   return r;
 });
 console.log(out); const bad = Object.values(out).filter(v => v !== 'ok');

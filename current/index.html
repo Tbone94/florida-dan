@@ -44,7 +44,9 @@
   .allege { color: var(--red); }
   #heat { font-size: .95em; letter-spacing: .12em; color: var(--red); text-shadow: 1px 1px 0 #000; }
   #heat.hot { animation: blink .5s steps(2) infinite; }
-  #fxTags { font-size: .66em; color: var(--pink); letter-spacing: .08em; font-weight: 700; min-height: 1em; }
+  #fxTags { font-size: .66em; color: var(--pink); letter-spacing: .08em; font-weight: 700; display: grid; gap: .25em; }
+  #fxTags .fxb { display: flex; align-items: center; gap: .5em; } #fxTags .fxb b { min-width: 6.4em; } #fxTags .fxb em { flex: 1; height: .55em; background: rgba(255,255,255,.14); } #fxTags .fxb i { display: block; height: 100%; }
+  #fxTags .fxw { color: var(--red); animation: blink .6s steps(2) infinite; }
   .rightBox { display: flex; flex-direction: column; align-items: flex-end; gap: .35em; }
   .stats { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .7em; padding: .3em .6em; font-size: .78em; font-weight: 700; font-variant-numeric: tabular-nums; }
   .stats span b { color: var(--yellow); margin-left: .2em; }
@@ -60,11 +62,12 @@
   .key { display: inline-block; min-width: 1.5em; padding: 0 .35em; margin-right: .15em; text-align: center; background: var(--paper); color: var(--ink); border: 2px solid var(--ink); border-bottom-width: 4px; border-radius: 4px; font-size: .85em; line-height: 1.35; }
   .key.pad { border-radius: 999px; background: var(--yellow); }
 
-  #hotbar { position: absolute; left: 50%; bottom: .5em; transform: translateX(-50%); display: flex; gap: .25em; padding: .25em; }
-  .slot { position: relative; width: 2.6em; height: 2.6em; background: #2a2136; border: 2px solid #0c0a10; cursor: pointer; padding: 0; display: grid; place-items: center; }
-  .slot img { width: 1.9em; height: 1.9em; image-rendering: pixelated; }
-  .slot .key { position: absolute; left: .15em; top: 0; font-size: .55em; color: #8d8a93; font-weight: 700; }
-  .slot .n { position: absolute; right: .15em; bottom: 0; font-size: .7em; font-weight: 700; color: var(--yellow); text-shadow: 1px 1px 0 #000; }
+  #hotbar { position: absolute; left: 50%; bottom: .5em; transform: translateX(-50%); display: flex; gap: .3em; padding: .3em; }
+  .slot { position: relative; width: 3.4em; height: 3.4em; background: #2a2136; border: 2px solid #0c0a10; cursor: pointer; padding: 0; display: grid; place-items: center; }
+  .slot img { width: 2.6em; height: 2.6em; image-rendering: pixelated; }
+  .slot .key { position: absolute; left: .2em; top: 0; font-size: .7em; color: #8d8a93; font-weight: 700; }
+  .slot .n { position: absolute; right: .2em; bottom: 0; font-size: .95em; font-weight: 700; color: var(--yellow); text-shadow: 1px 1px 0 #000; }
+  @media (pointer: coarse) { .slot .key { display: none; } }   /* number keys mean nothing on a phone */
   .slot.empty { display: none; }   /* only show what Dan actually has */
   .slot:hover { border-color: var(--yellow); }
   .slot.sel { border-color: var(--pink); box-shadow: 0 0 0 2px var(--pink); }
@@ -417,33 +420,34 @@
   <button class="tbtn" id="btnF" aria-label="Punch">PUNCH</button>
 </div>
 
-<script src="engine.js?v=202609231706"></script>
-<script src="songs.js?v=202609231706"></script>
-<script src="music.js?v=202609231706"></script>
-<script src="art.js?v=202609231706"></script>
-<script src="font.js?v=202609231706"></script>
-<script src="world.js?v=202609231706"></script>
-<script src="ambient.js?v=202609231706"></script>
-<script src="landmarks.js?v=202609231706"></script>
-<script src="gigs.js?v=202609231706"></script>
-<script src="actors.js?v=202609231706"></script>
-<script src="items.js?v=202609231706"></script>
-<script src="upgrades.js?v=202609231706"></script>
-<script src="money.js?v=202609231706"></script>
-<script src="headlines.js?v=202609231706"></script>
-<script src="story.js?v=202609231706"></script>
-<script src="minigames.js?v=202609231706"></script>
-<script src="court.js?v=202609231706"></script>
-<script src="cases.js?v=202609231706"></script>
-<script src="favors.js?v=202609231706"></script>
-<script src="court2.js?v=202609231706"></script>
-<script src="miami.js?v=202609231706"></script>
-<script src="cases45.js?v=202609231706"></script>
-<script src="miami2.js?v=202609231706"></script>
-<script src="daytona.js?v=202609231706"></script>
-<script src="daytona2.js?v=202609231706"></script>
-<script src="chase.js?v=202609231706"></script>
-<script src="game.js?v=202609231706"></script>
-<script src="share.js?v=202609231706"></script>
-<script src="ui.js?v=202609231706"></script>
-<script src="pwa.js?v=202609231706"></script>
+<script src="engine.js?v=202609231955"></script>
+<script src="songs.js?v=202609231955"></script>
+<script src="music.js?v=202609231955"></script>
+<script src="art.js?v=202609231955"></script>
+<script src="font.js?v=202609231955"></script>
+<script src="world.js?v=202609231955"></script>
+<script src="ambient.js?v=202609231955"></script>
+<script src="landmarks.js?v=202609231955"></script>
+<script src="gigs.js?v=202609231955"></script>
+<script src="arcs.js?v=202609231955"></script>
+<script src="actors.js?v=202609231955"></script>
+<script src="items.js?v=202609231955"></script>
+<script src="upgrades.js?v=202609231955"></script>
+<script src="money.js?v=202609231955"></script>
+<script src="headlines.js?v=202609231955"></script>
+<script src="story.js?v=202609231955"></script>
+<script src="minigames.js?v=202609231955"></script>
+<script src="court.js?v=202609231955"></script>
+<script src="cases.js?v=202609231955"></script>
+<script src="favors.js?v=202609231955"></script>
+<script src="court2.js?v=202609231955"></script>
+<script src="miami.js?v=202609231955"></script>
+<script src="cases45.js?v=202609231955"></script>
+<script src="miami2.js?v=202609231955"></script>
+<script src="daytona.js?v=202609231955"></script>
+<script src="daytona2.js?v=202609231955"></script>
+<script src="chase.js?v=202609231955"></script>
+<script src="game.js?v=202609231955"></script>
+<script src="share.js?v=202609231955"></script>
+<script src="ui.js?v=202609231955"></script>
+<script src="pwa.js?v=202609231955"></script>

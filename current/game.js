@@ -27,12 +27,13 @@ function startDay() {
   Object.assign(Game.fx, { buzz: 0, high: 0, shroom: 0, powder: 0, crash: 0, cig: 0 });
   Object.assign(Game.dan, { x: S_.dan.x, y: S_.dan.y, dir: 'down', ride: null, hurt: 0 });
   Object.assign(Game.boat, { x: S_.boat.x, y: S_.boat.y, dir: 'right' });
-  Object.assign(Game.cooler, { x: S_.cooler.x, y: S_.cooler.y, dir: 'down' });
+  Object.assign(Game.cooler, { x: S_.cooler.x, y: S_.cooler.y, dir: 'down', home: null });
   Game.inv.fish = Game.catchBag.filter(f => !f.junk).length;
   spawn();
   Game.cam.x = Game.dan.x - VW / 2; Game.cam.y = Game.dan.y - VH / 2 - 10;
   Game.mode = 'play'; showHud(true);
-  Story.setupDay(Game.day); Gigs.newDay();
+  Story.setupDay(Game.day); Gigs.newDay(); Arcs.newDay();
+  if (hasUp('keg')) { Game.inv.beer = (Game.inv.beer || 0) + 3; updateHotbar(); }   // the Kegerator provides
   Game.dawn = null; save();
   Game.dawn = { day: Game.day, money: Game.money, allegations: Game.allegations, headlines: Game.headlines.slice(), catchBag: Game.catchBag.slice(), pythons: Game.pythons.slice() };
   Sound.setMusic(true);
@@ -65,7 +66,7 @@ function spawn() {
   let best = null, bd = 1e9;
   for (let y = 12; y < 30; y++) for (let x = 28; x < 42; x++) if (World.tile(x, y) <= T.WATER) { const d = Math.hypot(x - 36, y - 18); if (d < bd) { bd = d; best = [x, y]; } }
   if (best && Game.day < 4) A.push(makeGator((best[0] + .5) * TS, (best[1] + .5) * TS, true));
-  tries(6, () => { const x = rnd(3, 18) * TS, y = rnd(41, 57) * TS; if (World.at(x, y) === T.SAWGRASS) { A.push(makePython(x, y)); return true; } });
+  tries(3, () => { const x = rnd(3, 18) * TS, y = rnd(41, 57) * TS; if (World.at(x, y) === T.SAWGRASS) { A.push(makePython(x, y)); return true; } });
   A.push(makeCritter('raccoon', 38 * TS, 41.5 * TS), makeCritter('raccoon', 14 * TS, 21 * TS));
   A.push(makeCritter('pelican', S_.dockEnd.x - 20, S_.dockEnd.y - 8), makeCritter('pelican', S_.ramp.x + 10, S_.ramp.y + 30));
   for (let i = 0; i < 4; i++) A.push(makeCritter('iguana', rnd(24, 70) * TS, rnd(38.5, 42.5) * TS));
@@ -89,6 +90,7 @@ function interaction() {
   const gi = Gigs.interactions(); if (gi) return gi;   // carrying a damp mattress outranks small talk
   if (D.hiding) return { label: 'Come out of the porta-potty', fn: () => { D.hiding = false; toast('Dan emerges. He will never be the same.'); } };
   if (Heat.cop && !D.ride && near(World.spots.hide || { x: 25.8 * TS, y: 43.3 * TS }, 22)) return { label: 'HIDE IN THE PORTA-POTTY', fn: () => { D.hiding = true; D.moving = false; toast('Dan hides in the porta-potty. It is... a lot in here.'); } };
+  const ar = Arcs.interaction(); if (ar) return ar;   // the thing you came here to do beats small talk with whoever's standing there
   if (!D.ride) for (const n of Game.npcs) if (!n.hidden && near(n, 24)) return { label: `Talk to ${n.name}`, fn: () => Story.talk(n) };
   for (const a of Game.animals) {
     if (a.spirit && near(a, 56) && (Game.fx.shroom > 0 || a.sober)) return { label: 'Approach the glowing manatee', fn: () => a.sober ? Cases.manny2() : Story.manny() };
@@ -115,7 +117,28 @@ function interaction() {
   if (near(Game.cooler, 18)) return { label: 'Ride the motorized cooler', fn: () => { D.ride = 'cooler'; D.x = Game.cooler.x; D.y = Game.cooler.y; Sound.play('engine'); if (Game.fx.buzz > 50 || Game.fx.powder > 0) Game.day_.dui = true; } };
   const p = facingPoint(16), k = World.at(p.x, p.y), here = World.at(D.x, D.y);
   if (k === T.DEEP || k === T.WATER || (k === T.SHALLOW && here === T.DOCK)) return { label: 'Cast from here', fn: () => Fishing.start(k, true) };
+  if (!D.ride && !Game.cooler.home && Math.hypot(Game.cooler.x - D.x, Game.cooler.y - D.y) > 200) return { label: 'Whistle for the cooler', fn: whistleCooler };
   return null;
+}
+// lost the cooler? whistle. It drives itself over, headlights on, like a very cold dog.
+function whistleCooler() {
+  Sound.play('git'); Game.cooler.home = { t: 0, stuck: 0 }; react('cheer');
+  toast(pick(['*fweeeet* Somewhere, a cooler’s headlights flick on.', '*whistle* COOLER! HERE, BOY!', '*fweet fweet* Off in the distance: a motor. It heard him.']), 2.5);
+  if (!Game.flags.coolerCalled) { Game.flags.coolerCalled = true; headline('MOTORIZED COOLER SEEN DRIVING ITSELF DOWN COUNTY ROAD; OWNER: "HE KNOWS HIS NAME"', 2); }
+}
+function coolerHome(dt) {
+  const C = Game.cooler, H = C.home, D = Game.dan; if (!H) return;
+  if (D.ride === 'cooler') { C.home = null; return; }
+  H.t += dt; const dx = D.x - C.x, dy = D.y - C.y, d = Math.hypot(dx, dy);
+  if (d < 22) { C.home = null; C.dir = dirOf(-dx, -dy); toast(pick(['The cooler rolls up and parks itself. Good cooler.', 'The cooler arrives. It beeps once. Proudly.']), 2); return; }
+  let moved = false;
+  for (const turn of [0, .7, -.7, 1.4, -1.4]) { const a = Math.atan2(dy, dx) + turn, nx = C.x + Math.cos(a) * 110 * dt, ny = C.y + Math.sin(a) * 110 * dt; if (canWalk(nx, ny)) { C.x = nx; C.y = ny; C.dir = dirOf(Math.cos(a), Math.sin(a)); moved = true; break; } }
+  H.stuck = moved ? 0 : H.stuck + dt;
+  if (Math.random() < dt * 3) Sound.play('engine');
+  if (H.stuck > 1 || H.t > 14) {   // no road home: it swims
+    const f = facingPoint(-18); C.home = null; C.x = canWalk(f.x, f.y) ? f.x : D.x + 16; C.y = canWalk(f.x, f.y) ? f.y : D.y + 6; splash(C.x, C.y, 10);
+    toast(pick(['The cooler arrives. Soaking wet. It swam.', 'The cooler crawls out of the swamp behind Dan. It has a fish in it now.']), 2.5);
+  }
 }
 // ---------- punching (F / X / PUNCH) ----------
 const PUNCH_WORDS = ['POW!', 'WHAM!', 'BONK!', 'THWACK!', 'SMACK!'];
@@ -173,6 +196,7 @@ function hints() {
   if (hintT > 0) { ui.hint.hidden = false; if ((hintT -= 1 / 60) <= 0) ui.hint.hidden = true; return; }
   const D = Game.dan, h = Game.flags.hints || {};
   if (!h.gator && Game.animals.some(a => a.type === 'gator' && !a.lurk && Math.hypot(a.x - D.x, a.y - D.y) < 90)) return hint('gator', `${K('punch')} punch &nbsp; ${K('b')} yell GIT &nbsp; ${K('a')} wrestle`, 6);
+  if (!h.arc && Game.npcs.some(n => !n.hidden && Arcs.offering(n) && Math.hypot(n.x - D.x, n.y - D.y) < 110)) return hint('arc', `A <b style="color:#ff5ea8">pink !</b> = a neighbor with a story. Finish it: cash, and they vouch for you`, 6);
   if (!h.gig && Game.npcs.some(n => !n.hidden && Gigs.offering(n) && Math.hypot(n.x - D.x, n.y - D.y) < 110)) return hint('gig', `A <b>$</b> over somebody = a paying side gig. Walk up and ${K('a')}`, 6);
   if (!h.detector && typeof Detector !== 'undefined' && Detector.on()) return hint('detector', `Metal detector: faster beeps = closer. ${K('a')} to dig when it says so`, 6);
   if (!h.nitro && D.ride === 'car' && hasUp('nitro')) return hint('nitro', `${K('run')} for nitrous`, 4);
@@ -199,7 +223,7 @@ function wrestleGator(a) {
 }
 function grabPython(a) {
   a.stun = 99;
-  Wrestle.start({ foe: 'python', arena: 'swamp', onWin: () => { a.state = 'bagged'; Game.pythons.push(a.len); toast(`Bagged a ${a.len} ft Burmese python. Rhonda pays $25/ft.`); if (Game.pythons.length === 1) headline(`FLORIDA MAN CATCHES ${a.len}-FOOT PYTHON WITH BARE HANDS, WEARING FLIP-FLOPS`, 5); },
+  Wrestle.start({ foe: 'python', arena: 'swamp', onWin: () => { a.state = 'bagged'; Game.pythons.push(a.len); toast(`Bagged a ${a.len} ft Burmese python. Rhonda pays $4/ft.`); if (Game.pythons.length === 1) headline(`FLORIDA MAN CATCHES ${a.len}-FOOT PYTHON WITH BARE HANDS, WEARING FLIP-FLOPS`, 5); },
     onLose: () => { a.stun = 0; a.state = 'flee'; a.timer = 3; toast('The python slithered off. Dan got hugged a lil. Not in a nice way.'); } });
 }
 function yell() {
@@ -241,10 +265,11 @@ function update(dt) {
   if (Input.tapped('mute')) toast(Sound.toggleMute() ? 'Sound off.' : 'Sound on.');
   tickFx(dt);
   Game.hour += dt / 30 * (Game.fx.high > 0 ? .6 : 1) * (Game.fx.powder > 0 ? 1.3 : 1);
-  Game.chill = Math.max(0, Game.chill - dt * .2);
+  Game.chill = Math.max(0, Game.chill - dt * (hasUp('zapper') ? .1 : .2));
   Game.gitCd = (Game.gitCd || 0) - dt; Game.punchCd = (Game.punchCd || 0) - dt; Game.dan.punchT = (Game.dan.punchT || 0) - dt;
   if (Game.chill <= 0) { Game.chill = 40; headline('FLORIDA MAN SCREAMS AT PELICAN FOR 40 MINUTES; PELICAN UNBOTHERED', 4); return say([['', 'Dan has run out of chill.'], ['DAN', 'WHAT ARE YOU LOOKIN AT, PELICAN? HUH? YEAH, YOU. YOU AND YOUR STUPID FACE-BAG!'], ['', 'The pelican is unbothered. Dan feels better, weirdly.']]); }
-  if (Game.hour >= 22) { Game.hour = 22; return say([['', 'It’s 10 PM. The mosquitoes have unionized.'], ['DAN', 'Aight. Bed. Wherever I’m standing is bed now.']], () => endDay('late')); }
+  if (Game.hour >= 22 && Cases.nightWork()) Game.hour = Math.min(Game.hour, 23.9);   // the Skunk Ape / Manny don't keep office hours
+  else if (Game.hour >= 22) { Game.hour = 22; return say([['', 'It’s 10 PM. The mosquitoes have unionized.'], ['DAN', 'Aight. Bed. Wherever I’m standing is bed now.']], () => endDay('late')); }
   moveDan(dt);
   if (Game.storm > .3 && !Game.dan.ride) { const nx = Game.dan.x + Game.storm * 16 * dt; if (canWalk(nx, Game.dan.y)) Game.dan.x = nx; }
   tickWorld(dt);
@@ -280,6 +305,7 @@ function tickFx(dt) {
   const D = Game.dan; if (D.animT > 0 && (D.animT -= dt) <= 0) D.anim = null; D.hurt -= dt;
 }
 function tickWorld(dt) {
+  if (Game.cooler.home) coolerHome(dt);
   Game.raccoonCd = (Game.raccoonCd || 0) - dt; Game.gatorCalm = (Game.gatorCalm || 0) - dt;
   for (const a of Game.animals) { if (a.type === 'gator') updateGator(a, dt); else if (a.type === 'python') updatePython(a, dt); else if (a.type !== 'manatee' && a.type !== 'skunkape') updateCritter(a, dt); }
   for (const n of Game.npcs) { if (n.scared > 0) { n.scared -= dt; continue; } if (MIAMI() && Miami.tickNPC(n, dt)) continue; updateNPC(n, dt); }

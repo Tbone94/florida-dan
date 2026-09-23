@@ -6,7 +6,7 @@ const r = await p.evaluate(() => {
   window.TRAILER = true; const out = [];
   const step = n => { for (let i = 0; i < n; i++) { Input.poll(); update(1 / 30); render(); hud(); Input.endFrame(); } };
   const talk = (pickRe) => { for (let i = 0; i < 80 && Game.mode === 'talk'; i++) { const cs = [...document.querySelectorAll('.choice')]; const c = pickRe ? cs.find(b => pickRe.test(b.textContent)) || cs[0] : cs[0]; if (c) c.click(); else Input.press('a'); step(3); } };
-  begin(false); talk(); Game.flags.noChase = true; Game.money = 400;
+  begin(false); talk(); Game.flags.noChase = true; Game.money = 1400;
   // --- swamp: Gazette bribe
   headline('FLORIDA MAN TEST STORY ONE', 8); const al0 = Game.allegations, n0 = Game.headlines.length;
   const nb = World.props.find(q => q.kind === 'newsbox'); Object.assign(Game.dan, { x: nb.x + 6, y: nb.y + 18, ride: null }); Game.mode = 'play';
@@ -23,7 +23,8 @@ const r = await p.evaluate(() => {
   out.push('owned: ' + ['detector', 'cigboat', 'aviators'].filter(hasUp).join(','));
   // detector: stand on a loot spot
   const spot = Detector.spots()[0]; Object.assign(Game.dan, { x: spot.x, y: spot.y, ride: null }); step(2); it = interaction(); out.push('detector: ' + (it && it.label)); const m0 = Game.money; it.fn(); out.push(`dug: +$${Game.money - m0}, spots left ${Detector.spots().length}`);
-  // gigs
+  // gigs (neighbor stories politely declined so the gig offers get the conversation)
+  for (const id in ARCS) ARC(id).no = Game.day;
   for (const id of ['cafecito', 'pickles', 'rematch']) {
     const d = GIGS[id], giver = Game.npcs.find(n => n.id === d.giver); Game.day_.gig.offers = { [d.giver]: id }; Game.day_.gig.active = null; Game.mode = 'play';
     Object.assign(Game.dan, { x: giver.x, y: giver.y + 16, carry: null }); Story.talk(giver); talk(/in\.”/);

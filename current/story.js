@@ -68,11 +68,13 @@ function addQuest(id, text, opt, before) {
   if (Q(id)) return; const q = { id, text, opt: !!opt, done: false }, i = before ? Game.quests.findIndex(x => x.id === before) : -1;
   if (i >= 0) Game.quests.splice(i, 0, q); else Game.quests.push(q); renderQuests();
 }
-const currentQuest = () => Game.quests.find(q => !q.done && !q.opt) || Game.quests.find(q => !q.done && q.gig);   // a gig gets the arrow once the real objective is done
+const currentQuest = () => Game.quests.find(q => !q.done && !q.opt) || Game.quests.find(q => !q.done && q.gig) || Game.quests.find(q => !q.done && q.arc && Arcs.target(q));   // a gig gets the arrow once the real objective is done
 // where the objective arrow points
 function questTarget(q) {
   const S_ = World.spots, who = id => Game.npcs.find(n => n.id === id);
   if (q && q.gig) return Gigs.target(q);
+  if (q && q.arc) return Arcs.target(q);
+  if (typeof Cases !== 'undefined' && Cases.waitDark && Cases.waitDark()) return Cases.places().couch;   // it's a night thing: go sit on the couch till dark
   switch (q && q.id) {
     case 'boat': return Game.dan.ride === 'boat' ? null : Game.boat;
     case 'fish': return Game.dan.ride === 'boat' ? null : S_.dockEnd;
@@ -132,7 +134,7 @@ const Story = {
     }
     if (n === 2) {
       F.stopSignOnRoof = true; Game.cold = true;
-      setQuests([['darlene', 'Get Darlene to sign'], ['rhonda', 'Get Deputy Rhonda to sign'], ['merle2', 'Get Merle to sign'], ['python', 'Python bounty: $25/ft', true]]);
+      setQuests([['darlene', 'Get Darlene to sign'], ['rhonda', 'Get Deputy Rhonda to sign'], ['merle2', 'Get Merle to sign'], ['python', 'Python bounty: $4/ft', true]]);
       say([
         ['', 'TUESDAY. 6:00 AM. 47°F. Florida is FREEZING. The iguanas are falling out of the trees.'], ['DAN', 'My nipples could cut glass.'],
         [PHONE_B, 'The judge wants CHARACTER WITNESSES. Three signatures. Upstanding members of the community.'], ['DAN', 'I know like four people, Brenda.'],
@@ -190,6 +192,7 @@ const Story = {
 
   // --- people ---
   talk(n) {
+    if (Arcs.talk(n)) return;   // a neighbor's story beats a side gig
     if (Gigs.talk(n)) return;
     if (n.id === 'coral') return say([['CORAL', pick(['Surf & Dive! We sell gear. The engine in the back is “for display.”', 'You look like a guy who’d buy a metal detector. That’s a compliment.', 'Waves are flat, prices are fair, questions are discouraged.'])], ['CORAL', 'Wanna look?', [['Browse', () => { Game.mode = 'shop'; openShop('surf'); return null; }], ['“Nah.”', () => [['CORAL', 'Hang loose. Or don’t. Free country.']]]]]]);
     if (Game.day >= 5 && Cases.talk(n)) return;
@@ -254,7 +257,7 @@ const Story = {
   },
   rhonda() {
     const F = Game.flags;
-    const bounty = () => { const n = Game.pythons.length; if (!n) return [['RHONDA', 'State pays $25 a foot for Burmese pythons. Out in the Glades, west side. Bring ’em to me. Alive-ish.']]; const ft = Game.pythons.reduce((a, b) => a + b, 0), cash = Math.round(ft * 25); Game.money += cash; Game.pythons = []; Sound.play('cash'); done('python'); if (ft > 30) headline(`FLORIDA MAN TURNS IN ${Math.round(ft)} FEET OF PYTHON, SAYS HE "JUST GRABBED 'EM"`, 4); return [['RHONDA', `${ft.toFixed(1)} feet of python. That’s $${cash}. The Everglades thanks you, Dan. I do not.`]]; };
+    const bounty = () => { const n = Game.pythons.length; if (!n) return [['RHONDA', 'State pays $4 a foot for Burmese pythons. Out in the Glades, west side. Bring ’em to me. Alive-ish.']]; const ft = Game.pythons.reduce((a, b) => a + b, 0), cash = Math.round(ft * 4); Game.money += cash; Game.pythons = []; Sound.play('cash'); done('python'); if (ft > 30) headline(`FLORIDA MAN TURNS IN ${Math.round(ft)} FEET OF PYTHON, SAYS HE "JUST GRABBED 'EM"`, 4); return [['RHONDA', `${ft.toFixed(1)} feet of python. That’s $${cash}. The Everglades thanks you, Dan. I do not.`]]; };
     if (Game.day === 2 && !Q('rhonda').done) {
       if (Game.inv.sign) { Game.inv.sign = 0; F.stopSignOnRoof = false; done('rhonda'); return say([['RHONDA', '...That’s my stop sign.'], ['DAN', 'Found it. On a roof. Wild, right?'], ['RHONDA', 'I will sign that you RETURNED it. That is ALL I am signing, Dan.'], ['', 'Witness 2 of 3. Technically.']]); }
       return say([['RHONDA', 'Morning, Dan. Somebody stole the stop sign off 29 and Fifth.'], ['RHONDA', 'You wouldn’t know anything about that.', [['“Absolutely not.”', () => [['RHONDA', 'Uh huh.']]], ['“...Define ‘stole.’”', () => [['RHONDA', 'I’m gonna pretend you said no.']]], ['Offer her a Swamp Lite', () => [['RHONDA', 'I am IN UNIFORM, Dan.']]]]],
@@ -328,7 +331,7 @@ const Story = {
 };
 
 // the bed only offers itself in the evening or when bed is the objective (no "sleep" button under your thumb at 6 AM)
-const sleepReady = () => { const q = currentQuest(); return Game.hour >= 17 || (!!q && ['bed', 'sleep1', 'sleep2'].includes(q.id)); };
+const sleepReady = () => { const q = Game.quests.find(q => !q.done && !q.opt); return Game.hour >= 17 || !q || ['bed', 'sleep1', 'sleep2'].includes(q.id); };
 function sleep() {
   if (Game.day >= 5) { const why = Cases.sleepBlock(); if (why) return toast(why); return say([['DAN', pick(['Welp. That’s a day.', 'Nite, swamp.', 'Another one for the books. The police books.'])]], () => endDay('sleep')); }
   const F = Game.flags;

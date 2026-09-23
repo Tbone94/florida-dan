@@ -5,7 +5,7 @@ await p.goto('http://localhost:8811/index.html'); await p.waitForTimeout(1200);
 const r = await p.evaluate(() => {
   window.TRAILER = true; const out = [];
   const step = n => { for (let i = 0; i < n; i++) { Input.poll(); update(1 / 30); render(); hud(); Input.endFrame(); } };
-  begin(false); ui.talk.hidden = true; Game.talk = null; Game.mode = 'play'; Game.flags.noChase = true; Game.money = 500;
+  begin(false); ui.talk.hidden = true; Game.talk = null; Game.mode = 'play'; Game.flags.noChase = true; Game.money = 3000;
   const bub = Game.npcs.find(n => n.id === 'bubba'); out.push('Bubba spawned at shack: ' + !!bub + ', Skeeter: ' + !!Game.npcs.find(n => n.id === 'skeeter') + ', Lurleen: ' + !!Game.npcs.find(n => n.id === 'lurleen'));
   Object.assign(Game.dan, { x: bub.x, y: bub.y + 14, dir: 'up' }); const a = interaction(); out.push('prompt at Bubba: ' + (a && a.label));
   Game.mode = 'shop'; openShop('bubba'); out.push('for sale: ' + [...ui.shopList.children].map(b => b.dataset.k).join(','));

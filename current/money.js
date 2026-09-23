@@ -17,7 +17,8 @@ const Bribe = {
     const a = (Game.day_.allege && Game.day_.allege[h]) || 5;
     Game.money -= c; Game.day_.headlines = Game.day_.headlines.filter(x => x !== h);
     const i = Game.headlines.map(x => x.text).lastIndexOf(h); if (i >= 0) Game.headlines.splice(i, 1);   // off the front page, out of the court's evidence pile
-    Game.allegations = Math.max(0, Game.allegations - a); Game.heat = Math.max(0, (Game.heat || 0) - 1.5);
+    Game.allegations = Math.max(0, Game.allegations - a * 2); Game.heat = Math.max(0, (Game.heat || 0) - 3);   // buried AND spun: worth more than the story cost you
+    if (Heat.cop && Game.heat < 2.9) { Heat.end(); toast('RADIO: ...all units, disregard. Nothing to see. Per the Gazette.', 3); }
     Sound.play('cash');
     return [['', 'The story vanishes. Nobody will ever know. Except Dan. And the Gazette. And the $' + c + '.'], ['DAN', pick(['Journalism is dead. I killed it. Worth it.', 'Freedom of the press? More like freedom of the... less.', 'That’s called damage control, baby.'])]];
   },
@@ -61,9 +62,9 @@ const Detector = {
 
 // ---------- Miami: South Beach Surf & Dive (detector, cigarette boat, gold aviators) ----------
 Object.assign(UPGRADES, {
-  detector: { name: 'Metal Detector', price: 45, desc: 'Beeps faster near buried loot on any beach. Dig it up.', shop: 'surf' },
-  cigboat: { name: 'Cigarette Boat Engine', price: 120, desc: 'Bolt it on the SS Budget. Way faster on Miami water.', shop: 'surf' },
-  aviators: { name: 'Gold Aviators', price: 25, desc: 'Pure drip. Does nothing. Worth it.', shop: 'surf' },
+  detector: { name: 'Metal Detector', price: 120, desc: 'Beeps faster near buried loot on any beach. Dig it up.', shop: 'surf' },
+  cigboat: { name: 'Cigarette Boat Engine', price: 350, desc: 'Bolt it on the SS Budget. Way faster on Miami water.', shop: 'surf' },
+  aviators: { name: 'Gold Aviators', price: 75, desc: 'Pure drip. Does nothing. Worth it.', shop: 'surf' },
 });
 for (const k of ['detector', 'cigboat', 'aviators']) ITEMS[k] = { ...UPGRADES[k], upgrade: true };
 Object.assign(ICONS, {

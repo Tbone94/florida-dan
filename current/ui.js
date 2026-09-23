@@ -51,6 +51,7 @@ function updateHeadlineBanner(dt) {
 // ---------- HUD tick ----------
 const days = ['', 'MON', 'TUE', 'WED', 'FRI'];
 function clock() { const h = Math.floor(Game.hour), m = Math.floor(Game.hour % 1 * 6) * 10, h12 = ((h + 11) % 12) + 1; return `${h12}:${m ? m : '00'} ${h < 12 ? 'AM' : 'PM'}`; }
+const FX_BARS = [['high', 'HIGH', '#86c94a'], ['shroom', 'TRIPPIN', '#c77dff'], ['powder', '“SINUSES”', '#f4efe6'], ['crash', 'CRASHING', '#8d8a93'], ['cig', 'SMOKIN', '#ff8a3d']];
 function hud() {
   if (Game.mode === 'title' || Game.mode === 'gazette') return;
   const set = (el, v) => { v = String(v); if (el._v !== v) { el._v = v; el.textContent = v; } };
@@ -58,11 +59,11 @@ function hud() {
   ui.chillFill.style.width = Game.chill + '%'; ui.buzzFill.style.width = Math.min(100, Game.fx.buzz) + '%'; ui.allegeFill.style.width = Game.allegations + '%';
   set(ui.allegeLabel, Game.allegations + '%');
   set(ui.money, '$' + Game.money); set(ui.nFish, Game.inv.fish || 0); set(ui.nBait, Game.inv.bait || 0); set(ui.nCan, Game.inv.can || 0); set(ui.nPy, Game.pythons.length ? Game.pythons.reduce((a, b) => a + b, 0).toFixed(0) + 'ft' : '0');
-  const F = Game.fx, tags = [];
-  if (F.buzz > 25) tags.push(F.buzz > 80 ? 'WASTED' : 'BUZZED'); if (F.high > 0) tags.push(`HIGH ${Math.ceil(F.high)}s`); if (F.shroom > 0) tags.push(`TRIPPIN ${Math.ceil(F.shroom)}s`);
-  if (F.powder > 0) tags.push(`“SINUSES” ${Math.ceil(F.powder)}s`); if (F.crash > 0) tags.push('CRASHING'); if (F.cig > 0) tags.push('SMOKIN');
-  set(ui.fxTags, tags.join(' · '));
-  const hs = Math.ceil((Game.heat || 0) - .05); $('heat').hidden = hs <= 0; set($('heat'), '★'.repeat(hs) + '☆'.repeat(5 - Math.max(0, hs)) + (Heat.cop ? '  WANTED' : '')); $('heat').classList.toggle('hot', !!Heat.cop);
+  // every timed effect gets a bar that drains until it wears off
+  const F = Game.fx, pk = Game.fxPeak || (Game.fxPeak = {}); let fx = F.buzz > 80 ? '<span class="fxw">WASTED</span>' : '';
+  for (const [k, name, col] of FX_BARS) { if (F[k] > 0) { pk[k] = Math.max(pk[k] || 0, F[k]); fx += `<span class="fxb"><b>${name}</b><em><i style="width:${Math.round(F[k] / pk[k] * 20) * 5}%;background:${col}"></i></em></span>`; } else pk[k] = 0; }
+  if (ui.fxTags._h !== fx) { ui.fxTags._h = fx; ui.fxTags.innerHTML = fx; }
+  const hs = Math.ceil((Game.heat || 0) - .05); $('heat').hidden = hs <= 0; set($('heat'), '★'.repeat(hs) + '☆'.repeat(5 - Math.max(0, hs)) + (Heat.cop ? '  WANTED' : Game.heatBumpT > 0 ? '  +★ MADE THE NEWS' : hs >= 3 ? '  COPS COMING' : '')); $('heat').classList.toggle('hot', !!Heat.cop);
   const tt = Gigs.timer(), rh = typeof Speedway !== 'undefined' ? Speedway.hud() : ''; ui.urgent.hidden = !(Game.urgent > 0 || tt || rh); if (rh) set(ui.urgent, rh); else if (Game.urgent > 0) set(ui.urgent, `FIND A TOILET: ${Math.ceil(Game.urgent)}s`); else if (tt) set(ui.urgent, `BEAT THE RECORD: ${tt}s`);
   for (const [id, n] of [['statBait', Game.inv.bait], ['statCan', Game.inv.can], ['statPy', Game.pythons.length]]) $(id).hidden = !n;
   updateHotbar(); renderQuests();
