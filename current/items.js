@@ -9,11 +9,14 @@ const ITEMS = {
   energy: { name: 'Gator Juice Energy', price: 4, desc: 'Speed boost. Heart goes brrrrr.' },
   hotdog: { name: 'Roller Dog (Day 4)', price: 2, desc: 'Big chill... or big trouble. Keep a toilet in mind.' },
   scratch: { name: 'Scratch-Off', price: 3, desc: 'Florida Frenzy! Win up to $100. You won’t.' },
+  gummy: { name: 'Gator Gummies', price: 12, desc: 'A long, strong high. The munchies will be biblical.' },
+  cafecito: { name: 'Cafecito', price: 2, desc: 'Cuban coffee. Legal rocket fuel. Speed + chill.' },
+  pastelito: { name: 'Pastelito', price: 2, desc: 'Guava and cheese. Fixes everything for about a minute.' },
   lettuce: { name: 'Head of Lettuce', price: 1, desc: 'A vegetable. At the Gulp-N-Go. Somehow.' },
   jortsXXXL: { name: 'Formal Jorts, XXXL', price: 8, desc: 'Black denim. For weddings, funerals, and cryptid testimony.' },
   firework: { name: 'Freedom Rocket', price: 10, desc: 'Throw it. Boom. Everything within a mile respects you now.' },
 };
-const HOTBAR = ['beer', 'cig', 'joint', 'shroom', 'powder', 'energy', 'hotdog', 'scratch', 'firework'];
+const HOTBAR = ['beer', 'cig', 'joint', 'shroom', 'powder', 'energy', 'hotdog', 'scratch', 'firework', 'gummy', 'cafecito', 'pastelito'];
 
 function giveItem(k, n = 1, quiet) {
   Game.inv[k] = (Game.inv[k] || 0) + n;
@@ -52,6 +55,9 @@ function useItem(k) {
       if (L.powder === 1) headline('FLORIDA MAN CLAIMS WHITE POWDER IS "SINUS MEDICINE," RUNS 40 MPH DOWN COUNTY ROAD 29', 8);
       if (F.shroom > 0) { headline('FLORIDA MAN "ASCENDS" ON UNKNOWN SUBSTANCES; WITNESSES SAY HE "WAS GLOWING AND KEPT SAYING MANATEE"', 10); Game.shake = 8; }
       break;
+    case 'gummy': F.high = 110; Game.chill = 100; Sound.play('munch'); L.joints++; toast(pick(['Chewy. Tropical. Kicking in... never? ...OH. OH, there it is.', 'Dan ate the whole bag. Dan has made a choice.'])); setTimeout(() => { if (Game.fx.high > 0) toast('BIBLICAL MUNCHIES. Dan would sell the cooler for a pastelito.'); }, 12000); break;
+    case 'cafecito': F.powder = Math.max(F.powder, 9); Game.chill = Math.min(100, Game.chill + 15); Sound.play('crack'); toast(pick(['*sip* ...Dan can see through time.', 'Abuela’s cafecito hits different. It hits EVERYTHING.', 'Dan’s eyelids are now permanently open.'])); break;
+    case 'pastelito': Game.chill = Math.min(100, Game.chill + 30); if (F.high > 0) { Game.chill = 100; toast('Munchies: DEFEATED. Guava is God.'); } else toast(pick(['Flaky. Sweet. Life-changing.', 'Crumbs everywhere. Worth it.'])); Sound.play('munch'); break;
     case 'energy': F.powder = Math.max(F.powder, 12); Sound.play('crack'); toast('GATOR JUICE. My heart is doin’ a drum solo.'); break;
     case 'hotdog': {
       Sound.play('munch'); L.hotdogs++;

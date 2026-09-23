@@ -96,6 +96,7 @@ function buildWorld() {
   add('billboard', 44, 42, 5, .6, true);
   add('courthouse', 73, 34, 10, 4);
   add('porta', 25.3, 42.3, 1, 1);
+  add('van', 22.4, 39.6, 3, 1.4);
   add('mailbox', 20, 43, .5, .5);
   for (let x = 50; x <= 69; x++) { if (x < 58 || x > 60) add('fence', x, 46.5, 1, .3); add('fence', x, 57.5, 1, .3); }
   for (let y = 47; y <= 57; y++) { add('fencev', 49.7, y, .3, 1); add('fencev', 69.7, y, .3, 1); }
@@ -288,6 +289,15 @@ function drawProp(p, cx, cy, t) {
     case 'grill': { shadow(x + 8, y + 15, 14); OR(x + 2, y - 2, 12, 8, PAL.greyD); R(x + 4, y + 6, 1, 8, PAL.ink); R(x + 11, y + 6, 1, 8, PAL.ink); break; }
     case 'flamingo': { shadow(x + 5, y + 7, 10); g.drawImage(SPR.flamingo, x, y - 12); break; }
     case 'sign': { R(x + 7, y - 6, 2, 14, PAL.woodD); OR(x - 33, y - 19, 82, 12, PAL.woodL); label('NO TRESPASSIN', x + 8, y - 9, PAL.red, 7); break; }
+    case 'van': {   // Wayne's Mystery Van
+      shadow(x + w / 2, y + h + 2, w + 6, 6);
+      OR(x, y - 12, w, h + 10, '#8fd18a'); R(x, y - 12, w, 4, '#b86bd6'); OR(x + 4, y - 8, 12, 8, '#9fd8ee'); OR(x + w - 12, y - 8, 8, 8, '#9fd8ee');
+      g.fillStyle = PAL.hat; g.beginPath(); g.arc(x + 26, y + 2, 4, 0, 7); g.fill(); g.fillStyle = PAL.yellow; g.beginPath(); g.arc(x + 34, y - 1, 3, 0, 7); g.fill();
+      OR(x + 6, y + h - 4, 7, 5, PAL.ink); OR(x + w - 13, y + h - 4, 7, 5, PAL.ink);
+      if (Math.floor(t * 2) % 3 === 0) { g.globalAlpha = .45; R(x + w - 6, y - 16 - (t * 8) % 6, 4, 4, PAL.tankD); g.globalAlpha = 1; }
+      label('MYSTERY VAN', x + w / 2, y - 16, '#b86bd6', 7);
+      break;
+    }
     case 'porta': { shadow(x + 8, y + 16, 16); OR(x + 1, y - 10, 14, 26, PAL.teal); R(x + 1, y - 12, 14, 3, PAL.white); R(x + 10, y + 3, 2, 2, PAL.red); break; }
     case 'mailbox': { R(x + 3, y - 2, 2, 10, PAL.woodD); OR(x, y - 8, 9, 6, PAL.greyD); R(x + 8, y - 8, 2, 3, PAL.red); break; }
     case 'fence': { R(x, y - 6, TS, 2, PAL.woodL); R(x, y - 2, TS, 2, PAL.woodL); R(x + 1, y - 9, 2, 12, PAL.woodD); break; }

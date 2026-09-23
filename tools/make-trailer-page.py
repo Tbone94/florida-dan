@@ -2,8 +2,9 @@
 import pathlib
 cur = pathlib.Path(__file__).resolve().parent.parent / 'current'
 s = (cur / 'index.html').read_text()
-s = s.replace('<script src="engine.js"></script>', '<script>window.TRAILER = true;</script>\n<script src="engine.js"></script>')
-s = s.replace('<script src="ui.js"></script>', '<script src="ui.js"></script>\n<script src="trailer.js"></script>')
+import re
+s = re.sub(r'(<script src="engine\.js[^"]*"></script>)', r'<script>window.TRAILER = true;</script>\n\1', s, 1)
+s = re.sub(r'(<script src="ui\.js([^"]*)"></script>)', r'\1\n<script src="trailer.js\2"></script>', s, 1)
 s = s.replace('<title>Florida Dan</title>', '<title>Florida Dan — trailer director</title>')
 s = s.replace('  @media (prefers-reduced-motion: reduce)', '''  /* director-mode overlays */
   #prompt, #hint, #objective { display: none !important; }

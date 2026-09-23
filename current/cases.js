@@ -139,7 +139,7 @@ const Cases = {
       say([['MERLE', 'My kiddie pool? For MANNY? Heck yeah, Danny. It’s got a hole in it but so do I.'], ['', 'Got: one (1) kiddie pool. Cartoon sharks on it.']]); return true;
     }
     if (n.id === 'darlene' && c.n === 2 && c.d === 2 && (Game.inv.lettuce || 0) === 0 && !F.lettuceTalk) {
-      F.lettuceTalk = true; say([['DARLENE', 'Lettuce? YOU want LETTUCE? Dan, in eleven years I have never seen you buy a vegetable.'], ['DAN', 'It’s for a friend.'], ['DARLENE', 'I’m putting it in the shop. I’m scared, Dan.']], () => { Game.mode = 'shop'; openShop(); }); return true;
+      F.lettuceTalk = true; say([['DARLENE', 'Lettuce? YOU want LETTUCE? Dan, in eleven years I have never seen you buy a vegetable.'], ['DAN', 'It’s for a friend.'], ['DARLENE', 'I’m putting it in the shop. I’m scared, Dan.']], () => { Game.mode = 'shop'; openShop('gulp'); }); return true;
     }
     // daily favors next, then everyday small talk
     if (Favors.talk(n)) return true;

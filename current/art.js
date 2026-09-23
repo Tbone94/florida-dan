@@ -53,6 +53,8 @@ const SWAPS = {
   kayden: { hat: PAL.teal, hatD: '#1b8f83', tank: PAL.purple, tankD: PAL.purpleD, stain: PAL.neon, jorts: PAL.black, hair: PAL.blonde, shades: PAL.skin, skin: '#f2c29a', flip: PAL.white },
   pam: { hat: PAL.tan, hatD: PAL.tanD, tank: PAL.teal, tankD: '#1b8f83', stain: PAL.white, jorts: PAL.tan, hair: PAL.grey, shades: PAL.skin, flip: PAL.brown },
   kevin: { hat: PAL.greyD, hatD: PAL.inkL, tank: PAL.mudL, tankD: PAL.mud, stain: PAL.mudD, jorts: PAL.greyD, hair: PAL.hairL, shades: PAL.skin, skin: '#d9a07a', flip: PAL.black },
+  wayne: { hat: '#2f8f4e', hatD: '#1f6a38', tank: '#b86bd6', tankD: '#ffd23f', stain: '#27c6b4', jorts: '#2f8f4e', hair: PAL.hairL, shades: '#7b4bc4', flip: PAL.brown },
+  doc: { hat: PAL.skin, hatD: PAL.skinD, tank: PAL.white, tankD: PAL.tankD, stain: PAL.red, jorts: PAL.white, hair: PAL.skinD, shades: PAL.shades, flip: PAL.white },
   // ---- Miami ----
   abuela: { hat: PAL.grey, hatD: PAL.greyD, tank: PAL.red, tankD: PAL.redD, stain: PAL.yellow, jorts: PAL.red, hair: PAL.white, shades: PAL.skin, skin: '#d99a74', flip: PAL.black },
   dj: { hat: PAL.neon, hatD: PAL.hat, tank: PAL.white, tankD: PAL.tankD, stain: PAL.neon, jorts: PAL.white, hair: PAL.neon, shades: PAL.teal, skin: '#c98a62', flip: PAL.white },
@@ -138,6 +140,12 @@ const ICONS = {
     '..........', '..........', '...oooo...', 'o.oggggo..', 'oooggkggo.', 'ogggggggo.', 'ooobbbbbo.', 'o.obbbbo..', '...oooo...', '..........'] },
   cash: { key: { o: 'ink', g: 'grassL', d: 'grassD' }, rows: [
     '..........', '..........', 'oooooooooo', 'ogggggdggo', 'ogdggdgdgo', 'oggdddggdo', 'ogdggdgdgo', 'ogggggdggo', 'oooooooooo', '..........'] },
+  gummy: { key: { o: 'ink', g: 'gatorL', d: 'gator', p: 'hat', y: 'yellow' }, rows: [
+    '..........', '..oooooo..', '.oggggggo.', '.ogdggdgo.', '.oggppggo.', '.ogyyyygo.', '.oggggggo.', '.ogdggdgo.', '..oooooo..', '..........'] },
+  cafecito: { key: { o: 'ink', w: 'white', c: 'brown', t: 'tankD' }, rows: [
+    '....t.t...', '...t.t....', '..........', '..oooooo..', '.owccccwo.', '.owccccwoo', '.owwwwwwo.', '..owwwwo..', '..oooooo..', '..........'] },
+  pastelito: { key: { o: 'ink', y: 'sand', d: 'sandD', p: 'hat' }, rows: [
+    '..........', '..........', '.oooooooo.', 'oyyyyyyyyo', 'oydydydyyo', 'oyyyppyyyo', 'oyyyyyyyyo', '.oooooooo.', '..........', '..........'] },
   lettuce: { key: { o: 'ink', g: 'grassL', d: 'grass', w: 'white' }, rows: [
     '..........', '...oooo...', '..oggdgo..', '.ogdgggdo.', '.oggwggdo.', '.odggdggo.', '.oggdgggo.', '..odggdo..', '...oooo...', '..........'] },
   trash: { key: { o: 'ink', g: 'grey', d: 'greyD', w: 'white' }, rows: [

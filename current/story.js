@@ -192,6 +192,8 @@ const Story = {
     if (n.id === 'darlene') return this.darlene();
     if (n.id === 'rhonda') return this.rhonda();
     if (n.id === 'tourist') return say(pick(TOURIST_TALKS));
+    if (n.id === 'wayne') return say([['WAYNE', pick(['Duuude. Dan. My guy. You look like you need some... oregano.', 'Welcome to the Mystery Van. The mystery is what’s in the van. It’s weed.', 'Shhh. Rhonda’s got ears in the palm trees, man.'])],
+      ['WAYNE', 'What can I do you for?', [['See what Wayne’s got', () => { Game.mode = 'shop'; openShop('van'); return null; }], ['“Just saying hi.”', () => [['WAYNE', 'Hi back, man. Hi... back. Whoa.']]]]]]);
   },
   merle() {
     const F = Game.flags, day = Game.day, real = Game.catchBag.filter(f => !f.junk);
@@ -217,7 +219,7 @@ const Story = {
   },
   darlene() {
     const F = Game.flags;
-    const shop = () => { Game.mode = 'shop'; openShop(); return null; };
+    const shop = () => { Game.mode = 'shop'; openShop('gulp'); return null; };
     const sell = () => { const n = Game.catchBag.filter(f => !f.junk && !f.legend).length; if (!n) return [['DARLENE', 'You ain’t got any fish, hon.']]; Game.money += n * 4; Game.catchBag = Game.catchBag.filter(f => f.junk || f.legend); Game.inv.fish = Game.catchBag.filter(f => !f.junk).length; Sound.play('cash'); return [['DARLENE', `${n} fish, $4 each. That’s $${n * 4}. Don’t tell the health department.`]]; };
     const opts = [['Shop', shop], ['Sell fish ($4 each)', sell], ['Leave', () => [['DARLENE', 'Bye, sugar. Don’t die.']]]];
     if (Game.day === 2 && !Q('darlene').done) {

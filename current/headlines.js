@@ -47,6 +47,8 @@ const HEADLINES = [
   ['bo_road', /NAPPING IN MIDDLE OF COUNTY ROAD/, 'Drink until everything goes black. (4/5)'],
   ['bo_potty', /NIGHT IN PORTA-POTTY/, 'Drink until everything goes black. (5/5)'],
   ['drunkFish', /CATCHES FISH WHILE DRUNK/, 'Fishing is easier with a buzz. Right?'],
+  ['oregano', /BUYS "OREGANO" FROM MAN IN VAN/, 'There’s a van behind the Gulp-N-Go. It smells like a van.'],
+  ['sharpieCoat', /MAN IN SHARPIE LAB COAT/, 'Miami has a “doctor” on the beach.'],
   // ---- the law ----
   ['coolerDUI', /DUI ON MOTORIZED COOLER/, 'The cooler has headlights for a reason.'],
   ['canCop', /HITS DEPUTY WITH BEER CAN/, 'Greet Rhonda the family way.'],

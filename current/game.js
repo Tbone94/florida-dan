@@ -43,6 +43,7 @@ function spawn() {
     makeNPC('merle', 'Merle', S_.merle.x, S_.merle.y, 'down', { wander: 18 }),
     makeNPC('darlene', 'Darlene', S_.darlene.x, S_.darlene.y, 'down'),
     makeNPC('rhonda', 'Deputy Rhonda', S_.rhonda.x, S_.rhonda.y, 'left', { wander: 70 }),
+    makeNPC('wayne', 'Wayne', 24 * TS, 41.6 * TS, 'down', { wander: 8 }),
     makeNPC('tourist', 'Tourist', 26 * TS, 46.6 * TS, 'down', { wander: 60 }),
     makeNPC('tourist', 'Tourist', 60 * TS, 43 * TS, 'down', { wander: 60 }),
   ];

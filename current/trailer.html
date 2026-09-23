@@ -141,12 +141,27 @@
   .box h2 { margin: 0 0 .2em; font-family: var(--display); font-weight: 400; font-size: 2em; color: var(--yellow); letter-spacing: .02em; }
   .box .sub2 { font-size: .8em; color: #c9c2b4; margin-bottom: .7em; }
   #shopList { display: grid; gap: .35em; margin-bottom: .8em; }
-  .shopRow { display: grid; grid-template-columns: 2em 1fr auto; gap: .6em; align-items: center; text-align: left; background: #1a1423; border: 2px solid #5d5a66; color: var(--paper); padding: .35em .5em; cursor: pointer; font-size: .92em; }
+  .shopRow { display: grid; grid-template-columns: 2em 1fr auto auto; gap: .6em; align-items: center; text-align: left; background: #1a1423; border: 2px solid #5d5a66; color: var(--paper); padding: .35em .5em; cursor: pointer; font-size: .92em; }
   .shopRow img { width: 2em; height: 2em; image-rendering: pixelated; }
   .shopRow small { display: block; font-size: .72em; color: #8d8a93; }
   .shopRow .pr { color: var(--green); font-weight: 700; }
   .shopRow:hover:not(:disabled) { border-color: var(--yellow); }
-  .shopRow:disabled { opacity: .45; cursor: default; }
+  .shopRow.broke { opacity: .5; }
+  .shopRow .own { font-size: .72em; color: #8d8a93; white-space: nowrap; }
+  .shopRow .own b { color: var(--yellow); }
+  .shopRow:focus { border-color: var(--yellow); outline: none; }
+  .shopRow.bought { animation: bought .55s ease-out; }
+  @keyframes bought { 0% { background: var(--green); border-color: var(--yellow); transform: scale(1.03); } 100% { background: #1a1423; } }
+  .shopRow.nope { animation: nope .3s; }
+  @keyframes nope { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+  #shop .box { position: relative; }
+  .floatCost { position: absolute; font-family: var(--display); font-size: 1.7em; color: var(--green); text-shadow: 2px 2px 0 var(--ink); pointer-events: none; animation: floatUp .9s ease-out forwards; }
+  @keyframes floatUp { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-46px); opacity: 0; } }
+  #wallet { display: inline-block; color: var(--green); }
+  #wallet.tick { animation: tick .5s; }
+  @keyframes tick { 0% { color: var(--red); transform: scale(1.35); } 100% { transform: scale(1); } }
+  #shopMsg { font-weight: 700; margin: -.3em 0 .6em; font-size: .92em; }
+  #shopMsg.good { color: var(--green); } #shopMsg.bad { color: var(--red); }
   #jQuests, #jSheet { list-style: none; margin: 0 0 .9em; padding: 0; display: grid; gap: .35em; font-size: .9em; line-height: 1.35; }
   #jQuests li.done { color: #8d8a93; text-decoration: line-through; }
   #journal .box { width: min(46em, 100%); }
@@ -282,7 +297,7 @@
 </div>
 
 <div id="shop" class="sheet" hidden>
-  <div class="box"><h2>GULP-N-GO</h2><div class="sub2" id="shopMoney"></div><div id="shopList"></div><button class="btn alt" id="shopClose">Leave</button></div>
+  <div class="box"><h2>GULP-N-GO</h2><div class="sub2" id="shopSub" hidden></div><div class="sub2" id="shopMoney"></div><div id="shopMsg" hidden></div><div id="shopList"></div><button class="btn alt" id="shopClose">Leave</button></div>
 </div>
 
 <div id="journal" class="sheet" hidden>
@@ -302,21 +317,21 @@
 </div>
 
 <script>window.TRAILER = true;</script>
-<script src="engine.js?v=202609222333"></script>
-<script src="art.js?v=202609222333"></script>
-<script src="font.js?v=202609222333"></script>
-<script src="world.js?v=202609222333"></script>
-<script src="actors.js?v=202609222333"></script>
-<script src="items.js?v=202609222333"></script>
-<script src="headlines.js?v=202609222333"></script>
-<script src="story.js?v=202609222333"></script>
-<script src="minigames.js?v=202609222333"></script>
-<script src="court.js?v=202609222333"></script>
-<script src="cases.js?v=202609222333"></script>
-<script src="favors.js?v=202609222333"></script>
-<script src="court2.js?v=202609222333"></script>
-<script src="chase.js?v=202609222333"></script>
-<script src="game.js?v=202609222333"></script>
-<script src="share.js?v=202609222333"></script>
-<script src="ui.js?v=202609222333"></script>
-<script src="trailer.js?v=202609222333"></script>
+<script src="engine.js?v=202609222337"></script>
+<script src="art.js?v=202609222337"></script>
+<script src="font.js?v=202609222337"></script>
+<script src="world.js?v=202609222337"></script>
+<script src="actors.js?v=202609222337"></script>
+<script src="items.js?v=202609222337"></script>
+<script src="headlines.js?v=202609222337"></script>
+<script src="story.js?v=202609222337"></script>
+<script src="minigames.js?v=202609222337"></script>
+<script src="court.js?v=202609222337"></script>
+<script src="cases.js?v=202609222337"></script>
+<script src="favors.js?v=202609222337"></script>
+<script src="court2.js?v=202609222337"></script>
+<script src="chase.js?v=202609222337"></script>
+<script src="game.js?v=202609222337"></script>
+<script src="share.js?v=202609222337"></script>
+<script src="ui.js?v=202609222337"></script>
+<script src="trailer.js?v=202609222337"></script>

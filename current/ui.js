@@ -11,7 +11,7 @@ function buildHotbar() {
   ui.hotbar.innerHTML = '';
   HOTBAR.forEach((k, i) => {
     const b = document.createElement('button'); b.className = 'slot'; b.id = 'slot-' + k; b.title = `${ITEMS[k].name} — ${ITEMS[k].desc}`;
-    b.innerHTML = `<span class="key">${i + 1}</span><img alt="" src="${SPR.iconURL[k]}"><span class="n">0</span>`;
+    b.innerHTML = `<span class="key">${'1234567890-='[i]}</span><img alt="" src="${SPR.iconURL[k]}"><span class="n">0</span>`;
     b.addEventListener('click', e => { e.currentTarget.blur(); useItem(k); });
     ui.hotbar.append(b); slotEls[k] = b;
   });
@@ -65,13 +65,21 @@ function showHud(on) { ['hudTop', 'hotbar'].forEach(k => ui[k].hidden = !on); ui
 
 // ---------- shop ----------
 const SHOP = ['beer', 'cig', 'energy', 'hotdog', 'scratch', 'firework', 'bait'];
-function openShop() {
+const VENDORS = {
+  gulp: { title: 'GULP-N-GO', sub: '', items: () => SHOP.concat(Game.day >= 5 ? Cases.shopExtras() : []) },
+  van: { title: 'WAYNE’S MYSTERY VAN', sub: 'Cash only. No cops. No Rhondas. Buying here gets you noticed (+1★).', items: () => ['joint', 'gummy'], shady: true },
+  clinic: { title: 'DR. SNIFFLES’ SINUS CLINIC', sub: 'Medical grade. Allegedly. Buying here gets you noticed (+1★).', items: () => ['powder', 'cafecito'], shady: true },
+  cafe: { title: 'CAFÉ ABUELA', sub: 'Ventanita open. Pay in cash or compliments.', items: () => ['cafecito', 'pastelito'] },
+};
+let vendor = 'gulp';
+function openShop(v = 'gulp') {
+  vendor = v; ui.shop.querySelector('h2').textContent = VENDORS[v].title; $('shopSub').textContent = VENDORS[v].sub; $('shopSub').hidden = !VENDORS[v].sub;
   ui.shop.hidden = false; ui.talk.hidden = true; $('shopMsg').hidden = true; renderShop(shopItems()[0]);
 }
 // the shop keeps your place: rows are built once, then updated in place after each purchase
-const shopItems = () => SHOP.concat(Game.day >= 5 ? Cases.shopExtras() : []);
+const shopItems = () => VENDORS[vendor].items();
 function shopInfo(k) {
-  return { price: k === 'bait' ? 2 : k === 'cig' ? 5 : ITEMS[k].price, qty: k === 'cig' ? 5 : 1,
+  return { price: k === 'bait' ? 2 : k === 'cig' ? 5 : k === 'joint' ? 8 : k === 'powder' ? 20 : ITEMS[k].price, qty: k === 'cig' ? 5 : 1,
     name: k === 'bait' ? 'Nightcrawlers' : ITEMS[k].name + (k === 'cig' ? ' ×5' : ''), desc: k === 'bait' ? 'Fish bite a lot more.' : ITEMS[k].desc };
 }
 function renderShop(focusKey) {
@@ -101,6 +109,8 @@ function buy(k, b) {
     return shopMsg(`Not enough cash. You need $${price - Game.money} more.`, true);
   }
   Game.money -= price; giveItem(k, qty, true); if (Game.day >= 5) Cases.bought(k); Sound.play('cash');
+  if (VENDORS[vendor].shady) { Heat.add(1); Game.flags['bought_' + vendor] = (Game.flags['bought_' + vendor] || 0) + 1;
+    if (Game.flags['bought_' + vendor] === 1) headline(vendor === 'van' ? 'FLORIDA MAN BUYS "OREGANO" FROM MAN IN VAN; OREGANO "EXTREMELY FUNNY"' : 'FLORIDA MAN BUYS "SINUS MEDICINE" FROM BEACH TENT RUN BY MAN IN SHARPIE LAB COAT', 3); }
   // feedback you can see: the row flashes, the price floats up, the wallet ticks down
   const box = ui.shop.querySelector('.box'), r = b.getBoundingClientRect(), br = box.getBoundingClientRect(), f = document.createElement('span');
   f.className = 'floatCost'; f.textContent = `−$${price}`; f.style.left = (r.right - br.left - 70) + 'px'; f.style.top = (r.top - br.top - 6) + 'px';
