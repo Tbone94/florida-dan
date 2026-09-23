@@ -14,7 +14,10 @@ function hideUI() {
   ui.fishMsg.textContent = ''; ui.wrestlePrompt.textContent = '';
 }
 function base(o = {}) {
-  Game.day = 5; Game.flags = { noChase: true }; Heat.end(); Game.heat = 0; Game.catchBag = []; Game.pythons = []; Game.money = 40;
+  const reg = o.region || 'swamp'; if (Game.region !== reg) World.load(reg);
+  Game.day = o.day || 5; Game.scene = null; Game.courtExtra = {}; Game.vehicles = []; BoatChase.boat = null; Race.on = false; Objection.s = null; Dance.s = null;
+  Game.dan.hiding = false; Game.dan.carry = null; ui.fishMsg.textContent = ''; $('heat').hidden = true;
+  ui.wrestle.querySelector('.hint').textContent = 'MASH E · HIT THE ARROW WHEN HE THRASHES'; Game.flags = { noChase: true }; Heat.end(); Game.heat = 0; Game.catchBag = []; Game.pythons = []; Game.money = 40;
   Game.inv = { beer: 9, cig: 5, joint: 2, shroom: 2, powder: 2, energy: 1, hotdog: 1, scratch: 1, firework: 2, bait: 3, fish: 0, can: 3, plywood: 0, sign: 0 };
   Game.mode = 'play'; Game.day_ = freshDayLog(); Game.day_.duiDone = true;
   Object.assign(Game.fx, { buzz: 0, high: 0, shroom: 0, powder: 0, crash: 0, cig: 0 });
@@ -43,7 +46,7 @@ function showCard(html, cls = '') { const c = $('tcard'); c.className = cls; c.i
 function hideCard() { $('tcard').hidden = true; }
 
 // ---------- the shot list ----------
-const SHOTS = [
+const V1 = [
   { id: 'cozy', dur: 4.0, setup() {
       base({ hour: 6.7 }); const D = Game.dan; D.dir = 'right';
       const d = World.spots.dockEnd;
@@ -232,6 +235,108 @@ const SHOTS = [
     after(lt, dt) { liveTalk(dt); const D = Game.dan; npc('rhonda').dir = 'left'; camOn(D.x + 12, D.y - 12, 2); } },
   { id: 'end', dur: 4.0, sim: false, setup() { base(); showCard('<div class="logo sm">Florida<br>Dan</div><div class="soon">COMING SOON</div><div class="tag">Gators. Jorts. Allegations.</div>', 'title end'); }, after(lt) { $('tcard').style.opacity = lt > 3.4 ? Math.max(0, 1 - (lt - 3.4) / .6) : 1; } },
 ];
+// ---------- v2: everything Dan got up to after Case One ----------
+const slamIn = (lt, sel = '.big') => { const e = $('tcard').querySelector(sel); if (e) e.style.transform = `rotate(-2deg) scale(${(1 + Math.max(0, .5 - lt * 5)).toFixed(3)})`; };
+const V2 = {
+  chase: { dur: 3.5, setup() {
+      base({ hour: 13 }); const D = Game.dan, h = World.spots.hide || { x: 25.8 * TS, y: 43.3 * TS };
+      T_.h = h; T_.x0 = h.x + 84; D.x = T_.x0; D.y = h.y; D.dir = 'left';
+      Game.npcs = Game.npcs.filter(n => n.id !== 'tourist'); const r = npc('rhonda'); if (r) r.hidden = true;
+      Game.heat = 5; Heat.cop = { x: D.x + 118, y: D.y, dir: 'left', t: 0 }; Heat.lostT = 0;
+      ui.hudTop.hidden = false; toast('RHONDA: DAN! PULL OVER! ...OR WALK OVER! WHATEVER YOU’RE DOING!');
+    },
+    step(lt) { Heat.lostT = 0; },
+    after(lt) {
+      const D = Game.dan, h = T_.h;
+      if (lt < 1.4) { D.x = lerp(T_.x0, h.x, ease(lt / 1.4)); D.y = h.y; D.moving = true; D.dir = 'left'; if (Math.floor(lt * 10) % 2 !== D.frame) D.frame ^= 1; }
+      if (at(lt, 1.4, 'hide')) { D.hiding = true; D.moving = false; toast('Dan hides in the porta-potty.'); Game.shake = 3; }
+      if (at(lt, 1.75, 'hh')) headline('FLORIDA MAN HIDES FROM POLICE IN PORTA-POTTY; DEPUTY "NOT GOING IN THERE"');
+      Game.heat = 5; const c = Heat.cop; camOn(c ? (Math.min(c.x, D.x + 90) + h.x) / 2 : h.x, h.y - 16, 1.35);
+    } },
+  card2: { dur: 2.0, sim: false, setup() { base(); showCard('<div class="big">AND THAT WAS<br>JUST <em>CASE ONE.</em></div>', 'slam'); }, after(lt) { slamIn(lt); }, end() { hideCard(); } },
+  objection: { dur: 3.0, setup() {
+      base(); CourtCases.begin(); Game.courtExtra = { manny: true }; Objection.speaker = null;
+      Objection.run([{ text: 'The defendant is a trained, professional manatee jockey.', lie: true, bust: 'Nobody trained him. Look at him.' }], () => { });
+    },
+    step(lt) { if (at(lt, 1.3, 'obj')) Input.press('a'); },
+    after(lt) { ui.fishMsg.textContent = lt >= 1.3 && lt < 2.2 ? 'OBJECTION!' : ''; Game.view = [0, 0, 1]; },
+    end() { ui.fishMsg.textContent = ''; ui.talk.hidden = true; } },
+  skunk: { dur: 3.0, setup() {
+      base({ hour: 20.7 }); const P = Cases.places().trailcam, D = Game.dan;
+      D.x = P.x + 10; D.y = P.y; D.dir = 'right';
+      const ape = Cases.makeApe(D.x - 34, D.y - 3); ape.state = 'lurk'; T_.ape = ape; Game.animals.push(ape);
+    },
+    step(lt) { if (at(lt, .2, 'beer')) useItem('beer'); if (at(lt, .85, 'hrm')) sayNow([['SKUNK APE', 'HRRRRRRRM.']]); },
+    after(lt, dt) {
+      liveTalk(dt); const D = Game.dan, a = T_.ape; a.x = D.x - 34; a.y = D.y - 3;
+      if (at(lt, 1.55, 'turn')) { D.dir = 'left'; Game.shake = 2; ui.talk.hidden = true; Game.talk = null; Game.mode = 'play'; }
+      if (at(lt, 1.7, 'hs')) headline('FLORIDA MAN SHARES BEER WITH SKUNK APE; "HE’S A GOOD LISTENER"');
+      camOn(D.x - 16, D.y - 20, 1.55);
+    } },
+  card3: { dur: 2.0, sim: false, setup() { base(); showCard('<div class="big">THEN HE WENT<br>TO <em>MIAMI.</em></div>', 'slam miami'); }, after(lt) { slamIn(lt); }, end() { hideCard(); } },
+  lambo: { dur: 3.5, setup() {
+      base({ region: 'miami', day: 11, hour: 12 }); const D = Game.dan;
+      const v = { kind: 'lambo', x: 55 * TS, y: 13 * TS, a: 0, v: 0, t: 0 }; Game.vehicles = [v]; T_.v = v; T_.x0 = v.x;
+      let x = v.x; while (!WET(World.at(x, v.y)) && x < MW * TS) x += 4; T_.sx = x + 10;
+      Object.assign(D, { ride: 'lambo', x: v.x, y: v.y, dir: 'right' });
+      toast('Push-to-start. Nice. Where are the... where are the BRAKES?');
+    },
+    after(lt, dt) {
+      const D = Game.dan, v = T_.v;
+      if (lt < 2.0) {
+        v.x = lerp(T_.x0, T_.sx, Math.pow(lt / 2, 1.8)); D.x = v.x; D.y = v.y;
+        if (Math.random() < .6) Game.parts.push({ kind: 'speed', x: v.x - 14, y: v.y + rnd(-5, 5), vx: -60, vy: 0, life: .25 });
+        if (at(lt, 1.0, 'stuck')) { toast('THE GAS PEDAL IS STUCK. THE OCEAN IS RIGHT THERE.'); Game.shake = 3; }
+      }
+      if (at(lt, 2.0, 'sploosh')) { ui.toast.hidden = true; toastT = 0; Game.vehicles = []; splash(v.x, v.y, 30); Game.shake = 10; Game.flash = .5; Object.assign(D, { ride: null, x: T_.sx - 30, y: v.y + 6, dir: 'right' }); }
+      if (at(lt, 2.1, 'hl')) headline('FLORIDA MAN VALETS INFLUENCER’S PINK LAMBORGHINI DIRECTLY INTO ATLANTIC OCEAN; "THE CAR DON’T SURF," HE EXPLAINS');
+      if (at(lt, 2.45, 'surf')) sayNow([['DAN', 'The car don’t surf.']]);
+      liveTalk(dt);
+      camOn(lt < 2 ? v.x + 30 : T_.sx - 14, v.y - 10, 1.3);
+    } },
+  dance: { dur: 2.5, setup() {
+      base({ region: 'miami', day: 12, hour: 22 }); Dance.start(() => { });
+      const s = Dance.s; s.t = .95; s.score = 8; for (const n of s.seq) if (n.t < s.t) n.hit = true;
+    },
+    step() { const s = Dance.s; if (!s) return; s.seq.forEach((n, i) => { if (n.hit === null && s.t >= n.t - .02 && !T_['n' + i]) { T_['n' + i] = true; Input.press(n.dir); } }); },
+    after(lt) { if (at(lt, 1.5, 'hd')) headline('FLORIDA MAN WINS DANCE-OFF AT CLUB SINUS; DJ "SHOOK," CROWD "CONFUSED BUT INTO IT"'); Game.view = [0, 0, 1]; },
+    end() { ui.wrestle.hidden = true; } },
+  boat: { dur: 2.5, setup() {
+      base({ region: 'miami', day: 16, hour: 17 }); const D = Game.dan;
+      BoatChase.boat = { x: 76 * TS, y: 44 * TS, i: 1, dir: 'right' }; BoatChase.hold = 0;
+      Object.assign(D, { ride: 'boat', dir: 'right', x: 72 * TS, y: 44 * TS }); toast('STAY ON HIM!');
+    },
+    step() { BoatChase.hold = 0; },
+    after(lt) {
+      const D = Game.dan, b = BoatChase.boat, bx = 76 * TS + lt * 58, y = 44 * TS;
+      b.x = bx; b.y = y; b.dir = 'right'; if (Math.random() < .5) Game.parts.push({ kind: 'foam', x: bx - 16, y: y + 3, vx: 0, vy: 0, life: .8 });
+      const gap = lt < 1.6 ? lerp(84, 34, ease(lt / 1.6)) : 34;
+      D.x = bx - gap; D.y = y + 2; D.dir = 'right'; Object.assign(Game.boat, { x: D.x, y: D.y, dir: 'right' });
+      if (Math.random() < .5) Game.parts.push({ kind: 'foam', x: D.x - 16, y: D.y + 3, vx: 0, vy: 0, life: .8 });
+      if (at(lt, 1.6, 'got')) { Game.flash = .6; Game.shake = 4; headline('FLORIDA MAN CATCHES SINUS CARTEL BOSS IN BOAT CHASE; BOSS IS A PELICAN'); }
+      camOn(bx - 20, y - 12, 1.45);
+    } },
+  stack: { dur: 3.5, sim: false, setup() {
+      const hs = ['FLORIDA MAN WRESTLES ALLIGATOR "FOR FUN"; ALLIGATOR "NOT HAVING FUN"', 'FLORIDA MAN EVADES DEPUTY ON MOTORIZED COOLER; DEPUTY "NOT MAD, JUST DISAPPOINTED"',
+        'TRAIL CAM CAPTURES "SKUNK APE" DRINKING SWAMP LITE; SKUNK APE IS JUST A GUY NAMED DAN', 'FLORIDA MAN THROWN OFF YACHT PARTY FOR "BEING TOO FLORIDA"',
+        'FLORIDA MAN OBJECTS AT EVERY LIE, IS RIGHT EVERY TIME; LAWYERS "FURIOUS"', 'FLORIDA MAN BEATS ROLLERBLADER IN OCEAN DRIVE RACE; ROLLERBLADER "DEVASTATED," DEMANDS REMATCH'];
+      const st = $('tstack'); st.innerHTML = ''; st.hidden = false;
+      const L = [3, 52, 5, 50, 3, 51], Tp = [4, 8, 36, 38, 67, 66], Rr = [-3, 3, 2, -3, -2, 3];   // a readable grid, not a pile
+      hs.forEach((h, i) => { const d = document.createElement('div'); d.className = 'clip'; d.innerHTML = `<small>THE SWAMP GAZETTE</small>${h}`; d.style.left = L[i] + '%'; d.style.top = Tp[i] + '%'; d.dataset.r = Rr[i]; st.append(d); });
+      $('tdim').style.opacity = .6;
+    },
+    after(lt) {
+      [...$('tstack').children].forEach((d, i) => { const k = lt - i * .35; d.style.opacity = k > 0 ? 1 : 0; const s = k > 0 ? 1 + Math.max(0, .5 - k * 6) : 1.5; d.style.transform = `rotate(${d.dataset.r}deg) scale(${s.toFixed(3)})`; });
+    }, end() { $('tstack').hidden = true; $('tdim').style.opacity = 0; } },
+  parade: { dur: 3.5, setup() { base(); Game.scene = 'parade'; Game.mode = 'court'; },
+    after(lt) { if (at(lt, .4, 'fm')) headline('FLORIDA MAN NAMED FLORIDA MAN OF THE YEAR; INSISTS HE IS "NOT A FLORIDA MAN" WHILE WEARING THE SASH'); Game.view = [0, 0, 1]; },
+    end() { Game.scene = null; } },
+};
+const V1s = id => V1.find(s => s.id === id);
+Object.assign(V1s('cooler'), { dur: 2.0 }); Object.assign(V1s('fireworks'), { dur: 2.0 }); Object.assign(V1s('brenda'), { dur: 2.0 }); Object.assign(V1s('hurricane'), { dur: 1.5 }); Object.assign(V1s('shroom'), { dur: 2.5 });
+Object.assign(V1s('end'), { setup() { base(); showCard('<div class="logo sm">Florida<br>Dan</div><div class="soon">COMING SOON</div><div class="tag">Gators. Jorts. Allegations. Miami.</div>', 'title end'); } });
+const SHOTS = ['cozy', 'card1', 'cooler', 'fish', 'wrestle', 'raccoon', 'iguana', 'brenda', 'blackout', 'powder', 'chase', 'fireworks', 'hurricane', 'shroom', 'court',
+  'card2', 'objection', 'skunk', 'card3', 'lambo', 'dance', 'boat', 'stack', 'parade', 'black', 'title', 'button', 'end'].map(id => V2[id] ? { id, ...V2[id] } : V1s(id));
 let t = 0; for (const s of SHOTS) { s.start = t; t += s.dur; }
 Trailer.total = t;
 Trailer.shots = SHOTS.map(s => [s.id, +s.start.toFixed(3), s.dur]);
@@ -304,66 +409,84 @@ Trailer.renderAudio = async function () {
   const boom = t => { noise(t, 1.2, .6, 'lowpass', 400); tone(t, 70, .9, 'sine', .5, -45); };
   const blips = (t, n, base = 180) => { for (let i = 0; i < n; i++) tone(t + i * .055, base + Math.random() * 140, .035, 'square', .03); };
   const scratch = t => { const o = tone(t, 900, .42, 'sawtooth', .16, -780); noise(t, .4, .25, 'bandpass', 1500, 2); };
+  const riser = (t, d) => Music.I.riser(MR, t, d, 1.2), impact = (t, v = 1) => Music.I.impact(MR, t, v);
   const crickets = (t0, t1, v = .04) => { for (let t = t0; t < t1; t += .09) if (Math.random() < .6) tone(t, 4200 + Math.random() * 300, .05, 'sine', v, 0, Math.random() - .5); };
 
-  // cold open: a fake cozy morning
-  crickets(0, 3.5); for (let t = 0.2; t < 3.3; t += 1.1) tone(t, 1800, .12, 'sine', .04, 700, .4);
-  [67, 71, 74, 79, 76, 74].forEach((n, i) => pluck(.3 + i * .5, N(n), .05, 0));
-  tone(0, N(55), 3.6, 'sine', .05, 0, 0, .8);
-  noise(S.cozy + 2.1, .12, .35, 'highpass', 2500); noise(S.cozy + 2.2, .35, .08, 'highpass', 4000);   // *crack*
+  // ---- the score: the real game soundtrack (music.js), three song changes, all on bar lines ----
+  const mg = ctx.createGain(); mg.gain.value = 1; mg.connect(master);
+  const MR = Music.rig(ctx, mg), BPM2 = 120, bar = 60 / BPM2 * 4;
+  const song = (id, sec, t0, t1, o, off) => Music.span(MR, id, sec, t0, t1, BPM2, o, off);
+  const fade = (t0, t1, v) => { mg.gain.setValueAtTime(mg.gain.value, t0); mg.gain.linearRampToValueAtTime(v, t1); };
+  const lp = (t, f, tc = .15) => MR.lp.frequency.setTargetAtTime(f, t, tc);
+  const siren = (t0, t1) => { for (let t = t0, i = 0; t < t1; t += .22, i++) tone(t, i % 2 ? 700 : 950, .22, 'sine', .05); };
+  const thunk = t => { noise(t, .12, .35, 'lowpass', 600); tone(t, 120, .15, 'square', .12, -60); };
+
+  // SWAMP LITE, start to Case One: banjo cold open → hook on the first card → breakdown under Brenda
+  mg.gain.setValueAtTime(.8, 0);
+  song('swamp', 'intro', 0, 3.4, { noDrums: true });
+  crickets(0, 3.5, .03); noise(S.cozy + 2.1, .12, .35, 'highpass', 2500);   // *crack*
   chomp(S.cozy + 3.4); scratch(S.cozy + 3.55);
-  // band kicks in on the card
-  crash(S.card1, .38); kick(S.card1, .9);
-  groove(S.card1, S.brenda);
-  tone(S.cooler + .2, 60, 2.2, 'sawtooth', .03, 20);
-  for (let i = 0; i < 4; i++) tone(S.cooler + .9 + i * .22, i % 2 ? 700 : 950, .22, 'sine', .07);  // siren
-  hl(S.cooler + .9);
-  noise(S.fish + .5, .3, .25, 'lowpass', 900); noise(S.fish + 1.45, .35, .3, 'lowpass', 700); chomp(S.fish + 2.0);
-  for (let t = S.fish; t < S.fish + .5; t += .05) tone(t, 950, .02, 'square', .025);
-  chomp(S.wrestle + .05); tone(S.wrestle + .85, 1320, .08, 'square', .07); tone(S.wrestle + .9, 1760, .1, 'square', .07);
-  tone(S.wrestle + 1.55, 300, .3, 'sawtooth', .12, -200); noise(S.wrestle + 1.55, .4, .3, 'lowpass', 800);
-  [392, 523, 659, 784].forEach((f, i) => tone(S.wrestle + 1.95 + i * .07, f, .14, 'triangle', .12));
-  for (let t = S.raccoon; t < S.raccoon + 1.4; t += .12) tone(t, 1900 + Math.random() * 900, .11, 'sawtooth', .07, 600);   // SKREEEE
-  for (const d of [.83, 1.33, 1.83]) { noise(S.iguana + d, .08, .4, 'lowpass', 500); tone(S.iguana + d, 300, .2, 'sawtooth', .08, -200); }
+  mg.gain.setValueAtTime(0, 3.42); mg.gain.setValueAtTime(.9, S.card1);
+  crash(S.card1, .3);
+  song('swamp', 'a', S.card1, S.brenda);
+  song('swamp', 'b', S.brenda, S.blackout);
+  song('swamp', 'a2', S.blackout, S.chase);
+  song('swamp', 'a2', S.chase, S.fireworks, { fast: 1 }, 2);   // the chase: same song, hats double + sirens on top
+  song('swamp', 'a', S.fireworks, S.shroom);
+  song('swamp', 'b', S.shroom, S.court, { trip: 1 }); lp(S.shroom, 1800, .3); lp(S.court - .05, 20000, .05);
+  song('swamp', 'a2', S.court, S.card2);
+  // spot effects, Case One
+  siren(S.cooler + .9, S.cooler + 1.8); hl(S.cooler + .9);
+  noise(S.fish + .5, .3, .2, 'lowpass', 900); noise(S.fish + 1.45, .35, .25, 'lowpass', 700); chomp(S.fish + 2.0);
+  chomp(S.wrestle + .05); [392, 523, 659, 784].forEach((f, i) => tone(S.wrestle + 1.95 + i * .07, f, .14, 'triangle', .09));
+  for (let t = S.raccoon; t < S.raccoon + 1.3; t += .12) tone(t, 1900 + Math.random() * 900, .11, 'sawtooth', .045, 600);   // SKREEEE
+  for (const d of [.83, 1.33, 1.83]) noise(S.iguana + d, .08, .35, 'lowpass', 500);
   hl(S.iguana + .85);
-  // breakdown: Brenda
-  tone(S.brenda, 1200, .12, 'sine', .08); tone(S.brenda + .18, 1200, .12, 'sine', .08); blips(S.brenda + .2, 12);
-  groove(S.brenda, S.drunk, { noDrums: true, noBanjo: true, pad: true });
-  // drunk
-  noise(S.drunk + .08, .12, .35, 'highpass', 2500); tone(S.drunk + 1.1, 95, .5, 'sawtooth', .1, -20);   // crack + burp
-  groove(S.drunk, S.blackout, { wobble: true });
-  // blackout
-  boom(S.blackout); tone(S.blackout + 1.5, 120, .7, 'sawtooth', .08, -30); tone(S.blackout + 1.5, 180, .7, 'sawtooth', .04, -40);   // moo
-  groove(S.blackout + 1.0, S.powder); hl(S.blackout + 1.15);
-  // "sinus medicine"
-  noise(S.powder, .4, .25, 'highpass', 3000); tone(S.powder + .1, 1200, .3, 'sawtooth', .04, 900); hl(S.powder + .05);
-  groove(S.powder, S.fireworks, { fastHats: true });
-  // fireworks
-  for (let t = S.fireworks + .3; t < S.fireworks + 1.5; t += .03) noise(t, .03, .06, 'highpass', 6000);
+  tone(S.brenda, 1200, .12, 'sine', .06); tone(S.brenda + .18, 1200, .12, 'sine', .06);
+  boom(S.blackout); tone(S.blackout + 1.5, 120, .7, 'sawtooth', .07, -30); hl(S.blackout + 1.15);   // moo
+  noise(S.powder, .4, .2, 'highpass', 3000); hl(S.powder + .05);
+  siren(S.chase, S.chase + 1.5); thunk(S.chase + 1.4); hl(S.chase + 1.75);
   boom(S.fireworks + 1.5); hl(S.fireworks + 1.55);
-  groove(S.fireworks, S.hurricane);
-  // hurricane
-  noise(S.hurricane, 2.0, .12, 'lowpass', 1500); boom(S.hurricane + .8); boom(S.hurricane + 1.6); blips(S.hurricane + .05, 8, 150);
-  groove(S.hurricane, S.shroom, { half: true });
-  // shrooms
-  groove(S.shroom, S.stack, { half: true, pad: true, trip: true, wobble: true });
-  for (let i = 0; i < 6; i++) tone(S.shroom + i * .4, 300 + i * 90, .8, 'sine', .04, 200);
-  tone(S.shroom + 1.6, 110, 1.2, 'sawtooth', .05, 40); tone(S.shroom + 1.6, 165, 1.2, 'sine', .06, 50);   // "Daaaniel"
-  // headline pile-up
-  for (let i = 0; i < 6; i++) { kick(S.stack + i * .25, .6); noise(S.stack + i * .25, .12, .3, 'bandpass', 2500, 1); }
-  for (let t = S.stack + 1.5; t < S.court; t += B / 8) snare(t, .08 + (t - S.stack - 1.5) * .2);
-  // court
-  crash(S.court, .5); boom(S.court); blips(S.court + .1, 16, 140);
-  groove(S.court + 1.5, S.black);
-  chomp(S.court + 1.6); tone(S.court + 2.2, 1320, .08, 'square', .07); [392, 523, 659, 784, 1046].forEach((f, i) => tone(S.court + 2.6 + i * .07, f, .16, 'triangle', .12));
+  boom(S.hurricane + .8); tone(S.shroom + 1.6, 110, 1.0, 'sawtooth', .04, 40);   // "Daaaniel"
+  crash(S.court, .35); chomp(S.court + 1.6); [392, 523, 659, 784, 1046].forEach((f, i) => tone(S.court + 2.6 + i * .07, f, .16, 'triangle', .09));
+
+  // the one hard stop (it's the joke): record scratch, a beat of nothing, then NIGHT GATORS eases in
+  scratch(S.card2); mg.gain.setValueAtTime(0, S.card2 + .02);
+  fade(S.objection - .01, S.objection + .6, .85);
+  song('gators', 'a', S.objection, S.card3);
+  impact(S.objection + 1.3); tone(S.objection + 1.45, 1320, .08, 'square', .06); tone(S.objection + 1.5, 1760, .12, 'square', .06);
+  noise(S.skunk + .2, .12, .3, 'highpass', 2500); tone(S.skunk + .85, 70, .9, 'sawtooth', .09, 25); noise(S.skunk + .85, .8, .12, 'lowpass', 400); hl(S.skunk + 1.7);
+
+  // Miami: the riser fades the swamp out under the card, OCEAN DRIVE drops on the next bar
+  fade(S.card3, S.card3 + 1.2, 0); riser(S.card3, S.lambo - S.card3);
+  mg.gain.setValueAtTime(.9, S.lambo); impact(S.lambo);
+  song('ocean', 'a', S.lambo, S.boat);
+  song('ocean', 'b', S.boat, S.stack);
+  song('ocean', 'intro', S.stack, S.parade); lp(S.stack, 900, .4);   // filtered down while the headlines pile up...
+  for (let i = 0; i < 6; i++) { kick(S.stack + i * .35, .45); noise(S.stack + i * .35, .1, .22, 'bandpass', 2500, 1); }
+  for (let t = S.stack + 2.5; t < S.parade - .01; t += .0625) snare(t, .05 + (t - S.stack - 2.5) * .22);
+  riser(S.stack + 1.5, S.parade - S.stack - 1.5);
+  { const e = ctx.createOscillator(); e.type = 'sawtooth'; e.frequency.setValueAtTime(55, S.lambo); e.frequency.exponentialRampToValueAtTime(220, S.lambo + 2); const eg = ctx.createGain(); eg.gain.setValueAtTime(.05, S.lambo); eg.gain.linearRampToValueAtTime(0, S.lambo + 2.05); e.connect(eg); out(eg); e.start(S.lambo); e.stop(S.lambo + 2.1); }
+  boom(S.lambo + 2.0); noise(S.lambo + 2.0, 1.2, .35, 'lowpass', 900); hl(S.lambo + 2.1);
+  for (const d of [.45, 1.05, 1.65, 2.25]) tone(S.dance + d, 1320, .06, 'square', .05);
+  hl(S.dance + 1.5); [392, 523, 659, 784].forEach((f, i) => tone(S.boat + 1.6 + i * .08, f, .14, 'triangle', .09)); hl(S.boat + 1.62);
+
+  // ...and SWAMP LITE comes home on the downbeat for the parade: everything at once
+  lp(S.parade - .02, 20000, .02); impact(S.parade, .8);
+  song('swamp', 'fin', S.parade, S.black); hl(S.parade + .4);
+  for (let t = S.parade; t < S.black; t += .07) if (Math.random() < .5) noise(t, .08, .03, 'bandpass', 2000 + Math.random() * 3000, 2);   // crowd
+  mg.gain.setValueAtTime(.9, S.black - .05); mg.gain.linearRampToValueAtTime(0, S.black);
+
   // title sting
-  kick(S.title, 1); crash(S.title, .45); for (const n of [40, 52, 59, 64, 67, 71]) tone(S.title, N(n), 2.8, 'sawtooth', .035, 0, 0, .01);
-  [76, 79, 83, 88].forEach((n, i) => pluck(S.title + 1 + i * .12, N(n), .06));
-  // the button
+  kick(S.title, 1); crash(S.title, .45); for (const n of [40, 52, 59, 64, 67, 71]) tone(S.title, N(n), 2.8, 'sawtooth', .03, 0, 0, .01);
+  mg.gain.setValueAtTime(.7, S.title + 1); song('swamp', 'intro', S.title + 1, S.button - .1, { noDrums: true });
+  mg.gain.setValueAtTime(.7, S.button - .4); mg.gain.linearRampToValueAtTime(0, S.button);
+  // the button: crickets, then wah wah wah waaah
   crickets(S.button, S.end, .03); blips(S.button + .05, 16, 160); blips(S.button + 2.3, 6, 200);
-  [466, 440, 415, 392].forEach((f, i) => tone(S.button + 3.0 + i * .22, f, i === 3 ? .6 : .2, 'sawtooth', .06, i === 3 ? -40 : 0));   // wah wah wah waaah
-  // end slate
-  kick(S.end); crash(S.end, .3); groove(S.end, S.end + 3.0, { noDrums: true }); tone(S.end, N(40), 3.5, 'triangle', .15);
+  [466, 440, 415, 392].forEach((f, i) => tone(S.button + 3.0 + i * .22, f, i === 3 ? .6 : .2, 'sawtooth', .06, i === 3 ? -40 : 0));
+  // end slate: the hook one last time, fading out
+  kick(S.end); crash(S.end, .3); mg.gain.setValueAtTime(.85, S.end); song('swamp', 'a', S.end, S.end + 4);
+  mg.gain.setValueAtTime(.85, S.end + 2.6); mg.gain.linearRampToValueAtTime(0, S.end + 3.95);
 
   const buf = await ctx.startRendering(), n = buf.length, dv = new DataView(new ArrayBuffer(44 + n * 4)), w = (o, s) => [...s].forEach((c, i) => dv.setUint8(o + i, c.charCodeAt(0)));
   w(0, 'RIFF'); dv.setUint32(4, 36 + n * 4, true); w(8, 'WAVEfmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 2, true); dv.setUint32(24, SR, true); dv.setUint32(28, SR * 4, true); dv.setUint16(32, 4, true); dv.setUint16(34, 16, true); w(36, 'data'); dv.setUint32(40, n * 4, true);

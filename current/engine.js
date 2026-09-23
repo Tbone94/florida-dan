@@ -143,30 +143,12 @@ const Sound = (() => {
     whiff: () => { noise(.18, .12, 1800); },
     fail: () => { tone(300, .2, 'square', .1, -100); tone(200, .35, 'square', .1, -80, .2); },
   };
-  // the soundtrack: scheduled a hair ahead on the audio clock so it never drifts.
-  // swamp-punk in E minor — stompy kick, banjo rolls, walking bass; the mood changes the band.
-  const ROOTS = [82.41, 65.41, 98, 73.42], CH = [[0, 7, 12, 15, 19], [0, 7, 12, 16, 19], [0, 7, 12, 16, 19], [0, 7, 12, 14, 19]];
-  const ROLL = [0, 2, 4, 1, 3, 2, 4, 1, 0, 3, 2, 4, 1, 2, 3, 4];
-  let nextT = 0, stepN = 0;
-  function playStep(i, d, mood, s16) {
-    const st = i % 16, bar = Math.floor(i / 16) % 4, root = ROOTS[bar], ch = CH[bar];
-    const chase = mood === 'chase', night = mood === 'night', trip = mood === 'trip', slow = mood === 'slow';
-    if (!night && !trip && (st === 0 || st === 8 || (chase && st % 4 === 0) || (!slow && st === 10))) { tone(150, .18, 'sine', .16, -110, d); noise(.02, .05, 3000, d); }
-    if (!night && (st === 4 || st === 12)) noise(.12, chase ? .09 : .06, 1500, d);
-    if (!night && (chase || st % 2 === 0)) noise(.035, st % 4 === 2 ? .03 : .018, 7000, d);
-    if ([0, 3, 6, 8, 11, 14].includes(st) && !(night && st % 8)) tone(root * (st === 6 || st === 14 ? 1.5 : 1) * (chase && st === 8 ? 2 : 1), s16 * 1.8, 'triangle', .08, 0, d);
-    if (slow && st % 2) return;
-    if (night && st % 4) return;
-    const f = root * 4 * Math.pow(2, ch[ROLL[st]] / 12);
-    if (trip) tone(f * (1 + Math.sin(i * .37) * .04), s16 * 2.5, 'sine', .03, Math.sin(i) * 40, d);
-    else tone(f, .09, 'square', chase ? .022 : .017, 0, d);
-    if (chase && st % 8 === 0) tone(root * 8, s16 * 3, 'sawtooth', .012, root * 2, d);
-  }
+  // the soundtrack lives in music.js + songs.js; the mood picks the song (or the remix)
+  let musicBus = null;
   function music(dt, mood) {
     if (!ac || muted || !musicOn) return;
-    const bpm = { speed: 150, chase: 152, slow: 84, trip: 96, night: 100 }[mood] || 116, s16 = 60 / bpm / 4;
-    if (nextT < ac.currentTime) nextT = ac.currentTime + .05;
-    while (nextT < ac.currentTime + .15) { playStep(stepN++, nextT - ac.currentTime, mood, s16); nextT += s16; }
+    if (!musicBus) { musicBus = ac.createGain(); musicBus.gain.value = .55; musicBus.connect(master); }
+    Music.tick(ac, musicBus, mood);
   }
   // everybody gets a voice: [base pitch, wobble, waveform]
   const VOICES = { DAN: [140, 50, 'square'], MERLE: [92, 30, 'sawtooth'], DARLENE: [330, 120, 'square'], RHONDA: [205, 25, 'triangle'], BRENDA: [270, 70, 'sine'],

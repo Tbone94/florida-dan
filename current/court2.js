@@ -139,6 +139,7 @@ const CREDITS = {
 
 // ---------- where the objective arrow points for Cases 2-3 + favors ----------
 function caseTarget(q) {
+  if (!q) return null;   // no objective right now: no arrow (this used to throw and skip the rest of the frame)
   const P = Cases.places(), who = id => Game.npcs.find(n => n.id === id), ape = Game.animals.find(a => a.ape);
   if (q.id.startsWith('fav_')) {
     const f = Favors.get(q.id.slice(4)), d = FAVORS[q.id.slice(4)]; if (!f) return null;

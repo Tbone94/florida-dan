@@ -22,6 +22,9 @@ s = s.replace('  @media (prefers-reduced-motion: reduce)', '''  /* director-mode
   #tcard .sub em { color: var(--teal); font-style: normal; }
   #tcard .soon { font-family: var(--display); font-size: 84px; color: var(--paper); text-shadow: 5px 5px 0 var(--ink); margin-top: .35em; letter-spacing: .04em; }
   #tcard .tag { font-family: var(--pixel); font-weight: 700; font-size: 34px; color: var(--yellow); text-shadow: 3px 3px 0 var(--ink); margin-top: .2em; }
+  #tcard.miami { background: linear-gradient(180deg, #2a0f3d 0%, #7b2a8c 45%, #ff4fd8 75%, #ffb36b 100%); }
+  #tcard.miami .big { text-shadow: 7px 7px 0 #27c6b4, 14px 14px 0 #1a0b24; }
+  #tcard.miami .big em { color: #ffd23f; }
   #tstack { position: absolute; inset: 0; z-index: 6; }
   .clip { position: absolute; width: 44%; background: var(--paper); color: var(--ink); border: 5px solid var(--ink); box-shadow: 12px 12px 0 var(--red); padding: .35em .6em .5em; font-family: var(--display); font-size: 44px; line-height: 1.02; text-transform: uppercase; }
   .clip small { display: block; font-family: var(--pixel); font-size: 20px; letter-spacing: .2em; color: var(--red); margin-bottom: .2em; }
