@@ -8,6 +8,8 @@ const Court = {
   start(cs) {
     if (cs === 'manatee') return CourtCases.manatee();
     if (cs === 'skunk') return CourtCases.skunk();
+    if (cs === 'lambo') return MiamiCourt.lambo();
+    if (cs === 'sinus') return MiamiCourt.sinus();
     Game.mode = 'court'; Game.courtChuck = 0; showHud(false);
     const hs = Game.headlines.map(h => h.text), picks = hs.slice(-4);
     const ev = picks.length ? picks.flatMap((h, i) => [['PROSECUTOR VANCE', `Exhibit ${'ABCD'[i]}: “${h}”`], ['DAN', OBJECTIONS[i % OBJECTIONS.length]], ['JUDGE HARLAN', i % 2 ? 'Overruled.' : 'Overruled. ...Did you really spoon a cow?']])
@@ -64,7 +66,7 @@ const Court = {
     for (let x = 0; x < VW; x += 20) R(x, 0, 1, 70, '#5a3d25');
     R(0, 70, VW, VH - 70, '#8e5a36'); for (let y = 76; y < VH; y += 8) R(0, y, VW, 1, '#7a4a2b');
     OR(110, 18, 100, 34, PAL.woodD); R(110, 18, 100, 4, PAL.woodL);                    // bench
-    g.drawImage(SPR.judge.down[0], 152, 0, 16, 18, 152, 2, 16, 18);
+    g.drawImage(SPR[MIAMI() ? 'vega' : 'judge'].down[0], 152, 0, 16, 18, 152, 2, 16, 18);
     OR(150, 60, 22, 8, PAL.yellow); OR(154, 28, 12, 10, PAL.blue); R(158, 30, 4, 6, PAL.white);    // seal
     OR(14, 44, 70, 40, PAL.woodD); R(14, 44, 70, 3, PAL.woodL); label('JURY', 49, 42, PAL.white, 6);
     const jurors = ['tourist', 'merle', 'darlene', 'tourist', 'rhonda', 'tourist'];

@@ -25,7 +25,7 @@ const GLYPHS = {
 };
 const GLYPH_BITS = {};
 for (const [k, v] of Object.entries(GLYPHS)) GLYPH_BITS[k] = v.split(' ').map(r => [...r].map(c => c === '1'));
-const FONT_SUB = { '’': "'", '‘': "'", '“': '"', '”': '"', '—': '-', '–': '-', '…': '...', '✶': '*', 'Ⓐ': 'A', 'Ⓑ': 'B', 'Ⓧ': 'X', 'Ⓨ': 'Y' };
+const FONT_SUB = { 'É': 'E', 'Í': 'I', 'Ñ': 'N', 'Á': 'A', 'Ó': 'O', 'Ú': 'U', 'é': 'E', 'í': 'I', 'ñ': 'N', 'á': 'A', 'ó': 'O', 'ú': 'U', '’': "'", '‘': "'", '“': '"', '”': '"', '—': '-', '–': '-', '…': '...', '✶': '*', 'Ⓐ': 'A', 'Ⓑ': 'B', 'Ⓧ': 'X', 'Ⓨ': 'Y' };
 const labelCache = new Map();
 function bakeLabel(text, color, scale) {
   const s = [...text.toUpperCase()].map(c => FONT_SUB[c] || c).join('');

@@ -69,6 +69,7 @@ const VENDORS = {
   gulp: { title: 'GULP-N-GO', sub: '', items: () => SHOP.concat(Game.day >= 5 ? Cases.shopExtras() : []) },
   van: { title: 'WAYNE’S MYSTERY VAN', sub: 'Cash only. No cops. No Rhondas. Buying here gets you noticed (+1★).', items: () => ['joint', 'gummy'], shady: true },
   clinic: { title: 'DR. SNIFFLES’ SINUS CLINIC', sub: 'Medical grade. Allegedly. Buying here gets you noticed (+1★).', items: () => ['powder', 'cafecito'], shady: true },
+  suits: { title: 'PASTEL SUITS', sub: 'Miami formal. For crimes, weddings, and crimes at weddings.', items: () => ['suit'] },
   cafe: { title: 'CAFÉ ABUELA', sub: 'Ventanita open. Pay in cash or compliments.', items: () => ['cafecito', 'pastelito'] },
 };
 let vendor = 'gulp';
@@ -87,7 +88,7 @@ function renderShop(focusKey) {
   for (const k of shopItems()) {
     const { price, name, desc } = shopInfo(k), b = document.createElement('button');
     b.className = 'shopRow'; b.dataset.k = k;
-    b.innerHTML = `<img alt="" src="${SPR.iconURL[k === 'jortsXXXL' ? 'jorts' : k]}"><span class="nm">${name}<small>${desc}</small></span><span class="own">have <b>0</b></span><span class="pr">$${price}</span>`;
+    b.innerHTML = `<img alt="" src="${SPR.iconURL[k === 'jortsXXXL' || k === 'suit' ? 'jorts' : k]}"><span class="nm">${name}<small>${desc}</small></span><span class="own">have <b>0</b></span><span class="pr">$${price}</span>`;
     b.addEventListener('click', () => buy(k, b)); ui.shopList.append(b);
   }
   refreshShop();
@@ -99,7 +100,7 @@ function refreshShop() {
   for (const b of ui.shopList.children) {
     const k = b.dataset.k, broke = Game.money < shopInfo(k).price;
     b.classList.toggle('broke', broke); b.setAttribute('aria-disabled', broke);
-    b.querySelector('.own b').textContent = k === 'jortsXXXL' ? (Game.flags.xxxl ? 1 : 0) : (Game.inv[k] || 0);
+    b.querySelector('.own b').textContent = k === 'jortsXXXL' ? (Game.flags.xxxl ? 1 : 0) : k === 'suit' ? (Game.flags.suit ? 1 : 0) : (Game.inv[k] || 0);
   }
 }
 function buy(k, b) {
@@ -108,7 +109,7 @@ function buy(k, b) {
     Sound.play('fail'); b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope');
     return shopMsg(`Not enough cash. You need $${price - Game.money} more.`, true);
   }
-  Game.money -= price; giveItem(k, qty, true); if (Game.day >= 5) Cases.bought(k); Sound.play('cash');
+  Game.money -= price; giveItem(k, qty, true); if (Game.day >= 5) Cases.bought(k); if (MIAMI()) MiamiCases.bought(k); Sound.play('cash');
   if (VENDORS[vendor].shady) { Heat.add(1); Game.flags['bought_' + vendor] = (Game.flags['bought_' + vendor] || 0) + 1;
     if (Game.flags['bought_' + vendor] === 1) headline(vendor === 'van' ? 'FLORIDA MAN BUYS "OREGANO" FROM MAN IN VAN; OREGANO "EXTREMELY FUNNY"' : 'FLORIDA MAN BUYS "SINUS MEDICINE" FROM BEACH TENT RUN BY MAN IN SHARPIE LAB COAT', 3); }
   // feedback you can see: the row flashes, the price floats up, the wallet ticks down
@@ -144,13 +145,13 @@ $('journalClose').addEventListener('click', closeJournal);
 $('journalBtn').addEventListener('click', e => { e.currentTarget.blur(); if (Game.mode === 'play') openJournal(); });
 
 // ---------- save ----------
-function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ day: Game.day, inv: Game.inv, money: Game.money, allegations: Game.allegations, headlines: Game.headlines, flags: Game.flags, catchBag: Game.catchBag, pythons: Game.pythons })); } catch (e) { } }
+function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ region: Game.region, day: Game.day, inv: Game.inv, money: Game.money, allegations: Game.allegations, headlines: Game.headlines, flags: Game.flags, catchBag: Game.catchBag, pythons: Game.pythons })); } catch (e) { } }
 function load() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); return s && s.day ? s : null; } catch (e) { return null; } }
 
 // ---------- title / next day ----------
 function begin(fromSave) {
   Sound.unlock(); ui.title.hidden = true;
-  if (fromSave) { const s = load(); Object.assign(Game, { day: s.day, inv: s.inv, money: s.money, allegations: s.allegations, headlines: s.headlines, flags: s.flags, catchBag: s.catchBag || [], pythons: s.pythons || [] }); startDay(); }
+  if (fromSave) { const s = load(); World.load(s.region || 'swamp'); Object.assign(Game, { day: s.day, inv: s.inv, money: s.money, allegations: s.allegations, headlines: s.headlines, flags: s.flags, catchBag: s.catchBag || [], pythons: s.pythons || [] }); startDay(); }
   else newGame();
 }
 $('startBtn').addEventListener('click', () => begin(false));

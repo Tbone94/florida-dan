@@ -142,6 +142,7 @@ const Miami = {
   },
   // Raul skates the Ocean Drive sidewalk, forever
   tickNPC(n, dt) {
+    if (n.race || n.baleGrab) return true;
     if (!n.skate) return false;
     n.t += dt; n.y += n.skate * 70 * dt; n.dir = n.skate > 0 ? 'down' : 'up'; n.moving = true;
     if (n.y > 57 * TS) n.skate = -1; if (n.y < 3 * TS) n.skate = 1;
@@ -151,11 +152,11 @@ const Miami = {
   interactions() {
     const D = Game.dan, S_ = World.spots, list = [], near = (p, r) => p && Math.hypot(D.x - p.x, D.y - p.y) < r;
     if (D.ride) return list;
-    if (near(S_.door, 18)) list.push({ label: 'Go up to your room (sleep)', fn: () => sleep() });
+    list.push(...MiamiCases.interactions());
+    if (near(S_.door, 18) && Game.flags.checkedIn !== false) list.push({ label: 'Go up to your room (sleep)', fn: () => sleep() });
     if (near(S_.court, 22)) { const cs = Cases.courtCase(); list.push({ label: cs ? 'Enter the courthouse' : 'Miami-Dade Courthouse (closed)', fn: () => cs ? Court.start(cs) : toast('The Miami-Dade Courthouse. Dan salutes it. Force of habit.') }); }
     if (near(S_.stationDoor, 22)) list.push({ label: Cases.info().n >= 4 && Cases.info().n <= 5 ? 'Greyhound (can’t leave mid-case)' : 'Take the bus back to the swamp', fn: () => { const n = Cases.info().n; if (n === 4 || n === 5) return toast('Brenda would kill you. Finish the case first.'); travel('swamp'); } });
     if (Game.urgent > 0 && near(S_.hide, 22)) list.push({ label: 'USE THE TOILET', fn: () => { Game.urgent = 0; Sound.play('splash'); toast('...Made it. A beach porta-potty in July. Dan has seen God, and God is sweaty.'); Game.chill = 100; } });
-    if (typeof MiamiCases !== 'undefined') list.push(...MiamiCases.interactions());
     return list;
   },
 };

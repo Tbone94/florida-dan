@@ -26,7 +26,7 @@ const FAVORS = {
 };
 const Favors = {
   roll(n) {
-    const keys = Object.keys(FAVORS).filter(k => k !== 'tour' || Game.npcs.some(x => x.id === 'tourist')), picked = [];
+    const keys = Object.keys(FAVORS).filter(k => Game.npcs.some(x => x.id === FAVORS[k].giver)), picked = [];
     while (picked.length < n && keys.length) picked.push(keys.splice(Math.floor(Math.random() * keys.length), 1)[0]);
     Game.favors = picked.map(id => ({ id, state: 'offered' }));
     for (const f of Game.favors) { const npc = Game.npcs.find(x => x.id === FAVORS[f.id].giver); if (npc) npc.quest = true; }

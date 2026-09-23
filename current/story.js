@@ -59,6 +59,8 @@ function toast(msg, secs = 3) { ui.toast.textContent = msg; ui.toast.hidden = fa
 
 // ---------- quests ----------
 function Q(id) { return Game.quests.find(q => q.id === id); }
+const qOpen = id => { const q = Q(id); return !!q && !q.done; };   // quest exists and isn't finished
+const qDone = id => { const q = Q(id); return !!q && q.done; };
 function done(id) { const q = Q(id); if (q && !q.done) { q.done = true; Sound.play('catch'); toast('✓ ' + q.text.replace(/\s*\(.*\)$/, '')); } renderQuests(); }
 function setQuests(list) { Game.quests = list.map(([id, text, opt]) => ({ id, text, opt: !!opt, done: false })); renderQuests(); }
 function addQuest(id, text, opt, before) {
@@ -269,6 +271,7 @@ const Story = {
 
   // --- world objects ---
   interactions() {
+    if (MIAMI()) return Miami.interactions();
     const D = Game.dan, F = Game.flags, S_ = World.spots, list = [];
     const near = (p, r) => Math.hypot(D.x - p.x, D.y - p.y) < r;
     if (D.ride) return list;

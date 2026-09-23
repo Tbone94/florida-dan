@@ -146,6 +146,8 @@ const ICONS = {
     '....t.t...', '...t.t....', '..........', '..oooooo..', '.owccccwo.', '.owccccwoo', '.owwwwwwo.', '..owwwwo..', '..oooooo..', '..........'] },
   pastelito: { key: { o: 'ink', y: 'sand', d: 'sandD', p: 'hat' }, rows: [
     '..........', '..........', '.oooooooo.', 'oyyyyyyyyo', 'oydydydyyo', 'oyyyppyyyo', 'oyyyyyyyyo', '.oooooooo.', '..........', '..........'] },
+  bale: { key: { o: 'ink', t: 'tan', d: 'tanD', w: 'white' }, rows: [
+    '..........', '.oooooooo.', '.ottdttto.', '.ottdttto.', '.odddddd o'.replace(' ', 'd'), '.ottdttto.', '.otwdwtto.', '.ottdttto.', '.oooooooo.', '..........'] },
   lettuce: { key: { o: 'ink', g: 'grassL', d: 'grass', w: 'white' }, rows: [
     '..........', '...oooo...', '..oggdgo..', '.ogdgggdo.', '.oggwggdo.', '.odggdggo.', '.oggdgggo.', '..odggdo..', '...oooo...', '..........'] },
   trash: { key: { o: 'ink', g: 'grey', d: 'greyD', w: 'white' }, rows: [

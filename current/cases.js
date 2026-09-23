@@ -13,10 +13,11 @@ function findTile(pred, x0, y0, x1, y1, seed) {
 }
 const Cases = {
   info(day = Game.day) {
-    if (day <= 4) return { n: 1, d: day }; if (day <= 7) return { n: 2, d: day - 4 }; if (day <= 10) return { n: 3, d: day - 7 }; return { n: 0, d: day - 10 };
+    if (day <= 4) return { n: 1, d: day }; if (day <= 7) return { n: 2, d: day - 4 }; if (day <= 10) return { n: 3, d: day - 7 };
+    if (day <= 13) return { n: 4, d: day - 10 }; if (day <= 16) return { n: 5, d: day - 13 }; return { n: 0, d: day - 16 };
   },
   name() { return CASE_NAMES[this.info().n]; },
-  courtCase() { return Game.day === 4 ? 'flamingo' : Game.day === 7 ? 'manatee' : Game.day === 10 ? 'skunk' : null; },
+  courtCase() { return Game.day === 4 ? 'flamingo' : Game.day === 7 ? 'manatee' : Game.day === 10 ? 'skunk' : Game.day === 13 && MIAMI() ? 'lambo' : Game.day === 16 && MIAMI() && Game.flags.flyer ? 'sinus' : null; },
   places() {
     if (this._p) return this._p;
     const M = World.spots.merle;
@@ -42,6 +43,7 @@ const Cases = {
 
   setupDay(n) {
     const c = this.info(n), F = Game.flags;
+    if (c.n >= 4) return MiamiCases.setupDay(n);
     if (c.n === 2 && c.d === 1) {
       setQuests([['kayden', 'Find the kid who filmed it (boat ramp)'], ['pam', 'Talk to Dr. Pam (Merle’s island)']]);
       return say([['', 'MONDAY. CASE TWO.'], [PHONE_B, 'Dan. The manatee video has forty million views.'], ['DAN', 'Is that a lot?'],
@@ -69,19 +71,20 @@ const Cases = {
     if (c.n === 3 && c.d === 3) { Game.hour = 8; setQuests([['court', 'Get to court by 10 AM']]); return say([['', 'WEDNESDAY. COURT DAY.'], [PHONE_B, 'Is it coming?'], ['DAN', 'He’s already there. He took the bus.'], [PHONE_B, 'The Skunk Ape took the BUS?'], ['DAN', 'He’s got a senior pass.']]); }
     // endless
     setQuests([]);
-    Favors.roll(2);
+    Favors.roll(MIAMI() ? 1 : 2);
     say([['', `DAY ${n}. ${pick(['The swamp is 91° and rising.', 'A pelican stares at Dan through the window.', 'Somewhere, a headline is waiting to happen.'])}`], ['DAN', pick(['Another beautiful day in paradise.', 'My head. My whole head.', 'Let’s make some news.', 'Florida Man of the Year, reporting for duty.'])]]);
   },
 
   tick(dt) {
     const c = this.info(), F = Game.flags;
+    if (c.n >= 4 || MIAMI()) { MiamiCases.tick(dt); Favors.tick(dt); return; }
     if (c.n === 2 && c.d === 1) {
       if (F.contentStart != null && !F.contentDone) {
         const got = Game.headlines.length - F.contentStart; questText('content', `Do 3 Florida Man things for Kayden’s camera (${Math.min(3, got)}/3)`);
         if (got >= 3) { F.contentDone = true; done('content'); questText('kayden', 'Go back to Kayden (boat ramp)'); toast('KAYDEN (texting): BRO. BRO. come back to the ramp'); }
       }
       if (F.trashStart && !F.trashDone) { const n = Game.inv.trash || 0; questText('trash', `Fish trash out of the lagoon by boat (${Math.min(5, n)}/5)`); if (n >= 5) { F.trashDone = true; done('trash'); questText('pam', 'Bring the trash to Dr. Pam'); } }
-      if (Q('kayden') && Q('kayden').done && Q('pam') && Q('pam').done && !F.c2d1) { F.c2d1 = true; addQuest('bed', 'Go home to bed'); }
+      if (Q('kayden') && qDone('kayden') && Q('pam') && qDone('pam') && !F.c2d1) { F.c2d1 = true; addQuest('bed', 'Go home to bed'); }
     }
     if (c.n === 2 && c.d === 2) {
       questText('lettuce', `Buy 3 heads of lettuce (${Math.min(3, Game.inv.lettuce || 0)}/3)`); if ((Game.inv.lettuce || 0) >= 3) done('lettuce');
@@ -101,6 +104,7 @@ const Cases = {
 
   talk(n) {
     const c = this.info(), F = Game.flags;
+    if (MIAMI() && MiamiCases.talk(n)) return true;
     if (n.id === 'kayden' && c.n === 2) {
       n.quest = false;
       if (!F.kaydenAsk) {
@@ -110,7 +114,7 @@ const Cases = {
           ['KAYDEN', 'Okay okay. I’ll delete it... if you give me BETTER content. Do three Florida Man things. On camera. Go.'], ['DAN', 'To get OUT of the news... I have to get IN the news.'], ['KAYDEN', 'That’s the algorithm, bro.']]);
         return true;
       }
-      if (F.contentDone && !Q('kayden').done) {
+      if (F.contentDone && qOpen('kayden')) {
         done('kayden'); headline('FLORIDA MAN DOES THREE FLORIDA MAN THINGS TO GET ONE FLORIDA MAN THING DELETED', 4);
         say([['KAYDEN', 'BRO. BROOOO. That was FIRE. Chat is LOSING it.'], ['KAYDEN', 'Manatee video: deleted. Well, “deleted.” It’s on like four other accounts.'], ['DAN', 'So I did all that for nothing.'], ['KAYDEN', 'You did it for CONTENT, bro.'], ['', 'Kayden gives Dan a fist bump. It is slightly sticky.']]);
         return true;
@@ -118,7 +122,7 @@ const Cases = {
       say([['KAYDEN', pick(['Do something crazy, bro. Chat is waiting.', 'Punch a gator. Chat LOVES gators.', 'Bro what if you got chased by the cops? For content.'])]]); return true;
     }
     if (n.id === 'pam') {
-      if (c.n === 2 && c.d === 1 && !Q('pam').done) {
+      if (c.n === 2 && c.d === 1 && qOpen('pam')) {
         if (!F.trashStart) {
           F.trashStart = true; Game.inv.trash = 0; addQuest('trash', 'Fish trash out of the lagoon by boat (0/5)', false, 'pam');
           say([['DR. PAM', 'You’re the man from the manatee video.'], ['DAN', 'Allegedly.'], ['DR. PAM', 'I’ve rescued manatees for thirty years. I have never seen one look that... happy.'],
@@ -134,7 +138,7 @@ const Cases = {
       }
       say([['DR. PAM', pick(['Manatees can hold their breath for twenty minutes. I can’t hold mine around you, Dan.', 'Stay off the manatees, Dan.', 'Did you know gators and manatees are actually pretty chill with each other? Unlike people.'])]]); return true;
     }
-    if (n.id === 'merle' && c.n === 2 && c.d === 2 && !Q('pool').done) {
+    if (n.id === 'merle' && c.n === 2 && c.d === 2 && qOpen('pool')) {
       Game.inv.pool = 1; done('pool');
       say([['MERLE', 'My kiddie pool? For MANNY? Heck yeah, Danny. It’s got a hole in it but so do I.'], ['', 'Got: one (1) kiddie pool. Cartoon sharks on it.']]); return true;
     }
@@ -158,18 +162,18 @@ const Cases = {
   },
 
   interactions() {
-    const D = Game.dan, c = this.info(), F = Game.flags, P = this.places(), list = [], near = (p, r) => Math.hypot(D.x - p.x, D.y - p.y) < r;
-    const needsDark = (c.n === 2 && c.d === 2 && !Q('manny2').done) || (c.n === 3 && c.d === 1 && Q('dogs').done && !Q('lure').done) || (c.n === 3 && c.d === 2 && !Q('reunion').done);
+    const D = Game.dan, c = this.info(), F = Game.flags, P = this.places(), list = MiamiCases.interactions(), near = (p, r) => Math.hypot(D.x - p.x, D.y - p.y) < r;
+    const needsDark = (c.n === 2 && c.d === 2 && qOpen('manny2')) || (c.n === 3 && c.d === 1 && qDone('dogs') && qOpen('lure')) || (c.n === 3 && c.d === 2 && qOpen('reunion'));
     if (needsDark && Game.hour < (c.n === 3 && c.d === 2 ? 18 : 20) && near(P.couch, 24)) list.push({ label: 'Sit on the couch till dark', fn: () => {
       say([['', 'Dan sits on the couch. He opens a Swamp Lite. The sun goes down. It is beautiful. He will never tell anyone.']], () => { Game.hour = c.n === 3 && c.d === 2 ? 18.2 : 20.2; });
     } });
     if (c.n === 3 && c.d === 1) {
-      if (!Q('trailcam').done && near(P.trailcam, 22)) list.push({ label: 'Check the trail cam', fn: () => {
+      if (qOpen('trailcam') && near(P.trailcam, 22)) list.push({ label: 'Check the trail cam', fn: () => {
         done('trailcam'); headline('TRAIL CAM CAPTURES "SKUNK APE" DRINKING SWAMP LITE; SKUNK APE IS JUST A GUY NAMED DAN', 5);
         say([['', 'The photo: a seven-foot shape, covered head to toe in mud, holding a Swamp Lite, giving the camera a thumbs up.'], ['DAN', '...That’s a good photo of me though.'],
           ['', 'In the corner of the photo, behind Dan, something much bigger is also holding a Swamp Lite.'], ['DAN', 'Oh. OH.']]);
       } });
-      if (Q('dogs').done && !Q('lure').done && near(P.trailcam, 26)) list.push({ label: Game.hour >= 20 ? 'Set out the roller dogs' : 'Set the bait (come back after dark)', fn: () => {
+      if (qDone('dogs') && qOpen('lure') && near(P.trailcam, 26)) list.push({ label: Game.hour >= 20 ? 'Set out the roller dogs' : 'Set the bait (come back after dark)', fn: () => {
         if (Game.hour < 20) return toast('Too bright. Skunk Apes are night people. (Couch at home: “sit till dark.”)');
         Game.inv.hotdog -= 3; done('lure'); addQuest('track', 'Follow the footprints', false);
         const ape = this.makeApe(P.trailcam.x + 60, P.trailcam.y - 20); Game.animals.push(ape);
@@ -179,8 +183,8 @@ const Cases = {
     }
     for (const a of Game.animals) if (a.ape && a.state === 'den' && near(a, 30)) {
       if (c.n === 3 && c.d === 1 && !F.apeFriend) list.push({ label: 'Approach the Skunk Ape', fn: () => this.apeMeet(a) });
-      else if (c.n === 3 && c.d === 2 && !Q('rehearse').done) list.push({ label: 'Rehearse the testimony', fn: () => this.rehearse() });
-      else if (c.n === 3 && c.d === 2 && Q('rehearse').done && !Q('reunion').done) list.push({ label: Game.hour >= 18 ? 'Hang out with the Skunk Ape' : 'Hang out (after 6 PM)', fn: () => Game.hour >= 18 ? this.reunion(a) : toast('The Skunk Ape is asleep. He sleeps like Dan: face down, one flip-flop on.') });
+      else if (c.n === 3 && c.d === 2 && qOpen('rehearse')) list.push({ label: 'Rehearse the testimony', fn: () => this.rehearse() });
+      else if (c.n === 3 && c.d === 2 && qDone('rehearse') && qOpen('reunion')) list.push({ label: Game.hour >= 18 ? 'Hang out with the Skunk Ape' : 'Hang out (after 6 PM)', fn: () => Game.hour >= 18 ? this.reunion(a) : toast('The Skunk Ape is asleep. He sleeps like Dan: face down, one flip-flop on.') });
       else list.push({ label: 'Talk to the Skunk Ape', fn: () => say([['SKUNK APE', pick(['HRRM.', 'HRRRRM?', '*offers Dan a half-eaten roller dog*', '*points at the moon, then at Dan, then nods slowly*'])]]) });
     }
     return list;

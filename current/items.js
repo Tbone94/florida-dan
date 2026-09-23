@@ -12,6 +12,8 @@ const ITEMS = {
   gummy: { name: 'Gator Gummies', price: 12, desc: 'A long, strong high. The munchies will be biblical.' },
   cafecito: { name: 'Cafecito', price: 2, desc: 'Cuban coffee. Legal rocket fuel. Speed + chill.' },
   pastelito: { name: 'Pastelito', price: 2, desc: 'Guava and cheese. Fixes everything for about a minute.' },
+  suit: { name: 'Pastel Suit', price: 30, desc: 'Seafoam jacket, pink tee. Instant Miami. Required for yachts.' },
+  bale: { name: 'Bale of “Sinus Medicine”', price: 0, desc: 'Found on the beach. Belongs to somebody. Somebody bad.' },
   lettuce: { name: 'Head of Lettuce', price: 1, desc: 'A vegetable. At the Gulp-N-Go. Somehow.' },
   jortsXXXL: { name: 'Formal Jorts, XXXL', price: 8, desc: 'Black denim. For weddings, funerals, and cryptid testimony.' },
   firework: { name: 'Freedom Rocket', price: 10, desc: 'Throw it. Boom. Everything within a mile respects you now.' },

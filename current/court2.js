@@ -8,7 +8,7 @@ const Objection = {
   run(list, then) { this.s = { list, i: 0, t: 0, phase: 'show', score: 0, then }; Game.mode = 'objection'; this.show(); },
   show() {
     const it = this.s.list[this.s.i];
-    ui.talk.hidden = false; ui.talk.classList.remove('phone'); ui.talkWho.hidden = false; ui.talkWho.textContent = 'PROSECUTOR VANCE'; ui.talkLine.textContent = it.text;
+    ui.talk.hidden = false; ui.talk.classList.remove('phone'); ui.talkWho.hidden = false; ui.talkWho.textContent = this.speaker || 'PROSECUTOR VANCE'; ui.talkLine.textContent = it.text;
     ui.talkChoices.innerHTML = `<div class="objbar"><i id="objFill"></i></div><div class="objhint">${K('a')} OBJECTION! &nbsp;— only if it’s a lie. Let the truth slide.</div>`;
     this.s.t = 0; this.s.phase = 'show'; Sound.voice('PROSECUTOR');
   },
@@ -22,12 +22,12 @@ const Objection = {
     const s = this.s, it = s.list[s.i], right = objected === it.lie; if (right) s.score++;
     s.phase = 'react'; s.t = 0; ui.talkChoices.innerHTML = '';
     if (objected) { ui.fishMsg.textContent = 'OBJECTION!'; setTimeout(() => { if (Game.mode === 'objection') ui.fishMsg.textContent = ''; }, 800); Game.shake = 7; Sound.play('punch'); }
-    ui.talkWho.textContent = 'JUDGE HARLAN';
+    ui.talkWho.textContent = MIAMI() ? 'JUDGE VEGA' : 'JUDGE HARLAN';
     ui.talkLine.textContent = objected ? (it.lie ? 'Sustained. ' + (it.bust || '') : 'Overruled. ' + (it.over || 'That one was true, son.')) : (it.lie ? (it.miss || 'The jury nods along. That was a lie, Dan. You let it slide.') : (it.ok || 'Noted.'));
     setTimeout(() => Sound.play(right ? 'cash' : 'fail'), 120);
   },
   finish() {
-    const s = this.s; this.s = null; ui.talk.hidden = true; ui.fishMsg.textContent = ''; Game.mode = 'court';
+    const s = this.s; this.s = null; this.speaker = null; ui.talk.hidden = true; ui.fishMsg.textContent = ''; Game.mode = 'court';
     if (s.score === s.list.length) headline('FLORIDA MAN OBJECTS AT EVERY LIE, IS RIGHT EVERY TIME; LAWYERS "FURIOUS"', 3);
     s.then(s.score, s.list.length);
   },
@@ -38,9 +38,9 @@ const CourtCases = {
   begin() { Game.mode = 'court'; Game.courtChuck = 0; Game.courtExtra = {}; showHud(false); },
   // fewer headlines during the case = a nicer judge (and a collectible)
   clean(n) {
-    const got = Game.headlines.length - (Game.flags['caseStart' + n] || 0);
-    if (got <= CLEAN_LIMIT[n]) { headline('FLORIDA MAN MAKES IT THROUGH A WHOLE CASE WITH BARELY ANY HEADLINES; SCIENTISTS "CONCERNED"', 1); return [['JUDGE HARLAN', `Only ${got} headlines this week, Mr. Dupree. For you, that is practically a vow of silence.`]]; }
-    return [['JUDGE HARLAN', `You made the paper ${got} times this week, Mr. Dupree. ${got} times. I read every one. At breakfast.`]];
+    const got = Game.headlines.length - (Game.flags['caseStart' + n] || 0), J = MIAMI() ? 'JUDGE VEGA' : 'JUDGE HARLAN';
+    if (got <= CLEAN_LIMIT[n]) { headline('FLORIDA MAN MAKES IT THROUGH A WHOLE CASE WITH BARELY ANY HEADLINES; SCIENTISTS "CONCERNED"', 1); return [[J, `Only ${got} headlines this week, Mr. Dupree. For you, that is practically a vow of silence.`]]; }
+    return [[J, `You made the paper ${got} times this week, Mr. Dupree. ${got} times. I read every one. At breakfast.`]];
   },
   manatee() {
     this.begin(); const F = Game.flags;
@@ -159,5 +159,5 @@ function caseTarget(q) {
     case 'trailcam': case 'lure': return P.trailcam;
     case 'track': case 'rehearse': case 'reunion': return ape || P.den;
   }
-  return null;
+  return MiamiCases.target(q);
 }

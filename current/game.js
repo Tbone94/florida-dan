@@ -23,7 +23,7 @@ function newGame() {
 function startDay() {
   const S_ = World.spots;
   Object.assign(Game, { hour: 6, chill: 70, urgent: 0, storm: 0, heat: 0, parts: [], projectiles: [], day_: freshDayLog() });
-  Heat.end(); Game.dan.hiding = false; Game.dan.carry = null; Game.prints = []; Game.scene = null; Game.courtExtra = {};
+  Heat.end(); Game.dan.hiding = false; Game.dan.carry = null; Game.vehicles = []; BoatChase.boat = null; Race.on = false; Game.prints = []; Game.scene = null; Game.courtExtra = {};
   Object.assign(Game.fx, { buzz: 0, high: 0, shroom: 0, powder: 0, crash: 0, cig: 0 });
   Object.assign(Game.dan, { x: S_.dan.x, y: S_.dan.y, dir: 'down', ride: null, hurt: 0 });
   Object.assign(Game.boat, { x: S_.boat.x, y: S_.boat.y, dir: 'right' });
@@ -38,6 +38,7 @@ function startDay() {
 }
 
 function spawn() {
+  if (MIAMI()) return Miami.spawn();
   const S_ = World.spots;
   Game.npcs = [
     makeNPC('merle', 'Merle', S_.merle.x, S_.merle.y, 'down', { wander: 18 }),
@@ -75,8 +76,9 @@ function spawn() {
 function facingPoint(dist) { const D = Game.dan, d = D.dir; return { x: D.x + (d === 'right' ? dist : d === 'left' ? -dist : 0), y: D.y + (d === 'down' ? dist : d === 'up' ? -dist : 0) }; }
 function interaction() {
   const D = Game.dan, near = (o, r) => Math.hypot(D.x - o.x, D.y - o.y) < r;
+  if (D.ride === 'lambo') return null;
   if (D.hiding) return { label: 'Come out of the porta-potty', fn: () => { D.hiding = false; toast('Dan emerges. He will never be the same.'); } };
-  if (Heat.cop && !D.ride && near({ x: 25.8 * TS, y: 43.3 * TS }, 22)) return { label: 'HIDE IN THE PORTA-POTTY', fn: () => { D.hiding = true; D.moving = false; toast('Dan hides in the porta-potty. It is... a lot in here.'); } };
+  if (Heat.cop && !D.ride && near(World.spots.hide || { x: 25.8 * TS, y: 43.3 * TS }, 22)) return { label: 'HIDE IN THE PORTA-POTTY', fn: () => { D.hiding = true; D.moving = false; toast('Dan hides in the porta-potty. It is... a lot in here.'); } };
   if (!D.ride) for (const n of Game.npcs) if (!n.hidden && near(n, 24)) return { label: `Talk to ${n.name}`, fn: () => Story.talk(n) };
   for (const a of Game.animals) {
     if (a.spirit && near(a, 56) && (Game.fx.shroom > 0 || a.sober)) return { label: 'Approach the glowing manatee', fn: () => a.sober ? Cases.manny2() : Story.manny() };
@@ -183,6 +185,7 @@ function yell() {
   if (Game.gitCd > 0) return; Game.gitCd = .8; Game.day_.gits++; Sound.play('git');
   const D = Game.dan; Game.parts.push({ kind: 'text', x: D.x, y: D.y - 30, vx: 0, vy: -12, life: 1, text: pick(['GIT!', 'GO ON, GIT!', 'NOT TODAY, SATAN!', 'GIT OUTTA HERE!', 'SHOO, YOU SUMBITCH!']) });
   for (const a of Game.animals) if (!a.pet && !a.spirit && Math.hypot(a.x - D.x, a.y - D.y) < (a.chuck ? 96 : 84)) { a.state = 'flee'; a.timer = 3.5; a.cd = 4; if (a.chuck) { done('chuck'); if (!Game.flags.chuckGit) { Game.flags.chuckGit = true; setTimeout(() => toast('Chuck hisses and backs off. You have Chuck’s respect. For now.'), 600); } } }
+  for (const n of Game.npcs) if (n.canadian && Math.hypot(n.x - D.x, n.y - D.y) < 60) { n.canadian = false; Game.flags.canadianGone = true; n.hx = n.x - 200; n.wander = 0; n.x -= 40; toast('THE CANADIAN: Sorry! Sorry, eh! SO sorry!'); headline('FLORIDA MAN YELLS "GIT" AT CANADIAN OVER POOL CHAIR; CANADIAN APOLOGIZES ELEVEN TIMES', 3); }
   for (const n of Game.npcs) if (Math.hypot(n.x - D.x, n.y - D.y) < 50) { n.scared = 1; if (n.id === 'tourist' && !Game.day_.yelledTourist) { Game.day_.yelledTourist = true; headline('FLORIDA MAN YELLS "GIT" AT TOURIST FROM OHIO', 4); } }
 }
 
@@ -201,6 +204,7 @@ function update(dt) {
     case 'raccoon': Minigame.updateRaccoon(dt); return;
     case 'court': return;
     case 'objection': Objection.update(dt); return;
+    case 'dance': Dance.update(dt); return;
     case 'shop': if (Input.tapped('pause') || Input.tapped('b')) closeShop(); return;
     case 'journal': if (Input.tapped('journal') || Input.tapped('pause') || Input.tapped('a') || Input.tapped('b')) closeJournal(); return;
     case 'gazette': return;
@@ -234,7 +238,7 @@ function update(dt) {
     p.got = true; giveItem(p.kind); toast(pick(PICKUP_LINES[p.kind] || [`Got ${ITEMS[p.kind] ? ITEMS[p.kind].name : p.kind}.`]));
   }
   Game.pickups = Game.pickups.filter(p => !p.got);
-  if (Game.day_.dui && Game.dan.ride === 'cooler' && !Game.day_.duiDone) { const r = Game.npcs.find(n => n.id === 'rhonda'); if (r && Math.hypot(r.x - Game.dan.x, r.y - Game.dan.y) < 90) { Game.day_.duiDone = true; Sound.play('siren'); Game.dan.ride = null; headline('FLORIDA MAN CITED FOR DUI ON MOTORIZED COOLER; ASKS DEPUTY IF SHE "WANTS A COLD ONE"', 10); say([['RHONDA', '*WHOOP WHOOP* Pull that cooler OVER, Dan.'], ['DAN', 'It’s a cooler, Rhonda. It’s not a VEHICLE.'], ['RHONDA', 'It has a MOTOR. It has HEADLIGHTS, Dan. Why does it have headlights.'], ['DAN', '...Want a cold one? It’s right here. I’m sittin’ on ’em.'], ['RHONDA', 'I’m writing you a ticket AND I’m taking a beer.']], () => { if (Game.inv.beer > 0) Game.inv.beer--; }); } }
+  if (!MIAMI() && Game.day_.dui && Game.dan.ride === 'cooler' && !Game.day_.duiDone) { const r = Game.npcs.find(n => n.id === 'rhonda'); if (r && Math.hypot(r.x - Game.dan.x, r.y - Game.dan.y) < 90) { Game.day_.duiDone = true; Sound.play('siren'); Game.dan.ride = null; headline('FLORIDA MAN CITED FOR DUI ON MOTORIZED COOLER; ASKS DEPUTY IF SHE "WANTS A COLD ONE"', 10); say([['RHONDA', '*WHOOP WHOOP* Pull that cooler OVER, Dan.'], ['DAN', 'It’s a cooler, Rhonda. It’s not a VEHICLE.'], ['RHONDA', 'It has a MOTOR. It has HEADLIGHTS, Dan. Why does it have headlights.'], ['DAN', '...Want a cold one? It’s right here. I’m sittin’ on ’em.'], ['RHONDA', 'I’m writing you a ticket AND I’m taking a beer.']], () => { if (Game.inv.beer > 0) Game.inv.beer--; }); } }
   const act = interaction();
   const pv = act ? K('a') + ' ' + act.label : ''; if (ui.prompt._v !== pv) { ui.prompt._v = pv; ui.prompt.innerHTML = pv; }
   ui.prompt.hidden = !act;
@@ -251,13 +255,15 @@ function tickFx(dt) {
 }
 function tickWorld(dt) {
   for (const a of Game.animals) { if (a.type === 'gator') updateGator(a, dt); else if (a.type === 'python') updatePython(a, dt); else if (a.type !== 'manatee' && a.type !== 'skunkape') updateCritter(a, dt); }
-  for (const n of Game.npcs) { if (n.scared > 0) { n.scared -= dt; continue; } updateNPC(n, dt); }
+  for (const n of Game.npcs) { if (n.scared > 0) { n.scared -= dt; continue; } if (MIAMI() && Miami.tickNPC(n, dt)) continue; updateNPC(n, dt); }
   updateProjectiles(dt); updateParts(dt);
 }
 const PICKUP_LINES = {
   beer: ['Found a warm Swamp Lite. Still counts.', 'A beer! In the grass! Easter egg for adults.'], cig: ['Found a loose menthol. Score.', 'Cigarette. Slightly damp. Still good.'],
   joint: ['Found a doobie in the couch cushions. Merry Christmas, Dan.'], bait: ['Tub of nightcrawlers. Still wiggly.', 'Bait! Mostly alive!'],
   scratch: ['A scratch-off! Unscratched! Destiny!'], hotdog: ['A roller dog. On the ground. Wrapped. ...Mostly wrapped.'], energy: ['Gator Juice! Half full! Nobody’s spit in it! Probably!'],
+  bale: ['A bale of “sinus medicine.” Heavy. Wet. Smells like a boat.', 'Another bale. Dan is a very good citizen.'],
+  cafecito: ['A cafecito! Still warm. Somebody’s abuela is watching over you.'],
   trash: ['A tire.', 'A whole recliner. In the lagoon. Why.', 'A single Croc.', 'A bag full of more bags.', 'A wedding ring! ...Nope. Pull tab.', 'Steve? ...Steve says hi.'],
   firework: ['A Freedom Rocket! Merle’s “hurricane supply.” (Slot 9, throws it)'],
 };
@@ -328,7 +334,7 @@ function drawWorld() {
   if (D.ride !== 'cooler') L.push([Game.cooler.y + 3, () => drawCooler(Game.cooler.x - cx, Game.cooler.y - cy, Game.cooler.dir, t, false)]);
   if (Game.mode !== 'title') L.push([D.y + (D.ride === 'boat' ? 4 : 0), () => drawDan(D.x - cx, D.y - cy, t)]);
   L.sort((a, b) => a[0] - b[0]).forEach(e => e[1]());
-  Heat.draw(cx, cy, t);
+  Heat.draw(cx, cy, t); Lambo.draw(cx, cy, t); BoatChase.draw(cx, cy, t);
   drawProjectiles(cx, cy); drawParts(cx, cy);
   drawObjective(cx, cy, t);
   if (Game.fx.shroom > 0) for (const a of Game.animals) if (vis(a.x, a.y, 0) && !a.lurk && hash2(Math.floor(t / 4), a.x | 0) > .6) label(TALKY[Math.floor(hash2(Math.floor(t / 4), a.y | 0) * TALKY.length)], a.x - cx, a.y - cy - 24, PAL.neon, 6);
@@ -359,6 +365,7 @@ function render() {
   if (Game.mode === 'fish') Fishing.draw();
   else if (Game.mode === 'wrestle') Wrestle.draw();
   else if (Game.mode === 'raccoon') Minigame.drawRaccoon();
+  else if (Game.mode === 'dance') Dance.draw();
   else if (Game.mode === 'objection' || Game.scene === 'parade' || Game.mode === 'court' || (Game.mode === 'talk' && Game.talk && Game.talk.prev === 'court') || (Game.mode === 'gazette' && Game.flags.inCourt)) Court.draw(Game.t);
   else drawWorld();
   if (window.Trailer && Trailer.extra) Trailer.extra();

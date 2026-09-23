@@ -37,6 +37,10 @@ Touch: on-screen stick + buttons.
   - *The Flamingo Incident* — a fish fry, three character witnesses, Hurricane Wanda, a manatee spirit, and a gator in the courtroom.
   - *The Manatee Matter* — the ride went viral (40M views). Pay a teenager in content, clean a lagoon, feed Manny lettuce, and OBJECT at the prosecutor's lies.
   - *The Skunk Ape Affair* — charged with impersonating a cryptid. Find Gary the Skunk Ape, bait him with roller dogs, get him into XXXL formal jorts, win, and become Florida Man of the Year.
+- **MIAMI** (take the Greyhound after Case 3): Ocean Drive neon, Club Sinus, Café Abuela, the beach and pier, Biscayne Bay marina.
+  - *Grand Theft Lambo* — valet a stranger's pink Lamborghini (no brakes) into the Atlantic, win a dance-off, fish the car back out (an octopus is driving it), and recruit Abuela, Raul the rollerblader, and Sheila from Boca.
+  - *Operation Sinus* — "square grouper" washes ashore; go undercover in a pastel suit for Detectives Rocket & Tubbs, blend in at a cartel yacht party, and chase the boss (Señor Pelícano, the pelican who's been stealing your fish) across the bay.
+- **Shady vendors:** Wayne's Mystery Van (swamp) and Dr. Sniffles' Sinus Clinic (Miami) — buying raises your heat.
 - **Then it never ends:** daily favors for the locals, the headline hunt, and Deputy Rhonda.
 - **Original four-day story:** a fish fry that ends in a turkey-fryer fire, three character witnesses (one is a raccoon stuck in an ice machine), Hurricane Wanda, a manatee spirit named Manny, and a courtroom finale where Chuck bursts in.
 - **Substances change how the game looks and plays** (WebGL post shader): beer (double vision, blackouts that teleport you), doobies (slow-mo), cow-pie shrooms (melting world, reversed controls, talking animals), “sinus medicine” (2× speed, then a crash), roller dogs (find a toilet in 35 seconds).

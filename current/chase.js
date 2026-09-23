@@ -21,7 +21,7 @@ const Heat = {
     this.cop = { x: spot.x, y: spot.y, dir: 'left', t: 0 }; this.lostT = 0;
     const r = Game.npcs.find(n => n.id === 'rhonda'); if (r) r.hidden = true;
     Sound.play('siren'); Game.day_.chases = (Game.day_.chases || 0) + 1;
-    toast(pick(['RHONDA: DAN! PULL OVER! ...OR WALK OVER! WHATEVER YOU’RE DOING!', 'RHONDA: You’re on my list today, Dan!', 'RHONDA: Stop right there, Florida Man!']), 3.5);
+    if (MIAMI()) toast(pick(['MIAMI-DADE: Pull over, pastel boy!', 'MIAMI-DADE: Stop right there, Florida Man!']), 3.5); else toast(pick(['RHONDA: DAN! PULL OVER! ...OR WALK OVER! WHATEVER YOU’RE DOING!', 'RHONDA: You’re on my list today, Dan!', 'RHONDA: Stop right there, Florida Man!']), 3.5);
     hint('chase', `Lose her: ${K('run')} run, take the <b>boat</b>, ride the <b>cooler</b>, or hide in the <b>porta-potty</b>`, 6);
   },
   chase(dt) {
@@ -62,7 +62,7 @@ const Heat = {
     };
     headline(H[how], 4); Game.heat = 1;
     toast(pick(['Lost her. Dan’s heart is doing the cha-cha.', 'She’s gone. For now.', 'Escaped. Dan did not have a plan. Dan never has a plan.']));
-    if (Game.dan.hiding) { Game.dan.hiding = false; Game.dan.x = 25.8 * TS; Game.dan.y = 43.9 * TS; }
+    if (Game.dan.hiding) { const h = World.spots.hide || { x: 25.8 * TS, y: 43.3 * TS }; Game.dan.hiding = false; Game.dan.x = h.x; Game.dan.y = h.y + 10; }
   },
   draw(cx, cy, t) {
     const c = this.cop; if (!c) return;
@@ -75,6 +75,6 @@ const Heat = {
     const on = Math.floor(t * 8) % 2;
     OR(x - 5, y - 2, 4, 3, on ? PAL.red : PAL.redD); OR(x + 1, y - 2, 4, 3, on ? PAL.blueD : PAL.blue);
     if (on) { g.globalAlpha = .18; g.fillStyle = PAL.red; g.beginPath(); g.arc(x - 3, y, 18, 0, 7); g.fill(); g.fillStyle = PAL.blue; g.beginPath(); g.arc(x + 3, y, 18, 0, 7); g.fill(); g.globalAlpha = 1; }
-    label('SHERIFF', x, y + h / 2 + 9, PAL.white, 7);
+    label(MIAMI() ? 'MIAMI-DADE' : 'SHERIFF', x, y + h / 2 + 9, PAL.white, 7);
   },
 };

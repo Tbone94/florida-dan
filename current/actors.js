@@ -15,7 +15,7 @@ const dirOf = (x, y) => Math.abs(x) > Math.abs(y) ? (x > 0 ? 'right' : 'left') :
 // ---------- Dan ----------
 function moveDan(dt) {
   const D = Game.dan, F = Game.fx; let { x: ax, y: ay } = Input.axis();
-  if (D.hiding) { D.moving = false; return; }
+  if (D.hiding || D.ride === 'lambo') { D.moving = false; return; }
   if (F.shroom > .4 && (ax || ay)) { ax = -ax * (Math.sin(Game.t * .3) > .6 ? 1 : -1); ay = ay; }    // left is right now. deal with it
   if (F.buzz > 55 && (ax || ay)) {
     const a = Math.atan2(ay, ax) + Math.sin(Game.t * 2.3) * (F.buzz - 55) / 45 * .9, m = Math.hypot(ax, ay);
@@ -53,8 +53,8 @@ function bonk() { if (Game.t - bonkT < .8) return; bonkT = Game.t; Game.shake = 
 
 function drawDan(x, y, t) {
   const D = Game.dan, F = Game.fx;
-  if (D.hiding || (D.hurt > 0 && Math.floor(t * 20) % 2)) return;
-  const spr = SPR.dan[D.dir][D.moving ? D.frame : 0];
+  if (D.hiding || D.ride === 'lambo' || (D.hurt > 0 && Math.floor(t * 20) % 2)) return;
+  const spr = SPR[Game.flags.suit && MIAMI() ? 'dansuit' : 'dan'][D.dir][D.moving ? D.frame : 0];
   if (D.ride === 'boat') return drawBoat(x, y, Game.boat.dir, t, true);
   if (D.ride === 'cooler') return drawCooler(x, y, Game.cooler.dir, t, true);
   const wading = World.at(D.x, D.y) === T.SHALLOW;

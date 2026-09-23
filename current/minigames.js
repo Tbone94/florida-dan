@@ -12,14 +12,23 @@ const SPECIES = [
   { id: 'phone', name: "Somebody's iPhone", lb: [.4, .4], pull: .1, jump: 0, w: 2, junk: true, q: ['17 missed calls from “MOM.” Not my problem.'] },
   { id: 'ronnie', name: 'BIG RONNIE', lb: [13, 15.5], pull: 1.2, jump: .35, w: 0, legend: true, h: .42, c1: '#2c5e22', c2: '#e8d39a', q: ['BIG RONNIE. THE LEGEND. I’m gonna cry. I’m cryin’.'] },
 ];
+const OCEAN = [
+  { id: 'grunt', name: 'Grunt', lb: [.4, 1.5], pull: .35, jump: 0, w: 28, h: .5, c1: '#9fb2b8', c2: '#ffd23f', q: ['It grunts. Hence the name. Hence the fish.'] },
+  { id: 'snapper', name: 'Mangrove Snapper', lb: [1, 6], pull: .7, jump: .1, w: 24, h: .4, c1: '#c0392b', c2: '#ffb3a0', q: ['Snapper! Abuela’s gonna fry this.'] },
+  { id: 'cuda', name: 'Barracuda', lb: [4, 20], pull: .9, jump: .5, w: 14, h: .18, c1: '#8d8a93', c2: '#e8f0f2', q: ['Teeth. So many teeth.'] },
+  { id: 'tarpon', name: 'THE SILVER KING', lb: [40, 90], pull: 1.25, jump: .6, w: 2, legend: true, h: .35, c1: '#d8e6ee', c2: '#ffffff', q: ['A TARPON. The Silver King. Dan is crying in public again.'] },
+  { id: 'sneaker', name: 'Designer Sneaker', lb: [1, 1], pull: .15, jump: 0, w: 5, junk: true, q: ['$900 sneaker. Soaked. Still worth $900.'] },
+  { id: 'bale', name: 'Square Grouper', lb: [25, 40], pull: .5, jump: 0, w: 3, junk: true, q: ['A bale of “sinus medicine.” The ocean is full of them.'] },
+];
+const LAMBO_FISH = { id: 'lambo', name: 'PINK LAMBORGHINI', lb: [3814, 3814], pull: 1.1, jump: 0, w: 0, h: .3, c1: '#ff5ea8', c2: '#ffc2d6', q: ['It’s beautiful. There’s an octopus driving it.'] };
 const SURF = 56, TIP = { x: 104, y: 30 };
 
 const Fishing = {
   f: null,
-  start(tile, fromShore) {
+  start(tile, fromShore, forced) {
     const bottom = fromShore ? (tile === T.DEEP ? 142 : 126) : tile === T.DEEP ? 168 : tile === T.WATER ? 148 : 116;
     const merleZone = World.region(Game.dan.x, Game.dan.y) === 'merle';
-    const pool = SPECIES.map(sp => [sp, sp.deep && bottom < 140 ? 0 : sp.legend ? (merleZone && bottom >= 140 ? 3 : 0) : sp.w]);
+    const pool = MIAMI() ? OCEAN.map(sp => [sp, sp.w]) : SPECIES.map(sp => [sp, sp.deep && bottom < 140 ? 0 : sp.legend ? (merleZone && bottom >= 140 ? 3 : 0) : sp.w]);
     const roll = () => { let r = Math.random() * pool.reduce((s, p) => s + p[1], 0); for (const [sp, w] of pool) if ((r -= w) < 0) return sp; return SPECIES[0]; };
     const fish = [];
     for (let i = 0, n = 4 + Math.floor(Math.random() * 3); i < n; i++) {
@@ -27,6 +36,7 @@ const Fishing = {
       const y = sp.junk ? bottom - 6 : SURF + 12 + Math.random() * (bottom - SURF - 22);
       fish.push({ sp, lbs, x: 130 + Math.random() * 180, y, hy: y, dir: Math.random() < .5 ? 1 : -1, spd: sp.junk ? 0 : rnd(10, 24), want: 0 });
     }
+    if (forced === 'lambo') fish.splice(0, fish.length, { sp: LAMBO_FISH, lbs: 3814, x: 250, y: bottom - 10, hy: bottom - 10, dir: -1, spd: 1, want: 0 });
     const bait = Game.inv.bait > 0; if (bait) Game.inv.bait--; else toast('No bait. Usin’ a Cheeto.');
     this.f = { phase: 'cast', t: 0, lure: { x: TIP.x, y: TIP.y, vx: rnd(120, 180), vy: -70 }, bottom, fish, fromShore, bait, hooked: null, tension: 0, slack: 0, stam: 1, surge: 0, jump: null, gator: null, gatorT: 0, merleZone, msgT: 0, endT: 0 };
     Game.mode = 'fish'; ui.fishHud.hidden = true; this.msg(''); Sound.play('splash');
@@ -113,6 +123,9 @@ const Fishing = {
     ui.cardK.textContent = c.junk ? 'YOU CAUGHT... UH' : c.legend ? 'LEGENDARY CATCH' : 'CAUGHT';
     ui.cardN.textContent = c.name; ui.cardW.textContent = `${c.lbs} lb`; ui.cardQ.textContent = '“' + pick(fi.sp.q) + '”';
     ui.card.hidden = false; Sound.play('catch'); Story.event('caught');
+    if (c.id === 'lambo') { done('fishcar'); headline('FLORIDA MAN FISHES PINK LAMBORGHINI OUT OF THE ATLANTIC; OCTOPUS FOUND "DRIVING"', 6); }
+    if (c.id === 'bale') headline('FLORIDA MAN FISHES "SQUARE GROUPER" OUT OF OCEAN, TRIES TO RETURN IT TO OWNER', 4);
+    if (c.id === 'tarpon') headline('FLORIDA MAN LANDS 90-POUND TARPON OFF SOUTH BEACH PIER, KISSES IT, GETS SLAPPED BY IT', 4);
   },
   draw() {
     const f = this.f; if (!f) return;
@@ -149,6 +162,9 @@ const Fishing = {
     const sp = fi.sp, x = Math.round(fi.x), y = Math.round(fi.y), dir = fi.dir;
     if (sp.id === 'boot') { OR(x - 4, y - 6, 5, 8, PAL.brown); OR(x - 4, y, 10, 3, PAL.brown); return; }
     if (sp.id === 'cart') { OR(x - 10, y - 8, 20, 10, PAL.greyD); for (let i = 1; i < 20; i += 3) R(x - 10 + i, y - 7, 1, 8, PAL.waterD); OR(x - 9, y + 3, 2, 2, PAL.ink); OR(x + 7, y + 3, 2, 2, PAL.ink); OR(x - 13, y - 9, 4, 1, PAL.red); return; }
+    if (sp.id === 'lambo') { const lx = Math.round(fi.x), ly = Math.round(fi.y); OR(lx - 22, ly - 7, 44, 12, '#ff5ea8'); R(lx - 22, ly - 7, 44, 3, '#ffc2d6'); OR(lx - 4, ly - 12, 16, 6, '#9fe8f0'); OR(lx - 16, ly + 4, 7, 5, PAL.black); OR(lx + 10, ly + 4, 7, 5, PAL.black); R(lx + 2, ly - 11, 4, 3, '#b86bd6'); R(lx + 1, ly - 8, 1, 3, '#b86bd6'); R(lx + 6, ly - 8, 1, 3, '#b86bd6'); return; }
+    if (sp.id === 'bale') { const bx = Math.round(fi.x), by = Math.round(fi.y); OR(bx - 9, by - 7, 18, 14, PAL.tan); R(bx - 9, by - 2, 18, 2, PAL.tanD); R(bx - 2, by - 7, 2, 14, PAL.tanD); return; }
+    if (sp.id === 'sneaker') { const sx = Math.round(fi.x), sy = Math.round(fi.y); OR(sx - 6, sy - 3, 12, 6, PAL.white); R(sx - 6, sy + 1, 12, 2, '#ff4fd8'); return; }
     if (sp.id === 'phone') { OR(x - 2, y - 3, 4, 7, PAL.black); R(x - 1, y - 2, 2, 4, PAL.teal); return; }
     const len = Math.round(clamp(8 + fi.lbs * 2.3, 9, 46)), h = Math.max(3, len * sp.h), wig = Math.sin(t * 10 + fi.hy) * 1.2;
     for (let pass = 0; pass < 2; pass++) for (let i = 0; i < len; i++) {
