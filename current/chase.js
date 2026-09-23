@@ -7,7 +7,7 @@ const Heat = {
   add(n) { Game.heat = clamp((Game.heat || 0) + n, 0, 5); },
   tick(dt) {
     Game.heat = Math.max(0, (Game.heat || 0) - dt * (this.cop ? 0 : .012));
-    if (!this.cop && Game.heat >= 2.9 && Game.day !== 4 && !Game.flags.noChase) this.start();
+    if (!this.cop && Game.heat >= 2.9 && Game.day !== 4 && !Game.flags.noChase && !ui.banner.classList.contains('show') && !headlineQ.length) this.start();   // one thing at a time
     if (this.cop) this.chase(dt);
   },
   start() {

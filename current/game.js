@@ -23,7 +23,7 @@ function newGame() {
 function startDay() {
   const S_ = World.spots;
   Object.assign(Game, { hour: 6, chill: 70, urgent: 0, storm: 0, heat: 0, parts: [], projectiles: [], day_: freshDayLog() });
-  Heat.end(); Game.dan.hiding = false; Game.dan.carry = null; Game.vehicles = []; BoatChase.boat = null; Race.on = false; Game.prints = []; Game.scene = null; Game.courtExtra = {};
+  Heat.end(); headlineQ.length = 0; Game.dan.hiding = false; Game.dan.carry = null; Game.vehicles = []; BoatChase.boat = null; Race.on = false; Game.prints = []; Game.scene = null; Game.courtExtra = {};
   Object.assign(Game.fx, { buzz: 0, high: 0, shroom: 0, powder: 0, crash: 0, cig: 0 });
   Object.assign(Game.dan, { x: S_.dan.x, y: S_.dan.y, dir: 'down', ride: null, hurt: 0 });
   Object.assign(Game.boat, { x: S_.boat.x, y: S_.boat.y, dir: 'right' });

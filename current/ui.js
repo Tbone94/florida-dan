@@ -31,13 +31,20 @@ function renderQuests() {
 
 // ---------- headline banner ----------
 let bannerT = 0;
+// one thing on screen at a time: headlines only drop in during play (or fishing), never over dialogue.
+// If a conversation starts mid-headline, the headline steps aside and comes back when it's over.
+let bannerCur = null;
+const BANNER_OK = { play: 1, fish: 1 };
 function updateHeadlineBanner(dt) {
-  if (bannerT > 0) { bannerT -= dt; if (bannerT <= 0) ui.banner.classList.remove('show'); return; }
-  if (headlineQ.length && Game.mode !== 'title') {
-    const h = headlineQ.shift(), it = typeof h === 'string' ? { text: h } : h;
+  if (bannerT > 0) {
+    if (!BANNER_OK[Game.mode]) { ui.banner.classList.remove('show'); bannerT = 0; if (bannerCur) headlineQ.unshift({ ...bannerCur, again: true }); bannerCur = null; return; }
+    bannerT -= dt; if (bannerT <= 0) { ui.banner.classList.remove('show'); bannerCur = null; } return;
+  }
+  if (headlineQ.length && BANNER_OK[Game.mode] && !window.TRAILER) {
+    const h = headlineQ.shift(), it = typeof h === 'string' ? { text: h } : h; bannerCur = it;
     ui.bannerText.textContent = it.text; ui.bannerKick.textContent = it.isNew ? `NEW ON YOUR RAP SHEET · ${Sheet.count()}/${Sheet.total()}` : 'BREAKING · SWAMP GAZETTE';
-    ui.banner.classList.toggle('fresh', !!it.isNew); ui.banner.classList.add('show'); bannerT = it.isNew ? 6.5 : 5.5;
-    Sound.play('headline'); if (it.isNew) setTimeout(() => Sound.play('catch'), 250); Game.shake = 3;
+    ui.banner.classList.toggle('fresh', !!it.isNew); ui.banner.classList.add('show'); bannerT = it.isNew ? 6 : 5;
+    if (!it.again) { Sound.play('headline'); if (it.isNew) setTimeout(() => Sound.play('catch'), 250); Game.shake = 3; }
   }
 }
 
