@@ -32,7 +32,7 @@ const Fishing = {
     const roll = () => { let r = Math.random() * pool.reduce((s, p) => s + p[1], 0); for (const [sp, w] of pool) if ((r -= w) < 0) return sp; return SPECIES[0]; };
     const fish = [];
     for (let i = 0, n = 4 + Math.floor(Math.random() * 3); i < n; i++) {
-      const sp = roll(), lbs = +(sp.lb[0] + Math.random() ** 1.6 * (sp.lb[1] - sp.lb[0])).toFixed(1);
+      const sp = roll(), lbs = +((sp.lb[0] + Math.random() ** (hasUp('rod') ? 1.1 : 1.6) * (sp.lb[1] - sp.lb[0]))).toFixed(1);   // the Ugly Stick pulls up bigger ones
       const y = sp.junk ? bottom - 6 : SURF + 12 + Math.random() * (bottom - SURF - 22);
       fish.push({ sp, lbs, x: 130 + Math.random() * 180, y, hy: y, dir: Math.random() < .5 ? 1 : -1, spd: sp.junk ? 0 : rnd(10, 24), want: 0 });
     }
@@ -96,7 +96,7 @@ const Fishing = {
       fi.x = clamp(fi.x, TIP.x, 314); fi.y = clamp(fi.y, SURF + 4, f.bottom - 5); fi.dir = dx > 0 ? -1 : 1;
       if (fi.sp.jump && fi.y < SURF + 50 && Math.random() < dt * fi.sp.jump * .4) { f.jump = { t: 0, x0: fi.x }; this.msg('JUMP! LET OFF!', .9); }
     }
-    f.tension += reel ? dt * (.13 + fi.power * f.stam * .3 + (f.surge > 0 ? .35 : 0)) : -dt * .75;   // gentler: fishing should feel good, not like a chore
+    f.tension += reel ? dt * (.13 + fi.power * f.stam * .3 + (f.surge > 0 ? .35 : 0)) * (hasUp('rod') ? .6 : 1) : -dt * .75;   // gentler: fishing should feel good, not like a chore
     f.tension = Math.max(0, f.tension);
     if (f.tension > .1) f.stam = Math.max(0, f.stam - dt * (.09 + f.tension * .2));
     f.slack = f.tension < .08 ? f.slack + dt : 0;

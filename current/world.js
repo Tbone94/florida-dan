@@ -100,6 +100,7 @@ function buildWorld() {
   add('mailbox', 20, 43, .5, .5);
   for (let x = 50; x <= 69; x++) { if (x < 58 || x > 60) add('fence', x, 46.5, 1, .3); add('fence', x, 57.5, 1, .3); }
   for (let y = 47; y <= 57; y++) { add('fencev', 49.7, y, .3, 1); add('fencev', 69.7, y, .3, 1); }
+  const landmarks = typeof addLandmarks === 'function' ? addLandmarks(add) : {};   // the rest of the swamp (landmarks.js)
   World.spots = {
     door: { x: 17.6 * TS, y: 16.6 * TS }, dan: { x: 17.6 * TS, y: 17.4 * TS }, dockEnd: { x: (x0 + 4.5) * TS, y: 17.5 * TS },
     boat: { x: (x0 + 6) * TS, y: 17.5 * TS }, cooler: { x: 20.5 * TS, y: 17.8 * TS }, merle: { x: 45.5 * TS, y: 12.9 * TS },
@@ -107,8 +108,9 @@ function buildWorld() {
     court: { x: 78 * TS, y: 38.6 * TS }, pasture: { x: 59 * TS, y: 52 * TS }, glades: { x: 10 * TS, y: 50 * TS },
     bridgeS: { x: 21.5 * TS, y: (y1 + 1) * TS }, ramp: { x: 35.5 * TS, y: 33.5 * TS }, roof: { x: 17.6 * TS, y: 12.4 * TS },
   };
+  Object.assign(World.spots, landmarks);
   const r = rng(29);
-  const clearOf = (x, y) => World.props.every(p => Math.hypot(p.x / TS + p.w / TS / 2 - x, p.y / TS + p.h / TS / 2 - y) > 3.2);
+  const clearOf = (x, y) => World.props.every(p => x < p.x / TS - 1.5 || x > (p.x + p.w) / TS + 1.5 || y < p.y / TS - 2.5 || y > (p.y + p.h) / TS + 2);   // no palm grows through a building
   for (let i = 0; i < 2600; i++) {
     const x = 1 + Math.floor(r() * (MW - 2)), y = 1 + Math.floor(r() * (MH - 2)), t = World.tile(x, y), roll = r();
     const open = t === T.GRASS && clearOf(x, y) && World.tile(x, y + 1) === T.GRASS && World.tile(x, y - 1) !== T.ROAD && World.tile(x, y + 1) !== T.ROAD && World.region(x * TS, y * TS) !== 'pasture';
@@ -326,7 +328,7 @@ function drawProp(p, cx, cy, t) {
       break;
     }
     case 'reeds': { for (let i = 0; i < 5; i++) { const rx = x + 2 + i * 3 + p.s * 2, sw = Math.sin(t * 1.5 + i + p.s * 5); R(rx + sw * .6, y + 2 + (i % 2) * 3, 1, 11 - (i % 2) * 3, PAL.camo); } R(x + 5 + p.s * 3, y, 2, 5, PAL.brown); break; }
-    default: if (typeof drawMiamiProp === 'function') drawMiamiProp(p, x, y, w, h, t); break;
+    default: if (typeof drawLandmark === 'function' && drawLandmark(p, x, y, w, h, t)) break; if (typeof drawMiamiProp === 'function') drawMiamiProp(p, x, y, w, h, t); break;
     case 'lily': { R(x + 4, y + 6, 8, 5, PAL.grassDD); R(x + 5, y + 6, 7, 4, PAL.grass); R(x + 8, y + 6, 1, 2, PAL.waterD); if (p.s > .7) R(x + 6, y + 5, 2, 2, PAL.hat); break; }
   }
 }

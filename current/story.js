@@ -193,6 +193,10 @@ const Story = {
     if (n.id === 'merle') return this.merle();
     if (n.id === 'darlene') return this.darlene();
     if (n.id === 'rhonda') return this.rhonda();
+    if (n.id === 'bubba') return say([['BUBBA', pick(['Bait, boats, bail. The three B’s. Four if you count beer.', 'Dan! My best bail customer. What’re we buyin’?', 'Everything’s a deal, nothing’s refundable, and I don’t know you.'])],
+      ['BUBBA', 'Whatcha need?', [['Browse the goods', () => { Game.mode = 'shop'; openShop('bubba'); return null; }], ['“Just lookin’.”', () => [['BUBBA', 'Lookin’ is free. Breathin’ near the airboat is five dollars.']]]]]]);
+    if (n.id === 'skeeter') return say([['SKEETER', pick(['Welcome to the Leaky Tiki. It leaks. That’s the name.', 'Only bar in the county you gotta boat to. Keeps the riffraff out. Mostly.', 'The umbrella drink is free if you can say what’s in it. Nobody can.'])]]);
+    if (n.id === 'lurleen') return say([['LURLEEN', pick(['Dan Dupree. You still owe me a lawn gnome.', 'Palmetto Pines ain’t fancy, but we got a pool. It’s a kiddie pool. It counts.', 'If you see my husband tell him the satellite dish is on the roof, not IN the roof.'])]]);
     if (n.id === 'tourist') return say(pick(TOURIST_TALKS));
     if (n.id === 'wayne') return say([['WAYNE', pick(['Duuude. Dan. My guy. You look like you need some... oregano.', 'Welcome to the Mystery Van. The mystery is what’s in the van. It’s weed.', 'Shhh. Rhonda’s got ears in the palm trees, man.'])],
       ['WAYNE', 'What can I do you for?', [['See what Wayne’s got', () => { Game.mode = 'shop'; openShop('van'); return null; }], ['“Just saying hi.”', () => [['WAYNE', 'Hi back, man. Hi... back. Whoa.']]]]]]);
@@ -227,8 +231,9 @@ const Story = {
   darlene() {
     const F = Game.flags;
     const shop = () => { Game.mode = 'shop'; openShop('gulp'); return null; };
-    const sell = () => { const n = Game.catchBag.filter(f => !f.junk && !f.legend).length; if (!n) return [['DARLENE', 'You ain’t got any fish, hon.']]; Game.money += n * 4; Game.catchBag = Game.catchBag.filter(f => f.junk || f.legend); Game.inv.fish = Game.catchBag.filter(f => !f.junk).length; Sound.play('cash'); return [['DARLENE', `${n} fish, $4 each. That’s $${n * 4}. Don’t tell the health department.`]]; };
-    const opts = [['Shop', shop], ['Sell fish ($4 each)', sell], ['Leave', () => [['DARLENE', 'Bye, sugar. Don’t die.']]]];
+    const sell = () => { const n = Game.catchBag.filter(f => !f.junk && !f.legend).length; if (!n) return [['DARLENE', 'You ain’t got any fish, hon.']]; const cash = Game.catchBag.reduce((a, f) => a + Upgrades.fishValue(f), 0); Game.money += cash; Game.catchBag = Game.catchBag.filter(f => f.junk || f.legend); Game.inv.fish = Game.catchBag.filter(f => !f.junk).length; Sound.play('cash'); return [['DARLENE', `${n} fish. By the pound, that’s $${cash}. Don’t tell the health department.`]]; };
+    const worth = Game.catchBag.reduce((a, f) => a + Upgrades.fishValue(f), 0);
+    const opts = [['Shop', shop], [worth ? `Sell fish ($${worth})` : 'Sell fish', sell], ['Leave', () => [['DARLENE', 'Bye, sugar. Don’t die.']]]];
     if (Game.day === 2 && !Q('darlene').done) {
       if (F.raccoonOut) { done('darlene'); return say([['DARLENE', 'You got it out! With your FACE! You’re a hero, Dan. A disgusting hero.'], ['', 'Darlene signs. Witness 1 of 3.'], ['DARLENE', 'Now what can I get ya?', opts]]); }
       return say([['DARLENE', 'Dan, baby, there is a RACCOON in my ice machine. Been in there since Sunday. He’s got a whole life in there now.'],         ['DARLENE', 'Get him out and I’ll sign whatever you want.', [

@@ -8,7 +8,7 @@ function canWalk(x, y) {
   for (const n of Game.npcs) if (n.solid !== false && Math.hypot(x - n.x, y - n.y) < 7) return false;
   return true;
 }
-function canBoat(x, y) { for (const [ox, oy] of [[0, 0], [-8, 0], [8, 0], [0, -5], [0, 5]]) if (!BOATABLE(World.at(x + ox, y + oy))) return false; return true; }
+function canBoat(x, y) { const air = hasUp('airboat') && !MIAMI(); for (const [ox, oy] of [[0, 0], [-8, 0], [8, 0], [0, -5], [0, 5]]) { const k = World.at(x + ox, y + oy); if (!BOATABLE(k) && !(air && k === T.SAWGRASS)) return false; } return true; }   // an airboat skims sawgrass
 function canDrive(x, y) { for (const [ox, oy] of [[-6, 0], [6, 0], [0, -4], [0, 3]]) { const k = World.at(x + ox, y + oy); if (!DRIVABLE(k) || World.solidAt(x + ox, y + oy)) return false; } return true; }
 const dirOf = (x, y) => Math.abs(x) > Math.abs(y) ? (x > 0 ? 'right' : 'left') : (y > 0 ? 'down' : 'up');
 
@@ -27,14 +27,16 @@ function moveDan(dt) {
   D.stepT += dt; if (D.stepT > .16) { D.stepT = 0; D.frame ^= 1; }
   let sp = 56 * (F.powder > 0 ? 1.9 : 1) * (F.crash > 0 ? .55 : 1) * (F.high > 0 ? .85 : 1) * (Input.held('run') ? 1.35 : 1);
   if (D.ride === 'boat') {
-    sp = (World.at(D.x, D.y) === T.SHALLOW ? 42 : 78) * (F.powder > 0 ? 1.6 : 1);
+    const air = hasUp('airboat'), k0 = World.at(D.x, D.y);
+    sp = (air ? (k0 === T.SAWGRASS ? 70 : k0 === T.SHALLOW ? 84 : 116) : k0 === T.SHALLOW ? 42 : 78) * (F.powder > 0 ? 1.6 : 1);
     const nx = D.x + ax * sp * dt, ny = D.y + ay * sp * dt;
     if (canBoat(nx, D.y)) D.x = nx; if (canBoat(D.x, ny)) D.y = ny;
     Object.assign(Game.boat, { x: D.x, y: D.y, dir: D.dir });
     if (Math.random() < dt * 8) Game.parts.push({ kind: 'foam', x: D.x - ax * 14, y: D.y - ay * 8 + 3, vx: 0, vy: 0, life: .8 });
     if (Math.random() < dt * 5) Sound.play('engine');
   } else if (D.ride === 'cooler') {
-    sp = 96 * (F.powder > 0 ? 1.5 : 1) * (World.at(D.x, D.y) === T.SAWGRASS ? .5 : 1);
+    sp = (hasUp('boombox') ? 128 : 96) * (F.powder > 0 ? 1.5 : 1) * (World.at(D.x, D.y) === T.SAWGRASS ? .5 : 1);
+    if (hasUp('boombox') && Math.random() < dt * 3) Game.parts.push({ kind: 'text', x: D.x + rnd(-8, 8), y: D.y - 18, vx: rnd(-8, 8), vy: -14, life: .9, text: '♪' });
     const nx = D.x + ax * sp * dt, ny = D.y + ay * sp * dt;
     if (canDrive(nx, D.y)) D.x = nx; else if (Math.abs(ax) > .5) bonk();
     if (canDrive(D.x, ny)) D.y = ny; else if (Math.abs(ay) > .5) bonk();
@@ -82,7 +84,11 @@ function drawBoat(x, y, dir, t, withDan) {
   OR(bx, by, w, h, PAL.greyD); R(bx + 2, by + 2, w - 4, h - 4, PAL.grey); R(bx + 2, by + 2, w - 4, 2, PAL.tankD);
   if (horiz) { OR(bx + (dir === 'right' ? -4 : w), by + 3, 4, 7, PAL.ink); }
   else OR(bx + 5, by + (dir === 'down' ? -4 : h), 6, 4, PAL.ink);
-  label('SS BUDGET', x, by + h + 7, PAL.white, 5);
+  if (hasUp('airboat') && !MIAMI()) {   // the fan cage, spinning, on the back
+    const fx = horiz ? bx + (dir === 'right' ? 2 : w - 10) : bx + 4, fy = horiz ? by - 10 : by + (dir === 'down' ? 2 : h - 10);
+    OR(fx, fy, 8, 12, PAL.greyD); R(fx + 1, fy + 1, 6, 10, PAL.ink); const a = t * 40; R(fx + 3 + Math.round(Math.cos(a) * 2), fy + 5 + Math.round(Math.sin(a) * 4), 2, 2, PAL.white);
+  }
+  label(hasUp('airboat') && !MIAMI() ? 'SS BUDGET II' : 'SS BUDGET', x, by + h + 7, PAL.white, 5);
   if (withDan) g.drawImage(SPR.dan[Game.dan.dir][0], 0, 0, 16, 14, Math.round(x - 8), Math.round(y - 16 + bob), 16, 14);
 }
 function drawCooler(x, y, dir, t, withDan) {
@@ -137,8 +143,8 @@ function updateGator(gt, dt) {
 }
 function gatorBite(gt, dx, dy, dist) {
   gt.chomp = .45; gt.cd = 14; gt.state = 'wander'; Game.gatorCalm = 6;   // after a bite every gator gives Dan a moment
-  knockback(dx / dist, dy / dist, 22);
-  Sound.play('chomp'); hurtDan(15);
+  knockback(dx / dist, dy / dist, hasUp('waders') ? 12 : 22);
+  Sound.play('chomp'); hurtDan(hasUp('waders') ? 7 : 15);
   Game.day_.bites++;
   let msg = pick(['OW! SON OF A BITCH!', 'HE BIT MY ASS! MY ACTUAL ASS!', "That's my good leg, you scaly f*ck!", 'NOT THE JORTS!', 'Mother of GOD that hurts!']);
   if (Game.inv.beer > 0 && Math.random() < .5) { Game.inv.beer--; msg = `${gt.chuck ? 'Chuck' : 'Gator'} stole a Swamp Lite. Rude as hell.`; }
@@ -229,7 +235,7 @@ function updateCritter(c, dt) {
   }
   if (c.type === 'iguana' && c.falling) { c.z -= c.vz * dt; c.vz += 260 * dt; if (c.z <= 0) { c.z = 0; c.falling = false; c.stun = 5; Sound.play('chomp'); if (dist < 12) { hurtDan(6); toast(pick(['AN IGUANA JUST FELL ON MY HEAD.', 'Frozen iguana to the dome. Classic Tuesday.', 'It’s raining lizards, Brenda!'])); Game.day_.iguanaHits++; if (Game.day_.iguanaHits === 1) headline('FLORIDA MAN STRUCK BY FROZEN IGUANA, CALLS IT "A SIGN FROM GOD"', 4); } } return; }
   c.cd = (c.cd || 0) - dt;
-  const loot = ['hotdog', 'beer', 'cig', 'scratch'].some(i => Game.inv[i] > 0);
+  const loot = !hasUp('fanny') && ['hotdog', 'beer', 'cig', 'scratch'].some(i => Game.inv[i] > 0);   // the fanny pack: zipped
   if (c.type === 'raccoon' && !c.pet && c.state !== 'flee' && c.state !== 'steal' && dist < 60 && loot && c.cd <= 0 && (Game.raccoonCd || 0) <= 0 && Game.mode === 'play') { c.state = 'steal'; Game.raccoonCd = 25; }   // one bandit at a time, ~25s apart
   if (c.type === 'pelican' && Game.inv.fish > 0 && dist < 90 && c.state !== 'flee') c.state = 'steal';
   if (c.state === 'steal') {

@@ -47,6 +47,9 @@ function spawn() {
     makeNPC('wayne', 'Wayne', 24 * TS, 41.6 * TS, 'down', { wander: 8 }),
     makeNPC('tourist', 'Tourist', 26 * TS, 46.6 * TS, 'down', { wander: 60 }),
     makeNPC('tourist', 'Tourist', 60 * TS, 43 * TS, 'down', { wander: 60 }),
+    makeNPC('bubba', 'Bubba', S_.bubba.x, S_.bubba.y, 'down'),
+    makeNPC('skeeter', 'Skeeter', S_.tiki.x, S_.tiki.y - 12, 'down'),
+    makeNPC('lurleen', 'Lurleen', S_.park.x, S_.park.y, 'down', { wander: 30 }),
   ];
   if (Game.day === 2) { Game.npcs[1].quest = true; Game.npcs[2].quest = true; Game.npcs[0].quest = true; }
   if (Game.day === 1) Game.npcs[0].quest = true;
@@ -94,6 +97,7 @@ function interaction() {
   if (D.ride === 'cooler') return { label: 'Park the cooler', fn: () => { D.ride = null; D.y += 10; if (!canWalk(D.x, D.y)) D.y -= 10; } };
   // vehicles you're standing right on top of beat anything else nearby (a cooler parked by the courthouse door)
   if (near(Game.cooler, 13)) return { label: 'Ride the motorized cooler', fn: () => { D.ride = 'cooler'; D.x = Game.cooler.x; D.y = Game.cooler.y; Sound.play('engine'); if (Game.fx.buzz > 50 || Game.fx.powder > 0) Game.day_.dui = true; } };
+  if (!MIAMI() && hasUp('recliner') && !D.ride) { const rc = World.props.find(p => p.kind === 'recliner'); if (rc && near({ x: rc.x + 8, y: rc.y + 4 }, 18)) return { label: 'Nap in the recliner', fn: recliner }; }
   const st = Story.interactions(); if (st.length) return st[0];
   const tb = Game.flags.trashBaby && !D.ride && Game.animals.find(a => a.pet);
   if (tb && Game.flags.tbStay && near(tb, 20)) { Game.tbFace = tb; return { label: 'Come on, Trash Baby', fn: () => setTrashBaby(false) }; }
