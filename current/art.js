@@ -53,6 +53,17 @@ const SWAPS = {
   kayden: { hat: PAL.teal, hatD: '#1b8f83', tank: PAL.purple, tankD: PAL.purpleD, stain: PAL.neon, jorts: PAL.black, hair: PAL.blonde, shades: PAL.skin, skin: '#f2c29a', flip: PAL.white },
   pam: { hat: PAL.tan, hatD: PAL.tanD, tank: PAL.teal, tankD: '#1b8f83', stain: PAL.white, jorts: PAL.tan, hair: PAL.grey, shades: PAL.skin, flip: PAL.brown },
   kevin: { hat: PAL.greyD, hatD: PAL.inkL, tank: PAL.mudL, tankD: PAL.mud, stain: PAL.mudD, jorts: PAL.greyD, hair: PAL.hairL, shades: PAL.skin, skin: '#d9a07a', flip: PAL.black },
+  // ---- Miami ----
+  abuela: { hat: PAL.grey, hatD: PAL.greyD, tank: PAL.red, tankD: PAL.redD, stain: PAL.yellow, jorts: PAL.red, hair: PAL.white, shades: PAL.skin, skin: '#d99a74', flip: PAL.black },
+  dj: { hat: PAL.neon, hatD: PAL.hat, tank: PAL.white, tankD: PAL.tankD, stain: PAL.neon, jorts: PAL.white, hair: PAL.neon, shades: PAL.teal, skin: '#c98a62', flip: PAL.white },
+  raul: { hat: PAL.yellow, hatD: PAL.orange, tank: PAL.teal, tankD: '#1b8f83', stain: PAL.yellow, jorts: PAL.neon, hair: PAL.black, shades: PAL.shades, skin: '#b8764f', flip: PAL.neon },
+  sheila: { hat: PAL.white, hatD: PAL.tankD, tank: PAL.hat, tankD: PAL.hatD, stain: PAL.white, jorts: PAL.hat, hair: PAL.orange, shades: PAL.shades, skin: '#f2b48f', flip: PAL.white },
+  rocket: { hat: PAL.hair, hatD: PAL.hairL, tank: PAL.teal, tankD: '#1b8f83', stain: PAL.hat, jorts: '#e9e2d0', hair: PAL.hair, shades: PAL.shades, flip: PAL.white },
+  tubbs: { hat: PAL.black, hatD: PAL.inkL, tank: PAL.white, tankD: PAL.tankD, stain: PAL.teal, jorts: PAL.white, hair: PAL.black, shades: PAL.shades, skin: '#8a5a3a', skinD: '#6b4428', flip: PAL.black },
+  vega: { hat: PAL.black, hatD: PAL.inkL, tank: PAL.robe, tankD: PAL.robeL, stain: PAL.robeL, jorts: PAL.robe, hair: PAL.black, shades: PAL.skin, skin: '#c98a62', flip: PAL.black },
+  goon: { hat: PAL.black, hatD: PAL.inkL, tank: PAL.black, tankD: PAL.inkL, stain: PAL.inkL, jorts: PAL.black, hair: PAL.black, shades: PAL.shades, flip: PAL.black },
+  valet: { hat: PAL.red, hatD: PAL.redD, tank: PAL.red, tankD: PAL.redD, stain: PAL.yellow, jorts: PAL.black, hair: PAL.black, flip: PAL.black },
+  dansuit: { tank: '#7fe0d6', tankD: PAL.teal, stain: PAL.hat, jorts: '#f3eee0' },   // Dan, undercover, pastel
   tourist: { hat: PAL.white, hatD: PAL.tankD, tank: PAL.teal, tankD: '#1b8f83', stain: PAL.yellow, jorts: PAL.tankD, skin: '#ff9d8a', skinD: '#e0685a', hair: PAL.blonde },
 };
 

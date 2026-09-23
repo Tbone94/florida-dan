@@ -1,7 +1,7 @@
 // FLORIDA DAN — the map: islands, mainland, County Road 29, the Gulp-N-Go, the Glades.
 'use strict';
 const TS = 16, MW = 90, MH = 60;
-const T = { DEEP: 0, WATER: 1, SHALLOW: 2, GRASS: 3, MUD: 4, DOCK: 5, SAND: 6, ROAD: 7, CONCRETE: 8, SAWGRASS: 9 };
+const T = { DEEP: 0, WATER: 1, SHALLOW: 2, GRASS: 3, MUD: 4, DOCK: 5, SAND: 6, ROAD: 7, CONCRETE: 8, SAWGRASS: 9, SIDEWALK: 10, ROADV: 11, PLAZA: 12 };
 const WET = t => t <= T.SHALLOW;
 const WALKABLE = t => t >= T.SHALLOW;
 const BOATABLE = t => t <= T.SHALLOW;
@@ -23,6 +23,17 @@ const World = {
     return 'swamp';
   },
 };
+
+const REGIONS = {};
+World.load = function (id) {
+  if (!REGIONS[id]) {
+    this.map = new Uint8Array(MW * MH); this.props = []; this.spots = {};
+    (id === 'miami' ? buildMiami : buildWorld)();
+    gatorMap(); REGIONS[id] = { map: this.map, props: this.props, spots: this.spots, gatorOK };
+  }
+  const Rg = REGIONS[id]; this.map = Rg.map; this.props = Rg.props; this.spots = Rg.spots; gatorOK = Rg.gatorOK; Game.region = id;
+};
+const MIAMI = () => Game.region === 'miami';
 
 function buildWorld() {
   const blob = (x, y, cx, cy, r) => Math.max(0, 1 - Math.hypot((x - cx) / r, (y - cy) / (r * .78)));
@@ -119,7 +130,8 @@ function drawTiles(cx, cy, t) {
   for (let ty = ty0; ty <= ty0 + 12; ty++) for (let tx = tx0; tx <= tx0 + 21; tx++) {
     const k = World.tile(tx, ty), x = tx * TS - cx, y = ty * TS - cy, hs = hash2(tx, ty);
     if (WET(k)) {
-      R(x, y, TS, TS, k === T.DEEP ? PAL.deep : k === T.WATER ? PAL.waterD : PAL.water);
+      const mia = MIAMI();
+      R(x, y, TS, TS, k === T.DEEP ? (mia ? '#0f6f9a' : PAL.deep) : k === T.WATER ? (mia ? '#1aa3b8' : PAL.waterD) : (mia ? '#46d1c9' : PAL.water));
       if (k === T.SHALLOW) { if (hs > .5) R(x + hs * 11, y + 9, 2, 1, PAL.sandD); }
       const ph = t * 1.2 + hs * 6.28;
       if (hs > .45) R(x + 3 + Math.sin(ph) * 2, y + 4 + hs * 8, 4, 1, k === T.DEEP ? PAL.waterD : PAL.waterL);
@@ -137,10 +149,28 @@ function drawTiles(cx, cy, t) {
         R(x, y, TS, TS - 2, PAL.wood); for (let i = 0; i < TS; i += 4) R(x, y + i, TS, 1, PAL.woodD);
         R(x, y + 14, TS, 2, PAL.ink); if (hs > .7) R(x + 5, y + 6, 1, 1, PAL.ink);
         break;
-      case T.ROAD:
+      case T.ROAD: {
         R(x, y, TS, TS, PAL.road); if (hs > .6) R(x + hs * 13, y + 5, 1, 1, PAL.roadD);
-        if (ty === 44) { R(x, y, TS, 1, PAL.white); if (tx % 2 === 0) R(x + 2, y + 15, 10, 2, PAL.line); }
-        if (ty === 45) R(x, y + 15, TS, 1, PAL.white);
+        const up = World.tile(tx, ty - 1), dn = World.tile(tx, ty + 1);
+        if (up !== T.ROAD) R(x, y, TS, 1, PAL.white);
+        if (dn === T.ROAD && up !== T.ROAD && tx % 2 === 0) R(x + 2, y + 15, 10, 2, PAL.line);
+        if (dn !== T.ROAD) R(x, y + 15, TS, 1, PAL.white);
+        break;
+      }
+      case T.ROADV: {
+        R(x, y, TS, TS, PAL.road); if (hs > .6) R(x + 5, y + hs * 13, 1, 1, PAL.roadD);
+        const lf = World.tile(tx - 1, ty), rt = World.tile(tx + 1, ty);
+        if (lf !== T.ROADV && lf !== T.ROAD) R(x, y, 1, TS, PAL.white);
+        if (rt === T.ROADV && lf !== T.ROADV && ty % 2 === 0) R(x + 15, y + 2, 2, 10, MIAMI() ? PAL.neon : PAL.line);
+        if (rt !== T.ROADV && rt !== T.ROAD) R(x + 15, y, 1, TS, PAL.white);
+        break;
+      }
+      case T.SIDEWALK:
+        R(x, y, TS, TS, '#f4c9c4'); R(x, y + 15, TS, 1, '#dfa9a6'); R(x + 15, y, 1, TS, '#dfa9a6'); if (hs > .9) R(x + 5, y + 7, 2, 1, '#dfa9a6');
+        break;
+      case T.PLAZA:
+        R(x, y, TS, TS, '#f1e6d2'); for (let i = 0; i < 4; i++) R(x + hash2(tx * 3 + i, ty) * 14, y + hash2(tx, ty * 3 + i) * 14, 1, 1, ['#27c6b4', '#ff5ea8', '#ffd23f', '#8d8a93'][i]);
+        if ((tx + ty) % 2 === 0) { g.globalAlpha = .06; R(x, y, TS, TS, PAL.ink); g.globalAlpha = 1; }
         break;
       case T.CONCRETE:
         R(x, y, TS, TS, PAL.concrete); R(x, y + 15, TS, 1, PAL.concreteD); R(x + 15, y, 1, TS, PAL.concreteD);
@@ -148,7 +178,7 @@ function drawTiles(cx, cy, t) {
         if (hs < .05) R(x + 6, y + 6, 4, 3, PAL.grey);   // gum. or worse
         break;
       case T.SAND:
-        R(x, y, TS, TS, PAL.sand); if (hs > .4) R(x + hs * 12, y + 3 + hs * 9, 1, 1, PAL.sandD); if (hs < .1) R(x + 9, y + 4, 2, 1, PAL.white);
+        R(x, y, TS, TS, MIAMI() ? '#f7e7bd' : PAL.sand); if (hs > .4) R(x + hs * 12, y + 3 + hs * 9, 1, 1, PAL.sandD); if (hs < .1) R(x + 9, y + 4, 2, 1, PAL.white);
         break;
       case T.MUD:
         R(x, y, TS, TS, PAL.mud); if (hs > .5) R(x + hs * 12, y + 5, 3, 1, PAL.mudD); if (hs < .25) R(x + 3, y + 11, 2, 1, PAL.mudL);
@@ -282,6 +312,7 @@ function drawProp(p, cx, cy, t) {
       break;
     }
     case 'reeds': { for (let i = 0; i < 5; i++) { const rx = x + 2 + i * 3 + p.s * 2, sw = Math.sin(t * 1.5 + i + p.s * 5); R(rx + sw * .6, y + 2 + (i % 2) * 3, 1, 11 - (i % 2) * 3, PAL.camo); } R(x + 5 + p.s * 3, y, 2, 5, PAL.brown); break; }
+    default: if (typeof drawMiamiProp === 'function') drawMiamiProp(p, x, y, w, h, t); break;
     case 'lily': { R(x + 4, y + 6, 8, 5, PAL.grassDD); R(x + 5, y + 6, 7, 4, PAL.grass); R(x + 8, y + 6, 1, 2, PAL.waterD); if (p.s > .7) R(x + 6, y + 5, 2, 2, PAL.hat); break; }
   }
 }
