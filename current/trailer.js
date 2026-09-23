@@ -27,7 +27,7 @@ function base(o = {}) {
   spawn(); Game.pickups = []; Game.quests = [];
   Game.animals = Game.animals.filter(a => a.type !== 'raccoon' && a.type !== 'pelican');   // no surprise thefts on camera
   Input.releaseAll(); Input.endFrame();
-  hideUI(); Trailer.extra = null; banner.text = null;
+  hideUI(); Trailer.extra = null; banner.text = null; Game.lens = 0; Game.camFx = 0;
 }
 function camOn(x, y, z = 1, oy = 0) {
   Game.cam.x = x - VW / 2; Game.cam.y = y - VH / 2 - 10;
@@ -368,14 +368,14 @@ const V2 = {
 const V1s = id => V1.find(s => s.id === id);
 Object.assign(V1s('cooler'), { dur: 2.0 }); Object.assign(V1s('fireworks'), { dur: 2.0 }); Object.assign(V1s('brenda'), { dur: 2.0 }); Object.assign(V1s('shroom'), { dur: 3.0 }); Object.assign(V1s('court'), { dur: 4.5 });
 Object.assign(V1s('end'), { setup() { base(); showCard('<div class="stk l">FREE</div><div class="stk r">NO ADS</div><div class="logo sm">Florida<br>Dan</div><div class="soon">AVAILABLE NOW</div><div class="url">tbone94.github.io/florida-dan</div><div class="tag">In your browser · install on your phone</div>', 'title end'); } });
-const SHOTS = ['cozy', 'card1', 'cooler', 'fish', 'wrestle', 'iguana', 'brenda', 'blackout', 'powder', 'chase', 'shroom', 'court',
+let SHOTS = ['cozy', 'card1', 'cooler', 'fish', 'wrestle', 'iguana', 'brenda', 'blackout', 'powder', 'chase', 'shroom', 'court',
   'charges', 'objection', 'skunk', 'card3', 'lambo', 'abuela', 'race', 'party', 'dance', 'boat', 'stack', 'parade', 'black', 'title', 'button', 'end'].map(id => V2[id] ? { id, ...V2[id] } : V1s(id));
-let t = 0; for (const s of SHOTS) { s.start = t; t += s.dur; }
-Trailer.total = t;
-Trailer.shots = SHOTS.map(s => [s.id, +s.start.toFixed(3), s.dur]);
+Trailer.setShots = list => { SHOTS = list; let t = 0; for (const s of SHOTS) { s.start = t; t += s.dur; } Trailer.total = t; Trailer.shots = SHOTS.map(s => [s.id, +s.start.toFixed(3), s.dur]); cur = -1; };   // other cuts (trailer-news.js) swap the list
+Trailer.V1s = id => V1s(id); Trailer.V2 = V2;
 
 // ---------- the frame stepper ----------
-let cur = -1;
+var cur = -1;
+Trailer.setShots(SHOTS);
 Trailer.frame = function (i) {
   const T = i / FPS, dt = 1 / FPS;
   let k = SHOTS.findIndex(s => T >= s.start && T < s.start + s.dur); if (k < 0) k = SHOTS.length - 1;
@@ -388,6 +388,7 @@ Trailer.frame = function (i) {
   if (sh.sim !== false || k === 0) { render(); hud(); }
   ui.prompt.hidden = true;
   // BREAKING banner: any headline the game fires gets the trailer slam
+  if (headlineQ.length && Trailer.onHeadline) { const h = headlineQ.shift(); headlineQ.length = 0; Trailer.onHeadline(h.text || h, T); }
   if (headlineQ.length) { const h = headlineQ.shift(); banner.text = h.text || h; banner.t0 = T; headlineQ.length = 0; ui.bannerText.textContent = banner.text; ui.bannerKick.textContent = 'BREAKING · SWAMP GAZETTE'; ui.banner.classList.remove('fresh'); }
   const bk = T - banner.t0, on = banner.text && bk < 2.1;
   ui.banner.style.transform = on ? `translate(-50%, ${bk < .12 ? (-160 + 160 * ease(bk / .12)).toFixed(1) : 0}%) rotate(-1deg) scale(${bk < .2 ? (1.12 - (bk / .2) * .12).toFixed(3) : 1})` : 'translate(-50%,-170%) rotate(-1deg)';

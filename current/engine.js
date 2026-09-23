@@ -180,13 +180,15 @@ const Screen = (() => {
     uniform float t, drunk, high, shroom, powder, crash, flash, night, cig;
     uniform vec3 tint, view;
     uniform vec2 tsize; uniform float pscale;
+    uniform float lens, cam;   // trailer only: fisheye amount; camera look (1 security, 2 night vision, 3 bodycam)
     vec3 hue(vec3 c, float a){ vec3 k = vec3(.57735); float ca = cos(a); return c*ca + cross(k, c)*sin(a) + k*dot(k, c)*(1. - ca); }
     vec3 S(vec2 u){   // sharp bilinear: hard pixels, but the edges land evenly at any (non-integer) scale
       vec2 px = clamp(u, .0005, .9995) * tsize, i = floor(px), d = fract(px) - .5, r = vec2(.5 - .5 / pscale);
       return texture2D(tex, (i + (d - clamp(d, -r, r)) * pscale + .5) / tsize).rgb;
     }
     void main(){
-      vec2 u = view.xy + uv * view.z;
+      vec2 q = uv - .5; q *= 1. + lens * dot(q, q) * 1.8;
+      vec2 u = view.xy + (q + .5) * view.z;
       u.x += sin(t*1.3 + u.y*3.) * .006 * drunk;
       u.y += cos(t*1.1 + u.x*2.) * .004 * drunk;
       u += vec2(sin(u.y*16. + t*2.), cos(u.x*12. + t*1.7)) * .007 * shroom;
@@ -204,6 +206,13 @@ const Screen = (() => {
       if (powder > .01) c = (c - .5) * (1. + .2*powder) + .5;
       float v = smoothstep(.9, .3, length(uv - .5) * (1. + night*.5 + crash*.7));
       c *= mix(1., v, .25 + night*.45 + crash*.45 + cig*.12);
+      if (cam > .5) {
+        float g = dot(c, vec3(.299, .587, .114)), n = fract(sin(dot(floor(uv * vec2(640., 360.)) + fract(t * 7.) * 91., vec2(12.9898, 78.233))) * 43758.5453) - .5;
+        if (cam < 1.5) c = vec3(pow(g, .9) * 1.08 + n * .12);
+        else if (cam < 2.5) c = vec3(.22, 1., .32) * (pow(g, .8) * 1.3 + n * .16);
+        else c = mix(vec3(g), c, .5) * vec3(1.06, 1., .9) + n * .07;
+      }
+      if (lens > .01) c *= smoothstep(.78, .52, length(q));
       c = mix(c, vec3(1.), flash);
       gl_FragColor = vec4(c, 1.);
     }`;
@@ -219,13 +228,13 @@ const Screen = (() => {
     const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
     [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]].forEach(([k, v]) => gl.texParameteri(gl.TEXTURE_2D, k, v));
-    ['t', 'drunk', 'high', 'shroom', 'powder', 'crash', 'flash', 'night', 'cig', 'tint', 'view', 'tsize', 'pscale'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
+    ['t', 'drunk', 'high', 'shroom', 'powder', 'crash', 'flash', 'night', 'cig', 'lens', 'cam', 'tint', 'view', 'tsize', 'pscale'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
   }
   function present(fx) {
     if (!gl) { ctx2d.imageSmoothingEnabled = false; ctx2d.drawImage(src, 0, 0, cv.width, cv.height); return; }
     gl.viewport(0, 0, cv.width, cv.height);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src);
-    for (const k of ['t', 'drunk', 'high', 'shroom', 'powder', 'crash', 'flash', 'night', 'cig']) gl.uniform1f(U[k], fx[k] || 0);
+    for (const k of ['t', 'drunk', 'high', 'shroom', 'powder', 'crash', 'flash', 'night', 'cig', 'lens', 'cam']) gl.uniform1f(U[k], fx[k] || 0);
     gl.uniform3fv(U.tint, fx.tint || [1, 1, 1]);
     gl.uniform3fv(U.view, fx.view || [0, 0, 1]);
     gl.uniform2f(U.tsize, src.width, src.height); gl.uniform1f(U.pscale, Math.max(1, cv.width / src.width / ((fx.view && fx.view[2]) || 1)));

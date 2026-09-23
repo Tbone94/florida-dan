@@ -409,5 +409,5 @@ function render() {
   const F = Game.fx, sky = Game.mode === 'title' ? [1, 1, 1] : skyTint(Game.hour), storm = 1 - Game.storm * .35;
   Screen.present({ t: Game.t, drunk: clamp((F.buzz - 25) / 60, 0, 1.3), high: F.high > 0 ? Math.min(1, F.high / 8) : 0, shroom: F.shroom > 0 ? Math.min(1, F.shroom / 6) : 0,
     powder: F.powder > 0 ? Math.min(1, F.powder / 4) : 0, crash: F.crash > 0 ? Math.min(1, F.crash / 5) : 0, cig: F.cig > 0 ? 1 : 0, flash: Game.flash,
-    night: Game.hour > 20 || Game.hour < 6 ? .8 : Game.hour > 18.5 ? .4 : 0, tint: sky.map(v => v * storm), view: Game.view || (Game.kick > 0 ? ((z) => [.5 - .5 / z, .5 - .5 / z, 1 / z])(1 + Game.kick * .05) : undefined) });
+    lens: Game.lens, cam: Game.camFx, night: Game.hour > 20 || Game.hour < 6 ? .8 : Game.hour > 18.5 ? .4 : 0, tint: sky.map(v => v * storm), view: Game.view || (Game.kick > 0 ? ((z) => [.5 - .5 / z, .5 - .5 / z, 1 / z])(1 + Game.kick * .05) : undefined) });
 }
