@@ -1,0 +1,198 @@
+<meta charset="utf-8">
+<title>Florida Dan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Pixelify+Sans:wght@400;600;700&display=swap">
+<style>
+  /* Three riso inks + the paper they print on. Everything on the page is one of these. */
+  :root {
+    color-scheme: light;
+    --paper: #f3ecdd;
+    --blue: #0078bf;
+    --pink: #ff48b0;
+    --yellow: #ffe800;
+    --ink: #1d3a3a;          /* blue x pink x yellow overprint, roughly */
+    --display: "Anton", "Impact", "Haettenschweiler", sans-serif;
+    --pixel: "Pixelify Sans", "Courier New", monospace;
+  }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--pixel);
+    overflow: hidden;
+    touch-action: none;
+    -webkit-user-select: none; user-select: none;
+  }
+  #stage {
+    position: absolute;
+    background: var(--paper);
+    overflow: hidden;
+  }
+  #screen { position: absolute; inset: 0; width: 100%; height: 100%; display: block; image-rendering: pixelated; }
+  #hud { position: absolute; inset: 0; pointer-events: none; font-size: clamp(11px, 1.55vw, 17px); }
+  #hud button { pointer-events: auto; }
+  .mul { mix-blend-mode: multiply; }
+
+  /* top-left: clock + meters */
+  #clock { position: absolute; left: 1.2em; top: 1em; display: grid; gap: .35em; }
+  #clock .time { font-weight: 700; font-size: 1.35em; color: var(--blue); letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+  #clock .day { color: var(--pink); font-weight: 600; letter-spacing: .12em; font-size: .8em; text-transform: uppercase; }
+  .meter { display: grid; grid-template-columns: 3.6em 7em; align-items: center; gap: .5em; font-size: .78em; letter-spacing: .1em; text-transform: uppercase; }
+  .meter .bar { height: .7em; border: 2px solid currentColor; position: relative; }
+  .meter .fill { position: absolute; inset: 0 auto 0 0; background: currentColor; }
+  .meter.chill { color: var(--blue); }
+  .meter.buzz { color: var(--pink); }
+
+  /* to-do sticky note */
+  #todo {
+    position: absolute; left: 1.2em; top: 7.4em; width: 14.5em;
+    background: var(--yellow); padding: .6em .75em .7em; transform: rotate(-1.5deg);
+    font-size: .82em; line-height: 1.35;
+  }
+  #todo h3 { margin: 0 0 .3em; font-size: 1em; letter-spacing: .12em; color: var(--pink); }
+  #todo ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .15em; }
+  #todo li.done { text-decoration: line-through; opacity: .45; }
+  #todoToggle { display: none; }
+
+  /* top-right: supplies (tap to use) */
+  #inv { position: absolute; right: 1.2em; top: 1em; display: flex; flex-wrap: wrap; gap: .4em; justify-content: flex-end; max-width: 48%; }
+  .chip {
+    font: 600 .82em var(--pixel); letter-spacing: .06em; text-transform: uppercase;
+    background: transparent; color: var(--blue); border: 2px solid var(--blue);
+    padding: .25em .55em; cursor: pointer;
+  }
+  .chip b { color: var(--pink); }
+  .chip.passive { cursor: default; color: var(--pink); border-color: var(--pink); }
+  .chip:disabled { opacity: .35; cursor: default; }
+  .chip:focus-visible, .btn:focus-visible { outline: 3px solid var(--pink); outline-offset: 2px; }
+
+  #prompt { position: absolute; left: 50%; bottom: 1.1em; transform: translateX(-50%); color: var(--blue); font-weight: 700; letter-spacing: .08em; white-space: nowrap; }
+  #toast { position: absolute; left: 50%; bottom: 2.8em; transform: translateX(-50%); color: var(--pink); font-weight: 700; font-size: 1.1em; text-align: center; max-width: 80%; }
+
+  /* fishing HUD */
+  #fishHud { position: absolute; right: 1.4em; top: 22%; bottom: 18%; width: 2.6em; display: grid; grid-template-rows: auto 1fr auto; gap: .4em; justify-items: center; color: var(--pink); font-size: .75em; letter-spacing: .1em; }
+  #tension { width: 1.1em; border: 2px solid var(--pink); position: relative; height: 100%; }
+  #tensionFill { position: absolute; left: 0; right: 0; bottom: 0; background: var(--pink); }
+  #tension::after { content: ""; position: absolute; left: -4px; right: -4px; top: 12%; border-top: 2px dashed var(--blue); }
+  #fishMsg { position: absolute; left: 50%; top: 12%; transform: translateX(-50%); font-family: var(--display); font-size: 2.3em; color: var(--pink); letter-spacing: .02em; text-shadow: 3px 2px 0 var(--blue); white-space: nowrap; }
+
+  /* dialogue */
+  #talk { position: absolute; left: 50%; bottom: 1em; transform: translateX(-50%); width: min(40em, 88%); background: var(--paper); border: 3px solid var(--blue); padding: .8em 1em 1em; box-shadow: 5px 4px 0 var(--pink); }
+  #talk .who { font-weight: 700; color: var(--pink); letter-spacing: .12em; text-transform: uppercase; font-size: .85em; }
+  #talk .line { margin-top: .3em; font-size: 1.1em; line-height: 1.4; color: var(--ink); }
+  #talk .more { position: absolute; right: .8em; bottom: .4em; color: var(--blue); font-size: .8em; }
+
+  /* catch card */
+  #card { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(2deg); background: var(--paper); border: 3px solid var(--ink); padding: 1em 1.4em 1.1em; min-width: 14em; text-align: center; box-shadow: 6px 5px 0 var(--yellow); }
+  #card .k { font-size: .75em; letter-spacing: .2em; color: var(--pink); }
+  #card .n { font-family: var(--display); font-size: 2.2em; color: var(--blue); line-height: 1.05; margin: .15em 0; text-wrap: balance; }
+  #card .w { font-weight: 700; font-size: 1.2em; font-variant-numeric: tabular-nums; }
+  #card .q { margin-top: .45em; font-style: italic; }
+
+  /* full-screen paper pages: title + the Swamp Gazette */
+  .sheet { position: fixed; inset: 0; background: var(--paper); font-size: 16px; z-index: 5; pointer-events: auto; display: grid; place-items: center; overflow: auto; padding-inline: 16px; }
+  .btn { font: 700 1.05em var(--pixel); letter-spacing: .1em; text-transform: uppercase; background: var(--blue); color: var(--paper); border: 0; padding: .6em 1.2em; cursor: pointer; box-shadow: 4px 3px 0 var(--pink); }
+  .btn:active { transform: translate(2px, 2px); box-shadow: 2px 1px 0 var(--pink); }
+
+  #title { background: rgba(243, 236, 221, .5); }
+  #talk, #card { pointer-events: auto; }
+  #title .wrap { text-align: center; display: grid; gap: 1em; justify-items: center; }
+  .riso-word { position: relative; font-family: var(--display); font-size: clamp(64px, 13vw, 190px); line-height: .9; letter-spacing: .01em; text-transform: uppercase; }
+  .riso-word span { display: block; mix-blend-mode: multiply; }
+  .riso-word span + span { position: absolute; inset: 0; }
+  .riso-word .l1 { color: var(--yellow); transform: translate(-.05em, .04em); }
+  .riso-word .l2 { color: var(--pink); transform: translate(.035em, -.02em) rotate(-.4deg); }
+  .riso-word .l3 { color: var(--blue); }
+  #title .tag { max-width: 34em; line-height: 1.5; font-size: 1.05em; }
+  #title .keys { font-size: .8em; letter-spacing: .08em; color: var(--blue); line-height: 1.7; }
+
+  #gazette .page { width: min(46em, 100%); padding-block: 1.4em; }
+  #gazette .mast { display: flex; justify-content: space-between; align-items: end; gap: 1em; border-bottom: 4px double var(--ink); padding-bottom: .3em; flex-wrap: wrap; }
+  #gazette .mast h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 2.6em; color: var(--blue); letter-spacing: .02em; line-height: 1; }
+  #gazette .meta { font-size: .78em; letter-spacing: .12em; text-transform: uppercase; color: var(--pink); }
+  #gazette .head { font-family: var(--display); font-weight: 400; font-size: clamp(2em, 5.4vw, 3.6em); line-height: 1.02; margin: .45em 0 .25em; text-transform: uppercase; text-wrap: balance; color: var(--ink); }
+  #gazette .dek { font-size: 1.1em; line-height: 1.45; color: var(--blue); max-width: 36em; }
+  #gazette .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(13em, 1fr)); gap: 1.2em; margin: 1.1em 0 1.4em; border-top: 2px solid var(--ink); padding-top: .8em; }
+  #gazette .cols h4 { margin: 0 0 .35em; font-size: .78em; letter-spacing: .16em; color: var(--pink); text-transform: uppercase; }
+  #gazette .cols ul { margin: 0; padding: 0; list-style: none; line-height: 1.55; font-variant-numeric: tabular-nums; }
+
+  /* touch controls */
+  #pad { position: fixed; inset: 0; pointer-events: none; }
+  #stick { position: absolute; left: 22px; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); width: 124px; height: 124px; border: 3px solid var(--blue); border-radius: 50%; pointer-events: auto; mix-blend-mode: multiply; opacity: .75; }
+  #nub { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; background: var(--blue); border-radius: 50%; }
+  .tbtn { position: absolute; width: 72px; height: 72px; border-radius: 50%; border: 0; font: 700 20px var(--pixel); color: var(--paper); pointer-events: auto; mix-blend-mode: multiply; }
+  #btnA { right: 22px; bottom: calc(52px + env(safe-area-inset-bottom, 0px)); background: var(--pink); }
+  #btnB { right: 106px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); background: var(--blue); font-size: 16px; }
+
+  @media (max-width: 760px) {
+    #todo { display: none; }
+    #todo.open { display: block; }
+    #todoToggle { display: block; position: absolute; left: 1.2em; top: 7.2em; }
+    #todo { top: 9.6em; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn:active { transform: none; }
+  }
+</style>
+
+<div id="stage">
+  <canvas id="screen" aria-label="Florida Dan game screen"></canvas>
+  <div id="hud">
+    <div id="clock" class="mul" hidden>
+      <div class="day" id="dayLabel">Day 1</div>
+      <div class="time" id="timeLabel">6:00 AM</div>
+      <div class="meter chill"><span>Chill</span><div class="bar"><div class="fill" id="chillFill"></div></div></div>
+      <div class="meter buzz"><span>Buzz</span><div class="bar"><div class="fill" id="buzzFill"></div></div></div>
+    </div>
+    <button id="todoToggle" class="chip mul" hidden>To-do</button>
+    <div id="todo" class="mul" hidden><h3>TO-DO (MERLE)</h3><ul id="todoList"></ul></div>
+    <div id="inv" hidden>
+      <button class="chip mul" id="useBeer" title="Drink a beer (1)">1 Beer <b id="nBeer">0</b></button>
+      <button class="chip mul" id="useCig" title="Smoke a cig (2)">2 Cigs <b id="nCig">0</b></button>
+      <button class="chip mul" id="useJoint" title="Spark the joint (3)">3 Joint <b id="nJoint">0</b></button>
+      <span class="chip passive mul">Bait <b id="nBait">0</b></span>
+      <span class="chip passive mul">Fish <b id="nFish">0</b></span>
+    </div>
+    <div id="prompt" class="mul"></div>
+    <div id="toast" class="mul"></div>
+    <div id="fishHud" hidden><span>SNAP</span><div id="tension" class="mul"><div id="tensionFill"></div></div><span>SLACK</span></div>
+    <div id="fishMsg" class="mul"></div>
+    <div id="talk" hidden><div class="who" id="talkWho"></div><div class="line" id="talkLine"></div><div class="more">E / tap ▸</div></div>
+    <div id="card" hidden><div class="k" id="cardK">CAUGHT</div><div class="n" id="cardN"></div><div class="w" id="cardW"></div><div class="q" id="cardQ"></div></div>
+
+    <div id="title" class="sheet">
+      <div class="wrap">
+        <div class="riso-word" aria-label="Florida Dan"><span class="l1">Florida Dan</span><span class="l2">Florida Dan</span><span class="l3">Florida Dan</span></div>
+        <p class="tag">Dan is 44. He lives in a cabin off County Road 29 with a jon boat, a cooler, and a grudge against a gator named Chuck. Cousin Merle's fish fry is tonight.</p>
+        <button class="btn" id="startBtn">Wake up, Dan</button>
+        <div class="keys">WASD / ARROWS move · E / SPACE use, cast, reel · Q yell “GIT!”<br>1 beer · 2 cig · 3 joint</div>
+      </div>
+    </div>
+
+    <div id="gazette" class="sheet" hidden>
+      <div class="page">
+        <div class="mast"><h1>The Swamp Gazette</h1><div class="meta" id="gzMeta"></div></div>
+        <div class="head" id="gzHead"></div>
+        <div class="dek" id="gzDek"></div>
+        <div class="cols">
+          <div><h4>The Catch</h4><ul id="gzFish"></ul></div>
+          <div><h4>Police Blotter</h4><ul id="gzBlotter"></ul></div>
+        </div>
+        <button class="btn" id="nextBtn">Sleep it off</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="pad" hidden>
+  <div id="stick"><div id="nub"></div></div>
+  <button class="tbtn" id="btnA" aria-label="Use">E</button>
+  <button class="tbtn" id="btnB" aria-label="Yell GIT">GIT</button>
+</div>
+
+<script src="world.js"></script>
+<script src="riso.js"></script>
+<script src="fish.js"></script>
+<script src="game.js"></script>
