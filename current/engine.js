@@ -26,7 +26,7 @@ const Input = (() => {
   const keys = new Set(), hit = new Set(), stick = { active: false, x: 0, y: 0, id: null };
   const MAP = { ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right',
     KeyE: 'a', Space: 'a', Enter: 'a', KeyQ: 'b', ShiftLeft: 'run', ShiftRight: 'run', KeyF: 'punch', KeyM: 'mute', Escape: 'pause', KeyP: 'pause', KeyJ: 'journal',
-    Digit1: 's1', Digit2: 's2', Digit3: 's3', Digit4: 's4', Digit5: 's5', Digit6: 's6', Digit7: 's7', Digit8: 's8', Digit9: 's9', Digit0: 's10', Minus: 's11', Equal: 's12' };
+    Digit1: 's1', Digit2: 's2', Digit3: 's3', Digit4: 's4', Digit5: 's5', Digit6: 's6', Digit7: 's7', Digit8: 's8', Digit9: 's9', Digit0: 's10', Minus: 's11', Equal: 's12', BracketLeft: 's13' };
   addEventListener('keydown', e => {
     const k = MAP[e.code]; if (!k) return;
     if (e.target.tagName === 'BUTTON' && k === 'a') return;
@@ -144,6 +144,8 @@ const Sound = (() => {
     punch: () => { noise(.07, .45, 150); tone(140, .12, 'square', .18, -80); noise(.05, .2, 2500, .02); },
     whiff: () => { noise(.18, .12, 1800); },
     fail: () => { tone(300, .2, 'square', .1, -100); tone(200, .35, 'square', .1, -80, .2); },
+    plant: () => { noise(.08, .3, 250); tone(150, .1, 'square', .1, -70); },
+    buzz: () => { for (let i = 0; i < 2; i++) { tone(95, .16, 'sawtooth', .07, 0, .4 + i * .24); noise(.16, .05, 900, .4 + i * .24); } tone(1568, .07, 'square', .05, 0, .95); },   // phone vibrates on a table, then the cheap chime
   };
   // the soundtrack lives in music.js + songs.js; the mood picks the song (or the remix)
   let musicBus = null;

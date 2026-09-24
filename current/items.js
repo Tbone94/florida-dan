@@ -17,8 +17,9 @@ const ITEMS = {
   lettuce: { name: 'Head of Lettuce', price: 1, desc: 'A vegetable. At the Gulp-N-Go. Somehow.' },
   jortsXXXL: { name: 'Formal Jorts, XXXL', price: 8, desc: 'Black denim. For weddings, funerals, and cryptid testimony.' },
   firework: { name: 'Freedom Rocket', price: 10, desc: 'Throw it. Boom. Everything within a mile respects you now.' },
+  flamingo: { name: 'Lawn Flamingo', price: 6, desc: 'Pink. Plastic. Not the one you fought. Plant it anywhere.' },
 };
-const HOTBAR = ['beer', 'cig', 'joint', 'shroom', 'powder', 'energy', 'hotdog', 'scratch', 'firework', 'gummy', 'cafecito', 'pastelito'];
+const HOTBAR = ['beer', 'cig', 'joint', 'shroom', 'powder', 'energy', 'hotdog', 'scratch', 'firework', 'gummy', 'cafecito', 'pastelito', 'flamingo'];
 
 function giveItem(k, n = 1, quiet) {
   Game.inv[k] = (Game.inv[k] || 0) + n;
@@ -28,6 +29,7 @@ function giveItem(k, n = 1, quiet) {
 function useItem(k) {
   if (Game.mode !== 'play' && Game.mode !== 'fish') return;
   if (!(Game.inv[k] > 0)) { toast(`No ${ITEMS[k].name}. ${pick(['Tragic.', 'Life is pain.', 'Gulp-N-Go sells some. Probably.'])}`); Sound.play('fail'); return; }
+  if (k === 'flamingo') return Flamingos.place();   // flamingos.js: it goes in the ground, not in Dan
   const F = Game.fx, D = Game.dan, L = Game.day_;
   Game.inv[k]--;
   D.anim = k; D.animT = 1.5;
@@ -101,7 +103,9 @@ function blackout() {
     ['the porta-potty', World.spots.darlene.x - 80, World.spots.darlene.y + 20, 'FLORIDA MAN SPENDS NIGHT IN PORTA-POTTY, CALLS IT "A STAYCATION"'],
   ];
   const [where, x, y, head] = pick(spots);
-  if (Game.car && typeof Car !== 'undefined') Car.exit(); Game.dan.ride = null;
+  if (Game.car && typeof Car !== 'undefined') Car.exit();
+  if (Game.dan.ride === 'boat') Object.assign(Game.boat, { x: World.spots.boat.x, y: World.spots.boat.y, dir: 'right' });   // someone tows the SS Budget home; it would be stranded in open water otherwise
+  Game.dan.ride = null;
   say([['', 'Everything goes black...'], ['', `Dan wakes up in ${where}. It's ${Math.min(20, Math.floor(Game.hour) + 3)}:00. His mouth tastes like a pennies.`],
     ['DAN', pick(['...Nobody saw that.', 'Where are my flip-flops. Where is my DIGNITY.', 'Brenda can never know about this.'])]], () => {
     let p = [x, y + 12];   // nearest walkable spot to where he's supposed to wake up

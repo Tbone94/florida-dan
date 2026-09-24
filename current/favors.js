@@ -39,7 +39,7 @@ const Favors = {
       const d = FAVORS[f.id]; if (d.giver !== n.id) continue;
       if (f.state === 'offered') { f.state = 'active'; n.quest = false; d.setup && d.setup(); say([[n.name.toUpperCase(), d.ask], ['DAN', pick(['On it.', 'Say less.', 'For you? Anything. For a price.'])]]); return true; }
       if (f.state === 'active' && d.ready && d.ready()) { this.complete(f.id, n); return true; }
-      if (f.state === 'active') { say([[n.name.toUpperCase(), pick(['Well? I’m waitin’.', 'Any luck?', 'Clock’s tickin’, Dan.'])]]); return true; }
+      if (f.state === 'active' && !Game.skipSide) { sideNag(n, [[n.name.toUpperCase(), pick(['Well? I’m waitin’.', 'Any luck?', 'Clock’s tickin’, Dan.'])]]); return true; }
     }
     return false;
   },

@@ -341,7 +341,7 @@ function drawProp(p, cx, cy, t) {
       break;
     }
     case 'grill': { shadow(x + 8, y + 15, 14); OR(x + 2, y - 2, 12, 8, PAL.greyD); R(x + 4, y + 6, 1, 8, PAL.ink); R(x + 11, y + 6, 1, 8, PAL.ink); break; }
-    case 'flamingo': { shadow(x + 5, y + 7, 10); g.drawImage(SPR.flamingo, x, y - 12); break; }
+    case 'flamingo': { shadow(x + 5, y + 7, 10); if (p.down) { g.save(); g.translate(x + 4, y + 5); g.rotate(p.down * Math.PI / 2); g.drawImage(SPR.flamingo, -4, -13); g.restore(); } else g.drawImage(SPR.flamingo, x, y - 12); break; }   // p.down: punched over (flamingos.js)
     case 'sign': { R(x + 7, y - 6, 2, 14, PAL.woodD); OR(x - 33, y - 19, 82, 12, PAL.woodL); label('NO TRESPASSIN', x + 8, y - 9, PAL.red, 7); break; }
     case 'van': {   // Wayne's Mystery Van
       shadow(x + w / 2, y + h + 2, w + 6, 6);

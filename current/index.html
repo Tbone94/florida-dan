@@ -317,6 +317,29 @@
   .mag.off { background: #d9d3c6; color: #6b6470; }
   #journalClose { margin-left: auto; }
   @media (max-width: 620px) { .fridge { grid-template-columns: 1fr; grid-template-areas: "clip" "todo" "rumor" "mags"; padding-left: 2.2em; } }
+  /* phone calls: one self-playing call, a row per line */
+  #talk.call #talkLine { display: grid; gap: .2em; }
+  #talk.call .cr { opacity: .5; } #talk.call .cr:last-child { opacity: 1; }
+  #talk.call .cr b { font: 400 .82em var(--marker); color: #0f7a6d; margin-right: .4em; }
+  #talk.call .cr.me b { color: #c2356b; }
+  /* Dan's phone: texts slide up from the bottom */
+  #cell { position: absolute; right: 1.6em; bottom: 0; width: 12.5em; z-index: 5; pointer-events: auto; transform: translateY(120%); transition: transform .4s cubic-bezier(.3, 1.45, .55, 1); }
+  #cell.up { transform: translateY(1.2em); }
+  #cell .body { position: relative; padding: 1em .65em 2.2em; border-radius: 1.4em 1.4em .7em .7em; transform: rotate(-4deg);
+    background: linear-gradient(160deg, #57515e, #2e2a34 55%, #221f27); box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .08), 0 10px 22px rgba(0, 0, 0, .55); }
+  #cell.up .body { animation: bzz .07s 6 .4s; }
+  @keyframes bzz { 33% { transform: rotate(-4deg) translate(-2px, 1px); } 66% { transform: rotate(-4deg) translate(2px, -1px); } }
+  #cell .ant { position: absolute; right: 1.5em; top: -1.05em; width: .6em; height: 1.3em; background: #2e2a34; border-radius: .35em .35em 0 0; }
+  #cell .grill { position: absolute; top: .38em; left: 50%; width: 2.6em; height: .24em; margin-left: -1.3em; background: #141217; border-radius: 1em; }
+  #cell .tape { position: absolute; left: -1.1em; top: .35em; width: 3.6em; height: 1.05em; z-index: 2; background: rgba(214, 208, 190, .92); transform: rotate(-38deg); box-shadow: 0 1px 2px rgba(0, 0, 0, .35); }
+  #cell .scr { position: relative; min-height: 6.2em; overflow: hidden; padding: .3em .45em .5em; border-radius: .35em; background: #b7cd96; color: #26301a; box-shadow: inset 0 2px 4px rgba(0, 0, 0, .28); }
+  #cell .sbar { display: flex; justify-content: space-between; align-items: baseline; font: 700 .62em var(--pixel); color: #26301a; border-bottom: 1px dashed rgba(38, 48, 26, .4); padding-bottom: .15em; margin-bottom: .1em; }
+  #cell .who { font-size: 1.25em; letter-spacing: .08em; color: #26301a; background: rgba(38, 48, 26, .15); padding: 0 .35em; border-radius: .2em; }
+  #cell .sms { font: 400 .85em/1.25 var(--pixel); background: rgba(38, 48, 26, .13); border-radius: .55em .55em .55em .1em; padding: .25em .45em; margin-top: .35em; opacity: 0; animation: smsIn .18s steps(2) forwards; }
+  @keyframes smsIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+  #cell .crack { position: absolute; inset: 0; pointer-events: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cg stroke='rgba(255,255,255,.6)' stroke-width='1.2' fill='none' vector-effect='non-scaling-stroke'%3E%3Cpath vector-effect='non-scaling-stroke' d='M84 0L70 26L76 50L62 76L66 100M70 26L46 33L24 26L0 34M76 50L100 58M46 33L40 56M62 76L42 84'/%3E%3C/g%3E%3C/svg%3E") no-repeat center / 100% 100%; }
+  @media (pointer: coarse) { #cell { right: auto; left: 50%; margin-left: -6.25em; } }
+  @media (prefers-reduced-motion: reduce) { #cell { transition: none; } #cell.up .body { animation: none; } }
 </style>
 
 <div id="stage">
@@ -351,6 +374,7 @@
     <div id="wrestlePrompt"></div>
     <div id="raccoon" class="panel" hidden><div class="ttl">RACCOON ON FACE</div><div class="grip"><i id="raccoonFill"></i></div><div class="hint">MASH E TO PEEL IT OFF</div></div>
     <div id="talk" hidden><div id="talkWho"></div><div id="talkLine"></div><div id="talkChoices"></div></div>
+    <div id="cell" hidden><div class="body"><div class="ant"></div><div class="grill"></div><div class="tape"></div><div class="scr"><div class="sbar"><span>▂▄▆_</span><span class="who"></span><span>3%</span></div><div class="msgs"></div><div class="crack"></div></div></div></div>
   </div>
 </div>
 
@@ -427,36 +451,38 @@
   <button class="tbtn" id="btnF" aria-label="Punch">PUNCH</button>
 </div>
 
-<script src="engine.js?v=202609232044"></script>
-<script src="songs.js?v=202609232044"></script>
-<script src="music.js?v=202609232044"></script>
-<script src="art.js?v=202609232044"></script>
-<script src="font.js?v=202609232044"></script>
-<script src="world.js?v=202609232044"></script>
-<script src="ambient.js?v=202609232044"></script>
-<script src="look.js?v=202609232044"></script>
-<script src="landmarks.js?v=202609232044"></script>
-<script src="gigs.js?v=202609232044"></script>
-<script src="arcs.js?v=202609232044"></script>
-<script src="actors.js?v=202609232044"></script>
-<script src="items.js?v=202609232044"></script>
-<script src="upgrades.js?v=202609232044"></script>
-<script src="money.js?v=202609232044"></script>
-<script src="headlines.js?v=202609232044"></script>
-<script src="story.js?v=202609232044"></script>
-<script src="cutscene.js?v=202609232044"></script>
-<script src="minigames.js?v=202609232044"></script>
-<script src="court.js?v=202609232044"></script>
-<script src="cases.js?v=202609232044"></script>
-<script src="favors.js?v=202609232044"></script>
-<script src="court2.js?v=202609232044"></script>
-<script src="miami.js?v=202609232044"></script>
-<script src="cases45.js?v=202609232044"></script>
-<script src="miami2.js?v=202609232044"></script>
-<script src="daytona.js?v=202609232044"></script>
-<script src="daytona2.js?v=202609232044"></script>
-<script src="chase.js?v=202609232044"></script>
-<script src="game.js?v=202609232044"></script>
-<script src="share.js?v=202609232044"></script>
-<script src="ui.js?v=202609232044"></script>
-<script src="pwa.js?v=202609232044"></script>
+<script src="engine.js?v=202609241858"></script>
+<script src="songs.js?v=202609241858"></script>
+<script src="music.js?v=202609241858"></script>
+<script src="art.js?v=202609241858"></script>
+<script src="font.js?v=202609241858"></script>
+<script src="world.js?v=202609241858"></script>
+<script src="ambient.js?v=202609241858"></script>
+<script src="look.js?v=202609241858"></script>
+<script src="landmarks.js?v=202609241858"></script>
+<script src="gigs.js?v=202609241858"></script>
+<script src="arcs.js?v=202609241858"></script>
+<script src="actors.js?v=202609241858"></script>
+<script src="items.js?v=202609241858"></script>
+<script src="flamingos.js?v=202609241858"></script>
+<script src="upgrades.js?v=202609241858"></script>
+<script src="money.js?v=202609241858"></script>
+<script src="headlines.js?v=202609241858"></script>
+<script src="story.js?v=202609241858"></script>
+<script src="phone.js?v=202609241858"></script>
+<script src="cutscene.js?v=202609241858"></script>
+<script src="minigames.js?v=202609241858"></script>
+<script src="court.js?v=202609241858"></script>
+<script src="cases.js?v=202609241858"></script>
+<script src="favors.js?v=202609241858"></script>
+<script src="court2.js?v=202609241858"></script>
+<script src="miami.js?v=202609241858"></script>
+<script src="cases45.js?v=202609241858"></script>
+<script src="miami2.js?v=202609241858"></script>
+<script src="daytona.js?v=202609241858"></script>
+<script src="daytona2.js?v=202609241858"></script>
+<script src="chase.js?v=202609241858"></script>
+<script src="game.js?v=202609241858"></script>
+<script src="share.js?v=202609241858"></script>
+<script src="ui.js?v=202609241858"></script>
+<script src="pwa.js?v=202609241858"></script>

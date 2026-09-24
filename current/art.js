@@ -123,6 +123,8 @@ const CRITTERS = {
 
 // item icons (10x10) — baked to data URLs for the DOM hotbar too
 const ICONS = {
+  flamingo: { key: { o: 'ink', p: 'hat', d: 'hatD', k: 'black', y: 'yellow' }, rows: [
+    '....ooo...', '...oppko..', '...opooyo.', '....op....', '...opp....', '..opppoo..', '.oppppdpo.', '..oppppo..', '...oooo...', '....o.....'] },
   beer: { key: { o: 'ink', s: 'tin', d: 'tinD', b: 'blue', w: 'white', r: 'red' }, rows: [
     '...oooo...', '..odsssod.', '..osssso..', '..obbbbo..', '..obwwbo..', '..obrrbo..', '..obwwbo..', '..obbbbo..', '..osssso..', '...oooo...'] },
   cig: { key: { o: 'ink', r: 'red', w: 'white', y: 'yellow' }, rows: [

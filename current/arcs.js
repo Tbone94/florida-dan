@@ -234,7 +234,7 @@ const Arcs = {
     if (s.st === 'active') {
       const acted = !c.act || s.acted;
       if (acted && (!c.ready || c.ready(s))) { if (c.take) c.take(s); this.finish(n.id); return true; }
-      if (c.readyHint && (!c.act || s.acted)) { say([[up, c.readyHint]]); return true; }
+      if (c.readyHint && (!c.act || s.acted)) { sideNag(n, [[up, c.readyHint]]); return true; }
       return false;
     }
     if (!this.offering(n)) return false;

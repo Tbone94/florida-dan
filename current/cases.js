@@ -128,7 +128,7 @@ const Cases = {
     if (n.id === 'pam') {
       if (c.n === 2 && c.d === 1 && qOpen('pam')) {
         if (!F.trashStart) {
-          F.trashStart = true; Game.inv.trash = 0; addQuest('trash', 'Fish trash out of the lagoon by boat (0/5)', false, 'pam');
+          F.trashStart = true; addQuest('trash', 'Fish trash out of the lagoon by boat (0/5)', false, 'pam');
           say([['DR. PAM', 'You’re the man from the manatee video.'], ['DAN', 'Allegedly.'], ['DR. PAM', 'I’ve rescued manatees for thirty years. I have never seen one look that... happy.'],
             ['DR. PAM', 'I’ll write a letter for your case if you clean up the lagoon. Take your boat out and fish the trash out of the water. Five pieces.'], ['DAN', 'That’s it?'], ['DR. PAM', 'You’ll see.']]);
           return true;
@@ -183,13 +183,14 @@ const Cases = {
       } });
       if (qDone('dogs') && qOpen('lure') && near(P.trailcam, 26)) list.push({ label: Game.hour >= 20 ? 'Set out the roller dogs' : 'Set the bait (come back after dark)', fn: () => {
         if (Game.hour < 20) return toast('Too bright. Skunk Apes are night people. (Couch at home: “sit till dark.”)');
+        if ((Game.inv.hotdog || 0) < 3) return toast('You ate the bait, Dan. Three roller dogs. Darlene’s got more.');
         Game.inv.hotdog -= 3; done('lure'); addQuest('track', 'Follow the footprints', false);
         const ape = this.makeApe(P.trailcam.x + 60, P.trailcam.y - 20); Game.animals.push(ape);
         ape.x += 400; Scene.play(this.lureScene(ape), () => { ape.state = 'run'; });   // offstage until it steps out
       } });
     }
     for (const a of Game.animals) if (a.ape && a.state === 'den' && near(a, 30)) {
-      if (c.n === 3 && !F.apeFriend) list.push({ label: 'Approach the Skunk Ape', fn: () => this.apeMeet(a) });
+      if (c.n === 3 && (!F.apeFriend || qOpen('track'))) list.push({ label: 'Approach the Skunk Ape', fn: () => this.apeMeet(a) });
       else if (c.n === 3 && c.d === 2 && qOpen('rehearse')) list.push({ label: 'Rehearse the testimony', fn: () => this.rehearse() });
       else if (c.n === 3 && c.d === 2 && qDone('rehearse') && qOpen('reunion')) list.push({ label: Game.hour >= 18 ? 'Hang out with the Skunk Ape' : 'Hang out (after 6 PM)', fn: () => Game.hour >= 18 ? this.reunion(a) : toast('The Skunk Ape is asleep. He sleeps like Dan: face down, one flip-flop on.') });
       else list.push({ label: 'Talk to the Skunk Ape', fn: () => say([['SKUNK APE', pick(['HRRM.', 'HRRRRM?', '*offers Dan a half-eaten roller dog*', '*points at the moon, then at Dan, then nods slowly*'])]]) });

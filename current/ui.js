@@ -11,7 +11,7 @@ function buildHotbar() {
   ui.hotbar.innerHTML = '';
   HOTBAR.forEach((k, i) => {
     const b = document.createElement('button'); b.className = 'slot'; b.id = 'slot-' + k; b.title = `${ITEMS[k].name} — ${ITEMS[k].desc}`;
-    b.innerHTML = `<span class="key">${'1234567890-='[i]}</span><img alt="" src="${SPR.iconURL[k]}"><span class="n">0</span>`;
+    b.innerHTML = `<span class="key">${'1234567890-=['[i]}</span><img alt="" src="${SPR.iconURL[k]}"><span class="n">0</span>`;
     b.addEventListener('click', e => { e.currentTarget.blur(); useItem(k); });
     ui.hotbar.append(b); slotEls[k] = b;
   });
@@ -74,7 +74,7 @@ function padFor(needed) { ui.pad.hidden = !(isTouch && (needed || !ui.hudTop.hid
 function showHud(on) { ['hudTop', 'hotbar'].forEach(k => ui[k].hidden = !on); ui.objective.hidden = !on || !ui.objective._v; if (!on) ui.hint.hidden = true; ui.pad.hidden = !(on && isTouch); }
 
 // ---------- shop ----------
-const SHOP = ['beer', 'cig', 'energy', 'hotdog', 'scratch', 'firework', 'bait'];
+const SHOP = ['beer', 'cig', 'energy', 'hotdog', 'scratch', 'firework', 'flamingo', 'bait'];
 const VENDORS = {
   gulp: { title: 'GULP-N-GO', sub: '', items: () => SHOP.concat(Game.day >= 5 ? Cases.shopExtras() : []) },
   van: { title: 'WAYNE’S MYSTERY VAN', sub: 'Cash only. No cops. No Rhondas. Buying here gets you noticed (+1★).', items: () => ['joint', 'gummy'], shady: true },
@@ -137,7 +137,7 @@ function buy(k, b) {
   const w = $('wallet'); if (w) { w.classList.remove('tick'); void w.offsetWidth; w.classList.add('tick'); }
 }
 function shopMsg(msg, bad) { const el = $('shopMsg'); el.textContent = msg; el.className = bad ? 'bad' : 'good'; el.hidden = false; clearTimeout(shopMsg.t); shopMsg.t = setTimeout(() => el.hidden = true, 2200); }
-function closeShop() { ui.shop.hidden = true; Game.mode = 'play'; }
+function closeShop() { ui.shop.hidden = true; Game.mode = 'play'; const f = Game.afterShop; Game.afterShop = null; if (f) f(); }
 $('shopClose').addEventListener('click', closeShop);
 
 // ---------- journal / rap sheet ----------
@@ -182,10 +182,14 @@ $('journalClose').addEventListener('click', closeJournal);
 $('journalBtn').addEventListener('click', e => { e.currentTarget.blur(); if (Game.mode === 'play') openJournal(); });
 
 // ---------- save ----------
-// a save in the middle of a day (bus, purchase) keeps the dawn's headlines/catch/money, because Continue replays the day from the top
+// a save in the middle of a day (bus, purchase) keeps the dawn's headlines/catch/money AND story flags, because Continue
+// replays the day from the top (a half-done day's flags could strand it: Manny never spawning, the ape already "met").
+// Things you own for good stay live: upgrades, flamingos, Trash Baby's porch, tips already shown.
+const KEEP_FLAG = /^(up|tbStay|flamingos|flam[A-Z]|hints)/;
+const saveFlags = d => { if (!d || !d.flags) return Game.flags; const f = JSON.parse(JSON.stringify(d.flags)); for (const k in Game.flags) if (KEEP_FLAG.test(k)) f[k] = Game.flags[k]; return f; };
 function save() {
   const d = Game.dawn && Game.dawn.day === Game.day ? Game.dawn : null;
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ region: Game.region, day: Game.day, inv: Game.inv, money: d ? Math.min(Game.money, d.money) : Game.money, allegations: d ? d.allegations : Game.allegations, headlines: d ? d.headlines : Game.headlines, flags: Game.flags, catchBag: d ? d.catchBag : Game.catchBag, pythons: d ? d.pythons : Game.pythons })); } catch (e) { }
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify({ region: Game.region, day: Game.day, inv: Game.inv, money: d ? Math.min(Game.money, d.money) : Game.money, allegations: d ? d.allegations : Game.allegations, headlines: d ? d.headlines : Game.headlines, flags: saveFlags(d), catchBag: d ? d.catchBag : Game.catchBag, pythons: d ? d.pythons : Game.pythons })); } catch (e) { }
 }
 function load() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); return s && s.day ? s : null; } catch (e) { return null; } }
 

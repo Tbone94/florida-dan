@@ -13,16 +13,62 @@ function headline(text, allege = 5) {
 
 // ---------- dialogue ----------
 // lines: [who, text] or [who, text, [[label, fn], ...]] for choices
+// phone calls: a run of caller + DAN lines plays as ONE self-running call (tap = whole call, tap again = hang up).
+// texts: never in the talk box — they go to Dan's phone (phone.js), which slides up once the talk is over.
+const callerOf = who => /^PHONE: /.test(who) ? who.slice(7).replace(/\s*\(.*\)$/, '') : null;
+function packTalk(lines) {
+  const out = [];
+  for (let i = 0; i < lines.length; i++) {
+    const [who, text, ch] = lines[i];
+    if (!ch && /^TEXT: /.test(who)) { Phone.text(who.slice(6), text); continue; }
+    if (ch || !callerOf(who)) { out.push(lines[i]); continue; }
+    const rows = []; let j = i;
+    while (j < lines.length && !lines[j][2] && (lines[j][0] === who || lines[j][0] === 'DAN')) rows.push(lines[j++]);
+    while (rows.length > 1 && rows[rows.length - 1][0] === 'DAN' && rows[rows.length - 2][0] === 'DAN') { rows.pop(); j--; }   // Dan still talking after the hang-up = not the call
+    out.push({ call: who, rows }); i = j - 1;
+  }
+  return out;
+}
 function say(lines, then) {
-  Game.talk = { q: lines.slice(), then: then || null, prev: Game.mode === 'talk' ? Game.talk && Game.talk.prev : Game.mode };
+  const q = packTalk(lines);
+  if (!q.length) { if (then) then(); return; }        // it was all texts: the phone has them
+  Game.talk = { q, then: then || null, prev: Game.mode === 'talk' ? Game.talk && Game.talk.prev : Game.mode };
   Game.mode = 'talk'; showTalk();
 }
 function showTalk() {
-  const [who, text, choices] = Game.talk.q[0];
-  Game.talk.typed = 0; Game.talk.full = text; Game.talk.choices = choices || null;
+  const e = Game.talk.q[0]; if (e.call) return showCall(e);
+  const [who, text, choices] = e;
+  Game.talk.typed = 0; Game.talk.full = text; Game.talk.choices = choices || null; Game.talk.call = null;
   ui.talkWho.textContent = who; ui.talkWho.hidden = !who; ui.talkLine.textContent = '';
   ui.talkChoices.innerHTML = ''; ui.talk.hidden = false;
-  ui.talk.classList.toggle('phone', /PHONE|TEXT|RADIO/.test(who));
+  ui.talk.classList.toggle('phone', /PHONE|TEXT|RADIO/.test(who)); ui.talk.classList.remove('call');
+}
+function showCall(e) {
+  Object.assign(Game.talk, { typed: 0, full: e.rows[0][1], choices: null, call: { row: 0, el: null, pause: .15, hang: 0 } });
+  ui.talkWho.textContent = e.call; ui.talkWho.hidden = false; ui.talkLine.textContent = ''; ui.talkChoices.innerHTML = ''; ui.talk.hidden = false;
+  ui.talk.classList.add('phone', 'call');
+}
+function callRow(who, text) {
+  const r = document.createElement('div'); r.className = 'cr' + (who === 'DAN' ? ' me' : '');
+  const b = document.createElement('b'); b.textContent = who === 'DAN' ? 'DAN' : callerOf(who); r.append(b, document.createElement('span'));
+  r.lastChild.textContent = text || ''; ui.talkLine.append(r);
+  while (ui.talkLine.childElementCount > 3) ui.talkLine.firstChild.remove();   // last three lines only — it scrolls like a call
+  return r;
+}
+function updateCall(T_, dt) {
+  const e = T_.q[0], C = T_.call, n = e.rows.length;
+  if (Input.tapped('a')) {
+    if (C.row >= n) return advanceTalk();
+    ui.talkLine.textContent = ''; e.rows.slice(-3).forEach(([w, t]) => callRow(w, t)); C.row = n; C.hang = 99; T_.typed = T_.full.length;
+    return;
+  }
+  if (C.row >= n) { if ((C.hang -= dt) <= 0) advanceTalk(); return; }   // nobody tapped: it hangs up by itself after a beat
+  if (C.pause > 0) { C.pause -= dt; return; }
+  const [who, text] = e.rows[C.row]; if (!C.el) { C.el = callRow(who, ''); T_.typed = 0; T_.full = text; }
+  const before = Math.floor(T_.typed); T_.typed += dt * (Game.fx.powder > 0 ? 140 : 62);
+  if (Math.floor(T_.typed) !== before && Math.floor(T_.typed) % 3 === 0 && text[Math.floor(T_.typed)] !== ' ') Sound.voice(who);
+  C.el.lastChild.textContent = text.slice(0, Math.floor(T_.typed));
+  if (T_.typed >= text.length) { C.el.lastChild.textContent = text; C.el = null; C.row++; C.pause = .5; C.hang = Math.max(2.2, text.length * .04); }
 }
 function renderChoices() {
   const ch = Game.talk.choices; if (!ch || ui.talkChoices.childElementCount) return;
@@ -34,6 +80,7 @@ function renderChoices() {
 function pickChoice(i) { const ch = Game.talk.choices; if (!ch || !ch[i]) return; Sound.play('pickup'); const fn = ch[i][1]; Game.talk.choices = null; advanceTalk(fn); }
 function updateTalk(dt) {
   const T_ = Game.talk;
+  if (T_.call) return updateCall(T_, dt);
   if (T_.typed < T_.full.length) {
     const before = Math.floor(T_.typed); T_.typed += dt * (Game.fx.powder > 0 ? 140 : 55);
     if (Math.floor(T_.typed) !== before && Math.floor(T_.typed) % 3 === 0 && T_.full[Math.floor(T_.typed)] !== ' ') Sound.voice(ui.talkWho.textContent);
@@ -46,8 +93,8 @@ function updateTalk(dt) {
   if (Input.tapped('a')) advanceTalk();
 }
 function advanceTalk(choiceFn) {
-  const T_ = Game.talk; T_.q.shift();
-  if (choiceFn) { const extra = choiceFn(); if (Game.mode === 'shop') { ui.talk.hidden = true; Game.talk = null; return; } if (Array.isArray(extra)) T_.q.unshift(...extra); }
+  const T_ = Game.talk; T_.q.shift(); T_.call = null;
+  if (choiceFn) { const extra = choiceFn(); if (Game.mode === 'shop') { ui.talk.hidden = true; Game.talk = null; Game.afterShop = T_.then; return; } if (Array.isArray(extra)) T_.q.unshift(...packTalk(extra)); }   // a shop keeps the talk's ending for when it closes
   if (Game.talk !== T_) return;                       // the choice started a new conversation
   if (T_.q.length) return showTalk();
   ui.talk.hidden = true; Game.mode = T_.prev === 'talk' ? 'play' : (T_.prev || 'play'); Game.talk = null;
@@ -93,6 +140,13 @@ function questTarget(q) {
 function questText(id, text) { const q = Q(id); if (q && q.text !== text) { q.text = text; renderQuests(); } }
 
 const PHONE_B = 'PHONE: BRENDA (PUBLIC DEFENDER)';
+// a "well? I'm waitin'" from somebody who also runs the only shop you need must not wall off the counter
+const SHOPKEEPS = ['darlene', 'wayne', 'bubba', 'abuela', 'doc', 'coral', 'wrench', 'needles'];
+function sideNag(n, lines) {
+  if (!SHOPKEEPS.includes(n.id)) return say(lines);
+  const [who, text] = lines[lines.length - 1];
+  say([...lines.slice(0, -1), [who, text, [['“Workin’ on it. Can I buy somethin’?”', () => { Game.afterTalk = () => { Game.skipSide = true; Story.talk(n); Game.skipSide = false; }; return null; }], ['“Workin’ on it.”', () => null]]]]);
+}
 // each tourist question comes with its own answers
 const TOURIST_TALKS = [
   [['TOURIST', 'Oh my gosh, are you a REAL Florida Man? Can I get a selfie?'], ['DAN', '', [
@@ -175,7 +229,7 @@ const Story = {
     if (Game.day === 3) {
       questText('stock', `Get 6 beers (${Math.min(6, Game.inv.beer)}/6)`); if (Game.inv.beer >= 6) done('stock');
       Game.storm = h < 13 ? 0 : clamp((h - 13) / 4, 0, 1);
-      if (h > 16 && !F.partyNag) { F.partyNag = true; toast('TEXT FROM MERLE: WHERE U AT. THE GUMBO IS READY. WANDA IS HERE'); }
+      if (h > 16 && !F.partyNag) { F.partyNag = true; Phone.text('MERLE', 'WHERE U AT'); Phone.text('MERLE', 'THE GUMBO IS READY. WANDA IS HERE'); }
     }
     if (Game.day === 4) {
       if (h >= 10 && !F.late) { F.late = true; say([[PHONE_B, 'DAN. WHERE ARE YOU. The judge is doing a crossword. HE’S ANGRY-CROSSWORDING.'], ['DAN', 'On my way! Traffic!'], [PHONE_B, 'You live on a SWAMP, Dan.']]); }
@@ -192,8 +246,7 @@ const Story = {
 
   // --- people ---
   talk(n) {
-    if (Arcs.talk(n)) return;   // a neighbor's story beats a side gig
-    if (Gigs.talk(n)) return;
+    if (!Game.skipSide) { if (Arcs.talk(n)) return; if (Gigs.talk(n)) return; }   // a neighbor's story beats a side gig (skipSide: sideNag's "can I buy somethin'?")
     if (n.id === 'coral') return say([['CORAL', pick(['Surf & Dive! We sell gear. The engine in the back is “for display.”', 'You look like a guy who’d buy a metal detector. That’s a compliment.', 'Waves are flat, prices are fair, questions are discouraged.'])], ['CORAL', 'Wanna look?', [['Browse', () => { Game.mode = 'shop'; openShop('surf'); return null; }], ['“Nah.”', () => [['CORAL', 'Hang loose. Or don’t. Free country.']]]]]]);
     if (Game.day >= 5 && Cases.talk(n)) return;
     const F = Game.flags, day = Game.day;

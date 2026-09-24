@@ -23,19 +23,19 @@ function newGame() {
 function startDay() {
   const S_ = World.spots;
   Object.assign(Game, { hour: 6, chill: 70, urgent: 0, storm: 0, heat: 0, parts: [], projectiles: [], day_: freshDayLog() });
-  Heat.end(); headlineQ.length = 0; hintT = 0; ui.hint.hidden = true; Game.car = null; Game.racing = false; Game.marks = []; if (typeof Speedway !== 'undefined') { Speedway.on = false; Speedway.cars = []; } if (typeof Convoy !== 'undefined') Convoy.on = false; Game.dan.hiding = false; Game.dan.carry = null; Game.vehicles = []; BoatChase.boat = null; Race.on = false; Game.prints = []; Game.scene = null; Game.courtExtra = {};
+  Heat.end(); Phone.clear(); headlineQ.length = 0; hintT = 0; ui.hint.hidden = true; Game.car = null; Game.racing = false; Game.marks = []; if (typeof Speedway !== 'undefined') { Speedway.on = false; Speedway.cars = []; } if (typeof Convoy !== 'undefined') Convoy.on = false; Game.dan.hiding = false; Game.dan.carry = null; Game.vehicles = []; BoatChase.boat = null; Race.on = false; Game.prints = []; Game.scene = null; Game.courtExtra = {};
   Object.assign(Game.fx, { buzz: 0, high: 0, shroom: 0, powder: 0, crash: 0, cig: 0 });
   Object.assign(Game.dan, { x: S_.dan.x, y: S_.dan.y, dir: 'down', ride: null, hurt: 0 });
   Object.assign(Game.boat, { x: S_.boat.x, y: S_.boat.y, dir: 'right' });
   Object.assign(Game.cooler, { x: S_.cooler.x, y: S_.cooler.y, dir: 'down', home: null });
   Game.inv.fish = Game.catchBag.filter(f => !f.junk).length;
-  spawn();
+  spawn(); Flamingos.sync();
   Game.cam.x = Game.dan.x - VW / 2; Game.cam.y = Game.dan.y - VH / 2 - 10;
   Game.mode = 'play'; showHud(true);
   Story.setupDay(Game.day); Gigs.newDay(); Arcs.newDay();
   if (hasUp('keg')) { Game.inv.beer = (Game.inv.beer || 0) + 3; updateHotbar(); }   // the Kegerator provides
   Game.dawn = null; save();
-  Game.dawn = { day: Game.day, money: Game.money, allegations: Game.allegations, headlines: Game.headlines.slice(), catchBag: Game.catchBag.slice(), pythons: Game.pythons.slice() };
+  Game.dawn = { day: Game.day, flags: JSON.parse(JSON.stringify(Game.flags)), money: Game.money, allegations: Game.allegations, headlines: Game.headlines.slice(), catchBag: Game.catchBag.slice(), pythons: Game.pythons.slice() };
   Sound.setMusic(true);
 }
 
@@ -116,8 +116,9 @@ function interaction() {
   if (near(Game.boat, 26)) return { label: 'Board the SS Budget', fn: () => { D.ride = 'boat'; D.x = Game.boat.x; D.y = Game.boat.y; Sound.play('engine'); } };
   if (near(Game.cooler, 18)) return { label: 'Ride the motorized cooler', fn: () => { D.ride = 'cooler'; D.x = Game.cooler.x; D.y = Game.cooler.y; Sound.play('engine'); if (Game.fx.buzz > 50 || Game.fx.powder > 0) Game.day_.dui = true; } };
   const p = facingPoint(16), k = World.at(p.x, p.y), here = World.at(D.x, D.y);
+  const fl = Flamingos.interaction(); if (fl) return fl;
   if (k === T.DEEP || k === T.WATER || (k === T.SHALLOW && here === T.DOCK)) return { label: 'Cast from here', fn: () => Fishing.start(k, true) };
-  if (!D.ride && Game.day_.usedCooler && !Game.cooler.home && Math.hypot(Game.cooler.x - D.x, Game.cooler.y - D.y) > 200)   // only once you've actually left it somewhere return { label: 'Whistle for the cooler', fn: whistleCooler };
+  if (!D.ride && Game.day_.usedCooler && !Game.cooler.home && Math.hypot(Game.cooler.x - D.x, Game.cooler.y - D.y) > 200) return { label: 'Whistle for the cooler', fn: whistleCooler };   // only once you've actually left it somewhere
   return null;
 }
 // lost the cooler? whistle. It drives itself over, headlights on, like a very cold dog.
@@ -150,6 +151,7 @@ function punch() {
   let tgt = null, bd = 18;
   for (const a of Game.animals) { if (a.pet || a.spirit || a.ape || a.state === 'bagged') continue; const p = a.type === 'python' ? a.segs[0] : a, d = Math.hypot(p.x - f.x, p.y - f.y); if (d < bd) { bd = d; tgt = a; } }
   let npcT = null; for (const n of Game.npcs) { const d = Math.hypot(n.x - f.x, n.y - f.y); if (d < Math.min(bd, 14)) { bd = d; npcT = n; } }
+  if (!tgt && !npcT && Flamingos.punch(f)) return;
   if (!tgt && !npcT) { if (Game.inv.can > 0) throwThing('can'); else Sound.play('whiff'); return; }
   Sound.play('punch'); Game.shake = 3 * pow; Game.hitstop = .055 * pow; Game.kick = 1; Game.day_.punches = (Game.day_.punches || 0) + 1;
   const hx = (npcT || tgt).x, hy = (npcT || tgt).y;
@@ -242,7 +244,7 @@ function update(dt) {
   Game.t += dt; Game.kick = Math.max(0, (Game.kick || 0) - dt * 7);
   if (toastT > 0 && (toastT -= dt) <= 0) ui.toast.hidden = true;
   Game.flash = Math.max(0, Game.flash - dt * 2); Game.shake = Math.max(0, Game.shake - dt * 18);
-  updateHeadlineBanner(dt);
+  updateHeadlineBanner(dt); Phone.update(dt);
   switch (Game.mode) {
     case 'title': Game.cam.x = 300 + Math.sin(Game.t * .05) * 260; Game.cam.y = 180 + Math.sin(Game.t * .04) * 120; for (const a of Game.animals) if (a.type === 'gator') updateGator(a, dt); return;
     case 'talk': updateTalk(dt); tickWorld(dt * .0); return;
@@ -331,7 +333,7 @@ const Events = {
     this.t = rnd(45, 80);
     const ev = pick(['lovebugs', 'merletext', 'mosquitos', 'brenda', 'tourist', 'sirens', 'weather']);
     if (ev === 'lovebugs') { toast('LOVEBUG SEASON. They’re doin’ it. On your FACE.'); for (let i = 0; i < 40; i++) Game.parts.push({ kind: 'bug', x: Game.dan.x + rnd(-80, 80), y: Game.dan.y + rnd(-60, 40), vx: rnd(-20, 20), vy: rnd(-20, 20), life: rnd(4, 8) }); }
-    if (ev === 'merletext') toast('TEXT FROM MERLE: ' + pick(['u up', 'chuck is on my porch again. hes eatin my crocs', 'found a boat in my yard. not mine. is it yours', 'do u know how to get a raccoon out of a toilet asking for a friend', 'lottery numbers are 4 8 15 16 23 42 trust me', 'I think my trailer is haunted by a tourist']), 4.5);
+    if (ev === 'merletext') Phone.text('MERLE', pick(['u up', 'chuck is on my porch again. hes eatin my crocs', 'found a boat in my yard. not mine. is it yours', 'do u know how to get a raccoon out of a toilet asking for a friend', 'lottery numbers are 4 8 15 16 23 42 trust me', 'I think my trailer is haunted by a tourist']));
     if (ev === 'mosquitos' && World.region(Game.dan.x, Game.dan.y) === 'glades') { toast('Mosquitos the size of sparrows. Dan donates a pint.'); Game.chill = Math.max(0, Game.chill - 10); }
     if (ev === 'brenda') toast(`TEXT FROM BRENDA: ${Game.allegations > 60 ? 'why is my phone blowing up with your name' : pick(['how are we doing. be honest', 'remember: NORMAL', 'please do not do anything on camera'])}`, 4.5);
     if (ev === 'sirens') Sound.play('siren');

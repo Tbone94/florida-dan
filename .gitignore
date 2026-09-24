@@ -4,3 +4,4 @@ promo/samples/
 promo/check*.png
 promo/*.wav
 .DS_Store
+.claude/

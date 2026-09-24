@@ -47,7 +47,7 @@ function buildMiami() {
   W.spots = {
     dan: { x: 47.5 * TS, y: 10.1 * TS }, door: { x: 47.5 * TS, y: 9.4 * TS }, arrive: { x: 18 * TS, y: 53.9 * TS },
     court: { x: 34 * TS, y: 21.4 * TS }, cafe: { x: 48 * TS, y: 27.5 * TS }, club: { x: 47.5 * TS, y: 21.6 * TS }, condo: { x: 46.5 * TS, y: 57.6 * TS },
-    boat: { x: 6.5 * TS, y: 28 * TS }, cooler: { x: 20.2 * TS, y: 54.4 * TS }, hide: { x: 62.8 * TS, y: 27.8 * TS },
+    boat: { x: 7.6 * TS, y: 28 * TS }, cooler: { x: 20.2 * TS, y: 54.4 * TS }, hide: { x: 62.8 * TS, y: 27.8 * TS },
     pier: { x: 80 * TS, y: 30 * TS }, valet: { x: 52.8 * TS, y: 11.1 * TS }, lambo: { x: 54.9 * TS, y: 11.5 * TS }, marina: { x: 13.5 * TS, y: 23.6 * TS },
     boutique: { x: 48 * TS, y: 42.4 * TS }, stationDoor: { x: 18 * TS, y: 53.4 * TS },
     merle: { x: -999, y: -999 }, darlene: { x: -999, y: -999 }, rhonda: { x: -999, y: -999 }, icemachine: { x: -999, y: -999 }, dockEnd: { x: 80 * TS, y: 30 * TS }, ramp: { x: 8 * TS, y: 36 * TS }, pasture: { x: -999, y: -999 },

@@ -51,7 +51,7 @@ const Gigs = {
   // the offer conversation
   offerLines(n) {
     const id = G_().offers[n.id], d = GIGS[id], last = d.offer[d.offer.length - 1];
-    return [...d.offer.slice(0, -1), [last[0], last[1], [[`“I’m in.” ($${d.pay})`, () => { Gigs.accept(id); return null; }], ['“Not today.”', () => [[n.name.toUpperCase(), 'Suit yourself.']]]]]];
+    return [...d.offer.slice(0, -1), [last[0], last[1], [[`“I’m in.” ($${d.pay})`, () => { Gigs.accept(id); return null; }], ['“Not today.”', () => { delete G_().offers[n.id]; return [[n.name.toUpperCase(), 'Suit yourself.']]; }]]]];
   },
   offer(n) { say(Gigs.offerLines(n)); },
   // returns true if the gig system handled this conversation
@@ -59,7 +59,7 @@ const Gigs = {
     const G = G_(), id = G.active, d = id && GIGS[id];
     if (d && d.giver === n.id) {
       const r = d.talkActive ? d.talkActive() : d.check && d.check() ? 'done' : [[n.name.toUpperCase(), 'Well? ' + d.quest + '.']];
-      if (r === 'done') Gigs.complete(id); else say(r);
+      if (r === 'done') Gigs.complete(id); else sideNag(n, r);
       return true;
     }
     if (n.id !== 'bubba' && Gigs.offering(n)) { Gigs.offer(n); return true; }

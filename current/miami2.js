@@ -19,7 +19,7 @@ const Lambo = {
     if (Math.random() < dt * 20) Game.parts.push({ kind: 'speed', x: v.x - Math.cos(v.a) * 14, y: v.y - Math.sin(v.a) * 14, vx: -Math.cos(v.a) * 40, vy: -Math.sin(v.a) * 40, life: .25 });
   },
   sink() {
-    const v = this.car; this.car = null; Game.flags.lamboSunk = true; Look.mark('skid', v.x - 150, v.y, { x2: v.x - 12, y2: v.y }, true);   // skid marks into the Atlantic, forever Game.vehicles = []; Game.dan.ride = null;
+    const v = this.car; this.car = null; Game.flags.lamboSunk = true; Look.mark('skid', v.x - 150, v.y, { x2: v.x - 12, y2: v.y }, true); Game.vehicles = []; Game.dan.ride = null;   // skid marks into the Atlantic, forever
     splash(v.x, v.y, 30); Sound.play('splash'); Game.shake = 10; Game.flash = .5;
     const shore = { x: 71.5 * TS, y: v.y }; Object.assign(Game.dan, { x: shore.x, y: clamp(shore.y, 3 * TS, 57 * TS), dir: 'right' });
     say([['', '*SPLOOSH*'], ['', 'The pink Lamborghini drives directly into the Atlantic Ocean. It floats for one beautiful second. Then it does not.'],

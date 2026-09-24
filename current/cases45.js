@@ -49,6 +49,7 @@ const MiamiCases = {
     }
     if (c.n === 5 && c.d === 1) {
       F.suit = false;
+      F.balesDone = false;   // a replayed day 14 re-counts (bales already in the bag still count)
       setQuests([['bales', 'Grab the bales on the beach before the goons do (0/4)'], ['flyer', 'Return the bales to their owner (post a flyer at Café Abuela)']]);
       return say([['RADIO', '...after last night’s storm, dozens of mystery bales have washed up on South Beach. Locals call them “square grouper.” Police say: do NOT touch them.'],
         ['DAN', 'Somebody lost their stuff. That’s sad.'], ['DAN', 'I’m gonna return it. Like a good citizen. There might be a reward.'], ['', 'Two men in black suits are already jogging toward the beach.']]);

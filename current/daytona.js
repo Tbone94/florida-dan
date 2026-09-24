@@ -75,7 +75,7 @@ function buildDaytona() {
     court: { x: 47.5 * TS, y: 7.6 * TS }, pits: { x: 22.4 * TS, y: 30 * TS }, garage29: { x: 22.4 * TS, y: 23 * TS }, gate: { x: 27.5 * TS, y: 24.5 * TS },
     finish: { x: 26.5 * TS, y: 31 * TS }, saloon: { x: 46 * TS, y: 22.6 * TS }, tattoo: { x: 57.2 * TS, y: 22.4 * TS }, speed: { x: 46 * TS, y: 30.4 * TS },
     donut: { x: 61.6 * TS, y: 30.5 * TS }, drive: { x: 64.7 * TS, y: 29.4 * TS }, pier: { x: 85 * TS, y: 20.5 * TS }, hide: { x: 38.9 * TS, y: 24 * TS },
-    boat: { x: 84 * TS, y: 30 * TS }, cooler: { x: 37 * TS, y: 31 * TS }, camp: { x: 35 * TS, y: 10 * TS }, beach: { x: 73 * TS, y: 30 * TS },
+    boat: { x: 80.5 * TS, y: 22.8 * TS }, cooler: { x: 37 * TS, y: 31 * TS }, camp: { x: 35 * TS, y: 10 * TS }, beach: { x: 73 * TS, y: 30 * TS },
     dockEnd: { x: 85 * TS, y: 20.5 * TS }, ramp: { x: 70 * TS, y: 30 * TS },
     merle: { x: -999, y: -999 }, darlene: { x: -999, y: -999 }, rhonda: { x: -999, y: -999 }, icemachine: { x: -999, y: -999 }, pasture: { x: -999, y: -999 }, glades: { x: -999, y: -999 },
   };
