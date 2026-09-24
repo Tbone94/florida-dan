@@ -163,6 +163,7 @@ function updateGator(gt, dt) {
   if (gt.state === 'chase' && dist < (gt.chuck ? 14 : 11) && gt.cd <= 0 && active && D.hurt <= 0) gatorBite(gt, dx, dy, dist);
 }
 function gatorBite(gt, dx, dy, dist) {
+  if (Math.random() < .5) Look.mark('flip', Game.dan.x + rnd(-6, 6), Game.dan.y + 4);   // he lost a flip-flop
   gt.chomp = .45; gt.cd = hasUp('tooth') ? 24 : 14; gt.state = 'wander'; Game.gatorCalm = 6;   // after a bite every gator gives Dan a moment
   knockback(dx / dist, dy / dist, hasUp('waders') ? 12 : 22);
   Sound.play('chomp'); hurtDan(hasUp('waders') ? 7 : 15); react('flop');

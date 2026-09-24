@@ -214,7 +214,7 @@ const DaytonaCases = {
     }
   },
   donutRun() {
-    const F = Game.flags; F.donutRun = true; done('donuts'); Game.car.v = 0;
+    const F = Game.flags; F.donutRun = true; done('donuts'); Game.car.v = 0; Look.mark('skid', Game.car.x - 180, Game.car.y, { x2: Game.car.x, y2: Game.car.y }, true);   // forty cars' worth of rubber through the drive-thru
     Scene.play(this.donutScene(), () => say([
       ['DAN', 'Forty-one dozen glazed. And a coffee. Put it on NASCAR.'], ['', 'It takes two hours. Every driver gets a donut. The race is postponed. Nobody is mad. Everyone is a little mad.'], [PHONE_T, 'Dan... the cops are here.']],
     () => { headline('FLORIDA MAN LEADS ENTIRE NASCAR FIELD THROUGH DONUT DRIVE-THRU UNDER CAUTION FLAG', 10); Convoy.on = false; Convoy.hist = []; Car.exit(); Game.vehicles = Game.vehicles.filter(v => v.id !== 'pace'); react('cheer');
@@ -238,7 +238,7 @@ const DaytonaCases = {
     }
     if (place === 1) {
       F.raceWon = true; done('race'); headline('FLORIDA MAN WINS DAYTONA 250, DOES BURNOUT, CRACKS SWAMP LITE IN VICTORY LANE', 12);
-      const car = Game.car; Scene.play(car ? [SC.cam(car.x, car.y - 6, 1.6, .6), SC.tween(() => car.a, a => { car.a = a; for (let i = 0; i < 2; i++) Game.parts.push({ kind: 'dust', x: car.x + rnd(-10, 10), y: car.y + rnd(-4, 6), vx: rnd(-20, 20), vy: rnd(-16, -4), life: rnd(.6, 1.2) }); Game.dan.x = car.x; Game.dan.y = car.y; }, car.a + 12.6, 2.2), SC.sound('engine'), SC.line('dan', 'WOOOOOOOO!', 1.3)] : [], () => {
+      const car = Game.car; if (car) Look.mark('donuts', car.x, car.y, {}, true); Scene.play(car ? [SC.cam(car.x, car.y - 6, 1.6, .6), SC.tween(() => car.a, a => { car.a = a; for (let i = 0; i < 2; i++) Game.parts.push({ kind: 'dust', x: car.x + rnd(-10, 10), y: car.y + rnd(-4, 6), vx: rnd(-20, 20), vy: rnd(-16, -4), life: rnd(.6, 1.2) }); Game.dan.x = car.x; Game.dan.y = car.y; }, car.a + 12.6, 2.2), SC.sound('engine'), SC.line('dan', 'WOOOOOOOO!', 1.3)] : [], () => {
       Car.exit(); react('cheer'); Game.vehicles = Game.vehicles.filter(v => v.id !== 'car29');
       say([['', 'CHECKERED FLAG. DAN DUPREE WINS THE DAYTONA 250.'], ['TAMMY JO', 'YOU DID IT! YOU ACTUALLY DID IT!'], ['RUSTY', 'I’m crying. I’m not crying. It’s gasoline. In my eyes.'], ['', 'Chip Sterling storms into victory lane with a lawyer and a cease-and-desist.'],
         ['CHIP STERLING', 'I’m SUING. Unlicensed racing, unauthorized burnouts, and emotional damages. MY emotions.'], [PHONE_B, 'Dan, I just heard. Courthouse. Now. I’m already here.']], () => addQuest('court', 'Chip is suing you. Volusia County Courthouse, NOW.')); });

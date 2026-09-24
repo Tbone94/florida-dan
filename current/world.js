@@ -130,6 +130,7 @@ function shadow(x, y, w, h = 3) { g.globalAlpha = .28; g.fillStyle = PAL.ink; g.
 
 function drawTiles(cx, cy, t) {
   const tx0 = Math.floor(cx / TS), ty0 = Math.floor(cy / TS);
+  const Gh = typeof Look !== 'undefined' && Look.g, hr = Game.hour, sheenA = Gh && Game.mode !== 'title' ? .22 * clamp((Math.abs(hr - 13) - 3) / 2.2, 0, 1) : 0;
   for (let ty = ty0; ty <= ty0 + 12; ty++) for (let tx = tx0; tx <= tx0 + Math.ceil(VW / TS); tx++) {
     const k = World.tile(tx, ty), x = tx * TS - cx, y = ty * TS - cy, hs = hash2(tx, ty);
     if (WET(k)) {
@@ -197,9 +198,24 @@ function drawTiles(cx, cy, t) {
         if (hs < .18) R(x + 5, y + 10, 2, 1, PAL.grassL);
         if (hs > .96) { R(x + 6, y + 6, 2, 2, PAL.yellow); R(x + 6, y + 8, 1, 2, PAL.grassDD); }
         else if (hs > .93) { R(x + 9, y + 9, 2, 2, PAL.hat); }
+        else if (hs > .3 && hs < .312) { R(x + 4, y + 9, 3, 2, '#8fb3d9'); R(x + 4, y + 9, 1, 2, '#e8eef5'); }   // Florida wildflowers: a Swamp Lite can
+        else if (hs > .5 && hs < .515) { R(x + 10, y + 5, 2, 1, PAL.white); R(x + 12, y + 5, 1, 1, PAL.orange); }   // ...and a cigarette butt
+    }
+    if (k === T.MUD || k === T.SAND) {   // the grass creeps over the edges: no hard square seams
+      [[0, -1], [0, 1], [-1, 0], [1, 0]].forEach(([ox, oy], d) => {
+        if (World.tile(tx + ox, ty + oy) !== T.GRASS) return;
+        for (let i = 0; i < TS; i++) { const len = Math.floor(hash2(tx * 16 + i + d * 7, ty * 13 + d) * 3.4); if (!len) continue;
+          const col = hash2(i, tx + ty * 3) > .8 ? PAL.grassD : PAL.grass;
+          if (oy < 0) R(x + i, y, 1, len, col); else if (oy > 0) R(x + i, y + TS - len, 1, len, col); else if (ox < 0) R(x, y + i, len, 1, col); else R(x + TS - len, y + i, len, 1, col); }
+      });
     }
     // cliff lip where land drops to water (3/4 view)
     if (!WET(k) && k !== T.DOCK && WET(World.tile(tx, ty + 1))) { R(x, y + 11, TS, 5, k === T.SAND ? PAL.sandD : PAL.mudD); R(x, y + 11, TS, 1, k === T.SAND ? PAL.sand : PAL.grassDD); }
+  }
+  if (sheenA > .01) {   // the water reflects the sky: pink at dawn, orange at golden hour, violet at dusk
+    const hi = Gh.hi; g.globalAlpha = sheenA; g.fillStyle = `rgb(${Math.min(255, hi[0] * 235) | 0},${Math.min(255, hi[1] * 175) | 0},${Math.min(255, hi[2] * 205) | 0})`;
+    for (let ty = ty0; ty <= ty0 + 12; ty++) for (let tx = tx0; tx <= tx0 + Math.ceil(VW / TS); tx++) if (WET(World.tile(tx, ty))) g.fillRect(tx * TS - cx, ty * TS - cy, TS, TS);
+    g.globalAlpha = 1;
   }
 }
 

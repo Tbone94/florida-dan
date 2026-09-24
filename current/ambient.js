@@ -38,6 +38,19 @@ const Ambient = (() => {
       R(x, y, 1, 1, PAL.white); if (h > .975) { R(x - 1, y, 3, 1, PAL.white); R(x, y - 1, 1, 3, PAL.white); }
     }
   }
+  // every firefly on screen: fn(worldX, worldY, blink 0..1) (look.js lights them up too)
+  function eachFly(cx, cy, t, fn) {
+    const h = Game.hour; if (!(h > 19.8 || h < 5) || MIAMI()) return;
+    const cs = 64, x0 = Math.floor(cx / cs) - 1, y0 = Math.floor(cy / cs) - 1;
+    for (let gy = y0; gy <= y0 + Math.ceil(VH / cs) + 2; gy++) for (let gx = x0; gx <= x0 + Math.ceil(VW / cs) + 2; gx++) {
+      if (hash2(gx, gy) < .3) continue;
+      const i = gx * 31 + gy * 17;
+      const wx = gx * cs + hash2(gx, gy + 1) * cs + Math.sin(t * (.3 + hash2(gy, gx) * .4) + i) * 14, wy = gy * cs + hash2(gx + 1, gy) * cs + Math.cos(t * (.25 + hash2(gx, gy + 5) * .3) + i) * 9;
+      if (WET(World.at(wx, wy))) continue;
+      const blink = Math.sin(t * (1.6 + hash2(i, 11)) + i * 1.7); if (blink < .2) continue;
+      fn(wx, wy, blink);
+    }
+  }
   function fireflies(cx, cy, t) {
     const h = Game.hour; if (!(h > 19.8 || h < 5) || MIAMI()) return;
     const cs = 64, x0 = Math.floor(cx / cs) - 1, y0 = Math.floor(cy / cs) - 1;   // anchored to the world, so they hover in place as you walk
@@ -51,5 +64,5 @@ const Ambient = (() => {
       g.globalAlpha = .55 * blink; R(x - 2, y - 1, 5, 3, '#d9ff6a'); R(x - 1, y - 2, 3, 5, '#d9ff6a'); g.globalAlpha = 1; R(x - 1, y, 3, 1, '#f4ffb0'); R(x, y - 1, 1, 3, '#f4ffb0');
     }
   }
-  return { water: glints, air(cx, cy, t) { fireflies(cx, cy, t); clouds(cx, cy, t); } };   // water: right after the tiles; air: over everything in the world
+  return { water: glints, eachFly, air(cx, cy, t) { fireflies(cx, cy, t); clouds(cx, cy, t); } };   // water: right after the tiles; air: over everything in the world
 })();

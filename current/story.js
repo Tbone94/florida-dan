@@ -216,7 +216,7 @@ const Story = {
     const S_ = World.spots, lx = S_.door.x - 34, ly = S_.door.y;
     return [SC.cam(lx + 10, ly - 22, 1.6, .6), SC.walk('dan', lx, ly + 2, 50), SC.face('dan', 'up'), SC.lift('dan', 30, 1.1),
       SC.face('dan', 'down'), SC.line('dan', 'GOT IT!', 1), SC.emote('dan', '?', .6),
-      SC.all([SC.lift('dan', 0, .3), SC.walk('dan', lx + 12, ly + 16, 70)]), SC.shake(8), SC.sound('hurt'), SC.react('flop'), SC.wait(1.3), SC.camOn('dan', 1, .5, -10)];
+      SC.all([SC.lift('dan', 0, .3), SC.walk('dan', lx + 12, ly + 16, 70)]), SC.fx(() => Look.mark('shingles', lx + 6, ly + 14, {}, true)), SC.shake(8), SC.sound('hurt'), SC.react('flop'), SC.wait(1.3), SC.camOn('dan', 1, .5, -10)];
   },
   // Hurricane Wanda makes landfall on Merle's party
   wandaScene() {
@@ -240,7 +240,7 @@ const Story = {
       SC.walk('merle', fx + 14, fy + 2, 40), SC.face('merle', 'left'),
       SC.line('merle', 'Like God intended.', 1.1),
       SC.emote('dan', '!', .9, PAL.red), SC.wait(.3),
-      SC.fx(() => { explode(fx, fy); fire(40); }), SC.shake(10), SC.flash(.8),
+      SC.fx(() => { explode(fx, fy); fire(40); Look.mark('scorch', fx, fy + 4, { big: 1 }, true); }), SC.shake(10), SC.flash(.8),
       SC.all([SC.walk('merle', fx + 58, fy + 10, 130), SC.emote('merle', '!!', 1.2, PAL.orange)]),
       SC.fx(() => fire(20)), SC.wait(1.1),
       SC.face('merle', 'left'), SC.line('merle', '...Worth it.', 1.5),

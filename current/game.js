@@ -23,7 +23,7 @@ function newGame() {
 function startDay() {
   const S_ = World.spots;
   Object.assign(Game, { hour: 6, chill: 70, urgent: 0, storm: 0, heat: 0, parts: [], projectiles: [], day_: freshDayLog() });
-  Heat.end(); headlineQ.length = 0; hintT = 0; ui.hint.hidden = true; Game.car = null; Game.racing = false; if (typeof Speedway !== 'undefined') { Speedway.on = false; Speedway.cars = []; } if (typeof Convoy !== 'undefined') Convoy.on = false; Game.dan.hiding = false; Game.dan.carry = null; Game.vehicles = []; BoatChase.boat = null; Race.on = false; Game.prints = []; Game.scene = null; Game.courtExtra = {};
+  Heat.end(); headlineQ.length = 0; hintT = 0; ui.hint.hidden = true; Game.car = null; Game.racing = false; Game.marks = []; if (typeof Speedway !== 'undefined') { Speedway.on = false; Speedway.cars = []; } if (typeof Convoy !== 'undefined') Convoy.on = false; Game.dan.hiding = false; Game.dan.carry = null; Game.vehicles = []; BoatChase.boat = null; Race.on = false; Game.prints = []; Game.scene = null; Game.courtExtra = {};
   Object.assign(Game.fx, { buzz: 0, high: 0, shroom: 0, powder: 0, crash: 0, cig: 0 });
   Object.assign(Game.dan, { x: S_.dan.x, y: S_.dan.y, dir: 'down', ride: null, hurt: 0 });
   Object.assign(Game.boat, { x: S_.boat.x, y: S_.boat.y, dir: 'right' });
@@ -271,7 +271,8 @@ function update(dt) {
   if (Game.chill <= 0) { Game.chill = 40; headline('FLORIDA MAN SCREAMS AT PELICAN FOR 40 MINUTES; PELICAN UNBOTHERED', 4); return say([['', 'Dan has run out of chill.'], ['DAN', 'WHAT ARE YOU LOOKIN AT, PELICAN? HUH? YEAH, YOU. YOU AND YOUR STUPID FACE-BAG!'], ['', 'The pelican is unbothered. Dan feels better, weirdly.']]); }
   if (Game.hour >= 22 && Cases.nightWork()) Game.hour = Math.min(Game.hour, 23.9);   // the Skunk Ape / Manny don't keep office hours
   else if (Game.hour >= 22) { Game.hour = 22; return say([['', 'It’s 10 PM. The mosquitoes have unionized.'], ['DAN', 'Aight. Bed. Wherever I’m standing is bed now.']], () => endDay('late')); }
-  moveDan(dt); if (Game.dan.ride === 'cooler') Game.day_.usedCooler = true;
+  moveDan(dt);
+  if (Game.dan.ride === 'cooler') { Game.day_.usedCooler = true; const C = Game.cooler, D = Game.dan; if (!C.lm || Math.hypot(D.x - C.lm.x, D.y - C.lm.y) > 6) { C.lm = { x: D.x, y: D.y }; const side = D.dir === 'up' || D.dir === 'down'; Look.mark('track', D.x + (side ? -4 : 0), D.y + (side ? 0 : 3)); Look.mark('track', D.x + (side ? 4 : 0), D.y + (side ? 0 : -3)); } }   // cooler tire tracks
   if (Game.storm > .3 && !Game.dan.ride) { const nx = Game.dan.x + Game.storm * 16 * dt; if (canWalk(nx, Game.dan.y)) Game.dan.x = nx; }
   tickWorld(dt);
   Story.tick(dt);
@@ -371,11 +372,12 @@ const TALKY = ['The swamp remembers, Dan.', 'Moo is a state of mind.', 'I’m no
 
 function drawWorld() {
   const cx = Math.round(clamp(Game.cam.x, 0, MW * TS - VW) + (Math.random() - .5) * Game.shake), cy = Math.round(clamp(Game.cam.y, 0, MH * TS - VH) + (Math.random() - .5) * Game.shake), t = Game.t;
-  drawTiles(cx, cy, t); Ambient.water(cx, cy, t);
+  drawTiles(cx, cy, t); Ambient.water(cx, cy, t); Look.drawMarks(cx, cy);
   const vis = (x, y, m = 60) => x > cx - m && x < cx + VW + m && y > cy - m && y < cy + VH + m * 1.5;
   for (const p of World.props) if (p.kind === 'lily' && vis(p.x, p.y)) drawProp(p, cx, cy, t);
   for (const f of Game.prints || []) if (vis(f.x, f.y)) g.drawImage(SPR.footprint, Math.round(f.x - cx - 2), Math.round(f.y - cy - 2));
   for (const a of Game.animals) if (a.type === 'gator' && a.lurk && vis(a.x, a.y)) drawGator(a, cx, cy, t);
+  Look.shadows(cx, cy, t);
   const L = [];
   for (const p of World.props) if (p.kind !== 'lily' && vis(p.x, p.y, 90)) L.push([p.y + p.h, () => drawProp(p, cx, cy, t)]);
   for (const p of Game.pickups) if (vis(p.x, p.y)) L.push([p.y, () => drawPickup(p, cx, cy, t)]);
@@ -393,7 +395,8 @@ function drawWorld() {
   L.sort((a, b) => a[0] - b[0]).forEach(e => e[1]());
   Heat.draw(cx, cy, t); Lambo.draw(cx, cy, t); BoatChase.draw(cx, cy, t); Car.drawAll(cx, cy, t);
   drawProjectiles(cx, cy); drawParts(cx, cy); Gigs.draw(cx, cy, t);
-  if (Game.mode !== 'title') Ambient.air(cx, cy, t);
+  if (Game.mode !== 'title') { Ambient.air(cx, cy, t); Look.air(cx, cy, t); }
+  Look.litCv = Look.lights(cx, cy, t);
   drawObjective(cx, cy, t); Scene.draw(cx, cy, t);
   if (Game.fx.shroom > 0) for (const a of Game.animals) if (vis(a.x, a.y, 0) && !a.lurk && hash2(Math.floor(t / 4), a.x | 0) > .6) label(TALKY[Math.floor(hash2(Math.floor(t / 4), a.y | 0) * TALKY.length)], a.x - cx, a.y - cy - 24, PAL.neon, 6);
   if (Game.storm > 0) drawStorm(t);
@@ -419,7 +422,7 @@ function drawStorm(t) {
 }
 
 function render() {
-  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.setTransform(1, 0, 0, 1, 0, 0); Look.litCv = null; const LG = Look.grade();
   const scene = Game.mode === 'fish' ? () => Fishing.draw() : Game.mode === 'wrestle' ? () => Wrestle.draw() : Game.mode === 'raccoon' ? () => Minigame.drawRaccoon() : Game.mode === 'mash' ? () => Mash.draw()
     : Game.mode === 'dance' ? () => Dance.draw()
     : (Game.mode === 'objection' || Game.scene === 'parade' || Game.mode === 'court' || (Game.mode === 'talk' && Game.talk && Game.talk.prev === 'court') || (Game.mode === 'gazette' && Game.flags.inCourt)) ? () => Court.draw(Game.t) : null;
@@ -433,8 +436,8 @@ function render() {
     g.fillStyle = '#0f0b15'; g.fillRect(0, 0, off, VH); g.fillRect(off + VW0, 0, W - off - VW0, VH);
   }
   if (window.Trailer && Trailer.extra) Trailer.extra();
-  const F = Game.fx, sky = Game.mode === 'title' ? [1, 1, 1] : skyTint(Game.hour), storm = 1 - Game.storm * .35;
+  const F = Game.fx, storm = 1 - Game.storm * .35, world = !scene;
   Screen.present({ t: Game.t, drunk: clamp((F.buzz - 25) / 60, 0, 1.3), high: F.high > 0 ? Math.min(1, F.high / 8) : 0, shroom: F.shroom > 0 ? Math.min(1, F.shroom / 6) : 0,
     powder: F.powder > 0 ? Math.min(1, F.powder / 4) : 0, crash: F.crash > 0 ? Math.min(1, F.crash / 5) : 0, cig: F.cig > 0 ? 1 : 0, flash: Game.flash,
-    lens: Game.lens, cam: Game.camFx, night: Game.hour > 20 || Game.hour < 6 ? .8 : Game.hour > 18.5 ? .4 : 0, tint: sky.map(v => v * storm), view: Game.view || (Game.kick > 0 ? ((z) => [.5 - .5 / z, .5 - .5 / z, 1 / z])(1 + Game.kick * .05) : undefined) });
+    lens: Game.lens, cam: Game.camFx, night: Game.hour > 20 || Game.hour < 6 ? .35 : Game.hour > 18.5 ? .15 : 0, tint: [storm, storm, storm * 1.02], shT: LG.sh, hiT: LG.hi, sat: LG.sat, amb: world ? LG.amb : Math.max(.72, LG.amb), lit: Look.litCv, shimmer: world ? LG.shimmer : 0, view: Game.view || (Game.kick > 0 ? ((z) => [.5 - .5 / z, .5 - .5 / z, 1 / z])(1 + Game.kick * .05) : undefined) });
 }

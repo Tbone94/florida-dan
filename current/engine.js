@@ -172,7 +172,7 @@ const Sound = (() => {
 
 // ---------- screen FX ----------
 const Screen = (() => {
-  let gl, cv, src, U = {}, ctx2d = null;
+  let gl, cv, src, U = {}, ctx2d = null, tex0 = null, litTex = null;
   const VS = 'attribute vec2 p; varying vec2 uv; void main(){ uv = vec2(p.x*.5+.5, .5-p.y*.5); gl_Position = vec4(p,0.,1.); }';
   const FS = `precision mediump float;
     varying vec2 uv;
@@ -181,6 +181,7 @@ const Screen = (() => {
     uniform vec3 tint, view;
     uniform vec2 tsize; uniform float pscale;
     uniform float lens, cam;   // trailer only: fisheye amount; camera look (1 security, 2 night vision, 3 bodycam)
+    uniform vec3 shT, hiT; uniform float sat, amb, litOn, shimmer; uniform sampler2D lit;   // time-of-day grade + the night light layer (look.js)
     vec3 hue(vec3 c, float a){ vec3 k = vec3(.57735); float ca = cos(a); return c*ca + cross(k, c)*sin(a) + k*dot(k, c)*(1. - ca); }
     vec3 S(vec2 u){   // sharp bilinear: hard pixels, but the edges land evenly at any (non-integer) scale
       vec2 px = clamp(u, .0005, .9995) * tsize, i = floor(px), d = fract(px) - .5, r = vec2(.5 - .5 / pscale);
@@ -189,6 +190,7 @@ const Screen = (() => {
     void main(){
       vec2 q = uv - .5; q *= 1. + lens * dot(q, q) * 1.8;
       vec2 u = view.xy + (q + .5) * view.z;
+      u.x += sin(u.y * 150. + t * 5.) * .0007 * shimmer * smoothstep(.35, 1., u.y);   // noon heat haze off the ground
       u.x += sin(t*1.3 + u.y*3.) * .006 * drunk;
       u.y += cos(t*1.1 + u.x*2.) * .004 * drunk;
       u += vec2(sin(u.y*16. + t*2.), cos(u.x*12. + t*1.7)) * .007 * shroom;
@@ -198,12 +200,14 @@ const Screen = (() => {
       if (drunk > .01) c = mix(c, S(u + vec2(.012 + sin(t*.9)*.008, cos(t*.7)*.006) * drunk), .42 * min(1., drunk));
       if (powder > .01) { float o = .0035 * powder; c.r = S(u + vec2(o, 0.)).r; c.b = S(u - vec2(o, 0.)).b; }
       c *= tint;
+      { float L1 = dot(c, vec3(.299, .587, .114)); c *= mix(shT, hiT, smoothstep(.1, .9, L1)); }   // split-tone: shadows one way, light the other
       { float L0 = dot(c, vec3(.299, .587, .114)); c *= mix(vec3(.93, 1., 1.05), vec3(1.05, 1., .92), smoothstep(.15, .85, L0)); c = c * .96 + vec3(.035, .028, .02); }   // Florida postcard: warm highs, teal lows, faded blacks
       float l = dot(c, vec3(.299, .587, .114));
-      c = mix(vec3(l), c, 1. + .45*high + .7*shroom + .3*powder - .75*crash);
+      c = mix(vec3(l), c, sat + .45*high + .7*shroom + .3*powder - .75*crash);
       if (shroom > .01) c = mix(c, hue(c, t*1.1 + u.y*5. + u.x*2.), .6 * shroom);
       c += vec3(.07, .03, -.03) * high;
       if (powder > .01) c = (c - .5) * (1. + .2*powder) + .5;
+      if (litOn > .5) { vec3 Lt = texture2D(lit, clamp(u, .001, .999)).rgb; c = c * (amb + Lt * 1.7) + Lt * .14 * (1. - amb); } else c *= amb;
       float v = smoothstep(.9, .3, length(uv - .5) * (1. + night*.5 + crash*.7));
       c *= mix(1., v, .25 + night*.45 + crash*.45 + cig*.12);
       if (cam > .5) {
@@ -226,14 +230,17 @@ const Screen = (() => {
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
     const loc = gl.getAttribLocation(prog, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
-    [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]].forEach(([k, v]) => gl.texParameteri(gl.TEXTURE_2D, k, v));
-    ['t', 'drunk', 'high', 'shroom', 'powder', 'crash', 'flash', 'night', 'cig', 'lens', 'cam', 'tint', 'view', 'tsize', 'pscale'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
+    const mk = () => { const tx = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tx); [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]].forEach(([k, v]) => gl.texParameteri(gl.TEXTURE_2D, k, v)); return tx; };
+    litTex = mk(); tex0 = mk();
+    ['t', 'drunk', 'high', 'shroom', 'powder', 'crash', 'flash', 'night', 'cig', 'lens', 'cam', 'tint', 'view', 'tsize', 'pscale', 'shT', 'hiT', 'sat', 'amb', 'litOn', 'shimmer', 'lit', 'tex'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
+    gl.uniform1i(U.tex, 0); gl.uniform1i(U.lit, 1);
   }
   function present(fx) {
     if (!gl) { ctx2d.imageSmoothingEnabled = false; ctx2d.drawImage(src, 0, 0, cv.width, cv.height); return; }
     gl.viewport(0, 0, cv.width, cv.height);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src);
+    if (fx.lit) { gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, litTex); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, fx.lit); gl.activeTexture(gl.TEXTURE0); }
+    gl.bindTexture(gl.TEXTURE_2D, tex0); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src);
+    gl.uniform3fv(U.shT, fx.shT || [1, 1, 1]); gl.uniform3fv(U.hiT, fx.hiT || [1, 1, 1]); gl.uniform1f(U.sat, fx.sat || 1); gl.uniform1f(U.amb, fx.amb === undefined ? 1 : fx.amb); gl.uniform1f(U.litOn, fx.lit ? 1 : 0); gl.uniform1f(U.shimmer, fx.shimmer || 0);
     for (const k of ['t', 'drunk', 'high', 'shroom', 'powder', 'crash', 'flash', 'night', 'cig', 'lens', 'cam']) gl.uniform1f(U[k], fx[k] || 0);
     gl.uniform3fv(U.tint, fx.tint || [1, 1, 1]);
     gl.uniform3fv(U.view, fx.view || [0, 0, 1]);

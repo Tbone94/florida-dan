@@ -33,6 +33,7 @@ function useItem(k) {
   D.anim = k; D.animT = 1.5;
   switch (k) {
     case 'beer': {
+      if (Math.random() < .6 && !Game.dan.ride) Look.mark('can', Game.dan.x + rnd(-8, 8), Game.dan.y + rnd(2, 6));   // litter: extremely Florida
       F.buzz = Math.min(130, F.buzz + 22); Game.chill = Math.min(100, Game.chill + 12); L.beers++; Game.inv.can = (Game.inv.can || 0) + 1;
       Sound.play('crack');
       toast(F.buzz > 80 ? pick(["Dan's seein' two of everything. Twice the gators.", 'Wooo. WOOOO. Okay.', 'The ground is movin’, Brenda.']) : pick(['*crack* ...ahhhhh.', 'Breakfast of champions.', 'Hydration.', 'Tastes like freedom and aluminum.', 'That’s the good sh*t.']));
@@ -132,6 +133,7 @@ function updateProjectiles(dt) {
   Game.projectiles = Game.projectiles.filter(p => p.life > 0);
 }
 function explode(x, y) {
+  if (typeof Look !== 'undefined') Look.mark('scorch', x, y + 6);   // the swamp remembers (until morning)
   Sound.play('boom'); Game.shake = 10; Game.flash = .6;
   for (let i = 0; i < 40; i++) { const a = rnd(0, 6.28), s = rnd(20, 90); Game.parts.push({ kind: 'spark', x, y: y - 16, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: rnd(.4, 1), c: pick([PAL.red, PAL.white, PAL.blue, PAL.yellow]) }); }
   for (const a of Game.animals) if (Math.hypot(a.x - x, a.y - y) < 110) { a.state = 'flee'; a.timer = 6; a.stun = 1.5; }

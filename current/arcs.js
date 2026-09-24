@@ -34,7 +34,7 @@ const ARCS = {
           SC.emote('merle', '♥', 1.1, PAL.hat), SC.say([['MERLE', '(down on one knee; his knee makes a sound) Darlene. You’re the best thing that ever happened at a gas station.'], ['DARLENE', '...Yes. YES, you idiot.']]),
           SC.all([SC.emote('merle', '♥', 1.4, PAL.hat), SC.emote('darlene', '♥', 1.4, PAL.hat)]), SC.line('dan', 'HIT IT!', .8),
           ...SC_ROCKET(S.x - 24, S.y + 10), SC.wait(.3), ...SC_ROCKET(S.x + 26, S.y + 10), SC.wait(.3),
-          SC.fly(ROCKET, S.x - 30, S.y + 10, S.x + 4, S.y - 8, .4, 20, true), SC.fx(() => { explode(S.x, S.y - 12); Game.shake = 8; Game.flash = .7; }),
+          SC.fly(ROCKET, S.x - 30, S.y + 10, S.x + 4, S.y - 8, .4, 20, true), SC.fx(() => { explode(S.x, S.y - 12); Game.shake = 8; Game.flash = .7; Look.mark('scorch', S.x, S.y + 10, { big: 1 }, true); for (let i = 0; i < 14; i++) Look.mark('paper', S.x + rnd(-30, 30), S.y + rnd(0, 26), {}, true); }),
           SC.line('boomer', 'THAT’S MY WHOLE INVENTORY—', 1.3), SC.cam(S.x, S.y - 50, 1.2, .6),
           ...[0, 1, 2, 3, 4, 5, 6, 7].flatMap(i => SC_ROCKET(S.x - 50 + i * 14, S.y, 70 + (i % 3) * 20, .15)), SC.wait(1.4)],
           () => { keep.forEach(k => Object.assign(k.n, { x: k.x, y: k.y, hx: k.hx, hy: k.hy })); headline('FLORIDA MAN’S PROPOSAL FIREWORKS IGNITE ENTIRE FIREWORKS STAND; BRIDE CALLS IT "PERFECT"', 6); fin(); }); } },
