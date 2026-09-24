@@ -29,21 +29,32 @@ const ARCS = {
     { gate: F => F.case2Won, where: 'swamp', text: 'Merle’s proposal: bring 3 Freedom Rockets to the fireworks stand after 7 PM',
       ask: [['MERLE', 'I’m gonna do it, Danny. I’m gonna ask her.'], ['DAN', 'MERLE!'], ['MERLE', 'Fireworks stand. Tonight. When she says yes, you light three Freedom Rockets. When she says no, you light three Freedom Rockets and I run.']],
       act: { at: () => AS().fireworks, when: () => Game.hour >= 19 && (Game.inv.firework || 0) >= 3, wait: () => (Game.inv.firework || 0) < 3 ? 'Proposal rockets (need 3 Freedom Rockets)' : 'Proposal rockets (after 7 PM)', label: 'Light the proposal rockets', run: fin => {
-        Game.inv.firework -= 3; say([['', 'Merle gets down on one knee. It takes a while. His knee makes a sound.'], ['MERLE', 'Darlene. You’re the best thing that ever happened at a gas station.'], ['DARLENE', '...Yes. YES, you idiot.'],
-          ['', 'Dan lights the rockets. The first one goes up. The second goes sideways. The third goes into Boomer’s stand.'], ['BOOMER', 'THAT’S MY WHOLE INVENTORY—'], ['', 'The sky explodes. Every rocket Boomer owns goes off at once. It is the most beautiful thing Collier County has ever seen.']],
-          () => { explode && explode(AS().fireworks.x, AS().fireworks.y - 30); Game.flash = .8; Game.shake = 8; headline('FLORIDA MAN’S PROPOSAL FIREWORKS IGNITE ENTIRE FIREWORKS STAND; BRIDE CALLS IT "PERFECT"', 6); fin(); }); } },
+        Game.inv.firework -= 3; const S = AS().fireworks, keep = ['merle', 'darlene'].map(id => who(id)).filter(Boolean).map(n => ({ n, x: n.x, y: n.y, hx: n.hx, hy: n.hy }));
+        Scene.play([SC.cam(S.x, S.y - 14, 1.5, .7), SC.place('merle', S.x - 12, S.y + 22, 'right'), SC.place('darlene', S.x + 12, S.y + 22, 'left'), SC.walk('dan', S.x - 30, S.y + 30, 50), SC.face('dan', 'right'),
+          SC.emote('merle', '♥', 1.1, PAL.hat), SC.say([['MERLE', '(down on one knee; his knee makes a sound) Darlene. You’re the best thing that ever happened at a gas station.'], ['DARLENE', '...Yes. YES, you idiot.']]),
+          SC.all([SC.emote('merle', '♥', 1.4, PAL.hat), SC.emote('darlene', '♥', 1.4, PAL.hat)]), SC.line('dan', 'HIT IT!', .8),
+          ...SC_ROCKET(S.x - 24, S.y + 10), SC.wait(.3), ...SC_ROCKET(S.x + 26, S.y + 10), SC.wait(.3),
+          SC.fly(ROCKET, S.x - 30, S.y + 10, S.x + 4, S.y - 8, .4, 20, true), SC.fx(() => { explode(S.x, S.y - 12); Game.shake = 8; Game.flash = .7; }),
+          SC.line('boomer', 'THAT’S MY WHOLE INVENTORY—', 1.3), SC.cam(S.x, S.y - 50, 1.2, .6),
+          ...[0, 1, 2, 3, 4, 5, 6, 7].flatMap(i => SC_ROCKET(S.x - 50 + i * 14, S.y, 70 + (i % 3) * 20, .15)), SC.wait(1.4)],
+          () => { keep.forEach(k => Object.assign(k.n, { x: k.x, y: k.y, hx: k.hx, hy: k.hy })); headline('FLORIDA MAN’S PROPOSAL FIREWORKS IGNITE ENTIRE FIREWORKS STAND; BRIDE CALLS IT "PERFECT"', 6); fin(); }); } },
       pay: () => [['MERLE', 'Forget the forty bucks, Danny. Forget it forever. You’re my best man.'], ['DAN', 'I’ll wear my good jorts.']], cash: 60, ref: 8, after: () => { Game.flags.merleDebt = false; Game.flags.bestMan = true; } },
   ],
   darlene: [
     { gate: () => Game.day >= 3, where: 'swamp', text: 'Stake out the Gulp-N-Go dumpster after 8 PM (the roller dog thief)',
       ask: [['DARLENE', 'Somebody’s been stealing roller dogs. Every night. Twelve dogs. Gone.'], ['DAN', 'It wasn’t me.'], ['DARLENE', 'I KNOW it wasn’t you, you pay for yours. Mostly. Stake out the dumpster tonight.']],
-      act: { at: () => ({ x: AS().darlene.x - 60, y: AS().darlene.y + 24 }), when: () => Game.hour >= 20, wait: 'Stake out the dumpster (after 8 PM)', label: 'Stake out the dumpster', run: fin => say([
-        ['', 'Dan hides behind the dumpster. An hour passes. He eats a roller dog. It was evidence.'], ['', 'Something climbs out of the dumpster. It is a raccoon. It is wearing a tiny bucket hat.'], ['DAN', '...Gregory?'], ['GREGORY', '*chitter*'],
+      act: { at: () => ({ x: AS().darlene.x - 60, y: AS().darlene.y + 24 }), when: () => Game.hour >= 20, wait: 'Stake out the dumpster (after 8 PM)', label: 'Stake out the dumpster', run: fin => {
+        const x = AS().darlene.x - 60, y = AS().darlene.y + 24, greg = makeCritter('raccoon', x + 400, y, { gregory: true });
+        Game.animals.push(greg);
+        Scene.play([SC.cam(x, y - 8, 1.7, .6), SC.walk('dan', x - 18, y + 8, 45), SC.face('dan', 'right'), SC.line('dan', 'shhh...', 1.2), SC.wait(.5), SC.emote('dan', 'Z', .8, PAL.white),
+          SC.place(greg, x + 4, y - 8), SC.emote(greg, '!', .7), SC.walk(greg, x + 6, y + 6, 20), SC.line(greg, '*chitter*', 1), SC.emote('dan', '?', .8), SC.line('dan', '...Gregory?', 1.2)],
+          () => say([['', 'An hour passed. Dan ate a roller dog. It was evidence.'], ['', 'The raccoon is wearing a tiny bucket hat. Dan knows that hat.'],
         ['DAN', '', [
           ['Punch Gregory', () => { hurtDan(8); return [['', '*POW* Gregory punches back. Harder. Gregory has done this before.'], ['', 'He drops the roller dogs and flees into the night, bucket hat and all.']]; }],
           ['Offer Gregory a Swamp Lite', () => { if (Game.inv.beer > 0) Game.inv.beer--; return [['', 'Gregory accepts. They drink. Gregory agrees to rob the Circle K across the county line instead.'], ['DAN', 'That’s called diplomacy.']]; }],
           ['Yell “GIT!”', () => { Sound.play('git'); return [['DAN', 'GIIIIIT!'], ['', 'Gregory gits. He leaves a note: “FINE.” It is written in mustard.']]; }]]]],
-        () => { headline('FLORIDA MAN FOILS RACCOON ROLLER DOG HEIST; RACCOON "WILL BE BACK"', 3); fin(); }) },
+        () => { Game.animals = Game.animals.filter(a => a !== greg); headline('FLORIDA MAN FOILS RACCOON ROLLER DOG HEIST; RACCOON "WILL BE BACK"', 3); fin(); }));
+      } },
       pay: () => [['DARLENE', 'Gregory. I KNEW it. Here, hon. And take some dogs. They’re, uh. They were in the dumpster a little.']], cash: 20, ref: 4, after: () => giveItem('hotdog', 2, true) },
     { gate: F => F.acquitted, where: 'swamp', text: 'Pass Darlene’s “secret shopper” test (talk to her)',
       ask: [['DARLENE', 'Corporate’s sending a secret shopper. If this store looks like a Florida Man store, I’m fired.'], ['DAN', 'What’s a Florida Man store?'], ['DARLENE', 'THIS ONE, Dan. Come back and practice being a normal customer with me.']],

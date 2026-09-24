@@ -117,7 +117,7 @@ function interaction() {
   if (near(Game.cooler, 18)) return { label: 'Ride the motorized cooler', fn: () => { D.ride = 'cooler'; D.x = Game.cooler.x; D.y = Game.cooler.y; Sound.play('engine'); if (Game.fx.buzz > 50 || Game.fx.powder > 0) Game.day_.dui = true; } };
   const p = facingPoint(16), k = World.at(p.x, p.y), here = World.at(D.x, D.y);
   if (k === T.DEEP || k === T.WATER || (k === T.SHALLOW && here === T.DOCK)) return { label: 'Cast from here', fn: () => Fishing.start(k, true) };
-  if (!D.ride && !Game.cooler.home && Math.hypot(Game.cooler.x - D.x, Game.cooler.y - D.y) > 200) return { label: 'Whistle for the cooler', fn: whistleCooler };
+  if (!D.ride && Game.day_.usedCooler && !Game.cooler.home && Math.hypot(Game.cooler.x - D.x, Game.cooler.y - D.y) > 200)   // only once you've actually left it somewhere return { label: 'Whistle for the cooler', fn: whistleCooler };
   return null;
 }
 // lost the cooler? whistle. It drives itself over, headlights on, like a very cold dog.
@@ -256,6 +256,7 @@ function update(dt) {
     case 'shop': if (Input.tapped('pause') || Input.tapped('b')) closeShop(); return;
     case 'journal': if (Input.tapped('left')) flipClip(-1); if (Input.tapped('right')) flipClip(1); if (Input.tapped('journal') || Input.tapped('pause') || Input.tapped('a') || Input.tapped('b')) closeJournal(); return;
     case 'gazette': return;
+    case 'scene': Scene.tick(dt); return;
   }
   // --- play ---
   if (Input.tapped('journal') || Input.tapped('pause')) return openJournal();
@@ -270,7 +271,7 @@ function update(dt) {
   if (Game.chill <= 0) { Game.chill = 40; headline('FLORIDA MAN SCREAMS AT PELICAN FOR 40 MINUTES; PELICAN UNBOTHERED', 4); return say([['', 'Dan has run out of chill.'], ['DAN', 'WHAT ARE YOU LOOKIN AT, PELICAN? HUH? YEAH, YOU. YOU AND YOUR STUPID FACE-BAG!'], ['', 'The pelican is unbothered. Dan feels better, weirdly.']]); }
   if (Game.hour >= 22 && Cases.nightWork()) Game.hour = Math.min(Game.hour, 23.9);   // the Skunk Ape / Manny don't keep office hours
   else if (Game.hour >= 22) { Game.hour = 22; return say([['', 'It’s 10 PM. The mosquitoes have unionized.'], ['DAN', 'Aight. Bed. Wherever I’m standing is bed now.']], () => endDay('late')); }
-  moveDan(dt);
+  moveDan(dt); if (Game.dan.ride === 'cooler') Game.day_.usedCooler = true;
   if (Game.storm > .3 && !Game.dan.ride) { const nx = Game.dan.x + Game.storm * 16 * dt; if (canWalk(nx, Game.dan.y)) Game.dan.x = nx; }
   tickWorld(dt);
   Story.tick(dt);
@@ -388,12 +389,12 @@ function drawWorld() {
   const D = Game.dan;
   if (D.ride !== 'boat') L.push([Game.boat.y + 4, () => drawBoat(Game.boat.x - cx, Game.boat.y - cy, Game.boat.dir, t, false)]);
   if (D.ride !== 'cooler') L.push([Game.cooler.y + 3, () => drawCooler(Game.cooler.x - cx, Game.cooler.y - cy, Game.cooler.dir, t, false)]);
-  if (Game.mode !== 'title') L.push([D.y + (D.ride === 'boat' ? 4 : 0), () => drawDan(D.x - cx, D.y - cy, t)]);
+  if (Game.mode !== 'title') L.push([D.y + (D.ride === 'boat' ? 4 : 0) + (D.lift ? 400 : 0), () => drawDan(D.x - cx, D.y - cy - (D.lift || 0), t)]);   // lift: up a ladder / on a roof (cutscenes)
   L.sort((a, b) => a[0] - b[0]).forEach(e => e[1]());
   Heat.draw(cx, cy, t); Lambo.draw(cx, cy, t); BoatChase.draw(cx, cy, t); Car.drawAll(cx, cy, t);
   drawProjectiles(cx, cy); drawParts(cx, cy); Gigs.draw(cx, cy, t);
   if (Game.mode !== 'title') Ambient.air(cx, cy, t);
-  drawObjective(cx, cy, t);
+  drawObjective(cx, cy, t); Scene.draw(cx, cy, t);
   if (Game.fx.shroom > 0) for (const a of Game.animals) if (vis(a.x, a.y, 0) && !a.lurk && hash2(Math.floor(t / 4), a.x | 0) > .6) label(TALKY[Math.floor(hash2(Math.floor(t / 4), a.y | 0) * TALKY.length)], a.x - cx, a.y - cy - 24, PAL.neon, 6);
   if (Game.storm > 0) drawStorm(t);
 }

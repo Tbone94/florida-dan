@@ -57,6 +57,7 @@ function buildMiami() {
 
 // ---------- drawing the city ----------
 const NIGHT = () => Game.hour >= 19.5 || Game.hour < 6;
+const shadeHex = (hex, k) => '#' + [1, 3, 5].map(i => Math.round(parseInt(hex.slice(i, i + 2), 16) * k).toString(16).padStart(2, '0')).join('');
 function neonGlow(x, y, w, h, c) {
   if (!NIGHT()) return;
   g.globalCompositeOperation = 'lighter'; g.globalAlpha = .22 + Math.sin(Game.t * 3 + x) * .05; g.fillStyle = c;
@@ -64,14 +65,42 @@ function neonGlow(x, y, w, h, c) {
 }
 function drawMiamiProp(p, x, y, w, h, t) {
   switch (p.kind) {
-    case 'deco': {
-      const fl = p.floors || 2, top = y - fl * 14;
-      shadow(x + w / 2, y + h + 2, w + 8, 6);
-      OR(x, top, w, h + fl * 14, p.color); R(x, top, w, 4, p.trim); R(x - 2, top - 3, w + 4, 3, p.trim);
-      for (let f = 0; f < fl; f++) for (let wx = x + 6; wx < x + w - 10; wx += 16) { OR(wx, top + 10 + f * 14, 8, 7, NIGHT() ? '#ffe9a8' : '#9fd8ee'); }
-      R(x + 2, y + h - 18, w - 4, 2, p.trim);
-      OR(x + w / 2 - 8, y + h - 16, 16, 16, PAL.inkL); R(x + w / 2 - 1, y + h - 16, 1, 16, PAL.ink);
-      if (p.sign) { const sw = labelWidth(p.sign) + 8; OR(x + w / 2 - sw / 2, top - 16, sw, 11, PAL.ink); neonGlow(x + w / 2 - sw / 2, top - 16, sw, 11, p.neon); label(p.sign, x + w / 2, top - 7, NIGHT() && Math.sin(t * 7 + x) < -.95 ? PAL.inkL : p.neon, 7); }
+    case 'deco': {   // Ocean Drive art deco: stepped ziggurat tower, fins, racing stripes, eyebrow ledges, portholes, neon
+      const fl = p.floors || 2, top = y - fl * 14, H = h + fl * 14, cx = Math.round(x + w / 2), dark = shadeHex(p.color, .78), deep = shadeHex(p.color, .6), night = NIGHT();
+      const trim = p.trim === PAL.white ? shadeHex(p.color, .55) : p.trim, glass = night ? '#ffe9a8' : '#9fd8ee', stream = !p.sign && hash2(p.x, p.y) > .5, tw = p.sign ? 34 : stream ? 0 : 24;   // streamline style: no tower, one tall fin, stripes all the way round
+      shadow(cx, y + h + 2, w + 8, 6);
+      OR(x, top, w, H, p.color);
+      R(x + 1, top + 1, 2, H - 2, dark); R(x + w - 3, top + 1, 2, H - 2, dark);                       // rounded, shaded corners
+      for (let i = 0; i < 3; i++) { R(x + 3, top + 5 + i * 3, cx - tw / 2 - x - 5, 1, trim); R(cx + tw / 2 + 2, top + 5 + i * 3, x + w - cx - tw / 2 - 5, 1, trim); }   // racing stripes
+      R(x, top, w, 2, trim);
+      // windows with eyebrow ledges, left and right of the tower
+      for (let f = 0; f < fl; f++) { const wy = top + 16 + f * 14;
+        for (let wx = x + 7; wx + 12 < cx - tw / 2 - 2; wx += 16) for (const X of [wx, x + w - (wx - x) - 12]) { OR(X, wy, 12, 7, glass); R(X - 2, wy - 3, 16, 2, trim); R(X - 2, wy - 1, 16, 1, deep); } }
+      if (stream) {   // the fin: a tall slab off to one side, lettered stripes, a porthole column
+        const fx = x + Math.round(w * .28), ft = top - 24; OR(fx - 5, ft, 10, H + 4 - 18, p.color); R(fx - 5, ft, 10, 2, trim); for (let i = 0; i < 4; i++) R(fx - 3, ft + 5 + i * 4, 6, 1, trim);
+        for (let k = 0; k < fl; k++) { const py = top + 14 + k * 14; R(fx - 2, py - 2, 5, 5, PAL.ink); R(fx - 1, py - 1, 3, 3, glass); }
+        if (night) { g.globalCompositeOperation = 'lighter'; g.globalAlpha = .5; R(fx - 5, ft, 10, 1, trim); R(fx, ft, 1, H - 14, trim); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; }
+      }
+      // the tower: three stepped tiers rising over the roofline, with a spine of vertical fins
+      const t1 = top - 10, t2 = top - 17, t3 = top - 22;
+      if (tw) {
+      OR(cx - tw / 2, t1, tw, H - (t1 - top) - 18 + 10, p.color); OR(cx - tw / 2 + 5, t2, tw - 10, 8, p.color); OR(cx - tw / 2 + 10, t3, tw - 20, 6, p.color);
+      R(cx - tw / 2, t1, tw, 2, trim); R(cx - tw / 2 + 5, t2, tw - 10, 2, trim); R(cx - tw / 2 + 10, t3, tw - 20, 2, trim);
+      for (const fx of [-6, 0, 6]) R(cx + fx - (fx ? 0 : 1), t1 + 4, fx ? 1 : 2, H - 30, dark);
+      // porthole windows down the tower
+      for (let k = 0; k < fl; k++) { const py = top + 12 + k * 14; for (const px of [cx - 10, cx + 10]) { R(px - 2, py - 3, 5, 1, PAL.ink); R(px - 3, py - 2, 7, 5, PAL.ink); R(px - 2, py + 3, 5, 1, PAL.ink); R(px - 2, py - 2, 5, 5, glass); R(px - 1, py - 1, 1, 1, PAL.white); } }
+      }
+      // entrance: glass-block panels, a marquee canopy, the door
+      const ey = y + h - 18;
+      for (const gx of [cx - 20, cx + 13]) { OR(gx, ey, 7, 16, '#d8f3ff'); for (let r = 0; r < 4; r++) R(gx + 1, ey + 3 + r * 4, 5, 1, '#9fc8dc'); }
+      OR(cx - 15, ey - 5, 30, 5, trim); R(cx - 14, ey, 28, 1, deep);
+      OR(cx - 8, ey + 2, 16, 14, PAL.inkL); R(cx - 1, ey + 2, 1, 14, PAL.ink);
+      if (p.sign) { const sw = labelWidth(p.sign) + 8; OR(cx - sw / 2, t3 - 14, sw, 11, PAL.ink); neonGlow(cx - sw / 2, t3 - 14, sw, 11, p.neon); label(p.sign, cx, t3 - 5, night && Math.sin(t * 7 + x) < -.95 ? PAL.inkL : p.neon, 7); }
+      if (night) {   // neon tubes trace the tower tiers and the stripes
+        const n = p.neon || trim; g.globalCompositeOperation = 'lighter'; g.globalAlpha = .55 + Math.sin(t * 3 + x) * .1;
+        R(cx - tw / 2, t1, tw, 1, n); R(cx - tw / 2 + 5, t2, tw - 10, 1, n); R(cx - tw / 2 + 10, t3, tw - 20, 1, n); R(x + 3, top + 5, w - 6, 1, n); R(cx - 15, ey, 30, 1, n);
+        g.globalAlpha = .12; R(cx - tw / 2 - 4, t3 - 4, tw + 8, H + 6, n); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
+      }
       if (p.club) { for (let i = 0; i < 3; i++) R(x + 10 + i * 30, y + h - 4, 18, 2, [PAL.neon, PAL.teal, PAL.yellow][(Math.floor(t * 4) + i) % 3]); }
       break;
     }

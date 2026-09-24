@@ -68,7 +68,13 @@
   .slot .key { position: absolute; left: .2em; top: 0; font-size: .7em; color: #8d8a93; font-weight: 700; }
   .slot .n { position: absolute; right: .2em; bottom: 0; font-size: .95em; font-weight: 700; color: var(--yellow); text-shadow: 1px 1px 0 #000; }
   @media (pointer: coarse) { .slot .key { display: none; } }   /* number keys mean nothing on a phone */
-  .slot.empty { display: none; }   /* only show what Dan actually has */
+  .slot.empty { display: none; }
+  /* cutscene letterbox */
+  #lbox { position: absolute; inset: 0; pointer-events: none; z-index: 4; }
+  #lbox i { position: absolute; left: 0; right: 0; height: 0; background: #000; transition: height .35s; } #lbox i:first-child { top: 0; } #lbox i:nth-child(2) { bottom: 0; }
+  #lbox.on i { height: 9%; }
+  #lskip { position: absolute; right: 1em; bottom: 1.2%; display: none; pointer-events: auto; background: none; border: 0; color: #cfcad6; font: 700 .8em var(--pixel, monospace); letter-spacing: .1em; cursor: pointer; padding: .3em .6em; }
+  #lbox.on #lskip { display: block; }   /* only show what Dan actually has */
   .slot:hover { border-color: var(--yellow); }
   .slot.sel { border-color: var(--pink); box-shadow: 0 0 0 2px var(--pink); }
   .padfocus { outline: 3px solid var(--yellow) !important; outline-offset: 3px; }
@@ -446,6 +452,7 @@
 </div>
 
 <div id="rotate" hidden>TURN YOUR PHONE SIDEWAYS FOR THE FULL SWAMP</div>
+<div id="lbox"><i></i><i></i><button id="lskip" onclick="Scene.skip()">SKIP ›</button></div>
 <div id="pad" hidden>
   <div id="stick"><div id="nub"></div></div>
   <button class="tbtn" id="btnA" aria-label="Use">E</button>
@@ -454,36 +461,37 @@
 </div>
 
 <script>window.TRAILER = true;</script>
-<script src="engine.js?v=202609231955"></script>
-<script src="songs.js?v=202609231955"></script>
-<script src="music.js?v=202609231955"></script>
-<script src="art.js?v=202609231955"></script>
-<script src="font.js?v=202609231955"></script>
-<script src="world.js?v=202609231955"></script>
-<script src="ambient.js?v=202609231955"></script>
-<script src="landmarks.js?v=202609231955"></script>
-<script src="gigs.js?v=202609231955"></script>
-<script src="arcs.js?v=202609231955"></script>
-<script src="actors.js?v=202609231955"></script>
-<script src="items.js?v=202609231955"></script>
-<script src="upgrades.js?v=202609231955"></script>
-<script src="money.js?v=202609231955"></script>
-<script src="headlines.js?v=202609231955"></script>
-<script src="story.js?v=202609231955"></script>
-<script src="minigames.js?v=202609231955"></script>
-<script src="court.js?v=202609231955"></script>
-<script src="cases.js?v=202609231955"></script>
-<script src="favors.js?v=202609231955"></script>
-<script src="court2.js?v=202609231955"></script>
-<script src="miami.js?v=202609231955"></script>
-<script src="cases45.js?v=202609231955"></script>
-<script src="miami2.js?v=202609231955"></script>
-<script src="daytona.js?v=202609231955"></script>
-<script src="daytona2.js?v=202609231955"></script>
-<script src="chase.js?v=202609231955"></script>
-<script src="game.js?v=202609231955"></script>
-<script src="share.js?v=202609231955"></script>
-<script src="ui.js?v=202609231955"></script>
-<script src="trailer.js?v=202609231955"></script>
-<script src="trailer-news.js?v=202609231955"></script>
-<script src="pwa.js?v=202609231955"></script>
+<script src="engine.js?v=202609232014"></script>
+<script src="songs.js?v=202609232014"></script>
+<script src="music.js?v=202609232014"></script>
+<script src="art.js?v=202609232014"></script>
+<script src="font.js?v=202609232014"></script>
+<script src="world.js?v=202609232014"></script>
+<script src="ambient.js?v=202609232014"></script>
+<script src="landmarks.js?v=202609232014"></script>
+<script src="gigs.js?v=202609232014"></script>
+<script src="arcs.js?v=202609232014"></script>
+<script src="actors.js?v=202609232014"></script>
+<script src="items.js?v=202609232014"></script>
+<script src="upgrades.js?v=202609232014"></script>
+<script src="money.js?v=202609232014"></script>
+<script src="headlines.js?v=202609232014"></script>
+<script src="story.js?v=202609232014"></script>
+<script src="cutscene.js?v=202609232014"></script>
+<script src="minigames.js?v=202609232014"></script>
+<script src="court.js?v=202609232014"></script>
+<script src="cases.js?v=202609232014"></script>
+<script src="favors.js?v=202609232014"></script>
+<script src="court2.js?v=202609232014"></script>
+<script src="miami.js?v=202609232014"></script>
+<script src="cases45.js?v=202609232014"></script>
+<script src="miami2.js?v=202609232014"></script>
+<script src="daytona.js?v=202609232014"></script>
+<script src="daytona2.js?v=202609232014"></script>
+<script src="chase.js?v=202609232014"></script>
+<script src="game.js?v=202609232014"></script>
+<script src="share.js?v=202609232014"></script>
+<script src="ui.js?v=202609232014"></script>
+<script src="trailer.js?v=202609232014"></script>
+<script src="trailer-news.js?v=202609232014"></script>
+<script src="pwa.js?v=202609232014"></script>

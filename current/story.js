@@ -211,19 +211,54 @@ const Story = {
     if (n.id === 'wayne') return say([['WAYNE', pick(['Duuude. Dan. My guy. You look like you need some... oregano.', 'Welcome to the Mystery Van. The mystery is what’s in the van. It’s weed.', 'Shhh. Rhonda’s got ears in the palm trees, man.'])],
       ['WAYNE', 'What can I do you for?', [['See what Wayne’s got', () => { Game.mode = 'shop'; openShop('van'); return null; }], ['“Just saying hi.”', () => [['WAYNE', 'Hi back, man. Hi... back. Whoa.']]]]]]);
   },
+  // up the ladder for the stop sign... and back down the fast way
+  roofScene() {
+    const S_ = World.spots, lx = S_.door.x - 34, ly = S_.door.y;
+    return [SC.cam(lx + 10, ly - 22, 1.6, .6), SC.walk('dan', lx, ly + 2, 50), SC.face('dan', 'up'), SC.lift('dan', 30, 1.1),
+      SC.face('dan', 'down'), SC.line('dan', 'GOT IT!', 1), SC.emote('dan', '?', .6),
+      SC.all([SC.lift('dan', 0, .3), SC.walk('dan', lx + 12, ly + 16, 70)]), SC.shake(8), SC.sound('hurt'), SC.react('flop'), SC.wait(1.3), SC.camOn('dan', 1, .5, -10)];
+  },
+  // Hurricane Wanda makes landfall on Merle's party
+  wandaScene() {
+    const M = World.spots.merle;
+    return [SC.cam(M.x - 10, M.y - 6, 1.25, .6), SC.all([SC.tween(() => Game.storm, v => { Game.storm = v; }, 1, 1.6), SC.shake(4)]),
+      SC.emote('merle', '!!', 1, PAL.orange), SC.fly(() => SPR.flamingo, M.x - 150, M.y - 10, M.x + 170, M.y - 70, 1.9, 9, true),
+      SC.line('merle', 'WAAANDAAA!', 1.3), SC.camOn('dan', 1, .5, -10)];
+  },
+  // Dan rides the manatee (the spirit said it's a felony)
+  mannyScene() {
+    const a = Game.animals.find(x => x.spirit); if (!a) return [];
+    const ax = a.x, ay = a.y;
+    return [SC.cam(ax, ay - 8, 1.5, .6), SC.walk('dan', ax, ay - 6, 45), SC.lift('dan', 5, .25), SC.emote('dan', '♥', 1, PAL.hat),
+      SC.all([SC.walk(a, ax + 90, ay + 10, 32), SC.walk('dan', ax + 90, ay + 4, 32), SC.cam(ax + 90, ay - 4, 1.5, 2.8)]), SC.flash(.6)];
+  },
+  // the frozen turkey goes in the fryer (shown, not told)
+  fryScene() {
+    const M = World.spots.merle, fx = M.x - 44, fy = M.y + 10, fire = n => { for (let i = 0; i < n; i++) Game.parts.push({ kind: 'fire', x: fx + rnd(-10, 10), y: fy - 4, vx: rnd(-10, 10), vy: rnd(-50, -12), life: rnd(1, 3) }); };
+    return [
+      SC.cam(fx + 12, fy - 8, 1.6, .7),
+      SC.walk('merle', fx + 14, fy + 2, 40), SC.face('merle', 'left'),
+      SC.line('merle', 'Like God intended.', 1.1),
+      SC.emote('dan', '!', .9, PAL.red), SC.wait(.3),
+      SC.fx(() => { explode(fx, fy); fire(40); }), SC.shake(10), SC.flash(.8),
+      SC.all([SC.walk('merle', fx + 58, fy + 10, 130), SC.emote('merle', '!!', 1.2, PAL.orange)]),
+      SC.fx(() => fire(20)), SC.wait(1.1),
+      SC.face('merle', 'left'), SC.line('merle', '...Worth it.', 1.5),
+      SC.camOn('dan', 1, .6, -10),
+    ];
+  },
   merle() {
     const F = Game.flags, day = Game.day, real = Game.catchBag.filter(f => !f.junk);
     if (day === 1 && !F.fry) {
       if (real.length < 3) return say([['MERLE', real.length ? `That’s ${real.length}. I said THREE, Danny. Three is a number.` : 'Danny boy! Where’s my fish? Fryer’s hot. Well. It’s gettin’ there.'], ['MERLE', 'And watch out for Chuck. He’s been in a MOOD.']]);
       const gar = real.some(f => f.id === 'gar');
       return say([['MERLE', `HOT DANG! ${real.length} fish!`], ...(gar ? [['MERLE', '...Is that a GAR, Danny? I said NO GAR. You KNOW what happened last time.']] : []),
-        ['MERLE', 'Now watch this. I got a frozen turkey too. Straight into the fryer. Frozen. Like God intended.'], ['DAN', 'Merle, I really don’t think you’re supposed to—'], ['', '*FWOOOOOOOOSH*']], () => {
-        explode(World.spots.merle.x - 44, World.spots.merle.y + 10); for (let i = 0; i < 30; i++) Game.parts.push({ kind: 'fire', x: World.spots.merle.x - 44 + rnd(-10, 10), y: World.spots.merle.y + 6, vx: rnd(-8, 8), vy: rnd(-40, -10), life: rnd(1, 3) });
+        ['MERLE', 'Now watch this. I got a frozen turkey too. Straight into the fryer. Frozen. Like God intended.'], ['DAN', 'Merle, I really don’t think you’re supposed to—']], () => Scene.play(this.fryScene(), () => {
         F.fry = true; Game.catchBag = Game.catchBag.filter(f => f.junk); Game.inv.fish = 0;
         headline('FLORIDA MAN’S COUSIN DEEP-FRIES FROZEN TURKEY, SUMMONS FIRE DEPARTMENT; FLORIDA MAN SAYS HE "WAS JUST STANDING THERE"', 8);
-        say([['MERLE', '...Worth it.'], ['MERLE', 'Here. Found this in the bottom of the fryer. It’s yours now. Don’t ask.'], ['', 'Got: “Sinus Medicine” ×1 (slot 5)'],
+        say([['MERLE', 'Here. Found this in the bottom of the fryer. It’s yours now. Don’t ask.'], ['', 'Got: “Sinus Medicine” ×1 (slot 5)'],
           ['DAN', 'It’s for my sinuses.'], ['MERLE', 'I didn’t ask, Danny.'], ['MERLE', 'Anyway you still owe me forty bucks.']], () => { giveItem('powder'); done('merle'); addQuest('sleep1', 'Go home to bed'); });
-      });
+      }));
     }
     if (day === 2 && !Q('merle2').done) {
       if (Game.money >= 40) return say([['MERLE', 'You got my forty?'], ['DAN', '', [['Pay Merle $40', () => { Game.money -= 40; Sound.play('cash'); done('merle2'); return [['MERLE', 'Pleasure doin’ business. I’ll sign it “Merle Haggard.” He’s a real guy. It’ll help.'], ['DAN', 'Merle, that’s a dead country singer.'], ['MERLE', 'Then he can’t deny it.']]; }], ['“What forty?”', () => [['MERLE', 'Don’t you “what forty” me, Daniel Wayne.']]]]]]);
@@ -270,23 +305,23 @@ const Story = {
     const F = Game.flags; F.party = true; done('party');
     say([['MERLE', 'WANDA! WANDA! WANDA!'], ['MERLE', 'Danny! You made it! Here — gumbo. Secret ingredient’s from the cow field.'],
       ['DAN', '', [['Eat the gumbo', () => [['DAN', '*slurp* ...Merle, what’s in this?'], ['MERLE', 'Forty percent mushrooms.']]], ['“I’m good, thanks.”', () => [['MERLE', 'More for Chuck then.'], ['', 'Dan drinks a Swamp Lite. The Swamp Lite was ALSO forty percent mushrooms. Merle is a menace.']]]]],
-      ['', 'Wanda arrives. The wind screams. Somewhere, a lawn flamingo achieves flight.'], ['???', 'Daaaaniel... come to the waaater...']], () => {
+    ], () => Scene.play(this.wandaScene(), () => say([['???', 'Daaaaniel... come to the waaater...']], () => {
       Game.fx.shroom = 120; Sound.play('trip'); Game.flags.manny = true; addQuest('manny', '??? Follow the voice to the water');
       Game.animals.push(makeCritter('manatee', World.spots.merle.x - 60, World.spots.merle.y + 70, { spirit: true }));
-    });
+    })));
   },
   manny() {
     say([['MANNY THE MANATEE SPIRIT', 'Daaaaaniel.'], ['DAN', '...Mom?'], ['MANNY', 'I am Manny. Sea cow of truth. Guardian of the Warm Power Plant Outflow.'],
       ['MANNY', 'You seek to escape the allegations, Daniel.'], ['MANNY', 'But you cannot escape what you ARE.'], ['DAN', 'A man?'], ['MANNY', 'A FLORIDA man.'],
       ['DAN', 'Don’t you say that. Don’t you DARE say that to me.'], ['MANNY', 'On Friday, the beast will come for you. When it does... do not run.'],
       ['MANNY', 'Hold its jaws shut, Daniel. Their jaw-opening muscles are weak. This is science.'],
-      ['DAN', '', [['“Can I ride you?”', () => [['MANNY', 'Touching a manatee is a felony in this state, Daniel.'], ['DAN', '...'], ['', 'Dan rides the manatee.']]], ['“What’s the meaning of life?”', () => [['MANNY', 'Lettuce. Warm water. Not getting hit by boats.'], ['DAN', 'Deep.'], ['', 'Dan rides the manatee anyway.']]]]],
-    ], () => {
+      ['DAN', '', [['“Can I ride you?”', () => [['MANNY', 'Touching a manatee is a felony in this state, Daniel.'], ['DAN', '...']]], ['“What’s the meaning of life?”', () => [['MANNY', 'Lettuce. Warm water. Not getting hit by boats.'], ['DAN', 'Deep.']]]]],
+    ], () => Scene.play(this.mannyScene(), () => {
       done('manny'); Game.flash = 1;
       headline('FLORIDA MAN FOUND RIDING MANATEE DURING HURRICANE; "IT WAS SPIRITUAL," HE TELLS DEPUTIES', 10);
       Game.animals = Game.animals.filter(a => !a.spirit);
       endDay('manny');
-    });
+    }));
   },
 
   // --- world objects ---
@@ -300,7 +335,7 @@ const Story = {
       if (Game.day === 3 && Game.inv.plywood >= 2 && !F.boarded) list.push({ label: 'Board up the windows', fn: () => { Game.inv.plywood -= 2; F.boarded = true; Sound.play('chomp'); done('board'); toast('Boarded. Dan used the stop sign as a third board. Rhonda will never know.'); } });
       else if (sleepReady()) list.push({ label: 'Hit the hay', fn: () => sleep() });
     }
-    if (F.stopSignOnRoof && !Game.inv.sign && near({ x: S_.door.x - 34, y: S_.door.y }, 18)) list.push({ label: 'Climb the ladder to the roof', fn: () => say([['', 'Dan climbs onto the roof. He grabs the stop sign.'], ['', 'Dan falls off the roof.'], ['DAN', 'I MEANT to do that.']], () => { Game.inv.sign = 1; F.stopSignOnRoof = false; hurtDan(5); done('sign'); headline('FLORIDA MAN FALLS OFF ROOF WHILE RETRIEVING STOLEN STOP SIGN HE "DID NOT STEAL"', 5); }) });
+    if (F.stopSignOnRoof && !Game.inv.sign && near({ x: S_.door.x - 34, y: S_.door.y }, 18)) list.push({ label: 'Climb the ladder to the roof', fn: () => Scene.play(Story.roofScene(), () => say([['DAN', '(from the dirt) I MEANT to do that.']], () => { Game.inv.sign = 1; F.stopSignOnRoof = false; hurtDan(5); done('sign'); headline('FLORIDA MAN FALLS OFF ROOF WHILE RETRIEVING STOLEN STOP SIGN HE "DID NOT STEAL"', 5); })) });
     if (Game.day === 2 && !F.raccoonOut && near(S_.icemachine, 20)) list.push({ label: 'Reach into the ice machine', fn: () => Minigame.raccoon() });
     if (near({ x: 37.7 * TS, y: 40.6 * TS }, 20)) list.push({ label: 'Dig in the dumpster', fn: () => {
       if (Game.day === 3 && !F.plywood) { F.plywood = true; Game.inv.plywood = 2; done('plywood'); return say([['', 'Dan finds two sheets of plywood.'], ['', 'He also finds a man named Kevin, asleep.'], ['KEVIN', 'Five more minutes.'], ['', 'Dan lets Kevin sleep.']]); }

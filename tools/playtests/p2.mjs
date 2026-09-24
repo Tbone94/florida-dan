@@ -16,7 +16,7 @@ const r = await p.evaluate(() => {
   Game.inv.beer = 3; Heat.cop = { x: Game.dan.x, y: Game.dan.y, dir: 'left', t: 0 }; Heat.busted(); talk(/Slip/);
   out.push(`cop payoff: beers kept=${Game.inv.beer} money $${Game.money}`);
   // --- Miami
-  Game.day = 18; World.load('miami'); spawn(); Gigs.newDay(); Game.mode = 'play'; ui.talk.hidden = true; Game.talk = null;
+  Game.day = 18; World.load('miami'); spawn(); Gigs.newDay(); for (const id in ARCS) ARC(id).no = Game.day;   // neighbor stories declined: this test is about shops and gigs Game.mode = 'play'; ui.talk.hidden = true; Game.talk = null;
   out.push('Miami offers: ' + JSON.stringify(Game.day_.gig.offers) + ' coral=' + !!Game.npcs.find(n => n.id === 'coral'));
   const coral = Game.npcs.find(n => n.id === 'coral'); Story.talk(coral); talk(/Browse/); out.push('surf shop: ' + [...ui.shopList.children].map(x => x.dataset.k).join(','));
   for (const row of [...ui.shopList.children]) row.click(); Game.mode = 'play'; ui.shop.hidden = true;

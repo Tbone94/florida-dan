@@ -185,8 +185,7 @@ const Cases = {
         if (Game.hour < 20) return toast('Too bright. Skunk Apes are night people. (Couch at home: “sit till dark.”)');
         Game.inv.hotdog -= 3; done('lure'); addQuest('track', 'Follow the footprints', false);
         const ape = this.makeApe(P.trailcam.x + 60, P.trailcam.y - 20); Game.animals.push(ape);
-        say([['', 'Dan lays three roller dogs on a log. The swamp goes quiet.'], ['', 'Something VERY large steps out of the sawgrass.'], ['SKUNK APE', 'HRRRRRRRM.'],
-          ['', 'It eats all three roller dogs in one bite and runs off into the dark.'], ['DAN', 'HEY! Those were $2 each!']], () => { ape.state = 'run'; Sound.play('boom'); });
+        ape.x += 400; Scene.play(this.lureScene(ape), () => { ape.state = 'run'; });   // offstage until it steps out
       } });
     }
     for (const a of Game.animals) if (a.ape && a.state === 'den' && near(a, 30)) {
@@ -214,11 +213,26 @@ const Cases = {
   },
   reunion(a) {
     const P = this.places(), chuck = makeGator(a.x + 26, a.y + 10, true); chuck.lurk = false; chuck.cd = 99; chuck.state = 'wander'; chuck.timer = 99; Game.animals.push(chuck);
-    say([['', 'A familiar pink visor rises out of the puddle next to the den.'], ['DAN', 'Chuck? What are you doing out here?'], ['CHUCK', '*hiss*'], ['SKUNK APE', '...HRRRM?'], ['CHUCK', '*HISS!!*'],
-      ['', 'The Skunk Ape and Chuck stare at each other for a long, long time.'], ['', 'Then they hug.'], ['DAN', 'You two KNOW each other?'], ['SKUNK APE', 'HRRM. HRRRM HRM.'],
+    chuck.stun = 99; Scene.play(this.reunionScene(a, chuck), () => { chuck.stun = 0; say([['DAN', 'You two KNOW each other?'], ['SKUNK APE', 'HRRM. HRRRM HRM.'],
       ['DAN', 'Thirty years? Since the hurricane of ’96? That’s beautiful. That’s... I’m not crying. It’s the swamp.']], () => {
       done('reunion'); headline('ALLIGATOR AND SKUNK APE REUNITE AFTER 30 YEARS; FLORIDA MAN CRIES, BLAMES "SWAMP GAS"', 4); addQuest('bed', 'Go home to bed');
-    });
+    }); });
+  },
+  // roller dogs on a log; something VERY large steps out of the sawgrass
+  lureScene(ape) {
+    const P = this.places(), x = P.trailcam.x, y = P.trailcam.y;
+    const dogs = (cx, cy) => { OR(x + 8 - cx, y + 5 - cy, 20, 4, PAL.woodD); for (let i = 0; i < 3; i++) { R(x + 10 + i * 6 - cx, y + 2 - cy, 5, 3, PAL.mudL); R(x + 10 + i * 6 - cx, y + 2 - cy, 5, 1, PAL.red); } };
+    return [SC.cam(x + 20, y - 8, 1.6, .7), SC.walk('dan', x + 2, y + 4, 45), SC.face('dan', 'right'), SC.prop('dogs', dogs), SC.sound('pickup'), SC.wait(.3),
+      SC.walk('dan', x - 34, y + 8, 40), SC.face('dan', 'right'), SC.line('dan', 'shhh...', 1.2), SC.wait(.6),
+      SC.place(ape, x + 80, y - 18), SC.walk(ape, x + 26, y + 2, 20), SC.line(ape, 'HRRRRRRRM.', 1.3),
+      SC.unprop('dogs'), SC.sound('munch'), SC.shake(4), SC.emote('dan', '!', .8, PAL.red),
+      SC.walk(ape, x + 130, y - 40, 120), SC.line('dan', 'HEY! Those were $2 each!', 1.6)];
+  },
+  // Chuck and the Skunk Ape: thirty years apart, and then a hug
+  reunionScene(a, chuck) {
+    return [SC.cam(a.x + 14, a.y - 6, 1.7, .6), SC.emote(chuck, '!', .7), SC.emote('dan', '?', .8), SC.line('dan', 'Chuck?!', 1), SC.line(chuck, '*hiss*', 1), SC.line(a, 'HRRRM?', 1.1), SC.line(chuck, '*HISS!!*', 1),
+      SC.all([SC.emote(a, '…', 1.8, PAL.white), SC.emote(chuck, '…', 1.8, PAL.white)]), SC.wait(.7),
+      SC.all([SC.walk(a, a.x + 10, a.y + 2, 18), SC.walk(chuck, a.x + 20, chuck.y - 2, 18)]), SC.all([SC.emote(a, '♥', 1.6, PAL.hat), SC.emote(chuck, '♥', 1.6, PAL.hat), SC.emote('dan', '♥', 1.6, PAL.hat)]), SC.wait(.6)];
   },
   manny2() {
     const F = Game.flags;

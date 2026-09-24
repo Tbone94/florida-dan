@@ -327,6 +327,6 @@ function drawNPC(n, cx, cy, t) {
   if (n.hidden) return;
   const x = Math.round(n.x - cx), y = Math.round(n.y - cy), s = SPR[n.sprite][n.dir][n.moving ? n.frame : 0];
   shadow(x, y + 1, 12); g.drawImage(s, x - 8, y - 21 + (n.moving ? 0 : Math.round(Math.sin(t * 2 + n.x) * .5)));
-  if (n.quest) { const b = Math.sin(t * 5) * 2; label('!', x, y - 26 + b, PAL.yellow, 10); } else if (Game.mode === 'play' && Arcs.offering(n)) { const b = Math.sin(t * 4 + 1) * 2; label('!', x, y - 26 + b, PAL.hat, 10); } else drawGigBubble(n, x, y, t);
+  if (Scene.on()) { } else if (n.quest) { const b = Math.sin(t * 5) * 2; label('!', x, y - 26 + b, PAL.yellow, 10); } else if (Game.mode === 'play' && Arcs.offering(n)) { const b = Math.sin(t * 4 + 1) * 2; label('!', x, y - 26 + b, PAL.hat, 10); } else drawGigBubble(n, x, y, t);
   if (n.id === 'rhonda') R(x - 5, y - 17, 10, 1, PAL.shades);
 }

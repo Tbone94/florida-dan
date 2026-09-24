@@ -215,10 +215,19 @@ const DaytonaCases = {
   },
   donutRun() {
     const F = Game.flags; F.donutRun = true; done('donuts'); Game.car.v = 0;
-    say([['', 'Dan pulls the pace car into the Donut Hut drive-thru.'], ['', 'Forty stock cars follow him in. Single file. At pace speed. Under caution.'], ['DONNA', '(over the speaker) Welcome to Donut Hut, what can I get— oh my God.'],
+    Scene.play(this.donutScene(), () => say([
       ['DAN', 'Forty-one dozen glazed. And a coffee. Put it on NASCAR.'], ['', 'It takes two hours. Every driver gets a donut. The race is postponed. Nobody is mad. Everyone is a little mad.'], [PHONE_T, 'Dan... the cops are here.']],
     () => { headline('FLORIDA MAN LEADS ENTIRE NASCAR FIELD THROUGH DONUT DRIVE-THRU UNDER CAUTION FLAG', 10); Convoy.on = false; Convoy.hist = []; Car.exit(); Game.vehicles = Game.vehicles.filter(v => v.id !== 'pace'); react('cheer');
-      addQuest('bed', 'Sleep it off at the Ocean Breeze Motel'); });
+      addQuest('bed', 'Sleep it off at the Ocean Breeze Motel'); }));
+  },
+  // the whole field in the drive-thru line: pan down it, then donuts out the window
+  donutScene() {
+    const v = Game.car, H = Convoy.hist, dr = DSP().drive, spk = { x: dr.x, y: dr.y - 6 }, cars = [];
+    for (let i = 1; i <= 10; i++) { const p = H[H.length - 1 - i * 12]; if (p) cars.push(p); }
+    const tail = cars[cars.length - 1] || v;
+    return [SC.cam(v.x, v.y - 6, 1.3, .5), SC.cam(tail.x, tail.y - 6, 1.15, 2.0), SC.line('dan', 'All forty of ’em. Single file.', 1.2), SC.cam(dr.x, dr.y - 10, 1.6, 1.0),
+      SC.line(spk, 'Welcome to Donut Hut, what can I get—', 1.5), SC.line(spk, '...oh my God.', 1.2), SC.emote('dan', '♥', 1, PAL.hat),
+      ...cars.slice(0, 6).map((c, i) => SC.fly(DONUT, dr.x, dr.y - 4, c.x, c.y - 4, .9 + i * .08, 7)), SC.cam(v.x - 40, v.y - 8, 1.25, 1.2)];
   },
   raceDone(mode, place, t) {
     const F = Game.flags;
@@ -229,9 +238,10 @@ const DaytonaCases = {
     }
     if (place === 1) {
       F.raceWon = true; done('race'); headline('FLORIDA MAN WINS DAYTONA 250, DOES BURNOUT, CRACKS SWAMP LITE IN VICTORY LANE', 12);
+      const car = Game.car; Scene.play(car ? [SC.cam(car.x, car.y - 6, 1.6, .6), SC.tween(() => car.a, a => { car.a = a; for (let i = 0; i < 2; i++) Game.parts.push({ kind: 'dust', x: car.x + rnd(-10, 10), y: car.y + rnd(-4, 6), vx: rnd(-20, 20), vy: rnd(-16, -4), life: rnd(.6, 1.2) }); Game.dan.x = car.x; Game.dan.y = car.y; }, car.a + 12.6, 2.2), SC.sound('engine'), SC.line('dan', 'WOOOOOOOO!', 1.3)] : [], () => {
       Car.exit(); react('cheer'); Game.vehicles = Game.vehicles.filter(v => v.id !== 'car29');
       say([['', 'CHECKERED FLAG. DAN DUPREE WINS THE DAYTONA 250.'], ['TAMMY JO', 'YOU DID IT! YOU ACTUALLY DID IT!'], ['RUSTY', 'I’m crying. I’m not crying. It’s gasoline. In my eyes.'], ['', 'Chip Sterling storms into victory lane with a lawyer and a cease-and-desist.'],
-        ['CHIP STERLING', 'I’m SUING. Unlicensed racing, unauthorized burnouts, and emotional damages. MY emotions.'], [PHONE_B, 'Dan, I just heard. Courthouse. Now. I’m already here.']], () => addQuest('court', 'Chip is suing you. Volusia County Courthouse, NOW.'));
+        ['CHIP STERLING', 'I’m SUING. Unlicensed racing, unauthorized burnouts, and emotional damages. MY emotions.'], [PHONE_B, 'Dan, I just heard. Courthouse. Now. I’m already here.']], () => addQuest('court', 'Chip is suing you. Volusia County Courthouse, NOW.')); });
     } else {
       say([[PHONE_T, `P${place}. So close, Dan. Rusty says he’s got another set of tires.`], ['RUSTY', 'Go again?', [['“Again!”', () => { Game.afterTalk = () => { const v = Game.vehicles.find(v => v.id === 'car29'); if (v && Game.car !== v) Car.enter(v); Speedway.start('race'); }; return null; }], ['“Gimme a minute.”', () => { Car.exit(); return [['RUSTY', 'She’s on pit road. Don’t let the tires get cold.']]; }]]]]);
     }

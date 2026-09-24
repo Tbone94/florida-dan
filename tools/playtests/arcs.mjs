@@ -28,7 +28,7 @@ const out = await p.evaluate(() => {
     r[id + ci] = s.ch === ci + 1 && s.st === 'idle' ? 'ok' : `stuck ch=${s.ch} st=${s.st} acted=${s.acted} target=${!!tg}`;
   }
   // cooler whistle
-  go('swamp', 25, ALL); Game.cooler.x = Game.dan.x + 600; Game.cooler.y = Game.dan.y; step(2);
+  go('swamp', 25, ALL); Game.day_.usedCooler = true; Game.cooler.x = Game.dan.x + 600; Game.cooler.y = Game.dan.y; step(2);
   const a = interaction(); const label = a && a.label; if (a) a.fn(); talk(); for (let i = 0; i < 20 * 60 && Game.cooler.home; i++) step(1);
   r.cooler = label === 'Whistle for the cooler' && !Game.cooler.home && Math.hypot(Game.cooler.x - Game.dan.x, Game.cooler.y - Game.dan.y) < 60 ? 'ok' : `label=${label} home=${!!Game.cooler.home} d=${Math.round(Math.hypot(Game.cooler.x - Game.dan.x, Game.cooler.y - Game.dan.y))}`;
   // cops in Miami actually get to you (from the hotel sidewalk, and from the beach)
