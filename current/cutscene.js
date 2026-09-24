@@ -39,7 +39,7 @@ const Scene = {
       if (s.finish) s.finish(s);
       this.i++; this.begin(); if (!this.skipping) break;
     }
-    this.aim(dt);
+    if (this.q) this.aim(dt);   // the last step can end the scene: don't re-aim (that left the zoom on in normal play)
   },
   aim() {   // the scene camera: centre + zoom through the shader's view window
     const c = this.cam, z = c.z, x0 = clamp(c.x - VW / 2, 0, MW * TS - VW), y0 = clamp(c.y - VH / 2 - 10, 0, MH * TS - VH);

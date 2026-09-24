@@ -14,4 +14,11 @@ for f in sorted(cur.glob('*.js')):
         if j < 0 or any(a in line for a in ALLOW): continue
         if re.search(r"[A-Za-z_]\w*(\.\w+)+\s*(=|\+=|-=)\s*[^=]|\)\s*;|\bif \(|\breturn\b.*;", code[j + 2:]):
             print(f'SWALLOWED? {f.name}:{i}: {line.strip()[-140:]}'); bad = 1
+# all the game's scripts share one global scope: two files declaring the same const/let breaks the second one at load
+# (bit us: SURF, takeFish). Glue them together in index.html order and let node find the clash.
+import tempfile
+order = re.findall(r'<script src="([a-z0-9-]+\.js)', (cur / 'index.html').read_text())
+with tempfile.NamedTemporaryFile('w', suffix='.js', delete=False) as t: t.write('\n'.join((cur / f).read_text().replace("'use strict';", '') for f in order)); tmp = t.name
+r = subprocess.run(['node', '--check', tmp], capture_output=True, text=True)
+if r.returncode: print('CLASH across scripts:', [l for l in r.stderr.split('\n') if 'Error' in l][:1]); bad = 1
 print('errors: none' if not bad else 'errors: see above'); sys.exit(bad)

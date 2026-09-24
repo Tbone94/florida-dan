@@ -146,6 +146,7 @@ const Mash = {
   },
   draw() {
     const s = this.s; if (!s) return; const t = Game.t, k = Math.min(1, s.n / s.need);
+    if (s.draw) return s.draw(t, k);   // other minigames bring their own picture (the Keys: chug-off, tarpon)
     if (s.kind === 'arm') {   // Dan vs Tiny, arms locked on a bar table
       R(0, 0, VW, VH, '#3a2618'); R(0, 110, VW, 70, '#6b4a2e'); for (let i = 0; i < VW; i += 20) R(i, 110, 1, 70, '#5a3a22');
       g.drawImage(SPR.tiny.down[0], 0, 0, 16, 22, 188, 40, 48, 66); g.drawImage(SPR.dan.down[0], 0, 0, 16, 22, 84, 40, 48, 66); label('TINY', 212, 118, PAL.white, 7); label('DAN', 108, 118, PAL.white, 7);

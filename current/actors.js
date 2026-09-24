@@ -8,7 +8,7 @@ function canWalk(x, y) {
   for (const n of Game.npcs) if (n.solid !== false && Math.hypot(x - n.x, y - n.y) < 7) return false;
   return true;
 }
-function canBoat(x, y) { const air = hasUp('airboat') && Game.region === 'swamp'; for (const [ox, oy] of [[0, 0], [-8, 0], [8, 0], [0, -5], [0, 5]]) { const k = World.at(x + ox, y + oy); if (!BOATABLE(k) && !(air && k === T.SAWGRASS)) return false; } return true; }   // an airboat skims sawgrass
+function canBoat(x, y) { const air = hasUp('airboat') && Game.region === 'swamp'; for (const [ox, oy] of [[0, 0], [-8, 0], [8, 0], [0, -5], [0, 5]]) { const k = World.at(x + ox, y + oy); if (!BOATABLE(k) && !(air && k === T.SAWGRASS) && !(typeof keysUnderBridge === 'function' && keysUnderBridge(x + ox, y + oy))) return false; } return true; }   // an airboat skims sawgrass
 function canDrive(x, y) { for (const [ox, oy] of [[-6, 0], [6, 0], [0, -4], [0, 3]]) { const k = World.at(x + ox, y + oy); if (!DRIVABLE(k) || World.solidAt(x + ox, y + oy)) return false; } return true; }
 const dirOf = (x, y) => Math.abs(x) > Math.abs(y) ? (x > 0 ? 'right' : 'left') : (y > 0 ? 'down' : 'up');
 

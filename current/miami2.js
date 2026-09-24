@@ -47,9 +47,9 @@ const Lambo = {
 // ---------- Club Sinus dance-off ----------
 const Dance = {
   s: null,
-  start(then) {
+  start(then, o = {}) {   // o: { who, title, sprite, sunset } — Mallory Square reuses the club dance-off
     const seq = []; for (let i = 0; i < 16; i++) seq.push({ dir: pick(['up', 'down', 'left', 'right']), t: 1.4 + i * .6, hit: null });
-    this.s = { seq, t: 0, score: 0, then, flash: '', flashT: 0 }; Game.mode = 'dance'; padFor(true);
+    this.s = { seq, t: 0, score: 0, then, o, who: o.who || 'DJ FLAMINGO', flash: '', flashT: 0 }; Game.mode = 'dance'; showHud(false); padFor(true);   // the HUD sat on top of the arrow lane
     ui.wrestle.hidden = false; ui.wrestleMsg.textContent = 'DANCE-OFF!'; ui.gripFill.style.width = '0%';
     ui.wrestle.querySelector('.hint').textContent = 'HIT THE ARROW WHEN IT REACHES THE BOX · 11 OF 16 TO WIN';
     Sound.play('headline');
@@ -69,19 +69,26 @@ const Dance = {
     if (s.t > s.seq[s.seq.length - 1].t + .9) this.finish();
   },
   finish() {
-    const s = this.s; this.s = null; padFor(false); ui.wrestle.hidden = true; ui.wrestle.querySelector('.hint').textContent = 'MASH E · HIT THE ARROW WHEN HE THRASHES'; Game.mode = 'play';
+    const s = this.s; this.s = null; showHud(true); padFor(false); ui.wrestle.hidden = true; ui.wrestle.querySelector('.hint').textContent = 'MASH E · HIT THE ARROW WHEN HE THRASHES'; Game.mode = 'play';
     if (s.score >= 11) s.then();
-    else say([['DJ FLAMINGO', `${s.score} out of 16? My GRANDMA hits more beats than that.`], ['DJ FLAMINGO', 'Again. From the top?', [['“Hit it.”', () => { s.again = true; }], ['“Gimme a minute.”', () => [['DJ FLAMINGO', 'Take your time, abuelo. The floor ain’t goin’ nowhere.']]]]]], () => { if (s.again) Dance.start(s.then); });
+    else say([[s.who, `${s.score} out of 16? My GRANDMA hits more beats than that.`], [s.who, 'Again. From the top?', [['“Hit it.”', () => { s.again = true; }], ['“Gimme a minute.”', () => [[s.who, 'Take your time, abuelo. The floor ain’t goin’ nowhere.']]]]]], () => { if (s.again) Dance.start(s.then, s.o); });
+  },
+  sunsetBg(t) {   // Mallory Square: the sun going into the Gulf, a crowd, a guy with a cat act
+    for (let y = 0; y < 110; y += 5) { const k = y / 110; R(0, y, VW, 5, `rgb(${Math.round(255 - 40 * k)},${Math.round(120 + 60 * k)},${Math.round(90 + 60 * (1 - k))})`); }
+    g.fillStyle = '#ffe36b'; g.beginPath(); g.arc(VW / 2, 104, 26, Math.PI, 0); g.fill(); R(0, 104, VW, 30, '#2a7fa0'); for (let i = 0; i < 12; i++) R(40 + i * 21, 108 + (i % 3) * 5, 10, 1, '#ffd29a');
+    R(0, 128, VW, 52, '#b8b3a8'); for (let x = 0; x < VW; x += 16) R(x, 128, 1, 52, '#a09b90');
+    for (let i = 0; i < 14; i++) { const x = 8 + i * 23, bob = Math.round(Math.abs(Math.sin(t * 5 + i)) * 2); OR(x, 116 - bob, 8, 12, [PAL.hat, PAL.teal, PAL.yellow, PAL.white, PAL.orange][i % 5]); R(x + 1, 111 - bob, 6, 5, i % 3 ? PAL.skin : '#b8704f'); }
   },
   draw() {
     const s = this.s, t = Game.t; if (!s) return;
+    if (s.o.sunset) this.sunsetBg(t); else {
     R(0, 0, VW, VH, '#150f24');
     for (let y = 0; y < 5; y++) for (let x = 0; x < 10; x++) { const on = (x + y + Math.floor(t * 4)) % 3 === 0; R(x * 32, 70 + y * 16, 31, 15, on ? ['#ff4fd8', '#27c6b4', '#ffd23f'][(x + y) % 3] : '#2a2136'); }
     for (let i = 0; i < 5; i++) { g.globalAlpha = .18; g.fillStyle = ['#ff4fd8', '#27c6b4', '#ffd23f'][i % 3]; g.beginPath(); g.moveTo(40 + i * 60, 0); g.lineTo(20 + i * 60 + Math.sin(t * 2 + i) * 40, 150); g.lineTo(70 + i * 60 + Math.sin(t * 2 + i) * 40, 150); g.fill(); } g.globalAlpha = 1;
-    label('CLUB SINUS', VW / 2, 16, '#27c6b4', 9);
+    label('CLUB SINUS', VW / 2, 16, '#27c6b4', 9); }
     const next = s.seq.find(n => n.hit === null), pose = next ? next.dir : 'down', bounce = Math.round(Math.abs(Math.sin(t * 6)) * 3);
     g.drawImage(SPR.dan[pose === 'up' ? 'up' : pose === 'left' ? 'left' : pose === 'right' ? 'right' : 'down'][Math.floor(t * 6) % 2], 176, 64 - bounce);
-    g.drawImage(SPR.dj.down[Math.floor(t * 5) % 2], 120, 64 - Math.round(Math.abs(Math.cos(t * 6)) * 3));
+    g.drawImage(SPR[s.o.sprite || 'dj'].down[Math.floor(t * 5) % 2], 120, 64 - Math.round(Math.abs(Math.cos(t * 6)) * 3));
     OR(14, 138, 292, 26, '#0c0a10'); OR(30, 140, 22, 22, '#3b2f4a');
     const arrow = (x, y, dir, c) => { g.save(); g.translate(x, y); g.rotate({ right: 0, down: Math.PI / 2, left: Math.PI, up: -Math.PI / 2 }[dir]); g.fillStyle = PAL.ink; g.beginPath(); g.moveTo(9, 0); g.lineTo(-6, -8); g.lineTo(-6, 8); g.fill(); g.fillStyle = c; g.beginPath(); g.moveTo(6, 0); g.lineTo(-4, -5.5); g.lineTo(-4, 5.5); g.fill(); g.restore(); };
     for (const n of s.seq) { const x = 41 + (n.t - s.t) * 110; if (x < 20 || x > 310 || n.hit === true) continue; arrow(x, 151, n.dir, n.hit === false ? '#5d5a66' : { up: '#ff4fd8', down: '#27c6b4', left: '#ffd23f', right: '#ff8a3d' }[n.dir]); }

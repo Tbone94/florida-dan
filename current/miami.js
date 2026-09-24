@@ -205,10 +205,12 @@ function travel(to) {
     spawn();
     Game.cam.x = Game.dan.x - VW / 2; Game.cam.y = Game.dan.y - VH / 2 - 10; Game.flash = .7;
     if (to === 'miami' && !Game.flags.miamiFirst) { Game.flags.miamiFirst = true; headline('FLORIDA MAN ARRIVES IN MIAMI WITH A COOLER AND "NO PLAN"; CITY "BRACES"', 3); }
-    toast({ miami: 'Welcome to MIAMI. Everything is pink and costs $19.', daytona: 'Welcome to DAYTONA BEACH. World Center of Racing. And sunburns.', swamp: 'Home sweet swamp.' }[to], 3.5);
+    toast({ miami: 'Welcome to MIAMI. Everything is pink and costs $19.', daytona: 'Welcome to DAYTONA BEACH. World Center of Racing. And sunburns.', keys: 'Welcome to the KEYS. Mile marker 50. The rest is bridge.', swamp: 'Home sweet swamp.' }[to], 3.5);
     if (to === 'daytona' && !Game.flags.daytonaFirst) { Game.flags.daytonaFirst = true; headline('FLORIDA MAN ARRIVES IN DAYTONA; SPEEDWAY "ON HIGH ALERT"', 2); }
     if (typeof MiamiCases !== 'undefined') MiamiCases.arrived(to);
     if (typeof DaytonaCases !== 'undefined') DaytonaCases.arrived(to);
+    if (typeof KeysCases !== 'undefined') KeysCases.arrived(to);
+    if (to === 'keys' && !Game.flags.keysFirst) { Game.flags.keysFirst = true; headline('FLORIDA MAN ARRIVES IN THE KEYS WITH A COOLER; ENTIRE ISLAND CHAIN "ON NOTICE"', 2); }
     Gigs.drop(); Gigs.newDay();   // a gig can't follow you onto the bus; new town, new people with work
     save();
   });

@@ -11,7 +11,7 @@ function buildHotbar() {
   ui.hotbar.innerHTML = '';
   HOTBAR.forEach((k, i) => {
     const b = document.createElement('button'); b.className = 'slot'; b.id = 'slot-' + k; b.title = `${ITEMS[k].name} — ${ITEMS[k].desc}`;
-    b.innerHTML = `<span class="key">${'1234567890-=['[i]}</span><img alt="" src="${SPR.iconURL[k]}"><span class="n">0</span>`;
+    b.innerHTML = `<span class="key">${('1234567890-=['[i] || '')}</span><img alt="" src="${SPR.iconURL[k]}"><span class="n">0</span>`;
     b.addEventListener('click', e => { e.currentTarget.blur(); useItem(k); });
     ui.hotbar.append(b); slotEls[k] = b;
   });
@@ -84,6 +84,9 @@ const VENDORS = {
   ink: { title: 'INK & REGRET', sub: 'No refunds. No crying. No exes’ names.', items: () => Upgrades.forSale('ink') },
   speed: { title: 'WRENCH’S SPEED SHOP', sub: 'Go faster. Look faster. Honk.', items: () => Upgrades.forSale('speed') },
   surf: { title: 'SURF & DIVE', sub: 'Wax, gear, and one extremely illegal engine.', items: () => Upgrades.forSale('surf') },
+  bait: { title: 'TARPON TOM’S BAIT & BEER', sub: 'Bait, beer, and tarpon food. The only store for seven miles.', items: () => ['beer', 'bait', 'cig', 'energy', 'scratch', 'firework', 'flamingo'] },
+  conch: { title: 'CONCH SHACK', sub: 'Fritters. Pie. Truth costs extra.', items: () => ['fritter', 'pie', 'beer', 'cafecito'] },
+  tees: { title: 'DWAYNE’S T-SHIRTS & SNORKELS', sub: 'Three for ten. Snorkels are not three for ten.', items: () => Upgrades.forSale('tees') },
   cafe: { title: 'CAFÉ ABUELA', sub: 'Ventanita open. Pay in cash or compliments.', items: () => ['cafecito', 'pastelito'] },
 };
 let vendor = 'gulp';
@@ -214,15 +217,18 @@ $('nextBtn').addEventListener('click', () => {
 $('creditsBtn').addEventListener('click', () => { $('credits').hidden = true; nextDay(); });
 // the story never skips a step: miss a trial, the bus, or the one errand a case hangs on, and the day comes round again
 const MUST = { 4: F => F.acquitted, 7: F => F.case2Won, 10: F => F.case3Won, 11: () => MIAMI(), 13: F => F.case4Won, 14: F => F.flyer, 16: F => F.case5Won, 17: F => DAYTONA() && F.donutRun, 19: F => F.case6Won, 22: F => F.case7Won };
+const KEYS_MUST = { '8.1': F => F.declared, '8.3': F => F.case8Won, '9.3': F => F.case9Won };
 const REDO = { 11: 'Brenda: The Greyhound waited. It is STILL waiting. Get on the bus, Dan.', 14: 'Brenda: Somebody has to post that FOUND flyer at the café, Dan. It’s you.', 17: 'Tammy Jo: Grand Marshal’s a no-show? We moved the pace lap. To TODAY.' };
 function nextDay() {
-  const ok = MUST[Game.day], redo = ok && !ok(Game.flags);
-  if (!redo) Game.day++;
+  const F = Game.flags, kc = Cases.info(Game.day);
+  const ok = kc.n >= 8 ? KEYS_MUST[kc.n + '.' + kc.d] : MUST[Game.day], redo = ok && !ok(F);
+  if (!redo) { Game.day++; if (F.case7Won && !F.keysFrom && Game.day >= 23) F.keysFrom = Game.day; }   // the Keys start the morning after the Daytona 250 (or the next morning, for old endless saves)
+  else if (kc.n >= 8 && !(kc.n === 8 && kc.d === 1) && !KEYS()) Game.day = F.keysFrom;   // a Keys case day away from the Keys: back to the bus
   else if (Game.day >= 12 && Game.day <= 16 && !MIAMI()) Game.day = 11;   // stranded in the wrong town (old saves): back to the bus
   else if (Game.day >= 18 && Game.day <= 22 && !DAYTONA()) Game.day = 17;
   else if (Game.day === 16 && !Game.flags.flyer) Game.day = 14;          // the trial can't open without the flyer
   startDay();
-  if (redo) toast(REDO[Game.day] || 'Brenda: You MISSED COURT. I got it rescheduled. To TODAY. Please.', 7);
+  if (redo) toast(kc.n === 8 && kc.d === 1 ? 'Captain Lou: The houseboat’s still yours, son. The sun sets again tonight. It does that.' : REDO[Game.day] || 'Brenda: You MISSED COURT. I got it rescheduled. To TODAY. Please.', 7);
 }
 
 // ---------- layout ----------

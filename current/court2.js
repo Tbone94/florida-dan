@@ -22,7 +22,7 @@ const Objection = {
     const s = this.s, it = s.list[s.i], right = objected === it.lie; if (right) s.score++;
     s.phase = 'react'; s.t = 0; ui.talkChoices.innerHTML = '';
     if (objected) { ui.fishMsg.textContent = 'OBJECTION!'; setTimeout(() => { if (Game.mode === 'objection') ui.fishMsg.textContent = ''; }, 800); Game.shake = 7; Sound.play('punch'); }
-    ui.talkWho.textContent = DAYTONA() ? 'JUDGE PETTIBONE' : MIAMI() ? 'JUDGE VEGA' : 'JUDGE HARLAN';
+    ui.talkWho.textContent = KEYS() ? 'JUDGE PINDER' : DAYTONA() ? 'JUDGE PETTIBONE' : MIAMI() ? 'JUDGE VEGA' : 'JUDGE HARLAN';
     ui.talkLine.textContent = objected ? (it.lie ? 'Sustained. ' + (it.bust || '') : 'Overruled. ' + (it.over || 'That one was true, son.')) : (it.lie ? (it.miss || 'The jury nods along. That was a lie, Dan. You let it slide.') : (it.ok || 'Noted.'));
     setTimeout(() => Sound.play(right ? 'cash' : 'fail'), 120);
   },
@@ -38,7 +38,7 @@ const CourtCases = {
   begin() { Game.mode = 'court'; Game.courtChuck = 0; Game.courtExtra = {}; showHud(false); },
   // fewer headlines during the case = a nicer judge (and a collectible)
   clean(n) {
-    const got = Game.headlines.length - (Game.flags['caseStart' + n] || 0), J = DAYTONA() ? 'JUDGE PETTIBONE' : MIAMI() ? 'JUDGE VEGA' : 'JUDGE HARLAN';
+    const got = Game.headlines.length - (Game.flags['caseStart' + n] || 0), J = KEYS() ? 'JUDGE PINDER' : DAYTONA() ? 'JUDGE PETTIBONE' : MIAMI() ? 'JUDGE VEGA' : 'JUDGE HARLAN';
     if (got <= CLEAN_LIMIT[n]) { headline('FLORIDA MAN MAKES IT THROUGH A WHOLE CASE WITH BARELY ANY HEADLINES; SCIENTISTS "CONCERNED"', 1); return [[J, `Only ${got} headlines this week, Mr. Dupree. For you, that is practically a vow of silence.`]]; }
     return [[J, `You made the paper ${got} times this week, Mr. Dupree. ${got} times. I read every one. At breakfast.`]];
   },

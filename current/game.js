@@ -41,6 +41,7 @@ function startDay() {
 
 function spawn() {
   if (MIAMI()) return Miami.spawn();
+  if (KEYS()) return Keys.spawn();
   if (DAYTONA()) return Daytona.spawn();
   const S_ = World.spots;
   Game.npcs = [
@@ -100,8 +101,9 @@ function interaction() {
   }
   if (D.ride === 'boat') {
     for (const dist of [14, 22]) { const p = facingPoint(dist), k = World.at(p.x, p.y); if (WALKABLE(k) && k !== T.SHALLOW && canWalk(p.x, p.y)) return { label: 'Hop out', fn: () => { D.ride = null; D.x = p.x; D.y = p.y; } }; }
-    return { label: 'Cast a line', fn: () => Fishing.start(World.at(D.x, D.y), false) };
+    return KEYS() ? Keys.waterPrompt() : { label: 'Cast a line', fn: () => Fishing.start(World.at(D.x, D.y), false) };
   }
+  if (D.ride === 'cooler' && KEYS() && Keys.coolerPrompt()) return Keys.coolerPrompt();
   if (D.ride === 'cooler') return { label: 'Park the cooler', fn: () => { D.ride = null; D.y += 10; if (!canWalk(D.x, D.y)) D.y -= 10; } };
   // vehicles you're standing right on top of beat anything else nearby (a cooler parked by the courthouse door)
   if (!D.ride && near(Game.cooler, 13)) return { label: 'Ride the motorized cooler', fn: () => { D.ride = 'cooler'; D.x = Game.cooler.x; D.y = Game.cooler.y; Sound.play('engine'); if (Game.fx.buzz > 50 || Game.fx.powder > 0) Game.day_.dui = true; } };
@@ -167,6 +169,7 @@ function punch() {
     if (a.hits >= 3) { a.hits = 0; a.state = 'flee'; a.timer = 7; a.cd = 9; a.stun = 1.5; a.belly = 1.5; toast(a.chuck ? 'Chuck backs off. Chuck will remember this.' : pick(['That gator has had ENOUGH.', 'Gator: humbled. Dan: undefeated.', 'The gator swims off to rethink its life.'])); if (a.chuck) done('chuck'); }
     else if (Math.random() < (a.chuck ? .45 : .22)) { a.stun = .25; a.cd = 0; a.state = 'chase'; toast(a.chuck ? 'Chuck did NOT like that.' : 'Uh oh. It’s mad now.'); }
     if (!Game.flags.punchedGator) { Game.flags.punchedGator = true; headline(a.chuck ? 'FLORIDA MAN PUNCHES GATOR NAMED CHUCK; CHUCK "WILL REMEMBER THIS"' : 'FLORIDA MAN PUNCHES ALLIGATOR IN THE FACE, SAYS IT "LOOKED AT HIM FUNNY"', 6); }
+  } else if (a.type === 'deer') { a.state = 'flee'; a.timer = 4; Heat.add(5); toast('YOU PUNCHED A KEY DEER. They’re ENDANGERED, Dan. There’s like eight hundred of them and now they ALL know your face.', 4.5); if (!Game.flags.deerPunch) { Game.flags.deerPunch = true; headline('FLORIDA MAN PUNCHES ENDANGERED KEY DEER; DEER "FINE," FLORIDA MAN "IN SO MUCH TROUBLE"', 15); }
   } else if (a.type === 'cow') { a.moo = 1.4; a.state = 'flee'; a.timer = 3; toast('You punched a cow. The cow did not deserve that.'); if (!Game.day_.cowPunch) { Game.day_.cowPunch = true; headline('FLORIDA MAN PUNCHES COW, IMMEDIATELY APOLOGIZES TO COW', 5); } }
   else if (a.type === 'python') { a.stun = 2.5; toast('The python is dazed. GRAB IT.'); headline('FLORIDA MAN PUNCHES PYTHON, APOLOGIZES, THEN BAGS IT', 4); }
   else { if (a.type === 'pelican') headline('FLORIDA MAN PUNCHES PELICAN; PELICAN "STILL SMUG"', 4); a.state = 'flee'; a.timer = 4; toast(a.type === 'raccoon' ? 'Raccoon: punched. Your dignity: also gone.' : a.type === 'pelican' ? 'You punched a pelican. It is somehow still smug.' : 'Iguana: bonked.'); }
@@ -255,6 +258,8 @@ function update(dt) {
     case 'court': return;
     case 'objection': Objection.update(dt); return;
     case 'dance': Dance.update(dt); return;
+    case 'bridge': Bridge.update(dt); tickFx(dt); return;
+    case 'dive': Dive.update(dt); tickFx(dt); return;
     case 'shop': if (Input.tapped('pause') || Input.tapped('b')) closeShop(); return;
     case 'journal': if (Input.tapped('left')) flipClip(-1); if (Input.tapped('right')) flipClip(1); if (Input.tapped('journal') || Input.tapped('pause') || Input.tapped('a') || Input.tapped('b')) closeJournal(); return;
     case 'gazette': return;
@@ -395,7 +400,7 @@ function drawWorld() {
   if (D.ride !== 'cooler') L.push([Game.cooler.y + 3, () => drawCooler(Game.cooler.x - cx, Game.cooler.y - cy, Game.cooler.dir, t, false)]);
   if (Game.mode !== 'title') L.push([D.y + (D.ride === 'boat' ? 4 : 0) + (D.lift ? 400 : 0), () => drawDan(D.x - cx, D.y - cy - (D.lift || 0), t)]);   // lift: up a ladder / on a roof (cutscenes)
   L.sort((a, b) => a[0] - b[0]).forEach(e => e[1]());
-  Heat.draw(cx, cy, t); Lambo.draw(cx, cy, t); BoatChase.draw(cx, cy, t); Car.drawAll(cx, cy, t);
+  Heat.draw(cx, cy, t); Lambo.draw(cx, cy, t); BoatChase.draw(cx, cy, t); KeysChase.draw(cx, cy, t); KeysGigs.draw(cx, cy, t); Car.drawAll(cx, cy, t);
   drawProjectiles(cx, cy); drawParts(cx, cy); Gigs.draw(cx, cy, t);
   if (Game.mode !== 'title') { Ambient.air(cx, cy, t); Look.air(cx, cy, t); }
   Look.litCv = Look.lights(cx, cy, t);
@@ -426,7 +431,7 @@ function drawStorm(t) {
 function render() {
   g.setTransform(1, 0, 0, 1, 0, 0); Look.litCv = null; const LG = Look.grade();
   const scene = Game.mode === 'fish' ? () => Fishing.draw() : Game.mode === 'wrestle' ? () => Wrestle.draw() : Game.mode === 'raccoon' ? () => Minigame.drawRaccoon() : Game.mode === 'mash' ? () => Mash.draw()
-    : Game.mode === 'dance' ? () => Dance.draw()
+    : Game.mode === 'dance' ? () => Dance.draw() : Game.mode === 'bridge' ? () => Bridge.draw() : Game.mode === 'dive' ? () => Dive.draw()
     : (Game.mode === 'objection' || Game.scene === 'parade' || Game.mode === 'court' || (Game.mode === 'talk' && Game.talk && Game.talk.prev === 'court') || (Game.mode === 'gazette' && Game.flags.inCourt)) ? () => Court.draw(Game.t) : null;
   if (!scene) drawWorld();
   else if (VW === VW0) scene();

@@ -6,12 +6,12 @@ const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push
 await p.goto('http://localhost:8811/index.html'); await p.waitForTimeout(1200);
 await p.evaluate(() => { window.TRAILER = true; try { localStorage.clear(); } catch (e) {} begin(false); });
 const lines = [];
-for (let day = 1; day <= 25; day++) {
+for (let day = 1; day <= 30; day++) {
   const res = await p.evaluate(async day => {
     const errs0 = [];
     const step = n => { for (let i = 0; i < n; i++) { Input.poll(); try { update(1 / 30); render(); hud(); } catch (e) { errs0.push('THROW ' + Game.mode + ': ' + e.message); } Input.endFrame(); } };
     const talk = () => { for (let i = 0; i < 200 && Game.mode === 'talk'; i++) { step(12); const cs = [...document.querySelectorAll('.choice')]; if (cs.length) cs[0].click(); else Input.press('a'); step(1); } };
-    const region = day <= 10 ? 'swamp' : day <= 16 ? 'miami' : day <= 22 ? 'daytona' : ['swamp', 'miami', 'daytona'][day % 3];
+    const region = day <= 10 ? 'swamp' : day <= 16 ? 'miami' : day <= 22 ? 'daytona' : day <= 28 ? 'keys' : ['swamp', 'miami', 'daytona', 'keys'][day % 4];   // 23-28: the Keys (keysFrom = 23)
     Object.assign(Game.flags, day > 16 ? { case5Won: true } : {}, day === 16 ? { flyer: true } : {}, day === 22 ? { raceWon: true } : {});
     Game.flags.noChase = false;
     World.load(region); Game.day = day; startDay(); talk();

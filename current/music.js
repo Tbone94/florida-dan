@@ -126,6 +126,7 @@ const Music = (() => {
       const lp = filt(R, 'lowpass', 1200, .5, g);
       for (const n of notes) for (const d of [-14, 14]) osc(R, 'sawtooth', N(n), t, t + dur + .6, d).connect(lp);
     },
+    steel(R, t, f, v = 1) { const out = pan(R, .2, R.pump), g1 = amp(R, t, .002, .07 * v, 0, .55, out), g2 = amp(R, t, .002, .025 * v, 0, .18, out); send(R, g1, .3, R.verb); osc(R, 'sine', f, t, t + .6).connect(g1); osc(R, 'sine', f * 2.76, t, t + .25).connect(g2); },   // a steel pan: a bell with a slightly-off overtone
     arp(R, t, f, v = 1) { const g = amp(R, t, .002, .05 * v, 0, .14, pan(R, -.25, R.pump)); send(R, g, .4, R.dly); osc(R, 'square', f, t, t + .2).connect(filt(R, 'lowpass', 2600, 2, g)); },
     riser(R, t, dur, v = 1) {
       const g = R.ctx.createGain(); g.gain.setValueAtTime(.0005, t); g.gain.exponentialRampToValueAtTime(.2 * v, t + dur); g.gain.linearRampToValueAtTime(0, t + dur + .02); g.connect(R.bus); send(R, g, .3, R.verb);
@@ -169,6 +170,7 @@ const Music = (() => {
     }
     if (S.banjo && !(o.lofi && st % 2)) { const r = ROLLS[S.banjo] || ROLLS.fwd; I.banjo(R, t, N(ch.v[r[st] % ch.v.length]) * (o.trip ? 1 + Math.sin(t * 5) * .015 : 1), st % 4 === 0 ? 1 : .75, st % 2 ? .3 : -.3); }
     if (S.twangArp && st % 2 === 0) I.twang(R, t, N(ch.v[[0, 1, 2, 3, 2, 1, 0, 1][st / 2 % 8]]), s16 * 2, .45);
+    if (o.island && [0, 3, 6, 10, 12].includes(st)) I.steel(R, t, N(ch.v[[1, 2, 3, 2, 1][[0, 3, 6, 10, 12].indexOf(st)] % ch.v.length] + 12), st === 0 ? 1 : .7);
     if ((S.arp || o.arp) && !o.lofi) I.arp(R, t, N(ch.v[[0, 1, 2, 3, 2, 3, 1, 2][st % 8]] + (st >= 8 ? 12 : 0)), .8);
     if ((S.pad || o.pad) && st === 0) I.pad(R, t, ch.v.slice(0, 3), s16 * 16, o.trip ? 1.4 : 1);
     if (S.sirens && st === 0 && bar % 2 === 0) { I.siren(R, t, 950, s16 * 3); I.siren(R, t + s16 * 4, 700, s16 * 3); I.siren(R, t + s16 * 8, 950, s16 * 3); I.siren(R, t + s16 * 12, 700, s16 * 3); }
@@ -184,15 +186,15 @@ const Music = (() => {
   // ---------- live play (the game) ----------
   const live = { R: null, cur: null, pos: {}, nextT: 0 };
   function pick(mood) {
-    const mia = typeof MIAMI === 'function' && MIAMI();
-    const base = mia ? ['ocean', 108] : ['swamp', 122];
+    const mia = typeof MIAMI === 'function' && MIAMI(), isl = typeof KEYS === 'function' && KEYS();   // the Keys: Swamp Lite, slower, with a steel pan
+    const base = mia ? ['ocean', 108] : isl ? ['swamp', 112] : ['swamp', 122], io = isl ? { island: 1, swing: .12 } : {};
     switch (mood) {
       case 'chase': return { key: 'chase', song: 'chase', bpm: 156, o: {}, lp: 20000 };
-      case 'speed': return { key: 'speed' + mia, song: base[0], bpm: 150, o: { fast: 1 }, lp: 20000 };
-      case 'slow': return { key: 'slow' + mia, song: base[0], bpm: 84, o: { lofi: 1, swing: .22 }, lp: 1300 };
+      case 'speed': return { key: 'speed' + mia + isl, song: base[0], bpm: 150, o: { fast: 1, ...io }, lp: 20000 };
+      case 'slow': return { key: 'slow' + mia + isl, song: base[0], bpm: 84, o: { lofi: 1, swing: .22, island: isl ? 1 : 0 }, lp: 1300 };
       case 'trip': return { key: 'trip', song: 'gators', bpm: 74, o: { trip: 1 }, lp: 2400 };
       case 'night': return mia ? { key: 'nightm', song: 'ocean', bpm: 96, o: { night: 1 }, lp: 5000 } : { key: 'night', song: 'gators', bpm: 92, o: {}, lp: 20000 };
-      default: return { key: 'norm' + mia, song: base[0], bpm: base[1], o: {}, lp: 20000 };
+      default: return { key: 'norm' + mia + isl, song: base[0], bpm: base[1], o: io, lp: 20000 };
     }
   }
   function tick(ctx, dest, mood) {

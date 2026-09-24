@@ -63,6 +63,8 @@ function useItem(k) {
     case 'gummy': F.high = 110; Game.chill = 100; Sound.play('munch'); L.joints++; toast(pick(['Chewy. Tropical. Kicking in... never? ...OH. OH, there it is.', 'Dan ate the whole bag. Dan has made a choice.'])); setTimeout(() => { if (Game.fx.high > 0) toast('BIBLICAL MUNCHIES. Dan would sell the cooler for a pastelito.'); }, 12000); break;
     case 'cafecito': F.powder = Math.max(F.powder, 9); Game.chill = Math.min(100, Game.chill + 15); Sound.play('crack'); toast(pick(['*sip* ...Dan can see through time.', 'Abuela’s cafecito hits different. It hits EVERYTHING.', 'Dan’s eyelids are now permanently open.'])); break;
     case 'pastelito': Game.chill = Math.min(100, Game.chill + 30); if (F.high > 0) { Game.chill = 100; toast('Munchies: DEFEATED. Guava is God.'); } else toast(pick(['Flaky. Sweet. Life-changing.', 'Crumbs everywhere. Worth it.'])); Sound.play('munch'); break;
+    case 'fritter': Game.chill = Math.min(100, Game.chill + 15); Sound.play('munch'); toast(pick(['Chewy. Hot. Tastes like a boat.', 'Conch fritter. Dan feels like a local. He is not.'])); break;
+    case 'pie': Game.chill = Math.min(100, Game.chill + 30); F.buzz = Math.max(0, F.buzz - 25); Sound.play('munch'); toast(pick(['KEY LIME PIE. Dan sees God. God is tart.', 'The sugar hits. The beer backs off. Science.'])); break;
     case 'energy': F.powder = Math.max(F.powder, 12); Sound.play('crack'); toast('GATOR JUICE. My heart is doin’ a drum solo.'); break;
     case 'hotdog': {
       Sound.play('munch'); L.hotdogs++;
@@ -90,6 +92,10 @@ function blackout() {
     ['the Hotel Neon fountain', ...(at(S_.door, 0, 20) || []), 'FLORIDA MAN FOUND ASLEEP IN HOTEL FOUNTAIN, TOLD STAFF HE WAS "A WATER FEATURE"'],
     ['the end of the pier, holding a stranger’s bait bucket', ...(at(S_.pier) || []), 'FLORIDA MAN WAKES UP ON PIER WITH STRANGER’S BAIT BUCKET, SAYS THEY’RE "CLOSE NOW"'],
     ['Café Abuela’s patio, under a tablecloth', ...(at(S_.cafe, 0, 16) || []), 'FLORIDA MAN FOUND UNDER CAFÉ TABLECLOTH; ABUELA FED HIM ANYWAY'],
+  ] : KEYS() ? [
+    ['the Southernmost Point, hugging the buoy', ...(at(S_.buoy, 0, -24) || []), 'FLORIDA MAN FOUND HUGGING SOUTHERNMOST POINT BUOY, TELLS TOURISTS "NO PHOTOS"'],
+    ['the Six-Toe House porch, covered in cats', ...(at(S_.sixtoe, 0, 12) || []), 'FLORIDA MAN WAKES UP UNDER ELEVEN SIX-TOED CATS, CALLS IT "THE BEST NIGHT OF HIS LIFE"'],
+    ['Mallory Square, wearing a street performer’s top hat', ...(at(S_.mallory, 0, 10) || []), 'FLORIDA MAN FOUND ASLEEP IN MALLORY SQUARE; TOURISTS TIPPED HIM $14'],
   ] : DAYTONA() ? [
     ['the Ocean Breeze ice machine', ...(at(S_.door, 0, 20) || []), 'FLORIDA MAN FOUND HUGGING MOTEL ICE MACHINE, CALLS IT "HIS PIT CREW"'],
     ['the courthouse steps, wearing a checkered flag', ...(at(S_.court, 0, 20) || []), 'FLORIDA MAN SLEEPS ON COURTHOUSE STEPS WRAPPED IN CHECKERED FLAG'],

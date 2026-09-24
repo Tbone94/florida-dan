@@ -13,11 +13,13 @@ function findTile(pred, x0, y0, x1, y1, seed) {
 }
 const Cases = {
   info(day = Game.day) {
+    const K = Game.flags.keysFrom;   // the Keys: two cases starting the morning after the Daytona 250 (keys2.js)
+    if (K && day >= K) { const d = day - K; return d < 3 ? { n: 8, d: d + 1 } : d < 6 ? { n: 9, d: d - 2 } : { n: 0, d: day - 22 }; }
     if (day <= 4) return { n: 1, d: day }; if (day <= 7) return { n: 2, d: day - 4 }; if (day <= 10) return { n: 3, d: day - 7 };
     if (day <= 13) return { n: 4, d: day - 10 }; if (day <= 16) return { n: 5, d: day - 13 }; if (day <= 19) return { n: 6, d: day - 16 }; if (day <= 22) return { n: 7, d: day - 19 }; return { n: 0, d: day - 22 };
   },
   name() { return CASE_NAMES[this.info().n]; },
-  courtCase() { return Game.day === 4 ? 'flamingo' : Game.day === 7 ? 'manatee' : Game.day === 10 ? 'skunk' : Game.day === 13 && MIAMI() ? 'lambo' : Game.day === 16 && MIAMI() && Game.flags.flyer ? 'sinus' : Game.day === 19 && DAYTONA() ? 'donut' : Game.day === 22 && DAYTONA() && Game.flags.raceWon ? 'race' : null; },
+  courtCase() { const kc = this.info(); if (KEYS() && kc.d === 3 && (kc.n === 8 || kc.n === 9)) return kc.n === 8 ? 'republic' : 'galleon'; return Game.day === 4 ? 'flamingo' : Game.day === 7 ? 'manatee' : Game.day === 10 ? 'skunk' : Game.day === 13 && MIAMI() ? 'lambo' : Game.day === 16 && MIAMI() && Game.flags.flyer ? 'sinus' : Game.day === 19 && DAYTONA() ? 'donut' : Game.day === 22 && DAYTONA() && Game.flags.raceWon ? 'race' : null; },
   places() {
     if (this._p) return this._p;
     const M = World.spots.merle;
@@ -44,6 +46,7 @@ const Cases = {
 
   setupDay(n) {
     const c = this.info(n), F = Game.flags;
+    if (c.n >= 8) return KeysCases.setupDay(n);
     if (c.n >= 6) return DaytonaCases.setupDay(n);
     if (c.n >= 4) return MiamiCases.setupDay(n);
     if (c.n === 2 && c.d === 1) {
@@ -79,6 +82,7 @@ const Cases = {
 
   tick(dt) {
     const c = this.info(), F = Game.flags;
+    if (KEYS() || c.n >= 8) { KeysCases.tick(dt); Favors.tick(dt); return; }
     if (DAYTONA() || c.n >= 6) { DaytonaCases.tick(dt); Favors.tick(dt); return; }
     if (c.n >= 4 || MIAMI()) { MiamiCases.tick(dt); Favors.tick(dt); return; }
     if (c.n === 2 && c.d === 1) {
@@ -108,7 +112,8 @@ const Cases = {
   talk(n) {
     const c = this.info(), F = Game.flags;
     if (MIAMI() && MiamiCases.talk(n)) return true;
-    if (DAYTONA() && DaytonaCases.talk(n)) return true;   // endless Daytona days still fall through to favors
+    if (DAYTONA() && DaytonaCases.talk(n)) return true;
+    if (KEYS() && KeysCases.talk(n)) return true;   // endless Daytona days still fall through to favors
     if (n.id === 'kayden' && c.n === 2) {
       n.quest = false;
       if (!F.kaydenAsk) {
@@ -166,10 +171,10 @@ const Cases = {
   },
 
   // the next step only happens after dark (and night work isn't cut off at 10 PM)
-  needsDark() { const c = this.info(); return !MIAMI() && !DAYTONA() && ((c.n === 2 && c.d === 2 && qOpen('manny2')) || (c.n === 3 && c.d === 1 && qDone('dogs') && qOpen('lure')) || (c.n === 3 && c.d === 2 && qDone('rehearse') && qOpen('reunion'))); },
+  needsDark() { const c = this.info(); return !MIAMI() && !DAYTONA() && !KEYS() && ((c.n === 2 && c.d === 2 && qOpen('manny2')) || (c.n === 3 && c.d === 1 && qDone('dogs') && qOpen('lure')) || (c.n === 3 && c.d === 2 && qDone('rehearse') && qOpen('reunion'))); },
   darkAt() { const c = this.info(); return c.n === 3 && c.d === 2 ? 18 : 20; },
   waitDark() { return this.needsDark() && Game.hour < this.darkAt(); },
-  nightWork() { const c = this.info(); return !MIAMI() && !DAYTONA() && (this.needsDark() || (c.n === 3 && c.d === 1 && qOpen('track'))); },
+  nightWork() { const c = this.info(); return !MIAMI() && !DAYTONA() && !KEYS() && (this.needsDark() || (c.n === 3 && c.d === 1 && qOpen('track'))); },
   interactions() {
     const D = Game.dan, c = this.info(), F = Game.flags, P = this.places(), list = MiamiCases.interactions(), near = (p, r) => Math.hypot(D.x - p.x, D.y - p.y) < r;
     if (this.waitDark() && near(P.couch, 24)) list.push({ label: 'Sit on the couch till dark', fn: () => {
@@ -247,9 +252,10 @@ const Cases = {
   },
   sleepBlock() {
     const c = this.info(), open = Game.quests.filter(q => !q.done && !q.opt && q.id !== 'bed');
-    if (this.courtCase()) return DAYTONA() ? 'Court. Today. The Volusia County Courthouse. GO.' : MIAMI() ? 'Court. Today. The Miami-Dade Courthouse. GO.' : 'Court. Today. The courthouse. East end of 29. GO.';
+    if (this.courtCase()) return KEYS() ? 'Court. Today. The Monroe County Courthouse. GO.' : DAYTONA() ? 'Court. Today. The Volusia County Courthouse. GO.' : MIAMI() ? 'Court. Today. The Miami-Dade Courthouse. GO.' : 'Court. Today. The courthouse. East end of 29. GO.';
     if (c.n === 6 && c.d === 1 && !Game.flags.donutRun) return 'Brenda: the Grand Marshal thing is TODAY, Dan. Daytona. Go.';
     if (c.n === 7 && c.d === 3 && !Game.flags.raceWon) return 'Sleep? It’s RACE DAY.';
+    if (c.n === 8 && c.d === 1 && !Game.flags.declared) return Game.flags.houseboat ? 'Sleep? The sunset’s the whole point of the houseboat.' : 'Brenda: You’re not even IN the Keys yet. (Greyhound, bridge, Captain Lou.)';
     if (c.n === 2 || c.n === 3) return open.length ? `Still got stuff to do: ${open[0].text.toLowerCase().replace(/\s*\(.*\)$/, '')}.` : null;
     return Game.hour < 17 && open.length ? 'Too early. Even for Dan.' : null;   // story's done for today? bed whenever you like
   },

@@ -24,7 +24,7 @@ const Heat = {
     this.cop = { x: spot.x, y: spot.y, dir: 'left', t: 0 }; this.lostT = 0;
     const r = Game.npcs.find(n => n.id === 'rhonda'); if (r) r.hidden = true;
     Sound.play('siren'); Game.day_.chases = (Game.day_.chases || 0) + 1;
-    if (MIAMI()) toast(pick(['MIAMI-DADE: Pull over, pastel boy!', 'MIAMI-DADE: Stop right there, Florida Man!']), 3.5); else if (DAYTONA()) toast(pick(['VOLUSIA DEPUTY: Pull over, champ!', 'VOLUSIA DEPUTY: This ain’t the speedway, Dupree!']), 3.5); else toast(pick(['RHONDA: DAN! PULL OVER! ...OR WALK OVER! WHATEVER YOU’RE DOING!', 'RHONDA: You’re on my list today, Dan!', 'RHONDA: Stop right there, Florida Man!']), 3.5);
+    if (KEYS()) toast(pick(['MONROE COUNTY: Pull over, Mr. President!', 'MONROE COUNTY: Stop in the name of the United States! Which you are still part of!']), 3.5); else if (MIAMI()) toast(pick(['MIAMI-DADE: Pull over, pastel boy!', 'MIAMI-DADE: Stop right there, Florida Man!']), 3.5); else if (DAYTONA()) toast(pick(['VOLUSIA DEPUTY: Pull over, champ!', 'VOLUSIA DEPUTY: This ain’t the speedway, Dupree!']), 3.5); else toast(pick(['RHONDA: DAN! PULL OVER! ...OR WALK OVER! WHATEVER YOU’RE DOING!', 'RHONDA: You’re on my list today, Dan!', 'RHONDA: Stop right there, Florida Man!']), 3.5);
     hint(MIAMI() || DAYTONA() ? 'chase2' : 'chase', MIAMI() || DAYTONA() ? `Lose 'em: ${K('run')} to run, or get way out of sight` : `Lose her: ${K('run')} to run, take the <b>boat</b>, ride the <b>cooler</b>, or hide in the <b>porta-potty</b>`, 6);
   },
   chase(dt) {
@@ -105,7 +105,7 @@ const Heat = {
     const on = Math.floor(t * 8) % 2;
     OR(x - 5, y - 2, 4, 3, on ? PAL.red : PAL.redD); OR(x + 1, y - 2, 4, 3, on ? PAL.blueD : PAL.blue);
     if (on) { g.globalAlpha = .18; g.fillStyle = PAL.red; g.beginPath(); g.arc(x - 3, y, 18, 0, 7); g.fill(); g.fillStyle = PAL.blue; g.beginPath(); g.arc(x + 3, y, 18, 0, 7); g.fill(); g.globalAlpha = 1; }
-    label(MIAMI() ? 'MIAMI-DADE' : DAYTONA() ? 'VOLUSIA' : 'SHERIFF', x, y + h / 2 + 9, PAL.white, 7);
+    label(KEYS() ? 'MONROE' : MIAMI() ? 'MIAMI-DADE' : DAYTONA() ? 'VOLUSIA' : 'SHERIFF', x, y + h / 2 + 9, PAL.white, 7);
     const f = c.foot; if (f) { const fx = Math.round(f.x - cx), fy = Math.round(f.y - cy); shadow(fx, fy + 1, 12); g.drawImage(SPR.rhonda[f.dir][f.moving ? f.frame : 0], fx - 8, fy - 21); R(fx - 5, fy - 17, 10, 1, PAL.shades); }
   },
 };

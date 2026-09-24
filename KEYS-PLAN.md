@@ -1,6 +1,6 @@
 # Florida Dan — The Keys (plan, 2026-09-24)
 
-Stage 4 of the expansion roadmap (upgrades ✅, Florida Man gigs ✅, Dan anims ✅, Daytona ✅). Status: **PLAN — waiting on owner decisions (bottom).**
+Stage 4 of the expansion roadmap (upgrades ✅, Florida Man gigs ✅, Dan anims ✅, Daytona ✅). Status: **APPROVED 9/24 — building.** Owner: Seven Mile Bridge drive ✅, both cases ✅, Dive = a real minigame usable in ANY Keys water ✅, NOT the finale — after the Keys comes an Orlando / theme-park knockoff region as the final chapter.
 
 ## Shape
 - New region `keys`, unlocked after Case 7 (Daytona 250). Two cases, same 3-day rhythm as everything else:
@@ -27,7 +27,7 @@ Dan rents a houseboat for "a quiet week." At sunset, eleven beers deep, he decla
 Snorkeling the old bridge, Dan finds a gold coin. A treasure-hunting outfit (and a TV crew) say it's theirs. Then Dan finds a lot more. Charge: **"Grand Theft Galleon."**
 - **New minigame: Dive** (side view, like the fishing screen): swim down, grab coins/junk, air meter, dodge a barracuda and jellyfish; buzz makes it wobbly, joint makes it slow and pretty. This is the Keys' signature mechanic and gets reused by an endless-mode dive gig.
 - Tarpon-feeding set piece, a lobster mini-season gig (every tourist in the water at once), boat chase vs the treasure crew (reuse BoatChase with reef hazards).
-- Day 3: court → **Florida Man of the Year: Grand Finale** parade down Duval (the FMOTY parade exists already; this is a bigger version) + full-series credits.
+- Day 3: court → FMOTY-style parade down Duval + case credits, ending on a tease: a theme-park billboard / Brenda: "Dan. Do NOT go to Orlando." (Orlando = the series finale, next region.)
 
 ## Around it
 - Gigs (3–4): roosters out of the bar, lobster-season crowd control, sunset pier "performer" shift, hauling a drunk guy's kayak back from "halfway to Cuba."
