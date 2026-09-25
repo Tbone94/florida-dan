@@ -50,15 +50,15 @@ function buildOrlando() {
   for (const x of [16, 33, 50, 64, 80]) add('ocone', x, 29.95, .5, .3, false);
   add('ojam', 22, 29.2, 1.8, .6, true, { c: '#f4efe6' }); add('ojam', 41, 30.1, 1.8, .6, true, { c: '#e0433a' }); add('ojam', 57, 29.2, 1.8, .6, true, { c: '#4f7bd1' }); add('ojam', 76, 30.1, 1.8, .6, true, { c: '#86c94a' });
   // International Drive
-  add('otimeshare', 71.5, 33.6, 7, 2.6); add('oupside', 80, 33.4, 6.4, 3); add('ovolcano', 75, 40.4, 5, 3); add('ogolfsign', 73, 38.8, 1, .4, false);
+  add('otimeshare', 71.5, 33.6, 7, 2.6); add('oupside', 80, 33.4, 6.4, 3); add('ovolcano', 75, 40.4, 5, 3); add('ogolfsign', 72.4, 39.2, 1, .4, false);
   add('osouvenir', 71.2, 50, 8, 2.6); add('oknights', 80.6, 50, 7, 2.8);
   // downtown
   add('ocourt', 75.5, 18, 9, 3.2); add('ofountain', 78.7, 7.2, 1.6, 1, true, { lake: true });
   for (const [x, y, s] of [[75, 5, 0], [83, 10, 1.3], [81, 4.6, 2.2]]) add('oswan', x, y, 1, .6, false, { s });
   // south: Gator Jamboree, Sunset Acres
-  add('ogators', 22.5, 46.4, 7, 2.2); add('ogsign', 30.6, 48.6, 1, .4, false);
+  add('ogators', 22.5, 46.4, 7, 2.2); add('ogsign', 35, 50.8, 1, .4, false);
   for (const [x, y, c] of [[37, 47, '#ffd6e0'], [42.5, 47, '#d6f0ff'], [37, 53.4, '#fff2c2'], [42.5, 53.4, '#e2ffd6'], [59, 47, '#f0d6ff']]) add('ohouse', x, y, 4, 2, true, { c });
-  add('ocart2', 47.2, 48.8, 1.4, .8, true, { c: '#ffffff' }); add('ocart2', 47.6, 54.6, 1.4, .8, true, { c: '#ffd6e0' }); add('oacres', 36.5, 51.2, 1, .4, false);
+  add('ocart2', 47.2, 48.8, 1.4, .8, true, { c: '#ffffff' }); add('ocart2', 47.6, 54.6, 1.4, .8, true, { c: '#ffd6e0' }); add('oacres', 41.7, 51.9, 1, .4, false);
   add('ohole', 46, 57, .4, .3, false);
   for (const [x, y] of [[2, 21], [9, 22], [15, 24], [62, 23], [65, 16], [66, 5], [88, 14], [71, 26], [86, 27], [3, 47], [8, 54], [17, 56], [35, 58], [62, 55], [66, 41], [88, 37], [60, 36], [45, 35], [30, 36], [22, 33], [24, 10], [31, 11], [48, 12], [55, 15], [55, 20], [22, 4], [56, 10]])
     add('palm', x + .25, y + .55, .5, .4, true, { s: hash2(x, y) });
@@ -93,7 +93,7 @@ function drawOrlandoProp(p, x, y, w, h, t) {
       label('214', x + 61, y + h - 21, PAL.yellow, 5);
       const sx = x + w - 12; R(sx, y - 42, 2, 24, PAL.greyD); OR(sx - 20, y - 50, 42, 13, '#7b4bc4'); R(sx - 8, y - 56, 3, 5, PAL.yellow); R(sx - 1, y - 58, 3, 7, PAL.yellow); R(sx + 6, y - 56, 3, 5, PAL.yellow);
       label('KINGDOM INN', sx + 1, y - 41, night && Math.floor(t * 2) % 7 ? '#ff9ec7' : PAL.yellow, 5);
-      sign('MINUTES FROM THE PARK*', x + 44, y - 25, PAL.white, '#7b4bc4', 4); return true;
+      sign('NEAR THE PARK*', x + 46, y - 25, PAL.white, '#7b4bc4', 4); return true;
     }
     case 'opool': {   // kidney-shaped-ish, extremely chlorinated. Manny summers here now.
       OR(x - 2, y - 2, w + 4, h + 4, '#e8e2d2'); R(x, y, w, h, '#4fd0e8'); for (let i = 0; i < 6; i++) R(x + 4 + ((i * 13 + t * 9) % (w - 8)), y + 4 + (i % 3) * 10, 6, 1, '#b8f4ff');
@@ -182,7 +182,7 @@ function drawOrlandoProp(p, x, y, w, h, t) {
     case 'otimeshare': {
       shack('#fff7ec', '#27c6b4', PAL.white); OR(x + 8, y + 2, 26, 10, PAL.waterL); OR(x + w - 20, y + h - 16, 12, 16, '#27c6b4');
       for (let i = 0; i < 5; i++) R(x + w - 44 + i * 5, y + 4 + Math.round(Math.sin(t * 6 + i) * 1), 3, 7, ['#ff5ea8', '#ffd23f', '#86c94a', '#27c6b4', '#ff8a3d'][i]);   // balloons
-      sign('SUNNY PINES TIMESHARES', x + w / 2, y - 20, '#27c6b4', PAL.white, 4); OR(x + w / 2 - 44, y + h + 2, 88, 9, PAL.yellow); label('FREE PARK TICKETS!*', x + w / 2, y + h + 10, '#e0433a', 5); return true;
+      sign('SUNNY PINES TIMESHARES', x + w / 2, y - 20, '#27c6b4', PAL.white, 4); OR(x + 5, y + 16, 72, 10, PAL.yellow); label('FREE TICKETS!*', x + 41, y + 25, '#e0433a', 5); return true;
     }
     case 'oupside': {   // a house, upside down, on its roof. You enter through the chimney, allegedly.
       shadow(x + w / 2, y + h + 3, w + 8, 6); g.fillStyle = PAL.ink; g.beginPath(); g.moveTo(x - 4, y - 2); g.lineTo(x + w / 2, y + h + 1); g.lineTo(x + w + 4, y - 2); g.fill();
@@ -226,14 +226,14 @@ function drawOrlandoProp(p, x, y, w, h, t) {
       R(mx - 12, y - 24, 4, 4, PAL.yellow); R(mx + 8, y - 24, 4, 4, PAL.yellow); R(mx - 11, y - 23, 2, 2, PAL.ink); R(mx + 9, y - 23, 2, 2, PAL.ink); OR(mx - 7, y + h - 16, 14, 16, PAL.black);
       sign('GATOR JAMBOREE', mx, y - 30, '#557f3c', PAL.yellow, 4); return true;
     }
-    case 'ogsign': { R(x + 7, y - 14, 2, 16, PAL.woodD); sign('DO NOT FEED THE GATORS', x + 8, y - 16, PAL.white, '#e0433a', 4); return true; }
+    case 'ogsign': { R(x + 7, y - 14, 2, 16, PAL.woodD); sign('NO FEEDING GATORS', x + 8, y - 16, PAL.white, '#e0433a', 4); return true; }
     case 'ohouse': {   // Sunset Acres: identical pastel houses, a flamingo each
       shadow(x + w / 2, y + h + 2, w + 6, 5); OR(x, y - 8, w, h + 8, p.c); g.fillStyle = PAL.ink; g.beginPath(); g.moveTo(x - 4, y - 7); g.lineTo(x + w / 2, y - 22); g.lineTo(x + w + 4, y - 7); g.fill();
       g.fillStyle = '#e0cfc0'; g.beginPath(); g.moveTo(x - 2, y - 8); g.lineTo(x + w / 2, y - 20); g.lineTo(x + w + 2, y - 8); g.fill();
       OR(x + 6, y + 2, 12, 9, PAL.waterL); OR(x + w - 18, y + h - 16, 10, 16, PAL.white); if (SPR.flamingo) g.drawImage(SPR.flamingo, x + w + 4, y + h - 10); return true;
     }
     case 'ocart2': { shadow(x + w / 2, y + h + 1, w + 4, 4); OR(x, y - 2, w, h, p.c); R(x + 2, y - 14, 1, 12, PAL.grey); R(x + w - 3, y - 14, 1, 12, PAL.grey); OR(x, y - 16, w, 3, '#27c6b4'); R(x + 2, y + h - 3, 3, 3, PAL.ink); R(x + w - 5, y + h - 3, 3, 3, PAL.ink); return true; }
-    case 'oacres': { R(x + 7, y - 14, 2, 16, PAL.woodD); sign('SUNSET ACRES · 55+ · GOLF CARTS ONLY', x + 8, y - 16, '#7b4bc4', PAL.white, 4); return true; }
+    case 'oacres': { R(x + 7, y - 14, 2, 16, PAL.woodD); sign('SUNSET ACRES · 55+ · CARTS ONLY', x + 8, y - 16, '#7b4bc4', PAL.white, 4); return true; }
     case 'ohole': { R(x, y, 5, 2, PAL.ink); R(x + 2, y - 14, 1, 14, PAL.white); R(x + 3, y - 14, 6, 4, '#e0433a'); return true; }
   }
   return false;
@@ -247,7 +247,7 @@ const Orlando = {
       makeNPC('chad', 'Chad', S_.timeshare.x, S_.timeshare.y, 'down'),
       makeNPC('larry', 'Lava Larry', S_.volcano.x - 30, S_.volcano.y + 8, 'down'),
       makeNPC('gloria', 'Gloria', S_.souvenir.x, S_.souvenir.y, 'down'),
-      makeNPC('deb', 'Wrangler Deb', S_.gators.x + 48, S_.gators.y - 4, 'down'),
+      makeNPC('deb', 'Wrangler Deb', S_.gators.x - 56, S_.gators.y, 'down'),
       makeNPC('dolores', 'Dolores', S_.acres.x, S_.acres.y, 'down', { wander: 40 }),
       makeNPC('enforcer', 'Fun Enforcement', 30 * TS, 11 * TS, 'down', { wander: 60 }),
       makeNPC('enforcer', 'Fun Enforcement', 50 * TS, 17 * TS, 'down', { wander: 60 }),
@@ -301,8 +301,7 @@ const Orlando = {
   gatePrompt() {
     const F = Game.flags;
     return { label: 'Enter SqueakyLand', fn: () => {
-      if (F.tickets && !Game.day_.ticketUsed) { Game.day_.ticketUsed = true; return this.enterPark(); }
-      if (Game.day_.inPaid) return this.enterPark();
+      if (F.tickets || Game.day_.inPaid) return this.enterPark();   // Chad’s “two-day” passes. Nobody checks the dates.
       say([['TICKET BOOTH', 'One adult, one day: $139. Plus tax. Plus parking. Plus the churro you’re about to buy.', [
         [`Pay a coupon price ($30)${Game.money < 30 ? ' — broke' : ''}`, () => { if (Game.money < 30) return [['TICKET BOOTH', 'Card declined. The mouse can tell.']]; Game.money -= 30; Game.day_.inPaid = true; Sound.play('cash'); Game.afterTalk = () => this.enterPark(); return null; }],
         ['HOP THE TURNSTILE', () => { Game.day_.inPaid = true; Heat.add(2); Game.afterTalk = () => this.enterPark(true); return null; }],
@@ -311,7 +310,7 @@ const Orlando = {
   },
   enterPark(hopped) {
     const D = Game.dan, S_ = World.spots; if (D.ride === 'cooler') D.ride = null;
-    Object.assign(D, { x: S_.gateIn.x, y: S_.gateIn.y - 6, dir: 'up', ride: null }); Game.cam.x = D.x - VW / 2; Game.cam.y = D.y - VH / 2 - 10; Game.flash = .4; Sound.play('pickup');
+    Object.assign(D, { x: S_.gateIn.x, y: S_.gateIn.y - 30, dir: 'up', ride: null }); Game.cam.x = D.x - VW / 2; Game.cam.y = D.y - VH / 2 - 10; Game.flash = .4; Sound.play('pickup');
     if (hopped) { toast('Dan vaults the turnstile. A family of five applauds. Fun Enforcement writes something down.', 3.5); if (!Game.flags.hopHl) { Game.flags.hopHl = true; headline('FLORIDA MAN HOPS SQUEAKYLAND TURNSTILE IN FLIP-FLOPS; SECURITY "IMPRESSED, HONESTLY"', 5); } }
     else toast(pick(['Welcome to SQUEAKYLAND! Churros are $14. Water is $9. Joy is free (it is not).', 'SQUEAKYLAND! The air smells like sugar and sunscreen and fear.']), 3.5);
     if (typeof OrlandoCases !== 'undefined') OrlandoCases.enteredPark();
@@ -321,10 +320,11 @@ const Orlando = {
   tick(dt) {
     const h = Game.hour; if (!(h > 20.75 && h < 21.25) || Game.mode !== 'play') return;
     if (Math.random() < dt * 2.2) {
-      const bx = (39.5 + rnd(-6, 6)) * TS, by = (1 + rnd(-3, 3)) * TS, c = pick(['#ff5ea8', '#ffd23f', '#27c6b4', '#b86bd6', '#ff8a3d', PAL.white]);
+      const bx = Game.cam.x + rnd(30, VW - 30), by = Game.cam.y + rnd(12, 70), c = pick(   // you can see them from anywhere in Orlando
+        ['#ff5ea8', '#ffd23f', '#27c6b4', '#b86bd6', '#ff8a3d', PAL.white]);
       for (let i = 0; i < 18; i++) { const a = i / 18 * 6.28; Game.parts.push({ kind: 'spark', x: bx, y: by, vx: Math.cos(a) * rnd(40, 70), vy: Math.sin(a) * rnd(40, 70) - 30, life: rnd(.8, 1.3), c }); }
       Game.parts.push({ kind: 'fire', x: bx, y: by, vx: 0, vy: 0, life: .4 }); if (Math.random() < .5) Sound.play('boom');
-      if (!Game.day_.fwToast && Math.hypot(Game.dan.x - bx, Game.dan.y - by) < 600) { Game.day_.fwToast = true; toast('Fireworks over the Cheese Castle. Every night. Dan cries a little. Nobody sees.', 3.5); }
+      if (!Game.day_.fwToast) { Game.day_.fwToast = true; toast('Fireworks over the Cheese Castle. Every night. Dan cries a little. Nobody sees.', 3.5); }
     }
   },
   // night light for the look layer (look.js calls this)

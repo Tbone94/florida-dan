@@ -55,7 +55,7 @@ const Sneak = {
       else gd.a = gd.base + Math.sin(s.t * gd.rate + gd.ph) * gd.sweep / 2;
     }
     const seen = s.guards.some(gd => this.sees(gd, s.x, s.y));
-    const rate = !seen ? -.32 : s.wave ? .16 : run ? 1.7 : s.moving ? 1.15 : .55;
+    const rate = !seen ? -.32 : s.wave ? .16 : run ? 3.2 : s.moving ? 1.15 : .55;   // a JOGGING mouse is the most suspicious thing in the park
     s.sus = clamp(s.sus + rate * dt, 0, 1);
     if (seen && !s.seen) { Sound.play('talk'); this.say(s.wave ? pick(['*waves* They wave back...', 'Just a mouse. Doing mouse stuff.']) : pick(['FUN ENFORCEMENT: ...Squeaky? That you?', 'FUN ENFORCEMENT: Why is the mouse jogging?', `HOLD ${K('a').replace(/<[^>]+>/g, '')}: WAVE LIKE YOU WORK HERE!`]), 1.2); }
     s.seen = seen;

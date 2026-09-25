@@ -164,6 +164,15 @@ await ev(() => {
   log.push('ears: ' + hasUp('ears') + ', end of endless: mode ' + Game.mode + (Game.talk ? ' talk ' + JSON.stringify(Game.talk.q[0]).slice(0, 80) : ''));
   talk(); Game.hour = 12; at(World.spots.photo, 34, 18); snap(); });
 await shot('19-endless');
+// an old endless save (past day 34, Keys done, never saw Orlando): Orlando starts the next morning, wherever Dan is
+await ev(() => {
+  Game.flags = { case1Won: true, case2Won: true, case3Won: true, case4Won: true, case5Won: true, case6Won: true, case7Won: true, case8Won: true, case9Won: true, keysFrom: 23, noChase: true };
+  Game.mode = 'play'; World.load('swamp'); Game.day = 40; nextDay(); talk();
+  need(Game.flags.orlandoFrom === 41 && Cases.info().n === 10 && Cases.info().d === 1, 'old save did not start Orlando on day 41: ' + Game.flags.orlandoFrom + ' ' + JSON.stringify(Cases.info()));
+  need(qOpen('bus10'), 'old save: no bus quest'); need(Game.region === 'swamp', 'old save moved regions');
+  // a missed escape replays the day
+  Game.day = 41; endDay('late'); step(2); $('nextBtn').click(); talk(); need(Game.day === 41, 'missed Case 10 day 1 did not replay: day ' + Game.day);
+});
 const r = await ev(() => ({ bad, log }));
 console.log(r.log.join('\n')); errs.push(...r.bad);
 console.log('errors:', errs.length ? errs : 'none'); await b.close();

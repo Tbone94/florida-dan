@@ -57,7 +57,7 @@ const OrlandoCases = {
     if (!(c.n === 10 && c.d === 1 && F.suitOn)) add('squeaky', 'Mr. Squeaky', S_.photo.x, S_.photo.y, 'down');
     if (c.n === 10 && c.d === 1) for (const [x, y] of [[37.5, 13.4], [41.6, 13.2], [36.8, 11.6]]) add('tourist', 'Tourist', x * TS, y * TS, 'up', { wander: 10 });
     if (!(c.n === 10 && c.d === 1)) add('kyle', 'Kyle', S_.orange.x, S_.orange.y, 'down');
-    if (c.n === 10 && c.d === 2) { add('todd', 'Todd', S_.gators.x - 70, S_.gators.y - 4, 'down'); add('pembrook', 'Mr. Pembrook', S_.court.x - 30, S_.court.y + 22, 'down'); }
+    if (c.n === 10 && c.d === 2) { add('todd', 'Todd', S_.gators.x + 52, S_.gators.y, 'down'); add('pembrook', 'Mr. Pembrook', S_.court.x - 30, S_.court.y + 22, 'down'); }
     if (c.n === 10 && c.d === 3) { add('pembrook', 'Mr. Pembrook', S_.court.x - 30, S_.court.y + 22, 'down'); add('cheddarton', 'Wendell Cheddarton', S_.court.x + 30, S_.court.y + 22, 'down'); }
     if (c.n === 11 && c.d === 2 && !F.ridePhoto) add('cheddarton', 'Wendell Cheddarton', S_.coaster.x + 26, S_.coaster.y + 8, 'down');
     if (c.n === 11 && F.gangHere) this.spawnGang(c.d === 3 ? 4 : 3);
@@ -97,9 +97,9 @@ const OrlandoCases = {
     }
     if (c.n === 11 && c.d === 2) {
       Game.hour = 7; setQuests([['coaster', 'Ride Space Squeak Mountain (the park)'], ['memo', 'After dark: sneak into the castle (the memo)'], ['gang', 'Hang out with the gang (0/5)', true]]);
-      return say([[PHONE_B, 'Squeaky Corp’s whole case is your headlines. Read out loud. All of them.'], [PHONE_B, 'I need proof THEY wrote that law. And proof you’re no worse than anybody else in this state.'],
+      return say([[PHONE_B, 'Squeaky Corp’s whole case is your headlines. Read out loud. All of them.'], [PHONE_B, 'I need proof THEY wrote that law. And proof you’re no worse than anyone in this state.'],
         ['DAN', 'Nobody in this state is better than me, Brenda.'], [PHONE_B, 'PROVE it. Cheddarton rides Space Squeak Mountain every morning. It’s in his memoir.'],
-        ['TEXT: KYLE', 'hey its kyle. squeaky HQ is inside the castle. the safe code is 1234. i ran the safe for a week in 2020']]);
+        ['TEXT: KYLE', 'its kyle. HQ is in the castle. safe code is 1234. i had the safe for a week in 2020']]);
     }
     if (c.n === 11 && c.d === 3) {
       Game.hour = 8; setQuests([['court', 'THE LAST TRIAL. Orange County Courthouse']]);
@@ -215,7 +215,7 @@ const OrlandoCases = {
     if (c.n === 11 && c.d === 2 && qOpen('coaster')) {
       F.ridePhoto = true; done('coaster'); const ch = oWho('cheddarton'); if (ch) ch.hidden = true;
       headline('SQUEAKY CORP CEO PHOTOGRAPHED SHOTGUNNING BEER ON ROLLER COASTER, SHIRTLESS, BEHIND FLORIDA MAN', 6);
-      return say([['', 'The ride photo prints. Row one: Dan, thumbs up. Row two: Wendell Cheddarton, CEO of Squeaky Corp.'], ['', 'He is shotgunning a Swamp Lite on the big drop. Shirt off. Screaming “FLORIDA!”'],
+      return say([['', 'The ride photo prints. Row one: Dan, thumbs up. Row two: the CEO of Squeaky Corp.'], ['', 'He is shotgunning a Swamp Lite on the big drop. Shirt off. Screaming “FLORIDA!”'],
         ['DAN', '...Brenda’s gonna LOVE this.'], ['PHOTO BOOTH', 'That’s $29.99 for the photo, sir.'], ['DAN', 'Worth every penny.']], () => { Game.money = Math.max(0, Game.money - 30); });
     }
     toast(pick(['Ride photo: Dan, thumbs up, eyes closed. Row two: a CEO screaming. $29.99.', 'Space Squeak Mountain: survived. Dan buys the photo. And a keychain of the photo.']), 3.5);
@@ -227,7 +227,7 @@ const OrlandoCases = {
     if (!r.won) return say([['FUN ENFORCEMENT', 'Sir, the park is CLOSED. Why are you in a trash can.'], ['', 'Dan waits in the trash can till they leave. It’s a nice trash can. Try again?']]);
     F.memo = true; done('memo'); Object.assign(D, { x: S_.gateOut.x, y: S_.gateOut.y + 10, dir: 'down' }); Game.cam.x = D.x - VW / 2; Game.cam.y = D.y - VH / 2 - 10;
     headline('FLORIDA MAN BREAKS INTO THEME PARK CASTLE AT NIGHT, TAKES ONE (1) MEMO AND ONE (1) CHURRO', 5);
-    say([['', 'Squeaky HQ. A safe behind a painting of the mouse. Code: 1-2-3-4. Kyle was right.'], ['', 'A memo: “FLORIDA MAN ACT, DRAFT 9. By Squeaky Corp Legal. Do NOT let Tallahassee read this part.”'],
+    say([['', 'Squeaky HQ. A safe behind a painting of the mouse. Code: 1-2-3-4. Kyle was right.'], ['', 'A memo: “FLORIDA MAN ACT, DRAFT 9. By Squeaky Corp Legal. Do NOT let Tallahassee see.”'],
       ['DAN', 'They WROTE the law. The mouse wrote the LAW.'], ['', 'Also in the safe: forty churros. Dan takes one. For the road.']], () => addQuest('bed', 'Sleep at the Kingdom Inn. Big day.'));
   },
   // ---------- people ----------
@@ -246,7 +246,7 @@ const OrlandoCases = {
         if (c.n === 10 && c.d === 2 && qOpen('kyle')) {
           if (!Q('oranges')) { addQuest('oranges', 'Punch orange trees for Kyle (0/6)', false, 'kyle'); hint('punch', `Trees respect punches. ${K('punch')} next to an orange tree`, 6);
             return say([['KYLE', 'Oh no. It’s you. The beer mouse.'], ['DAN', 'Kyle. I need you in court. Tell ’em you GAVE me the suit.'], ['KYLE', 'Squeaky Corp says if I testify I’ll never work in Orlando again.'],
-              ['KYLE', 'And I NEED this job. Juice. No head. Sunlight. But I’m behind.'], ['KYLE', 'Six oranges from the grove. I can’t reach. Shake ’em loose? Punch the trees. Gently. Or not.']]), true; }
+              ['KYLE', 'And I NEED this job. Juice. No head. Sunlight. But I’m behind.'], ['KYLE', 'Six oranges from the grove. I can’t reach. Punch ’em loose? Gently. Or not.']]), true; }
           if ((Game.inv.orange || 0) >= 6) { Game.inv.orange -= 6; F.kyleIn = true; done('oranges'); done('kyle'); headline('FORMER MOUSE FINDS PEACE AT GIANT ORANGE; "I CAN SEE THE SKY"', 3); this.day2Check();
             return say([['KYLE', 'Six! The boss is gonna cry. I’m gonna cry. I’m crying.'], ['KYLE', 'I’ll testify. I gave you the suit. Freely. Joyfully. In my underwear.'], ['DAN', 'That’s all we need, buddy.']]), true; }
           return say([['KYLE', `Six oranges, man. You’ve got ${Game.inv.orange || 0}. The trees are right there. Punch ’em.`]]), true;
@@ -387,17 +387,17 @@ const OrlandoCourt = {
       ['JUDGE HARLAN', 'Mr. Dupree. Eleven cases ago you stood in my courtroom and I asked for your plea.'], ['JUDGE HARLAN', 'You said being a Florida Man was a lifestyle. I said that wasn’t a plea.'],
       ['JUDGE HARLAN', 'I was right. It isn’t a plea. It isn’t a crime, either.'], ['JUDGE HARLAN', 'The Florida Man Act is struck down. The petition is DENIED. The cooler stays.'],
       ['JUDGE HARLAN', 'One more question, son. For the record. For all of us.'], ['JUDGE HARLAN', 'Are you a Florida Man?', [
-        ['“I am NOT a Florida Man.”', () => [['', 'The whole gallery, all at once:'], ['EVERYBODY', 'YES YOU ARE!'], ['DAN', '...Yeah. Yeah, I am.'], ['DAN', 'I’m a Florida Man. And these are my Florida people.']]],
-        ['“...Yeah. I am.”', () => [['DAN', 'I fight gators. I ride manatees. I lose my pants. A lot.'], ['DAN', 'And every time I fell in the swamp, somebody in this room pulled me out.'], ['DAN', 'So yeah. Florida Man. Proud of it.']]],
-        ['Crack a Swamp Lite', () => { Sound.play('crack'); return [['', '*crack*'], ['JUDGE HARLAN', '...Is that a Swamp Lite?'], ['DAN', 'Want one?'], ['JUDGE HARLAN', 'Eleven cases ago I said “after.” ...Yeah. Now.'], ['', 'Four hundred cans open at once. Five judges. One gator. Brenda.']]; }]]],
-      ['BRENDA', 'Dan. Eleven cases. You finally said it.'], ['', 'Brenda hugs Dan. Chuck hugs Dan. Gary hugs everyone. Rhonda allows it.'],
+        ['“I am NOT a Florida Man.”', () => [['', 'The whole gallery, all at once:'], ['EVERYBODY', 'YES YOU ARE!'], ['DAN', '...Yeah. Yeah, I am.'], ['DAN', 'I’m a Florida Man. And these are my Florida people.'], ['BRENDA', 'Eleven cases, Dan. You finally said it.']]],
+        ['“...Yeah. I am.”', () => [['DAN', 'I fight gators. I ride manatees. I lose my pants. A lot.'], ['DAN', 'And every time I fell in the swamp, somebody in this room pulled me out.'], ['DAN', 'So yeah. Florida Man. Proud of it.'], ['BRENDA', 'Eleven cases, Dan. You finally said it.']]],
+        ['Crack a Swamp Lite', () => { Sound.play('crack'); return [['', '*crack*'], ['JUDGE HARLAN', '...Is that a Swamp Lite?'], ['DAN', 'Want one?'], ['JUDGE HARLAN', 'Eleven cases ago I said “after.” ...Yeah. Now.'], ['', 'Four hundred cans open at once. Five judges. One gator. Brenda.'], ['BRENDA', 'Dan. You didn’t even answer the question.'], ['DAN', 'That WAS the answer, Brenda.']]; }]]],
+      ['', 'Brenda hugs Dan. Chuck hugs Dan. Gary hugs everyone. Rhonda allows it.'],
       ['JUDGE HARLAN', 'Court is adjourned. Forever. Somebody get the alligator a lawyer.']],
     () => { E.hug = true; headline('FLORIDA MAN ACT STRUCK DOWN; FLORIDA MAN ADMITS HE IS "A FLORIDA MAN" IN OPEN COURT; ALLIGATOR SITS ON CEO', 15); this.parade(); });
   },
   parade() {
     Game.scene = 'finale'; Game.mode = 'court';
-    say([['', 'THAT NIGHT. SQUEAKYLAND. The park has never let a Florida Man lead the parade. Tonight it does.'], ['KYLE', '(back in the suit, by choice, one night only) Ladies and gentlemen... FLORIDA MAN!'],
-      ['', 'Merle waves the turkey fryer. Manny waves a flipper from his kiddie pool. Trash Baby steals a churro.'], ['BRENDA', 'So. What now?'],
+    say([['', 'THAT NIGHT. SQUEAKYLAND. They’ve never let a Florida Man lead the parade. Until now.'], ['KYLE', '(back in the suit, by choice, one night only) Ladies and gentlemen... FLORIDA MAN!'],
+      ['', 'Merle waves the turkey fryer. Manny waves a flipper. Trash Baby steals a churro.'], ['BRENDA', 'So. What now?'],
       ['DAN', 'The swamp. Miami. Daytona. The Keys. Orlando. It’s all ours, Brenda.'], ['DAN', 'Wanna get a Swamp Lite?'], ['BRENDA', '...Yeah. Yeah, I do.']],
     () => { headline('FLORIDA MAN LEADS SQUEAKYLAND PARADE ON GIANT COOLER FLOAT; MOUSE "FINE WITH IT, HONESTLY"', 6); Game.flags.case11Won = true; Game.flags.theEnd = true; Game.flags.creditsPending = 11; endDay('court'); });
   },

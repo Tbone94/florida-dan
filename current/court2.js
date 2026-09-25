@@ -161,8 +161,9 @@ function caseTarget(q) {
     case 'trailcam': case 'lure': return P.trailcam;
     case 'track': case 'rehearse': case 'reunion': return ape || P.den;
   }
-  if (typeof OrlandoCases !== 'undefined' && ORLANDO()) { const o = OrlandoCases.target(q); if (o !== undefined) return o; }
-  if (typeof KeysCases !== 'undefined' && KEYS()) { const k = KeysCases.target(q); if (k !== undefined) return k; }   // (this hook was missing: the Keys never had objective arrows)
+  const cn = Cases.info().n;
+  if (typeof OrlandoCases !== 'undefined' && (ORLANDO() || cn >= 10)) { const o = OrlandoCases.target(q); if (o !== undefined) return o; }
+  if (typeof KeysCases !== 'undefined' && (KEYS() || cn === 8 || cn === 9)) { const k = KeysCases.target(q); if (k !== undefined) return k; }   // (this hook was missing: the Keys never had objective arrows)
   if (typeof DaytonaCases !== 'undefined') { const d = DaytonaCases.target(q); if (d !== undefined) return d; }
   return MiamiCases.target(q);
 }
