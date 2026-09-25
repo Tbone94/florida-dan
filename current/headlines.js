@@ -140,6 +140,27 @@ const HEADLINES = [
   ['phone', /IPHONE OUT OF SWAMP/, 'Somebody’s mom keeps calling from the bottom of the swamp.'],
   ['scratch100', /WINS \$100/, 'Feeling lucky? Keep scratching.'],
   ['fireworks', /SETS OFF FIREWORKS/, 'Freedom Rockets aren’t just for the 4th.'],
+  // ---- side quests, variety pass (sidequests.js) ----
+  ['gigOregano', /OREGANO PIZZA NIGHT/, 'Wayne has a “spice” delivery for Skeeter.'],
+  ['gigSnitch', /IT WAS ACTUALLY OREGANO/, 'Wayne has a delivery. Rhonda has a nose.'],
+  ['gigPaparazzi', /PHOTO OF CELEBRITY’S FEET/, 'The valet knows where a celebrity is sunbathing.'],
+  ['papBusted', /BODYGUARD THROWS FLORIDA MAN/, 'Get caught sneaking up on a celebrity. A lot.'],
+  ['gigYacht', /WATER TAXI TO YACHT PARTY/, 'Coral needs a water taxi.'],
+  ['gigBeachRun', /BEATS GUY ON RIDING MOWER/, 'Wrench times the beach run.'],
+  ['gigGulls', /PELICANS OFF TATTOO PARLOR/, 'Needles has birds on the roof.'],
+  ['gigPies', /TWELVE KEY LIME PIES/, 'Joelle’s pies need to get to Marathon. Cold.'],
+  ['catCensus', /CAT CENSUS/, 'Miss Pearl needs photos of her cats.'],
+  ['fritter', /DOUBLE LIFE AS "FRITTER"/, 'Where does Pearl’s cat go at night?'],
+  ['catGang', /CAT LEADS KEY WEST STREET GANG/, 'Tell Miss Pearl a lie about her cat.'],
+  ['bestInToes', /BEST IN TOES/, 'The Key West Cat Show. Bring a hair dryer.'],
+  ['gusGoodbye', /SAY GOODBYE TO HIS SHIPWRECK/, 'Old Gus wants one last look at her.'],
+  ['gusWatch', /1984 DIVE WATCH/, 'Gus lost something on the wreck in ’84.'],
+  ['silverMount', /MOUNTS IT IN RETIREE’S LIVING ROOM/, 'Old Silver: keep him.'],
+  ['silverFree', /LETS IT GO; RETIREE CRIES/, 'Old Silver: let him go.'],
+  ['mamaEscort', /WITHOUT HER SEEING A SINGLE BIKER/, 'Tiny’s mama is visiting. She can’t see a biker.'],
+  ['dentalCon', /DENTAL CONVENTION FOR ONE/, 'Bike Night with a visiting mother. Keep the lie going.'],
+  ['hellsGranny', /HELL’S GRANNY/, 'Bike Night with a visiting mother. Tell the truth.'],
+  ['mamaArm', /ARM-WRESTLES BIKER’S MOTHER/, 'Bike Night with a visiting mother. Settle it at the table.'],
 ];
 const SHEET_KEY = 'floridaDan.sheet';
 const Sheet = {

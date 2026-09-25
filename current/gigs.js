@@ -78,6 +78,7 @@ const Gigs = {
     if (id === 'pool') Game.animals = Game.animals.filter(a => a.gig !== 'pool');
   },
   tick(dt) {
+    SideQuests.tick(dt);   // sidequests.js: its gigs + neighbor-story chapters tick themselves
     const G = G_(), id = G.active; if (!id) return;
     const d = GIGS[id];
     if (id === 'rematch' && Race.on && !(Cases.info().n === 4 && Cases.info().d === 3)) Race.tick(dt);
@@ -90,9 +91,10 @@ const Gigs = {
       if (G.t > TRIAL_LIMIT) { G.cp = -1; Sound.play('fail'); toast('Too slow. Back to Bubba’s dock to try again.'); }
     }
   },
-  timer: () => { const G = G_(); return G.active === 'trial' && G.cp >= 1 ? Math.max(0, Math.ceil(TRIAL_LIMIT - G.t)) : 0; },
+  timer: () => { const G = G_(); return G.active === 'trial' && G.cp >= 1 ? Math.max(0, Math.ceil(TRIAL_LIMIT - G.t)) : SideQuests.timer(); },
   interactions() {
     const D = Game.dan;
+    const sq = SideQuests.interaction(); if (sq) return sq;
     if (D.carry === 'mattress') { const dm = World.props.find(p => p.kind === 'dumpster'); if (dm && Math.hypot(D.x - dm.x - 12, D.y - dm.y - 8) < 32) return { label: 'Toss the mattress', fn: () => { D.carry = null; Sound.play('boom'); Gigs.complete('mattress'); } }; }
     const S_ = World.spots, near = (p, r) => p && Math.hypot(D.x - p.x, D.y - p.y) < r;
     const nb = World.props.find(p => p.kind === 'newsbox'); if (nb && !D.ride && near({ x: nb.x + 6, y: nb.y + 6 }, 18)) return { label: 'Bribe the Swamp Gazette', fn: () => Bribe.open() };
@@ -101,6 +103,7 @@ const Gigs = {
   // where the objective arrow points while a gig is the thing to do
   target(q) {
     const id = q.id.slice(4), who = n => Game.npcs.find(x => x.id === n);
+    const sq = SideQuests.target(id); if (sq !== undefined) return sq;
     if (id === 'beer') return who('skeeter');
     if (id === 'pool') return Game.animals.find(a => a.gig === 'pool');
     if (id === 'mattress') return Game.pickups.find(p => p.kind === 'mattress') || (Game.dan.carry === 'mattress' ? World.props.find(p => p.kind === 'dumpster') : null);
@@ -110,6 +113,7 @@ const Gigs = {
   },
   // race buoys (only while the trial is on)
   draw(cx, cy, t) {
+    SideQuests.draw(cx, cy, t);
     const G = G_(); if (G.active !== 'trial' || !World.spots.bubbaDock) return;
     trialPoints().forEach((p, i) => {
       if (i === 0 && G.cp >= 1 && G.cp < 3) return;

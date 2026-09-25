@@ -64,7 +64,7 @@ function hud() {
   for (const [k, name, col] of FX_BARS) { if (F[k] > 0) { pk[k] = Math.max(pk[k] || 0, F[k]); fx += `<span class="fxb"><b>${name}</b><em><i style="width:${Math.round(F[k] / pk[k] * 20) * 5}%;background:${col}"></i></em></span>`; } else pk[k] = 0; }
   if (ui.fxTags._h !== fx) { ui.fxTags._h = fx; ui.fxTags.innerHTML = fx; }
   const hs = Math.ceil((Game.heat || 0) - .05); $('heat').hidden = hs <= 0; set($('heat'), '★'.repeat(hs) + '☆'.repeat(5 - Math.max(0, hs)) + (Heat.cop ? '  WANTED' : Game.heatBumpT > 0 ? '  +★ MADE THE NEWS' : hs >= 3 ? '  COPS COMING' : '')); $('heat').classList.toggle('hot', !!Heat.cop);
-  const tt = Gigs.timer(), rh = typeof Speedway !== 'undefined' ? Speedway.hud() : ''; ui.urgent.hidden = !(Game.urgent > 0 || tt || rh); if (rh) set(ui.urgent, rh); else if (Game.urgent > 0) set(ui.urgent, `FIND A TOILET: ${Math.ceil(Game.urgent)}s`); else if (tt) set(ui.urgent, `BEAT THE RECORD: ${tt}s`);
+  const tt = Gigs.timer(), rh = typeof Speedway !== 'undefined' ? Speedway.hud() : ''; ui.urgent.hidden = !(Game.urgent > 0 || tt || rh); if (rh) set(ui.urgent, rh); else if (Game.urgent > 0) set(ui.urgent, `FIND A TOILET: ${Math.ceil(Game.urgent)}s`); else if (tt) set(ui.urgent, `${SideQuests.timerLabel()}: ${tt}s`);
   for (const [id, n] of [['statBait', Game.inv.bait], ['statCan', Game.inv.can], ['statPy', Game.pythons.length]]) $(id).hidden = !n;
   updateHotbar(); renderQuests();
   if (Game.mode !== 'play') { ui.prompt.hidden = true; ui.hint.hidden = true; }   // tips wait out minigames (hints() brings them back)

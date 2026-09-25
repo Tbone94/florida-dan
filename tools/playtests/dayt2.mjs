@@ -10,7 +10,7 @@ const r = await p.evaluate(() => {
   const act = () => { const a = interaction(); if (a) a.fn(); return a && a.label; };
   const mash = () => { for (let i = 0; i < 400 && Game.mode === 'mash'; i++) { Input.press('a'); step(1); } };
   begin(false); talk(); Object.assign(Game.flags, { case5Won: true, case6Won: true, case7Won: true, noChase: true }); Game.money = 600;
-  World.load('daytona'); Game.day = 24; startDay(); talk();
+  World.load('daytona'); Game.day = 24; startDay(); talk(); ARC('tiny').no = 24;   // Tiny's neighbor story (sidequests.js) would take the talk first: decline it today
   log('D24 daytona offers: ' + JSON.stringify(Game.day_.gig.offers));
   for (const id of ['donuts', 'helmet', 'pitcrew']) {
     const d = GIGS[id], giver = npc(d.giver); Game.day_.gig.offers = { [d.giver]: id }; Game.day_.gig.active = null; go(giver); Story.talk(giver); talk(/in\.”/);
