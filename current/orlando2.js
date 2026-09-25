@@ -302,7 +302,7 @@ const OrlandoCases = {
     if (park && near(S_.coaster, 26)) list.push({ label: 'Ride Space Squeak Mountain', fn: () => this.coaster() });
     if (c.n === 11 && c.d === 2 && qOpen('memo')) {
       if (near(S_.gateOut, 26) && !park && Game.hour >= 20) list.push({ label: 'Sneak into SqueakyLand after hours', fn: () => this.memo() });
-      if (park && near(S_.castle, 30)) list.push({ label: 'Squeaky HQ (locked till after dark)', fn: () => toast('The castle door says CAST ONLY. A guard is eating a turkey leg in front of it. Come back after dark.', 3.5) });
+      if (park && near(S_.castle, 30)) list.push({ label: 'Squeaky HQ (locked till after dark)', fn: () => toast(Game.hour >= 20 ? 'Guards everywhere in here. Go back out the front gate and sneak in proper.' : 'The castle door says CAST ONLY. A guard is eating a turkey leg in front of it. Come back after dark.', 3.5) });
       if (near(S_.door, 22) && Game.hour < 20) list.push({ label: 'Wait for dark with the gang', fn: () => { Game.hour = 20.1; toast('Everyone sits by the pool. Gary tries the hot tub. The hot tub does not survive. It’s dark.', 4); } });
     }
     for (const a of Game.animals) if (a.ape && near(a, 30)) list.push({ label: 'Hang out with Gary', fn: () => { const gt = F.gangTalk = F.gangTalk || {}; if (c.n === 11 && c.d === 2) gt.gary = 1; giveItem('beer', 1, true);
@@ -316,7 +316,7 @@ const OrlandoCases = {
       case 'timeshare': return oWho('chad');
       case 'park': return park ? null : S_.gateOut;
       case 'squeaky': return park ? oWho('squeaky') : S_.gateOut;
-      case 'escape': return park ? S_.gateIn : null;
+      case 'escape': return park ? S_.gateIn : S_.gateOut;
       case 'kyle': return F.kyleTip || Q('oranges') ? oWho('kyle') : oWho('chad');
       case 'oranges': return (Game.inv.orange || 0) >= 6 ? oWho('kyle') : Game.pickups.find(p => p.kind === 'orange') || S_.grove;
       case 'video': return Game.animals.find(a => a.chomps) || oWho('todd') || oWho('deb');
@@ -324,7 +324,7 @@ const OrlandoCases = {
       case 'i4': return D.ride === 'cooler' ? S_.onramp : Game.cooler;
       case 'fishfry': return oFish() >= 3 ? oWho('o_merle') : S_.lola;
       case 'coaster': return park ? S_.coaster : S_.gateOut;
-      case 'memo': return Game.hour < 20 ? S_.door : park ? S_.castle : S_.gateOut;
+      case 'memo': return Game.hour < 20 ? S_.door : park ? S_.gateIn : S_.gateOut;   // the sneak starts outside the front gate
       case 'gang': { const gt = F.gangTalk || {}; return Game.npcs.find(n => GANG.some(g_ => g_[0] === n.id) && !gt[n.id]) || null; }
     }
     return undefined;

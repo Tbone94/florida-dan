@@ -49,6 +49,9 @@ await ev(() => {
   need(Game.flags.orlandoFrom === 29, 'orlandoFrom not set after day 28: ' + Game.flags.orlandoFrom);
   need(Cases.info().n === 10 && Cases.info().d === 1, 'day 29 is not case 10 day 1: ' + JSON.stringify(Cases.info()));
   need(!!Q('bus10'), 'no bus quest on day 29');
+  // the day ends still in the mouse suit: 10.1 replays out of the suit (else no Mr. Squeaky, no escape, a loop)
+  Game.flags.suitOn = true; endDay('late'); step(2); $('nextBtn').click(); talk();
+  need(Game.day === 29 && !Game.flags.suitOn && !!Q('bus10'), 'suit day did not replay clean: day ' + Game.day + ' suitOn ' + Game.flags.suitOn);
 });
 // ---- Case 10, day 1 ----
 await ev(() => { at(World.spots.stationDoor, 0, 6); busMenu(); step(20); const cs = [...document.querySelectorAll('.choice')]; log.push('bus from the Keys: ' + cs.map(c => c.textContent).join(' | '));

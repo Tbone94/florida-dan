@@ -213,10 +213,10 @@ $('nextBtn').addEventListener('click', () => {
   if (!window.TRAILER && performance.now() - (Game.gazetteAt || 0) < 700) return;
   ui.gazette.hidden = true;
   const cp = Game.flags.creditsPending;
-  if (cp) { Game.flags.creditsPending = 0; const [h, p, b, star] = CREDITS[cp], sm = $('credits').querySelector('.small'); if (sm._def === undefined) sm._def = sm.textContent; sm.textContent = star || sm._def; $('credits').querySelector('h2').textContent = h; $('creditsText').innerHTML = p; $('creditsBtn').textContent = b; $('credits').hidden = false; $('creditsBtn').focus(); return; }
+  if (cp) { Game.flags.creditsPending = 0; const [h, p, b, star] = CREDITS[cp], sm = $('credits').querySelector('.small'); if (sm._def === undefined) sm._def = sm.textContent; sm.textContent = star || sm._def; $('credits').querySelector('h2').textContent = h; $('creditsText').innerHTML = p; $('creditsBtn').textContent = b; $('credits').hidden = false; Game.creditsAt = performance.now(); $('creditsBtn').focus(); return; }
   nextDay();
 });
-$('creditsBtn').addEventListener('click', () => { $('credits').hidden = true; nextDay(); });
+$('creditsBtn').addEventListener('click', () => { if (!window.TRAILER && performance.now() - (Game.creditsAt || 0) < 700) return; $('credits').hidden = true; nextDay(); });
 // the story never skips a step: miss a trial, the bus, or the one errand a case hangs on, and the day comes round again
 const MUST = { 4: F => F.acquitted, 7: F => F.case2Won, 10: F => F.case3Won, 11: () => MIAMI(), 13: F => F.case4Won, 14: F => F.flyer, 16: F => F.case5Won, 17: F => DAYTONA() && F.donutRun, 19: F => F.case6Won, 22: F => F.case7Won };
 const KEYS_MUST = { '8.1': F => F.declared, '8.3': F => F.case8Won, '9.3': F => F.case9Won };
@@ -225,6 +225,7 @@ const REDO = { 11: 'Brenda: The Greyhound waited. It is STILL waiting. Get on th
 function nextDay() {
   const F = Game.flags, kc = Cases.info(Game.day);
   const ok = kc.n >= 10 ? ORLANDO_MUST[kc.n + '.' + kc.d] : kc.n >= 8 ? KEYS_MUST[kc.n + '.' + kc.d] : MUST[Game.day], redo = ok && !ok(F);
+  if (redo && kc.n === 10 && kc.d === 1) F.suitOn = false;   // a replayed 10.1 starts out of the suit, or there's no mouse to hug
   if (!redo) { Game.day++; if (F.case7Won && !F.keysFrom && Game.day >= 23) F.keysFrom = Game.day; if (F.case9Won && !F.orlandoFrom && F.keysFrom && Game.day >= F.keysFrom + 6) F.orlandoFrom = Game.day; }   // the Keys start the morning after the Daytona 250, Orlando the morning after the Atocha Job (or the next morning, for old endless saves)
   else if (kc.n >= 10 && !(kc.n === 10 && kc.d === 1) && !ORLANDO()) Game.day = F.orlandoFrom;   // an Orlando case day away from Orlando: back to the bus
   else if (kc.n >= 8 && kc.n <= 9 && !(kc.n === 8 && kc.d === 1) && !KEYS()) Game.day = F.keysFrom;   // a Keys case day away from the Keys: back to the bus
