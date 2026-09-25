@@ -24,7 +24,7 @@ const Heat = {
     this.cop = { x: spot.x, y: spot.y, dir: 'left', t: 0 }; this.lostT = 0;
     const r = Game.npcs.find(n => n.id === 'rhonda'); if (r) r.hidden = true;
     Sound.play('siren'); Game.day_.chases = (Game.day_.chases || 0) + 1;
-    if (KEYS()) toast(pick(['MONROE COUNTY: Pull over, Mr. President!', 'MONROE COUNTY: Stop in the name of the United States! Which you are still part of!']), 3.5); else if (MIAMI()) toast(pick(['MIAMI-DADE: Pull over, pastel boy!', 'MIAMI-DADE: Stop right there, Florida Man!']), 3.5); else if (DAYTONA()) toast(pick(['VOLUSIA DEPUTY: Pull over, champ!', 'VOLUSIA DEPUTY: This ain’t the speedway, Dupree!']), 3.5); else toast(pick(['RHONDA: DAN! PULL OVER! ...OR WALK OVER! WHATEVER YOU’RE DOING!', 'RHONDA: You’re on my list today, Dan!', 'RHONDA: Stop right there, Florida Man!']), 3.5);
+    if (ORLANDO()) toast(pick(['ORANGE COUNTY: Pull over, Mouse Man!', 'ORANGE COUNTY: Sir, the ears are NOT a disguise!']), 3.5); else if (KEYS()) toast(pick(['MONROE COUNTY: Pull over, Mr. President!', 'MONROE COUNTY: Stop in the name of the United States! Which you are still part of!']), 3.5); else if (MIAMI()) toast(pick(['MIAMI-DADE: Pull over, pastel boy!', 'MIAMI-DADE: Stop right there, Florida Man!']), 3.5); else if (DAYTONA()) toast(pick(['VOLUSIA DEPUTY: Pull over, champ!', 'VOLUSIA DEPUTY: This ain’t the speedway, Dupree!']), 3.5); else toast(pick(['RHONDA: DAN! PULL OVER! ...OR WALK OVER! WHATEVER YOU’RE DOING!', 'RHONDA: You’re on my list today, Dan!', 'RHONDA: Stop right there, Florida Man!']), 3.5);
     hint(MIAMI() || DAYTONA() ? 'chase2' : 'chase', MIAMI() || DAYTONA() ? `Lose 'em: ${K('run')} to run, or get way out of sight` : `Lose her: ${K('run')} to run, take the <b>boat</b>, ride the <b>cooler</b>, or hide in the <b>porta-potty</b>`, 6);
   },
   chase(dt) {
@@ -46,7 +46,7 @@ const Heat = {
     c.stuck = moved || c.foot ? 0 : (c.stuck || 0) + dt;
     if (!c.foot && c.stuck > .5 && !hidden && !onWater && d < 180) {
       for (const [ox, oy] of [[0, 14], [14, 0], [-14, 0], [0, -14], [0, 0]]) if (canWalk(c.x + ox, c.y + oy)) { c.foot = { x: c.x + ox, y: c.y + oy, dir: 'down', frame: 0, moving: false }; break; }
-      if (c.foot) { toast(MIAMI() ? 'OFFICER: Out of the car! ON FOOT!' : DAYTONA() ? 'DEPUTY: Oh, you wanna RUN? I did track in high school!' : 'RHONDA: Fine. FINE. I’ll catch you on FOOT, Dan.', 2.5); hint('footcop', `Cops get out and run now. ${K('run')} to outrun them`, 5); }
+      if (c.foot) { toast(ORLANDO() ? 'ORANGE COUNTY: Fine. I’ll catch the mouse man on FOOT.' : MIAMI() ? 'OFFICER: Out of the car! ON FOOT!' : DAYTONA() ? 'DEPUTY: Oh, you wanna RUN? I did track in high school!' : 'RHONDA: Fine. FINE. I’ll catch you on FOOT, Dan.', 2.5); hint('footcop', `Cops get out and run now. ${K('run')} to outrun them`, 5); }
     }
     if (!hidden && !onWater && d < (c.foot ? 11 : 13)) return this.busted();
     // she loses you if you're far away, in a porta-potty, or out on the water, for long enough
@@ -72,7 +72,7 @@ const Heat = {
   end() { this.cop = null; const r = Game.npcs.find(n => n.id === 'rhonda'); if (r) r.hidden = false; },
   busted() {
     this.end(); Sound.play('siren'); react('flop');
-    const mia = MIAMI() || DAYTONA() || KEYS(), cop = MIAMI() ? 'OFFICER' : DAYTONA() || KEYS() ? 'DEPUTY' : 'RHONDA', fine = Math.min(Game.money, 20), took = ['beer', 'joint', 'shroom', 'powder'].filter(k => Game.inv[k] > 0), bribe = mia ? 40 : 25;
+    const mia = MIAMI() || DAYTONA() || KEYS() || ORLANDO(), cop = MIAMI() ? 'OFFICER' : DAYTONA() || KEYS() || ORLANDO() ? 'DEPUTY' : 'RHONDA', fine = Math.min(Game.money, 20), took = ['beer', 'joint', 'shroom', 'powder'].filter(k => Game.inv[k] > 0), bribe = mia ? 40 : 25;
     if (Game.car && typeof Car !== 'undefined') Car.exit(); Game.dan.ride = null; Game.heat = 0;
     const takeFine = () => { Game.money -= fine; took.forEach(k => Game.inv[k] = 0); headline(pick(['FLORIDA MAN LEADS DEPUTY ON LOW-SPEED CHASE, CAUGHT HIDING BEHIND A LAWN FLAMINGO', 'FLORIDA MAN ARRESTED AFTER TELLING DEPUTY "YOU CAN’T ARREST ME, I’M ON THE CLOCK"']), 6);
       return [[cop, `That’s a $${fine} fine${took.length ? `, and I’m confiscating the ${took.map(k => ITEMS[k].name).join(', ')}` : ''}.`], ['DAN', pick(['This is entrapment.', 'I want to speak to Brenda.', 'Can I at least keep one beer. For my nerves.'])], [cop, 'Go home, Dan.']]; };
@@ -105,7 +105,7 @@ const Heat = {
     const on = Math.floor(t * 8) % 2;
     OR(x - 5, y - 2, 4, 3, on ? PAL.red : PAL.redD); OR(x + 1, y - 2, 4, 3, on ? PAL.blueD : PAL.blue);
     if (on) { g.globalAlpha = .18; g.fillStyle = PAL.red; g.beginPath(); g.arc(x - 3, y, 18, 0, 7); g.fill(); g.fillStyle = PAL.blue; g.beginPath(); g.arc(x + 3, y, 18, 0, 7); g.fill(); g.globalAlpha = 1; }
-    label(KEYS() ? 'MONROE' : MIAMI() ? 'MIAMI-DADE' : DAYTONA() ? 'VOLUSIA' : 'SHERIFF', x, y + h / 2 + 9, PAL.white, 7);
+    label(ORLANDO() ? 'ORANGE CO.' : KEYS() ? 'MONROE' : MIAMI() ? 'MIAMI-DADE' : DAYTONA() ? 'VOLUSIA' : 'SHERIFF', x, y + h / 2 + 9, PAL.white, 7);
     const f = c.foot; if (f) { const fx = Math.round(f.x - cx), fy = Math.round(f.y - cy); shadow(fx, fy + 1, 12); g.drawImage(SPR.rhonda[f.dir][f.moving ? f.frame : 0], fx - 8, fy - 21); R(fx - 5, fy - 17, 10, 1, PAL.shades); }
   },
 };

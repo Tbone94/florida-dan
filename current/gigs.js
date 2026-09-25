@@ -75,7 +75,7 @@ const Gigs = {
     G.active = null; G.done.push(id); done('gig_' + id);
     Game.money += d.pay; Sound.play('cash'); toast(`Gig done: +$${d.pay}`); react('cheer');
     headline(d.hl, 2);
-    if (id === 'pool') Game.animals = Game.animals.filter(a => a.gig !== 'pool');
+    Game.animals = Game.animals.filter(a => a.gig !== id);   // the kiddie-pool gator, Deb's runaway
   },
   tick(dt) {
     SideQuests.tick(dt);   // sidequests.js: its gigs + neighbor-story chapters tick themselves
@@ -98,7 +98,7 @@ const Gigs = {
     if (D.carry === 'mattress') { const dm = World.props.find(p => p.kind === 'dumpster'); if (dm && Math.hypot(D.x - dm.x - 12, D.y - dm.y - 8) < 32) return { label: 'Toss the mattress', fn: () => { D.carry = null; Sound.play('boom'); Gigs.complete('mattress'); } }; }
     const S_ = World.spots, near = (p, r) => p && Math.hypot(D.x - p.x, D.y - p.y) < r;
     const nb = World.props.find(p => p.kind === 'newsbox'); if (nb && !D.ride && near({ x: nb.x + 6, y: nb.y + 6 }, 18)) return { label: 'Bribe the Swamp Gazette', fn: () => Bribe.open() };
-    return MiamiGigs.interaction() || DaytonaGigs.interaction() || KeysGigs.interaction() || Detector.interaction();
+    return MiamiGigs.interaction() || DaytonaGigs.interaction() || KeysGigs.interaction() || OrlandoGigs.interaction() || Detector.interaction();
   },
   // where the objective arrow points while a gig is the thing to do
   target(q) {
@@ -109,7 +109,7 @@ const Gigs = {
     if (id === 'mattress') return Game.pickups.find(p => p.kind === 'mattress') || (Game.dan.carry === 'mattress' ? World.props.find(p => p.kind === 'dumpster') : null);
     if (id === 'trial') { const G = G_(), P = trialPoints(); return G.cp >= 1 ? P[G.cp] : P[0]; }
     if (id === 'cow') return Game.animals.find(a => a.herd);
-    return MiamiGigs.target(id) || DaytonaGigs.target(id) || KeysGigs.target(id);
+    return MiamiGigs.target(id) || DaytonaGigs.target(id) || KeysGigs.target(id) || OrlandoGigs.target(id);
   },
   // race buoys (only while the trial is on)
   draw(cx, cy, t) {

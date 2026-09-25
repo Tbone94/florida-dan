@@ -6,6 +6,8 @@ const OBJECTIONS = [
 ];
 const Court = {
   start(cs) {
+    if (cs === 'whimsy') return OrlandoCourt.whimsy();
+    if (cs === 'finale') return OrlandoCourt.finale();
     if (cs === 'republic') return KeysCourt.republic();
     if (cs === 'galleon') return KeysCourt.galleon();
     if (cs === 'donut') return DaytonaCourt.donut();
@@ -70,22 +72,23 @@ const Court = {
     for (let x = 0; x < VW; x += 20) R(x, 0, 1, 70, '#5a3d25');
     R(0, 70, VW, VH - 70, '#8e5a36'); for (let y = 76; y < VH; y += 8) R(0, y, VW, 1, '#7a4a2b');
     OR(110, 18, 100, 34, PAL.woodD); R(110, 18, 100, 4, PAL.woodL);                    // bench
-    g.drawImage(SPR[KEYS() ? 'pinder' : DAYTONA() ? 'pettibone' : MIAMI() ? 'vega' : 'judge'].down[0], 152, 0, 16, 18, 152, 2, 16, 18);
+    label('IN GOD WE TRUST (MOSTLY)', 160, 12, PAL.yellow, 5);   // on the wall, behind the judge
+    g.drawImage(SPR[ORLANDO() ? 'blossom' : KEYS() ? 'pinder' : DAYTONA() ? 'pettibone' : MIAMI() ? 'vega' : 'judge'].down[0], 0, 0, 16, 18, 152, 2, 16, 18);   // (source x was 152: the judge never showed up)
     OR(150, 60, 22, 8, PAL.yellow); OR(154, 28, 12, 10, PAL.blue); R(158, 30, 4, 6, PAL.white);    // seal
     OR(14, 44, 70, 40, PAL.woodD); R(14, 44, 70, 3, PAL.woodL); label('JURY', 49, 42, PAL.white, 6);
     const jurors = ['tourist', 'merle', 'darlene', 'tourist', 'rhonda', 'tourist'];
     jurors.forEach((j, i) => { const jump = fighting || Game.courtChuck === 2 ? Math.abs(Math.sin(t * 8 + i)) * 4 : 0; g.drawImage(SPR[j].down[0], 0, 0, 16, 14, 18 + (i % 3) * 22, 28 + Math.floor(i / 3) * 16 - jump, 16, 14); });
     OR(236, 70, 70, 16, PAL.woodD);
     if (!fighting) {
-      g.drawImage(SPR.dan.up[0], 150, 120); g.drawImage(SPR.darlene.up[0], 176, 120);
+      g.drawImage(SPR.dan.up[0], 150, 120); g.drawImage(SPR[ORLANDO() ? 'brenda' : 'darlene'].up[0], 176, 120);   // Orlando: Brenda, in person, finally
       OR(130, 140, 70, 10, PAL.woodL);
       if (Game.courtChuck === 2) { g.drawImage(SPR.judge.down[0], 250, 118); }
     }
     OR(292, 90, 26, 60, PAL.woodD); if (Game.courtChuck) { R(292, 90, 26, 60, PAL.black); label('*CRASH*', 300, 86, PAL.yellow, 8); }
-    label('IN GOD WE TRUST (MOSTLY)', 160, 12, PAL.yellow, 5);
   },
   draw(t) {
     if (Game.scene === 'parade') return drawParade(t);
+    if (Game.scene === 'finale') return drawFinale(t);
     this.drawRoom(t, false); drawCourtExtras(t);
     if (Game.courtChuck === 1 && Game.mode === 'talk') { g.save(); g.translate(270, 140); for (let i = 0; i < 1; i++); g.restore(); OR(246, 132, 50, 12, PAL.gator); OR(290, 134, 16, 8, PAL.gator); OR(236, 135, 12, 6, PAL.gatorD); OR(254, 128, 10, 3, PAL.hat); }
     if (Game.courtChuck === 2) { OR(180, 130, 50, 12, PAL.gator); OR(226, 132, 16, 8, PAL.gator); OR(186, 126, 10, 3, PAL.hat); label('NOT GUILTY', VW / 2, 90, PAL.yellow, 14); }

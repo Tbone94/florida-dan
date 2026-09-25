@@ -28,7 +28,7 @@ const REGIONS = {};
 World.load = function (id) {
   if (!REGIONS[id]) {
     this.map = new Uint8Array(MW * MH); this.props = []; this.spots = {};
-    ({ miami: buildMiami, daytona: typeof buildDaytona === 'function' ? buildDaytona : buildWorld, keys: typeof buildKeys === 'function' ? buildKeys : buildWorld }[id] || buildWorld)();
+    ({ miami: buildMiami, daytona: typeof buildDaytona === 'function' ? buildDaytona : buildWorld, keys: typeof buildKeys === 'function' ? buildKeys : buildWorld, orlando: typeof buildOrlando === 'function' ? buildOrlando : buildWorld }[id] || buildWorld)();
     gatorMap(); REGIONS[id] = { map: this.map, props: this.props, spots: this.spots, gatorOK };
   }
   const Rg = REGIONS[id]; this.map = Rg.map; this.props = Rg.props; this.spots = Rg.spots; gatorOK = Rg.gatorOK; Game.region = id;
@@ -134,8 +134,8 @@ function drawTiles(cx, cy, t) {
   for (let ty = ty0; ty <= ty0 + 12; ty++) for (let tx = tx0; tx <= tx0 + Math.ceil(VW / TS); tx++) {
     const k = World.tile(tx, ty), x = tx * TS - cx, y = ty * TS - cy, hs = hash2(tx, ty);
     if (WET(k)) {
-      const mia = MIAMI(), key = typeof KEYS === 'function' && KEYS();   // the Keys: the bluest water in the game
-      R(x, y, TS, TS, k === T.DEEP ? (key ? '#0b7fa6' : mia ? '#0f6f9a' : PAL.deep) : k === T.WATER ? (key ? '#18b8c8' : mia ? '#1aa3b8' : PAL.waterD) : (key ? '#5fe3d3' : mia ? '#46d1c9' : PAL.water));
+      const mia = MIAMI(), key = typeof KEYS === 'function' && KEYS(), orl = typeof ORLANDO === 'function' && ORLANDO();   // the Keys: the bluest water in the game. Orlando: theme-park lagoon blue
+      R(x, y, TS, TS, k === T.DEEP ? (key ? '#0b7fa6' : orl ? '#1f6fb8' : mia ? '#0f6f9a' : PAL.deep) : k === T.WATER ? (key ? '#18b8c8' : orl ? '#2f95d6' : mia ? '#1aa3b8' : PAL.waterD) : (key ? '#5fe3d3' : orl ? '#5cc2ec' : mia ? '#46d1c9' : PAL.water));
       if (k === T.SHALLOW) { if (hs > .5) R(x + hs * 11, y + 9, 2, 1, PAL.sandD); }
       const ph = t * 1.2 + hs * 6.28;
       if (hs > .45) R(x + 3 + Math.sin(ph) * 2, y + 4 + hs * 8, 4, 1, k === T.DEEP ? PAL.waterD : PAL.waterL);
@@ -373,7 +373,7 @@ function drawProp(p, cx, cy, t) {
       break;
     }
     case 'reeds': { for (let i = 0; i < 5; i++) { const rx = x + 2 + i * 3 + p.s * 2, sw = Math.sin(t * 1.5 + i + p.s * 5); R(rx + sw * .6, y + 2 + (i % 2) * 3, 1, 11 - (i % 2) * 3, PAL.camo); } R(x + 5 + p.s * 3, y, 2, 5, PAL.brown); break; }
-    default: if (typeof drawLandmark === 'function' && drawLandmark(p, x, y, w, h, t)) break; if (typeof drawMoneyProp === 'function' && drawMoneyProp(p, x, y, w, h, t)) break; if (typeof drawDaytonaProp === 'function' && drawDaytonaProp(p, x, y, w, h, t)) break; if (typeof drawKeysProp === 'function' && drawKeysProp(p, x, y, w, h, t)) break; if (typeof drawMiamiProp === 'function') drawMiamiProp(p, x, y, w, h, t); break;
+    default: if (typeof drawLandmark === 'function' && drawLandmark(p, x, y, w, h, t)) break; if (typeof drawMoneyProp === 'function' && drawMoneyProp(p, x, y, w, h, t)) break; if (typeof drawDaytonaProp === 'function' && drawDaytonaProp(p, x, y, w, h, t)) break; if (typeof drawKeysProp === 'function' && drawKeysProp(p, x, y, w, h, t)) break; if (typeof drawOrlandoProp === 'function' && drawOrlandoProp(p, x, y, w, h, t)) break; if (typeof drawMiamiProp === 'function') drawMiamiProp(p, x, y, w, h, t); break;
     case 'lily': { R(x + 4, y + 6, 8, 5, PAL.grassDD); R(x + 5, y + 6, 7, 4, PAL.grass); R(x + 8, y + 6, 1, 2, PAL.waterD); if (p.s > .7) R(x + 6, y + 5, 2, 2, PAL.hat); break; }
   }
 }

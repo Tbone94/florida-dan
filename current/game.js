@@ -42,6 +42,7 @@ function startDay() {
 function spawn() {
   if (MIAMI()) return Miami.spawn();
   if (KEYS()) return Keys.spawn();
+  if (ORLANDO()) return Orlando.spawn();
   if (DAYTONA()) return Daytona.spawn();
   const S_ = World.spots;
   Game.npcs = [
@@ -104,6 +105,7 @@ function interaction() {
     return KEYS() ? Keys.waterPrompt() : { label: 'Cast a line', fn: () => Fishing.start(World.at(D.x, D.y), false) };
   }
   if (D.ride === 'cooler' && KEYS() && Keys.coolerPrompt()) return Keys.coolerPrompt();
+  if (D.ride === 'cooler' && ORLANDO() && Orlando.coolerPrompt()) return Orlando.coolerPrompt();
   if (D.ride === 'cooler') return { label: 'Park the cooler', fn: () => { D.ride = null; D.y += 10; if (!canWalk(D.x, D.y)) D.y -= 10; } };
   // vehicles you're standing right on top of beat anything else nearby (a cooler parked by the courthouse door)
   if (!D.ride && near(Game.cooler, 13)) return { label: 'Ride the motorized cooler', fn: () => { D.ride = 'cooler'; D.x = Game.cooler.x; D.y = Game.cooler.y; Sound.play('engine'); if (Game.fx.buzz > 50 || Game.fx.powder > 0) Game.day_.dui = true; } };
@@ -154,6 +156,7 @@ function punch() {
   for (const a of Game.animals) { if (a.pet || a.spirit || a.ape || a.state === 'bagged') continue; const p = a.type === 'python' ? a.segs[0] : a, d = Math.hypot(p.x - f.x, p.y - f.y); if (d < bd) { bd = d; tgt = a; } }
   let npcT = null; for (const n of Game.npcs) { const d = Math.hypot(n.x - f.x, n.y - f.y); if (d < Math.min(bd, 14)) { bd = d; npcT = n; } }
   if (!tgt && !npcT && Flamingos.punch(f)) return;
+  if (!tgt && !npcT && ORLANDO() && Orlando.punch(f)) return;   // orange trees give up the goods
   if (!tgt && !npcT) { if (Game.inv.can > 0) throwThing('can'); else Sound.play('whiff'); return; }
   Sound.play('punch'); Game.shake = 3 * pow; Game.hitstop = .055 * pow; Game.kick = 1; Game.day_.punches = (Game.day_.punches || 0) + 1;
   const hx = (npcT || tgt).x, hy = (npcT || tgt).y;
@@ -219,7 +222,8 @@ function drawObjective(cx, cy, t) {
 
 function wrestleGator(a) {
   Wrestle.start({ foe: a.chuck ? 'chuck' : 'gator', arena: 'swamp', onWin: () => {
-    if (a.gig === 'pool') { Game.chill = Math.min(100, Game.chill + 25); return Gigs.complete('pool'); }
+    if (a.win) { Game.chill = Math.min(100, Game.chill + 25); return a.win(a); }   // a story gator (Orlando's Sir Chomps)
+    if (a.gig) { Game.chill = Math.min(100, Game.chill + 25); return Gigs.complete(a.gig); }
     a.stun = 10; a.state = 'flee'; a.timer = 12; a.cd = 12; a.belly = 1.8; Game.chill = Math.min(100, Game.chill + 25); Game.day_.wrestles++; setTimeout(() => react('cheer'), 0);
     if (a.chuck) { done('chuck'); headline('FLORIDA MAN WRESTLES ALLIGATOR NAMED "CHUCK," CALLS IT "A DISAGREEMENT BETWEEN FRIENDS"', 8); }
     else if (Game.day_.wrestles === 1) headline('FLORIDA MAN WRESTLES ALLIGATOR "FOR FUN"; ALLIGATOR "NOT HAVING FUN"', 6);
@@ -260,6 +264,8 @@ function update(dt) {
     case 'dance': Dance.update(dt); return;
     case 'bridge': Bridge.update(dt); tickFx(dt); return;
     case 'dive': Dive.update(dt); tickFx(dt); return;
+    case 'sneak': Sneak.update(dt); tickFx(dt); return;
+    case 'coaster': Coaster.update(dt); tickFx(dt); return;
     case 'shop': if (Input.tapped('pause') || Input.tapped('b')) closeShop(); return;
     case 'journal': if (Input.tapped('left')) flipClip(-1); if (Input.tapped('right')) flipClip(1); if (Input.tapped('journal') || Input.tapped('pause') || Input.tapped('a') || Input.tapped('b')) closeJournal(); return;
     case 'gazette': return;
@@ -431,7 +437,7 @@ function drawStorm(t) {
 function render() {
   g.setTransform(1, 0, 0, 1, 0, 0); Look.litCv = null; const LG = Look.grade();
   const scene = Game.mode === 'fish' ? () => Fishing.draw() : Game.mode === 'wrestle' ? () => Wrestle.draw() : Game.mode === 'raccoon' ? () => Minigame.drawRaccoon() : Game.mode === 'mash' ? () => Mash.draw()
-    : Game.mode === 'dance' ? () => Dance.draw() : Game.mode === 'bridge' ? () => Bridge.draw() : Game.mode === 'dive' ? () => Dive.draw()
+    : Game.mode === 'dance' ? () => Dance.draw() : Game.mode === 'bridge' ? () => Bridge.draw() : Game.mode === 'dive' ? () => Dive.draw() : Game.mode === 'sneak' ? () => Sneak.draw() : Game.mode === 'coaster' ? () => Coaster.draw()
     : (Game.mode === 'objection' || Game.scene === 'parade' || Game.mode === 'court' || (Game.mode === 'talk' && Game.talk && Game.talk.prev === 'court') || (Game.mode === 'gazette' && Game.flags.inCourt)) ? () => Court.draw(Game.t) : null;
   if (!scene) drawWorld();
   else if (VW === VW0) scene();

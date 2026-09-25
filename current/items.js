@@ -64,6 +64,7 @@ function useItem(k) {
     case 'cafecito': F.powder = Math.max(F.powder, 9); Game.chill = Math.min(100, Game.chill + 15); Sound.play('crack'); toast(pick(['*sip* ...Dan can see through time.', 'Abuela’s cafecito hits different. It hits EVERYTHING.', 'Dan’s eyelids are now permanently open.'])); break;
     case 'pastelito': Game.chill = Math.min(100, Game.chill + 30); if (F.high > 0) { Game.chill = 100; toast('Munchies: DEFEATED. Guava is God.'); } else toast(pick(['Flaky. Sweet. Life-changing.', 'Crumbs everywhere. Worth it.'])); Sound.play('munch'); break;
     case 'fritter': Game.chill = Math.min(100, Game.chill + 15); Sound.play('munch'); toast(pick(['Chewy. Hot. Tastes like a boat.', 'Conch fritter. Dan feels like a local. He is not.'])); break;
+    case 'turkeyleg': Game.chill = Math.min(100, Game.chill + 40); Sound.play('munch'); toast(pick(['GIANT TURKEY LEG. Dan holds it aloft. He is a king now.', 'Smoky. Enormous. Possibly emu. Dan does not care.'])); if (!Game.flags.legHl) { Game.flags.legHl = true; headline('FLORIDA MAN EATS GIANT TURKEY LEG WHILE WALKING DOWN I-4 SHOULDER, WAVES IT AT TRAFFIC', 2); } break;
     case 'pie': Game.chill = Math.min(100, Game.chill + 30); F.buzz = Math.max(0, F.buzz - 25); Sound.play('munch'); toast(pick(['KEY LIME PIE. Dan sees God. God is tart.', 'The sugar hits. The beer backs off. Science.'])); break;
     case 'energy': F.powder = Math.max(F.powder, 12); Sound.play('crack'); toast('GATOR JUICE. My heart is doin’ a drum solo.'); break;
     case 'hotdog': {
@@ -92,6 +93,10 @@ function blackout() {
     ['the Hotel Neon fountain', ...(at(S_.door, 0, 20) || []), 'FLORIDA MAN FOUND ASLEEP IN HOTEL FOUNTAIN, TELLS STAFF HE’S "A WATER FEATURE"'],
     ['the end of the pier, holding a stranger’s bait bucket', ...(at(S_.pier) || []), 'FLORIDA MAN WAKES UP ON PIER WITH STRANGER’S BAIT BUCKET, SAYS THEY’RE "CLOSE NOW"'],
     ['Café Abuela’s patio, under a tablecloth', ...(at(S_.cafe, 0, 16) || []), 'FLORIDA MAN FOUND UNDER CAFÉ TABLECLOTH; ABUELA FED HIM ANYWAY'],
+  ] : ORLANDO() ? [
+    ['the Kingdom Inn pool, on a pool noodle', ...(at(S_.pool, 0, 8) || []), 'FLORIDA MAN FOUND ASLEEP ON MOTEL POOL NOODLE, DRIFTING IN CIRCLES SINCE 3 AM'],
+    ['the Big Orange, hugging it', ...(at(S_.orange, 0, 8) || []), 'FLORIDA MAN WAKES UP HUGGING GIANT ORANGE; ORANGE "DID NOT CONSENT"'],
+    ['the Volcano Golf volcano, inside it', ...(at(S_.volcano, 0, 10) || []), 'FLORIDA MAN FOUND SLEEPING INSIDE MINI GOLF VOLCANO; "IT WAS WARM"'],
   ] : KEYS() ? [
     ['the Southernmost Point, hugging the buoy', ...(at(S_.buoy, 0, -24) || []), 'FLORIDA MAN FOUND HUGGING SOUTHERNMOST POINT BUOY, TELLS TOURISTS "NO PHOTOS"'],
     ['the Six-Toe House porch, covered in cats', ...(at(S_.sixtoe, 0, 12) || []), 'FLORIDA MAN WAKES UP UNDER ELEVEN SIX-TOED CATS, CALLS IT "THE BEST NIGHT OF HIS LIFE"'],

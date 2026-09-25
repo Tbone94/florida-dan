@@ -19,6 +19,10 @@ const GRADES = {
     [0, [.30, .36, .64], [.60, .70, .98], 1.0, .44], [5.5, [.42, .40, .70], [.78, .70, .92], 1.0, .54], [6.6, [.84, .62, .76], [1.08, .86, .80], 1.14, .82],
     [8, [.96, .98, 1.02], [1.06, 1.03, .96], 1.28, .99], [10, [1.0, 1.02, 1.04], [1.08, 1.06, 1.0], 1.32, 1], [17, [.98, .96, 1.02], [1.08, 1.02, .94], 1.32, 1],
     [18.4, [.86, .60, .78], [1.18, .88, .66], 1.46, .97], [19.6, [.66, .44, .80], [1.10, .74, .78], 1.36, .82], [20.9, [.36, .34, .70], [.70, .66, 1.0], 1.08, .52], [24, [.30, .36, .64], [.60, .70, .98], 1.0, .44]],
+  orlando: [   // theme-park candy: hot, saturated, a pink-purple fireworks night
+    [0, [.30, .26, .62], [.70, .52, .98], 1.12, .46], [5.5, [.44, .36, .70], [.84, .66, .92], 1.1, .56], [6.6, [.86, .60, .80], [1.10, .84, .84], 1.2, .84],
+    [8, [.98, .96, 1.02], [1.08, 1.03, .96], 1.38, .99], [10, [1.02, 1.0, 1.04], [1.10, 1.05, .98], 1.44, 1], [16.5, [1.0, .96, 1.02], [1.10, 1.02, .94], 1.44, 1],
+    [18.2, [.86, .56, .86], [1.18, .86, .76], 1.5, .96], [19.5, [.62, .40, .86], [1.10, .70, .92], 1.42, .8], [20.8, [.34, .28, .70], [.84, .58, 1.04], 1.22, .5], [24, [.30, .26, .62], [.70, .52, .98], 1.12, .46]],
   daytona: [
     [0, [.34, .36, .64], [.62, .66, .95], .95, .44], [5.5, [.42, .40, .68], [.72, .66, .88], .95, .52], [6.5, [.76, .60, .74], [1.05, .84, .78], 1.08, .8],
     [8, [.96, .95, 1.0], [1.07, 1.04, .95], 1.15, .98], [10, [1.0, 1.0, 1.02], [1.08, 1.06, .97], 1.18, 1], [16.5, [.98, .95, 1.0], [1.08, 1.02, .92], 1.2, 1],
@@ -88,6 +92,7 @@ const Look = {
     for (const v of Game.vehicles || []) beam(v.x, v.y, Math.cos(v.a || 0), Math.sin(v.a || 0));
     const cop = typeof Heat !== 'undefined' && Heat.cop; if (cop) { const b = Math.floor(t * 8) % 2; L(cop.x - 4, cop.y, 52, b ? '#ff3b3b' : '#3b7bff', .95); }
     let n = 0; for (const q of Game.parts) if (q.kind === 'fire' && n++ < 40) L(q.x, q.y, 14, '#ff8a3d', .55);
+    if (typeof Orlando !== 'undefined' && ORLANDO()) Orlando.lights(L, t);
     if (typeof Ambient !== 'undefined' && Ambient.eachFly) Ambient.eachFly(cx, cy, t, (wx, wy, b) => L(wx, wy, 9, '#d9ff6a', .8 * b));
     x.globalAlpha = 1; x.globalCompositeOperation = 'source-over';
     return c;
@@ -140,7 +145,7 @@ const Look = {
   },
   // ---------- dusk mosquito clouds over swamp water ----------
   air(cx, cy, t) {
-    const h = Game.hour; if (MIAMI() || DAYTONA() || KEYS() || h < 17.4 || h > 21.2 || Game.mode === 'title') return;
+    const h = Game.hour; if (MIAMI() || DAYTONA() || KEYS() || ORLANDO() || h < 17.4 || h > 21.2 || Game.mode === 'title') return;
     const cs = 96, x0 = Math.floor(cx / cs) - 1, y0 = Math.floor(cy / cs) - 1;
     for (let gy = y0; gy <= y0 + Math.ceil(VH / cs) + 1; gy++) for (let gx = x0; gx <= x0 + Math.ceil(VW / cs) + 1; gx++) {
       if (hash2(gx * 3, gy * 7) < .55) continue;

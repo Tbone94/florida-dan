@@ -22,7 +22,7 @@ const Objection = {
     const s = this.s, it = s.list[s.i], right = objected === it.lie; if (right) s.score++;
     s.phase = 'react'; s.t = 0; ui.talkChoices.innerHTML = '';
     if (objected) { ui.fishMsg.textContent = 'OBJECTION!'; setTimeout(() => { if (Game.mode === 'objection') ui.fishMsg.textContent = ''; }, 800); Game.shake = 7; Sound.play('punch'); }
-    ui.talkWho.textContent = KEYS() ? 'JUDGE PINDER' : DAYTONA() ? 'JUDGE PETTIBONE' : MIAMI() ? 'JUDGE VEGA' : 'JUDGE HARLAN';
+    ui.talkWho.textContent = Game.courtJudge || (ORLANDO() ? 'JUDGE BLOSSOM' : null) || (KEYS() ? 'JUDGE PINDER' : DAYTONA() ? 'JUDGE PETTIBONE' : MIAMI() ? 'JUDGE VEGA' : 'JUDGE HARLAN');
     ui.talkLine.textContent = objected ? (it.lie ? 'Sustained. ' + (it.bust || '') : 'Overruled. ' + (it.over || 'That one was true, son.')) : (it.lie ? (it.miss || 'The jury nods along. That was a lie, Dan. You let it slide.') : (it.ok || 'Noted.'));
     setTimeout(() => Sound.play(right ? 'cash' : 'fail'), 120);
   },
@@ -35,10 +35,10 @@ const Objection = {
 
 const CLEAN_LIMIT = { 2: 10, 3: 8 };
 const CourtCases = {
-  begin() { Game.mode = 'court'; Game.courtChuck = 0; Game.courtExtra = {}; showHud(false); },
+  begin() { Game.mode = 'court'; Game.courtChuck = 0; Game.courtExtra = {}; Game.courtJudge = null; showHud(false); },
   // fewer headlines during the case = a nicer judge (and a collectible)
   clean(n) {
-    const got = Game.headlines.length - (Game.flags['caseStart' + n] || 0), J = KEYS() ? 'JUDGE PINDER' : DAYTONA() ? 'JUDGE PETTIBONE' : MIAMI() ? 'JUDGE VEGA' : 'JUDGE HARLAN';
+    const got = Game.headlines.length - (Game.flags['caseStart' + n] || 0), J = Game.courtJudge || (ORLANDO() ? 'JUDGE BLOSSOM' : null) || (KEYS() ? 'JUDGE PINDER' : DAYTONA() ? 'JUDGE PETTIBONE' : MIAMI() ? 'JUDGE VEGA' : 'JUDGE HARLAN');
     if (got <= CLEAN_LIMIT[n]) { headline('FLORIDA MAN MAKES IT THROUGH A WHOLE CASE WITH BARELY ANY HEADLINES; FLORIDA "WORRIED ABOUT HIM"', 1); return [[J, `Only ${got} headline${got === 1 ? '' : 's'} this week, Mr. Dupree. For you, that is practically a vow of silence.`]]; }
     return [[J, `You made the paper ${got} times this week, Mr. Dupree. ${got} times. I read every one. At breakfast.`]];
   },
@@ -128,6 +128,7 @@ function drawCourtExtras(t) {
   const E = Game.courtExtra || {};
   if (E.manny) { OR(40, 130, 46, 12, PAL.blue); R(42, 132, 42, 3, PAL.waterL); for (let i = 0; i < 3; i++) R(46 + i * 13, 136, 5, 3, PAL.grey); g.drawImage(SPR.manatee, 51, 118 + Math.sin(t * 2)); label('MANNY', 63, 116, PAL.glow, 7); }
   if (E.ape) { g.save(); g.translate(236, 92); g.scale(1.6, 1.6); g.drawImage(SPR.skunkape, 0, 0); g.restore(); R(245, 118, 12, 6, PAL.black); label('GARY', 250, 88, PAL.yellow, 7); }
+  if (typeof drawOrlandoCourt === 'function') drawOrlandoCourt(E, t);
 }
 
 // ---------- credits after each case ----------
@@ -160,7 +161,9 @@ function caseTarget(q) {
     case 'trailcam': case 'lure': return P.trailcam;
     case 'track': case 'rehearse': case 'reunion': return ape || P.den;
   }
-  if (typeof KeysCases !== 'undefined' && Cases.info().n >= 8) { const k = KeysCases.target(q); if (k !== undefined) return k; }
+  const cn = Cases.info().n;
+  if (typeof OrlandoCases !== 'undefined' && (ORLANDO() || cn >= 10)) { const o = OrlandoCases.target(q); if (o !== undefined) return o; }
+  if (typeof KeysCases !== 'undefined' && (KEYS() || cn === 8 || cn === 9)) { const k = KeysCases.target(q); if (k !== undefined) return k; }   // (this hook was missing: the Keys never had objective arrows)
   if (typeof DaytonaCases !== 'undefined') { const d = DaytonaCases.target(q); if (d !== undefined) return d; }
   return MiamiCases.target(q);
 }

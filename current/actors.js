@@ -58,7 +58,7 @@ function bonk() { if (Game.t - bonkT < .8) return; bonkT = Game.t; Game.shake = 
 function drawDan(x, y, t) {
   const D = Game.dan, F = Game.fx;
   if (D.hiding || D.ride === 'lambo' || D.ride === 'car' || (D.hurt > 0 && Math.floor(t * 20) % 2)) return;
-  const spr = SPR[Game.flags.suit && MIAMI() ? 'dansuit' : 'dan'][D.dir][D.moving ? D.frame : 0];
+  const spr = SPR[D.mascot ? 'danmouse' : Game.flags.suit && MIAMI() ? 'dansuit' : 'dan'][D.dir][D.moving ? D.frame : 0];
   if (D.ride === 'boat') return drawBoat(x, y, Game.boat.dir, t, true);
   if (D.ride === 'cooler') return drawCooler(x, y, Game.cooler.dir, t, true);
   const wading = World.at(D.x, D.y) === T.SHALLOW;
@@ -71,10 +71,12 @@ function drawDan(x, y, t) {
   }
   const hop = D.anim === 'cheer' ? -Math.round(Math.abs(Math.sin((1.3 - D.animT) * Math.PI * 1.6)) * 8) : 0;   // two happy hops
   const idle = !D.moving && !D.anim ? Math.floor((D.idleT || 0) / 3.2) % 4 : 0, idleOn = (D.idleT || 0) > 6;
-  if (hop) { shadow(x, y + 1, 12); g.drawImage(spr, Math.round(x - 8), Math.round(y - 21 + hop)); R(x - 9, y - 22 + hop, 2, 4, PAL.skin); R(x + 7, y - 22 + hop, 2, 4, PAL.skin); return; }
-  if (idleOn && idle === 1) { const look = SPR[Game.flags.suit && MIAMI() ? 'dansuit' : 'dan'][Math.floor(t * .8) % 2 ? 'left' : 'right'][0]; shadow(x, y + 1, 12); g.drawImage(look, Math.round(x - 8), Math.round(y - 21 + bob)); return; }   // looks around
+  const ears = (yy, side) => { if (!hasUp('ears') || D.mascot) return; for (const ex of side ? [x - 5, x + 2] : [x - 8, x + 4]) { R(ex, yy, 4, 3, PAL.ink); R(ex + 1, yy - 1, 2, 5, PAL.ink); R(ex + 1, yy, 2, 3, '#3a3440'); } };   // the knockoff mouse ears (Orlando souvenir shop)
+  if (hop) { shadow(x, y + 1, 12); g.drawImage(spr, Math.round(x - 8), Math.round(y - 21 + hop)); ears(Math.round(y - 22 + hop), D.dir === 'left' || D.dir === 'right'); R(x - 9, y - 22 + hop, 2, 4, PAL.skin); R(x + 7, y - 22 + hop, 2, 4, PAL.skin); return; }
+  if (idleOn && idle === 1) { const look = SPR[D.mascot ? 'danmouse' : Game.flags.suit && MIAMI() ? 'dansuit' : 'dan'][Math.floor(t * .8) % 2 ? 'left' : 'right'][0]; shadow(x, y + 1, 12); g.drawImage(look, Math.round(x - 8), Math.round(y - 21 + bob)); ears(Math.round(y - 22 + bob), true); return; }   // looks around
   if (wading) { g.drawImage(spr, 0, 0, 16, 16, Math.round(x - 8), Math.round(y - 15 + bob), 16, 16); R(x - 9, y, 18, 1, PAL.foam); }
   else g.drawImage(spr, Math.round(x - 8), Math.round(y - 21 + bob));
+  ears(Math.round(y - 22 + bob + (wading ? 6 : 0)), D.dir === 'left' || D.dir === 'right');
   const hx = D.dir === 'left' ? x - 9 : x + 6, hy = y - 11 + bob;
   const chugging = D.anim === 'beer' && D.animT < 1.1 && D.animT > .3;
   if ((D.anim === 'beer' && !chugging) || D.anim === 'energy') { OR(hx, hy - 4, 3, 5, D.anim === 'beer' ? PAL.blue : PAL.black); R(hx, hy - 4, 3, 1, PAL.tin); }

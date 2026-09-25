@@ -3,7 +3,7 @@ import { chromium } from '/Users/happycamper/Projects/_tools/record-kit/node_mod
 import fs from 'fs';
 const [reg = 'swamp', out = '/Users/happycamper/Projects/florida-dan/promo/ui/map-swamp.png'] = process.argv.slice(2);
 const b = await chromium.launch({ channel: 'chrome' }); const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
-await p.goto('http://localhost:8811/index.html'); await p.waitForTimeout(1200);
+await p.goto('http://localhost:' + (process.env.PORT || 8811) + '/index.html'); await p.waitForTimeout(1200);
 const data = await p.evaluate(reg => {
   window.TRAILER = true; World.load(reg); Game.day = 5; Game.hour = 12; Game.flags = {}; Game.inv = Game.inv || {}; Game.day_ = freshDayLog(); spawn(); Game.mode = 'title'; Game.shake = 0;
   const W = MW * TS, H = MH * TS, big = document.createElement('canvas'); big.width = W; big.height = H; const bx = big.getContext('2d');

@@ -307,7 +307,7 @@ const KeysChase = {
 // ---------- Monroe County trials ----------
 CLEAN_LIMIT[8] = 9; CLEAN_LIMIT[9] = 9;
 CREDITS[8] = ['THE REPUBLIC STANDS', 'The Republic of Dan has three citizens: a cat, a rooster, and Brayden (bro).<br>The Coast Guard has asked, politely, that its flag stop being pants.<br>Captain Lou has put up a sign: NO NATIONS.', 'Next case'];
-CREDITS[9] = ['FINDERS KEEPERS', 'The Nuestra Señora de la Cerveza is going to a museum. Old Gus cut the ribbon. He cried. The tarpon came.<br>Rex Doubloon’s show was cancelled. Madison got a new show. It’s about Dan.<br><br>NEXT: ORLANDO. (Coming soon. The mouse is watching.)<br>The swamp, Miami, Daytona and the Keys are all yours.', 'Keep playing'];
+CREDITS[9] = ['FINDERS KEEPERS', 'The Nuestra Señora de la Cerveza is going to a museum. Old Gus cut the ribbon. He cried. The tarpon came.<br>Rex Doubloon’s show was cancelled. Madison got a new show. It’s about Dan.<br><br>NEXT: ORLANDO. The mouse is watching.<br>The swamp, Miami, Daytona and the Keys are all yours.', 'Keep playing'];
 const KeysCourt = {
   republic() {
     CourtCases.begin(); const F = Game.flags;

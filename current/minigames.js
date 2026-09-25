@@ -27,7 +27,7 @@ const Fishing = {
   f: null,
   start(tile, fromShore, forced) {
     const bottom = fromShore ? (tile === T.DEEP ? 142 : 126) : tile === T.DEEP ? 168 : tile === T.WATER ? 148 : 116;
-    const merleZone = World.region(Game.dan.x, Game.dan.y) === 'merle';
+    const merleZone = World.region(Game.dan.x, Game.dan.y) === 'merle' && !ORLANDO();   // Big Ronnie lives at Merle’s, not in Orlando
     const pool = MIAMI() || DAYTONA() || KEYS() ? OCEAN.map(sp => [sp, sp.w]) : SPECIES.map(sp => [sp, sp.deep && bottom < 140 ? 0 : sp.legend ? (merleZone && bottom >= 140 ? 3 : 0) : sp.w]);
     const roll = () => { let r = Math.random() * pool.reduce((s, p) => s + p[1], 0); for (const [sp, w] of pool) if ((r -= w) < 0) return sp; return SPECIES[0]; };
     const fish = [];

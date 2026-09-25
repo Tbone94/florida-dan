@@ -382,6 +382,7 @@ const Story = {
     if (MIAMI()) return Miami.interactions();
     if (DAYTONA()) return Daytona.interactions();
     if (KEYS()) return Keys.interactions();
+    if (ORLANDO()) return Orlando.interactions();
     const D = Game.dan, F = Game.flags, S_ = World.spots, list = [];
     const near = (p, r) => Math.hypot(D.x - p.x, D.y - p.y) < r;
     if (D.ride) return list;
