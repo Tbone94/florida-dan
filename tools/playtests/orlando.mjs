@@ -111,8 +111,8 @@ await ev(() => { talk(); need(Game.flags.gangHere && !qOpen('i4'), 'the gang did
   need(Game.flags.bridgeBest === undefined, 'I-4 run wrote the Seven Mile Bridge record');
   // a real cast at Lake Lola works (freshwater)
   at(World.spots.dockEnd, 0, 0, 'right'); need(/Cast/.test(ixl()), 'no fishing at Lake Lola: ' + ixl());
-  for (let i = 0; i < 3; i++) Game.catchBag.push({ name: 'Largemouth Bass', lbs: 4 }); Game.inv.fish = 3; step(2); need(/Bring the fish/.test(Q('fishfry').text), 'fish fry quest text not updated: ' + Q('fishfry').text);
-  at(World.spots.pool, 0, 0); snap(); });
+  at(World.spots.pool, 0, 0); for (let i = 0; i < 3; i++) Game.catchBag.push({ name: 'Largemouth Bass', lbs: 4 }); Game.inv.fish = 3; step(2); need(/Bring the fish/.test(Q('fishfry').text), 'fish fry quest text not updated: ' + Q('fishfry').text);   // (away from the dock pelican)
+  snap(); });
 await shot('12-pool');
 await ev(() => { talkTo('o_merle'); step(60 * 2.2); });
 await shot('13-fishfry');
@@ -162,7 +162,7 @@ await ev(() => {
   Gigs.accept('wrangle'); const a = Game.animals.find(q => q.gig === 'wrangle'); need(!!a, 'no runaway gator'); if (a) { a.cd = 99; a.stun = 0; a.lurk = false; Object.assign(Game.dan, { x: a.x - 14, y: a.y, dir: 'right' }); step(1); const ix = interaction(); if (ix && /WRESTLE/.test(ix.label)) { ix.fn(); wrestle(); } }
   talk(); need(G.done.includes('wrangle'), 'wrangle gig did not complete');
   log.push('ears: ' + hasUp('ears') + ', end of endless: mode ' + Game.mode + (Game.talk ? ' talk ' + JSON.stringify(Game.talk.q[0]).slice(0, 80) : ''));
-  talk(); Game.hour = 12; at(World.spots.photo, 34, 18); snap(); });
+  talk(); Game.hour = 12; at(World.spots.photo, 34, 18); snap(); log.push('dan at the end: ' + JSON.stringify({ ears: hasUp('ears'), mascot: Game.dan.mascot, anim: Game.dan.anim, dir: Game.dan.dir, hurt: Game.dan.hurt, up: Game.flags.up })); });
 await shot('19-endless');
 // an old endless save (past day 34, Keys done, never saw Orlando): Orlando starts the next morning, wherever Dan is
 await ev(() => {

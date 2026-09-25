@@ -46,7 +46,7 @@ const Heat = {
     c.stuck = moved || c.foot ? 0 : (c.stuck || 0) + dt;
     if (!c.foot && c.stuck > .5 && !hidden && !onWater && d < 180) {
       for (const [ox, oy] of [[0, 14], [14, 0], [-14, 0], [0, -14], [0, 0]]) if (canWalk(c.x + ox, c.y + oy)) { c.foot = { x: c.x + ox, y: c.y + oy, dir: 'down', frame: 0, moving: false }; break; }
-      if (c.foot) { toast(MIAMI() ? 'OFFICER: Out of the car! ON FOOT!' : DAYTONA() ? 'DEPUTY: Oh, you wanna RUN? I did track in high school!' : 'RHONDA: Fine. FINE. I’ll catch you on FOOT, Dan.', 2.5); hint('footcop', `Cops get out and run now. ${K('run')} to outrun them`, 5); }
+      if (c.foot) { toast(ORLANDO() ? 'ORANGE COUNTY: Fine. I’ll catch the mouse man on FOOT.' : MIAMI() ? 'OFFICER: Out of the car! ON FOOT!' : DAYTONA() ? 'DEPUTY: Oh, you wanna RUN? I did track in high school!' : 'RHONDA: Fine. FINE. I’ll catch you on FOOT, Dan.', 2.5); hint('footcop', `Cops get out and run now. ${K('run')} to outrun them`, 5); }
     }
     if (!hidden && !onWater && d < (c.foot ? 11 : 13)) return this.busted();
     // she loses you if you're far away, in a porta-potty, or out on the water, for long enough
@@ -72,7 +72,7 @@ const Heat = {
   end() { this.cop = null; const r = Game.npcs.find(n => n.id === 'rhonda'); if (r) r.hidden = false; },
   busted() {
     this.end(); Sound.play('siren'); react('flop');
-    const mia = MIAMI() || DAYTONA(), cop = MIAMI() ? 'OFFICER' : DAYTONA() ? 'DEPUTY' : 'RHONDA', fine = Math.min(Game.money, 20), took = ['beer', 'joint', 'shroom', 'powder'].filter(k => Game.inv[k] > 0), bribe = mia ? 40 : 25;
+    const mia = MIAMI() || DAYTONA() || ORLANDO(), cop = MIAMI() ? 'OFFICER' : DAYTONA() || ORLANDO() ? 'DEPUTY' : 'RHONDA', fine = Math.min(Game.money, 20), took = ['beer', 'joint', 'shroom', 'powder'].filter(k => Game.inv[k] > 0), bribe = mia ? 40 : 25;
     if (Game.car && typeof Car !== 'undefined') Car.exit(); Game.dan.ride = null; Game.heat = 0;
     const takeFine = () => { Game.money -= fine; took.forEach(k => Game.inv[k] = 0); headline(pick(['FLORIDA MAN LEADS DEPUTY ON LOW-SPEED CHASE, CAUGHT HIDING BEHIND A LAWN FLAMINGO', 'FLORIDA MAN ARRESTED AFTER TELLING DEPUTY "YOU CAN’T ARREST ME, I’M ON THE CLOCK"']), 6);
       return [[cop, `That’s a $${fine} fine${took.length ? `, and I’m confiscating the ${took.map(k => ITEMS[k].name).join(', ')}` : ''}.`], ['DAN', pick(['This is entrapment.', 'I want to speak to Brenda.', 'Can I at least keep one beer. For my nerves.'])], [cop, 'Go home, Dan.']]; };
