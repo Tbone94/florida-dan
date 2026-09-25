@@ -1,6 +1,6 @@
 // The Keys, end to end: Case 8 (bus → Seven Mile Bridge run → Captain Lou → the declaration → flag/citizens/sunset → trial)
-// and Case 9 (snorkel doubloon → Rex → Gus + tarpon → wreck dive → Rex boat chase → claim → trial → credits), then an
-// endless Keys day. Every step asserts; screenshots of the set pieces go to argv[2] (default /tmp/fd-keys).
+// and Case 9 (snorkel doubloon → Rex → Gus + tarpon → wreck dive → Rex boat chase → claim → trial → credits), then the
+// next morning (Orlando's Case 10 starts; the bus there is checked). Every step asserts; screenshots of the set pieces go to argv[2] (default /tmp/fd-keys).
 import { chromium } from '/Users/happycamper/Projects/_tools/record-kit/node_modules/playwright/index.mjs';
 import fs from 'fs';
 const A = process.argv.slice(2), mobile = A.includes('mobile'), OUT = A.find(a => a.startsWith('/')) || '/tmp/fd-keys';
@@ -9,7 +9,7 @@ const b = await chromium.launch({ channel: 'chrome' });
 const ctx = await b.newContext(mobile ? { viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 } : { viewport: { width: 1280, height: 720 } });
 const p = await ctx.newPage(); const errs = [];
 p.on('pageerror', e => errs.push('PAGE ' + e.message + ' ' + (e.stack || '').split('\n')[1])); p.on('console', m => { if (m.type() === 'error' && !/404/.test(m.text())) errs.push(m.text().slice(0, 200)); });
-await p.goto('http://localhost:8811/index.html?t=' + Date.now()); await p.waitForTimeout(1500);
+await p.goto('http://localhost:' + (process.env.PORT || 8811) + '/index.html?t=' + Date.now()); await p.waitForTimeout(1500);
 const tag = mobile ? 'm' : 'd';
 const shot = async n => { await p.waitForTimeout(120); await p.screenshot({ path: `${OUT}/${tag}-${n}.png` }); };
 const ev = (fn, a) => p.evaluate(fn, a);
@@ -114,8 +114,8 @@ await ev(() => {
   need(Cases.courtCase() === 'galleon', 'no galleon court case');
   const c = World.spots.court; Object.assign(Game.dan, { x: c.x, y: c.y + 8, ride: null }); interaction().fn(); talk(); objection(); step(10);
   need(Game.flags.case9Won, 'case 9 not won'); need(Game.flags.creditsPending === 9 || !$('gazette').hidden, 'no credits queued');
-  nextDay_(); need(Cases.info().n === 0, 'day 29 not endless: ' + JSON.stringify(Cases.info())); need(Game.mode === 'play', 'endless morning stuck in ' + Game.mode);
-  // the bus now has all four stops from the Keys
+  nextDay_(); need(Cases.info().n === 10 && Cases.info().d === 1 && Game.flags.orlandoFrom === 29, 'day 29 is not Orlando case 10 (orlando.mjs covers it): ' + JSON.stringify(Cases.info())); need(Game.mode === 'play', 'day 29 morning stuck in ' + Game.mode);
+  // the bus now has every stop from the Keys (Orlando included)
   const s = World.spots.stationDoor; Object.assign(Game.dan, { x: s.x, y: s.y + 6, ride: null }); busMenu(); step(20); const stops = [...document.querySelectorAll('.choice')].map(c => c.textContent); log.push('bus: ' + stops.join(' | ')); need(stops.length >= 4, 'bus missing stops');
   talk(); snap();
 });

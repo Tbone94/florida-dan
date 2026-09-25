@@ -91,6 +91,7 @@ function bakePerson(name) {
     if (dir === 'right') out.left = [bakeRows(a, DAN_KEY, pal, true), bakeRows(b, DAN_KEY, pal, true)];
   }
   if (name === 'merle') for (const fr of out.down) { const g = fr.getContext('2d'); g.fillStyle = PAL.ink; g.fillRect(5, 6, 1, 1); g.fillRect(10, 6, 1, 1); g.fillStyle = PAL.grey; g.fillRect(4, 8, 8, 3); }
+  if (SWAPS[name] && SWAPS[name].post) SWAPS[name].post(out);   // extra bits on top (Orlando: mouse ears)
   if (name === 'judge') for (const fr of out.down) { const g = fr.getContext('2d'); g.fillStyle = PAL.ink; g.fillRect(5, 6, 1, 1); g.fillRect(10, 6, 1, 1); }
   return out;
 }

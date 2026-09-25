@@ -7,7 +7,7 @@ const arcNear = (p, r) => p && Math.hypot(Game.dan.x - p.x, Game.dan.y - p.y) < 
 const who = id => Game.npcs.find(n => n.id === id);
 const bigFish = lbs => Game.catchBag.find(f => !f.junk && !f.legend && f.lbs >= lbs);
 const takeFish = f => { Game.catchBag.splice(Game.catchBag.indexOf(f), 1); Game.inv.fish = Game.catchBag.filter(x => !x.junk).length; };
-const SWAMP = () => !MIAMI() && !DAYTONA() && !KEYS();
+const SWAMP = () => !MIAMI() && !DAYTONA() && !KEYS() && !ORLANDO();
 
 // chapter: { gate, where ('swamp'|'miami'), ask: lines, text, target(), ready()/take() (bring it back), or act: { at(), when(), wait, label, run(finish) }, pay(): lines, cash, ref }
 const ARCS = {

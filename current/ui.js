@@ -77,6 +77,7 @@ function showHud(on) { ['hudTop', 'hotbar'].forEach(k => ui[k].hidden = !on); ui
 const SHOP = ['beer', 'cig', 'energy', 'hotdog', 'scratch', 'firework', 'flamingo', 'bait'];
 const VENDORS = {
   gulp: { title: 'GULP-N-GO', sub: '', items: () => SHOP.concat(Game.day >= 5 ? Cases.shopExtras() : []) },
+  souvenir: { title: 'GIANT DISCOUNT SOUVENIR WORLD', sub: '70% off. Always. Nothing here is licensed.', items: () => ['turkeyleg', 'hotdog', 'beer', 'firework', 'flamingo', ...Upgrades.forSale('souvenir')] },
   van: { title: 'WAYNE’S MYSTERY VAN', sub: 'Cash only. No cops. No Rhondas. Buying here gets you noticed (+1★).', items: () => ['joint', 'gummy'], shady: true },
   clinic: { title: 'DR. SNIFFLES’ SINUS CLINIC', sub: 'Medical grade. Allegedly. Buying here gets you noticed (+1★).', items: () => ['powder', 'cafecito'], shady: true },
   suits: { title: 'PASTEL SUITS', sub: 'Miami formal. For crimes, weddings, and crimes at weddings.', items: () => ['suit'] },
@@ -211,24 +212,26 @@ $('shareBtn').addEventListener('click', shareFrontPage);
 $('nextBtn').addEventListener('click', () => {
   ui.gazette.hidden = true;
   const cp = Game.flags.creditsPending;
-  if (cp) { Game.flags.creditsPending = 0; const [h, p, b] = CREDITS[cp]; $('credits').querySelector('h2').textContent = h; $('creditsText').innerHTML = p; $('creditsBtn').textContent = b; $('credits').hidden = false; $('creditsBtn').focus(); return; }
+  if (cp) { Game.flags.creditsPending = 0; const [h, p, b, star] = CREDITS[cp], sm = $('credits').querySelector('.small'); if (sm._def === undefined) sm._def = sm.textContent; sm.textContent = star || sm._def; $('credits').querySelector('h2').textContent = h; $('creditsText').innerHTML = p; $('creditsBtn').textContent = b; $('credits').hidden = false; $('creditsBtn').focus(); return; }
   nextDay();
 });
 $('creditsBtn').addEventListener('click', () => { $('credits').hidden = true; nextDay(); });
 // the story never skips a step: miss a trial, the bus, or the one errand a case hangs on, and the day comes round again
 const MUST = { 4: F => F.acquitted, 7: F => F.case2Won, 10: F => F.case3Won, 11: () => MIAMI(), 13: F => F.case4Won, 14: F => F.flyer, 16: F => F.case5Won, 17: F => DAYTONA() && F.donutRun, 19: F => F.case6Won, 22: F => F.case7Won };
 const KEYS_MUST = { '8.1': F => F.declared, '8.3': F => F.case8Won, '9.3': F => F.case9Won };
+const ORLANDO_MUST = { '10.1': F => F.escaped, '10.3': F => F.case10Won, '11.1': F => F.gangHere, '11.3': F => F.case11Won };
 const REDO = { 11: 'Brenda: The Greyhound waited. It is STILL waiting. Get on the bus, Dan.', 14: 'Brenda: Somebody has to post that FOUND flyer at the café, Dan. It’s you.', 17: 'Tammy Jo: Grand Marshal’s a no-show? We moved the pace lap. To TODAY.' };
 function nextDay() {
   const F = Game.flags, kc = Cases.info(Game.day);
-  const ok = kc.n >= 8 ? KEYS_MUST[kc.n + '.' + kc.d] : MUST[Game.day], redo = ok && !ok(F);
-  if (!redo) { Game.day++; if (F.case7Won && !F.keysFrom && Game.day >= 23) F.keysFrom = Game.day; }   // the Keys start the morning after the Daytona 250 (or the next morning, for old endless saves)
-  else if (kc.n >= 8 && !(kc.n === 8 && kc.d === 1) && !KEYS()) Game.day = F.keysFrom;   // a Keys case day away from the Keys: back to the bus
+  const ok = kc.n >= 10 ? ORLANDO_MUST[kc.n + '.' + kc.d] : kc.n >= 8 ? KEYS_MUST[kc.n + '.' + kc.d] : MUST[Game.day], redo = ok && !ok(F);
+  if (!redo) { Game.day++; if (F.case7Won && !F.keysFrom && Game.day >= 23) F.keysFrom = Game.day; if (F.case9Won && !F.orlandoFrom && F.keysFrom && Game.day >= F.keysFrom + 6) F.orlandoFrom = Game.day; }   // the Keys start the morning after the Daytona 250, Orlando the morning after the Atocha Job (or the next morning, for old endless saves)
+  else if (kc.n >= 10 && !(kc.n === 10 && kc.d === 1) && !ORLANDO()) Game.day = F.orlandoFrom;   // an Orlando case day away from Orlando: back to the bus
+  else if (kc.n >= 8 && kc.n <= 9 && !(kc.n === 8 && kc.d === 1) && !KEYS()) Game.day = F.keysFrom;   // a Keys case day away from the Keys: back to the bus
   else if (Game.day >= 12 && Game.day <= 16 && !MIAMI()) Game.day = 11;   // stranded in the wrong town (old saves): back to the bus
   else if (Game.day >= 18 && Game.day <= 22 && !DAYTONA()) Game.day = 17;
   else if (Game.day === 16 && !Game.flags.flyer) Game.day = 14;          // the trial can't open without the flyer
   startDay();
-  if (redo) toast(kc.n === 8 && kc.d === 1 ? 'Captain Lou: The houseboat’s still yours, son. The sun sets again tonight. It does that.' : REDO[Game.day] || 'Brenda: You MISSED COURT. I got it rescheduled. To TODAY. Please.', 7);
+  if (redo) toast(kc.n === 8 && kc.d === 1 ? 'Captain Lou: The houseboat’s still yours, son. The sun sets again tonight. It does that.' : kc.n === 10 && kc.d === 1 ? 'Chad: The passes are still good, buddy! The mouse waits for no one. Except you.' : kc.n === 11 && kc.d === 1 ? 'Brenda: The gang is STILL on I-4, Dan. Rhonda is directing traffic. Go.' : REDO[Game.day] || 'Brenda: You MISSED COURT. I got it rescheduled. To TODAY. Please.', 7);
 }
 
 // ---------- layout ----------

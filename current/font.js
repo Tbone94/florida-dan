@@ -36,7 +36,7 @@ function bakeLabel(text, color, scale) {
   const dot = (px, py, col) => { x.fillStyle = col; x.fillRect(px * scale, py * scale, scale, scale); };
   const pixels = [];
   [...s].forEach((ch, i) => { const b = GLYPH_BITS[ch]; if (!b) return; b.forEach((row, ry) => row.forEach((on, rx) => { if (on) pixels.push([1 + i * adv + rx, 1 + ry]); })); });
-  for (const [px, py] of pixels) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) dot(px + dx, py + dy, '#1a1423');
+  if (color !== '#1a1423') for (const [px, py] of pixels) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) dot(px + dx, py + dy, '#1a1423');   // ink text (speech bubbles, message boxes) gets no ink outline: it was a solid blob
   for (const [px, py] of pixels) dot(px, py, color);
   return c;
 }

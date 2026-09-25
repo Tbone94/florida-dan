@@ -18,7 +18,7 @@ async function frontPage() {
   x.fillStyle = INK; x.textAlign = 'center'; x.font = '104px Anton, Impact, sans-serif'; x.fillText('THE SWAMP GAZETTE', W / 2, 138);
   x.fillRect(56, 156, W - 112, 6); x.fillRect(56, 168, W - 112, 2);
   x.font = '700 26px "Pixelify Sans", monospace'; x.fillStyle = RED;
-  x.fillText(`${days[Game.day] || 'DAY ' + Game.day} EDITION  ·  50¢  ·  ${KEYS() ? 'MONROE COUNTY' : MIAMI() ? 'MIAMI-DADE' : DAYTONA() ? 'VOLUSIA COUNTY' : 'COLLIER COUNTY'}`, W / 2, 206);
+  x.fillText(`${days[Game.day] || 'DAY ' + Game.day} EDITION  ·  50¢  ·  ${ORLANDO() ? 'ORANGE COUNTY' : KEYS() ? 'MONROE COUNTY' : MIAMI() ? 'MIAMI-DADE' : DAYTONA() ? 'VOLUSIA COUNTY' : 'COLLIER COUNTY'}`, W / 2, 206);
   // the photo: a real frame from Dan's day, kept pixel-crisp
   const pw = 968, ph = pw * 9 / 16, py = 232;
   x.fillStyle = INK; x.fillRect(W / 2 - pw / 2 - 8, py - 8, pw + 16, ph + 16);

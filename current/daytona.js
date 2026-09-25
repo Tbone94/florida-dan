@@ -173,8 +173,8 @@ const Daytona = {
 const REGION_NAMES = { swamp: 'the swamp', miami: 'Miami', daytona: 'Daytona' };
 function busMenu() {
   const n = Cases.info().n, F = Game.flags;
-  if (n === 4 || n === 5 || ((n === 6 || n === 7) && DAYTONA()) || ((n === 8 || n === 9) && KEYS())) return toast('Brenda would kill you. Finish the case first.');
-  const dests = ['swamp', 'miami', 'daytona', 'keys'].filter(r => r !== Game.region && (r === 'swamp' || (r === 'miami' && (F.case5Won || n >= 4)) || (r === 'daytona' && (F.case5Won)) || (r === 'keys' && (F.case7Won))));
+  if (n === 4 || n === 5 || ((n === 6 || n === 7) && DAYTONA()) || ((n === 8 || n === 9) && KEYS()) || ((n === 10 || n === 11) && ORLANDO())) return toast('Brenda would kill you. Finish the case first.');
+  const dests = ['swamp', 'miami', 'daytona', 'keys', 'orlando'].filter(r => r !== Game.region && (r === 'swamp' || (r === 'miami' && (F.case5Won || n >= 4)) || (r === 'daytona' && (F.case5Won)) || (r === 'keys' && (F.case7Won)) || (r === 'orlando' && (F.case9Won))));
   if (!dests.length) return toast('The bus only goes one way right now. Nowhere.');
   say([['DRIVER', 'Where to?', [...dests.map(r => [`To ${REGION_NAMES[r]}`, () => { Game.afterTalk = () => travel(r); return null; }]), ['“Nowhere. Just looking at the bus.”', () => [['DRIVER', 'People do that. It’s a nice bus.']]]]]]);
 }
