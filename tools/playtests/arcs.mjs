@@ -40,4 +40,4 @@ const out = await p.evaluate(() => {
   return r;
 });
 console.log(out); const bad = Object.entries(out).filter(([k, v]) => !String(v).startsWith('ok'));
-console.log(bad.length ? 'FAILURES: ' + JSON.stringify(bad) : 'all arcs ok'); if (bad.length) errs.push('stuck arcs: ' + bad.map(b => b[0]).join(', '));   // a stuck story is a failure, not a footnote console.log('errors:', errs.length ? [...new Set(errs)].slice(0, 6) : 'none'); await b.close();
+console.log(bad.length ? 'FAILURES: ' + JSON.stringify(bad) : 'all arcs ok'); if (bad.length) errs.push('stuck arcs: ' + bad.map(b => b[0]).join(', ')); console.log('errors:', errs.length ? [...new Set(errs)].slice(0, 6) : 'none'); await b.close();
