@@ -310,7 +310,7 @@ Object.assign(ARCS, {
       target: s => s.silver ? SideQuests.who('gus') : World.spots.dockEnd,
       ready: s => !!s.silver && SideQuests.free('gus'), get readyHint() { return SideQuests.nag('gus', 'Sunset, son. End of the dock. He only bites at sunset.'); },
       pay: () => [['OLD GUS', '...That’s him. That’s Old Silver. I gave him that scar in 1986.'], ['OLD GUS', 'He’s yours, son. You caught him. What’s it gonna be?', [
-        ['Mount him on Gus’s wall', () => { Game.money += 80; headline('FLORIDA MAN LANDS 142-LB LEGENDARY TARPON, MOUNTS IT IN RETIREE’S LIVING ROOM', 4); return [['OLD GUS', 'Over the TV. I’ll talk to him during Jeopardy. Here, eighty bucks. Taxidermy guy owes me.']]; }],
+        ['Mount him on Gus’s wall', () => { Game.money += 80; headline('FLORIDA MAN LANDS 142-LB LEGENDARY TARPON, MOUNTS IT IN RETIREE’S LIVING ROOM', 4); return [['OLD GUS', 'Over the TV. I’ll talk to him during the game shows. Here, eighty bucks. Taxidermy guy owes me.']]; }],
         ['Let him go', () => { Game.allegations = Math.max(0, Game.allegations - 8); headline('FLORIDA MAN CATCHES LEGENDARY TARPON, LETS IT GO; RETIREE CRIES ON DOCK', 1); return [['', 'Dan and Gus ease Old Silver back into the water. He looks at them. Then he’s gone.'], ['OLD GUS', 'Forty years. And I finally let him go. Thank you, son.']]; }]]]],
       cash: 30, ref: 6, after: () => SideQuests.mark('gus') },
   ],

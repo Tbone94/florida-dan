@@ -91,7 +91,7 @@ const HEADLINES = [
   ['pelicanBoss', /BOSS IS A PELICAN/, 'That pelican has been up to something.'],
   ['sinusCourt', /SINUS CARTEL RUN BY A PELICAN/, 'Win Case Five.'],
   ['grouper', /FISHES "SQUARE GROUPER"/, 'The ocean has bales in it.'],
-  ['tarpon', /90-POUND TARPON/, 'The Silver King swims off the pier.'],
+  ['silverKing', /90-POUND TARPON/, 'The Silver King swims off the pier.'],
   // ---- gators ----
   ['wrestleGator', /WRESTLES ALLIGATOR "FOR FUN"/, 'Get hands-on with a gator.'],
   ['wrestleChuck', /ALLIGATOR NAMED "CHUCK," CALLS IT/, 'Chuck needs a hug. A firm one.'],
