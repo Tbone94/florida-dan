@@ -12,7 +12,7 @@ function buildHotbar() {
   HOTBAR.forEach((k, i) => {
     const b = document.createElement('button'); b.className = 'slot'; b.id = 'slot-' + k; b.title = `${ITEMS[k].name} — ${ITEMS[k].desc}`;
     b.innerHTML = `<span class="key">${('1234567890-=[]\\'[i] || '')}</span><img alt="" src="${SPR.iconURL[k]}"><span class="n">0</span>`;
-    b.addEventListener('click', e => { e.currentTarget.blur(); useItem(k); });
+    b.addEventListener('click', e => { e.currentTarget.blur(); if (!window.TRAILER && performance.now() - (Game.talkEndAt || 0) < 450) return; useItem(k); });   // a tap meant for the talk box that lands after it closes
     ui.hotbar.append(b); slotEls[k] = b;
   });
 }
@@ -200,7 +200,7 @@ function load() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); re
 // ---------- title / next day ----------
 function begin(fromSave) {
   Sound.unlock(); ui.title.hidden = true; if (window.PWA) PWA.immerse();
-  if (fromSave) { const s = load(); World.load(s.region || 'swamp'); Object.assign(Game, { day: s.day, inv: s.inv, money: s.money, allegations: s.allegations, headlines: s.headlines, flags: s.flags, catchBag: s.catchBag || [], pythons: s.pythons || [] }); startDay(); }
+  if (fromSave) { const s = load(); World.load(s.region || 'swamp'); setTimeout(() => toast('Picked up from this morning. (The game saves every dawn.)', 3.5), 50); Object.assign(Game, { day: s.day, inv: s.inv, money: s.money, allegations: s.allegations, headlines: s.headlines, flags: s.flags, catchBag: s.catchBag || [], pythons: s.pythons || [] }); startDay(); }
   else newGame();
 }
 $('startBtn').addEventListener('click', () => begin(false));
@@ -210,6 +210,7 @@ $('howtoClose').addEventListener('click', closeHowto);
 ui.continueBtn.addEventListener('click', () => begin(true));
 $('shareBtn').addEventListener('click', shareFrontPage);
 $('nextBtn').addEventListener('click', () => {
+  if (!window.TRAILER && performance.now() - (Game.gazetteAt || 0) < 700) return;
   ui.gazette.hidden = true;
   const cp = Game.flags.creditsPending;
   if (cp) { Game.flags.creditsPending = 0; const [h, p, b, star] = CREDITS[cp], sm = $('credits').querySelector('.small'); if (sm._def === undefined) sm._def = sm.textContent; sm.textContent = star || sm._def; $('credits').querySelector('h2').textContent = h; $('creditsText').innerHTML = p; $('creditsBtn').textContent = b; $('credits').hidden = false; $('creditsBtn').focus(); return; }
@@ -247,7 +248,7 @@ function resize() {
   stage.style.setProperty('--u', Math.max(11, Math.min(21, w / 54, h / 25)) + 'px');   // short landscape phones: size text by height too
   // Render at the screen's real resolution (capped at 2200px wide); the shader's sharp-bilinear upscale keeps every
   // game pixel the same size at any scale, so scrolling doesn't shimmer the way a CSS-stretched canvas did.
-  const dpr = devicePixelRatio || 1, cw = Math.round(Math.min(w * dpr, window.TRAILER ? 1920 : 2200));
+  const dpr = devicePixelRatio || 1, cw = Math.round(Math.min(w * dpr, window.TRAILER ? 1920 : isTouch ? Math.max(1280, VW * 3) : 2200));   // phones: ~3 canvas px per game pixel is plenty (full DPR was GPU-bound at 30 fps)
   screenCv.width = cw; screenCv.height = Math.round(cw * VH / VW);
   document.body.classList.toggle('portrait', portrait);
   $('rotate').hidden = !(portrait && isTouch);

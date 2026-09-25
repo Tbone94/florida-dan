@@ -218,7 +218,7 @@
     #toast { left: calc(.6em + env(safe-area-inset-left, 0px)); bottom: calc(150px + env(safe-area-inset-bottom, 0px)); max-width: 40%; }
     #hint { left: calc(.6em + env(safe-area-inset-left, 0px)); bottom: calc(150px + 4.5em + env(safe-area-inset-bottom, 0px)); }
     #prompt { bottom: calc(22px + env(safe-area-inset-bottom, 0px)); }
-    #hotbar { bottom: calc(4px + env(safe-area-inset-bottom, 0px)); }
+    #hotbar { bottom: calc(4px + env(safe-area-inset-bottom, 0px)); max-width: calc(100% - 380px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)); overflow-x: auto; scrollbar-width: none; justify-content: flex-start; }   /* never under the stick or GIT */
     #stick { left: calc(18px + env(safe-area-inset-left, 0px)); }
     #btnA { right: calc(18px + env(safe-area-inset-right, 0px)); }
     #btnB, #btnF { right: calc(98px + env(safe-area-inset-right, 0px)); }

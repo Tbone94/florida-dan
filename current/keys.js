@@ -178,7 +178,7 @@ const Keys = {
     if (near(S_.door, 20) && sleepReady()) list.push({ label: 'Sleep on the houseboat', fn: () => sleep() });
     if (near(S_.court, 22)) { const cs = Cases.courtCase(); list.push({ label: cs ? 'Enter the courthouse' : 'Monroe County Courthouse (closed)', fn: () => cs ? Court.start(cs) : toast('The Monroe County Courthouse. A rooster is asleep on the steps. It has seniority.') }); }
     if (near(S_.stationDoor, 22)) list.push({ label: 'Greyhound', fn: () => busMenu() });
-    if (near(S_.buoy, 26)) list.push({ label: 'Take a photo at the Southernmost Point', fn: () => KeysCases.buoyPhoto() });
+    if (near(S_.buoy, 26) && !qOpen('wreck')) list.push({ label: 'Take a photo at the Southernmost Point', fn: () => KeysCases.buoyPhoto() });
     if (this.canDiveHere() && !near(Game.boat, 30) && !(near(S_.door, 20) && sleepReady())) list.push(this.waterPrompt());   // last: boarding, sleeping, doors all beat 'Dive in'
     if (Game.urgent > 0 && near(S_.hide, 22)) list.push({ label: 'USE THE TOILET', fn: () => { Game.urgent = 0; Sound.play('splash'); toast('A Duval Street porta-potty at 2 PM. There are roosters in here.'); Game.chill = 100; } });
     return list;

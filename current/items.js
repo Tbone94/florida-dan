@@ -147,11 +147,12 @@ function updateProjectiles(dt) {
   }
   Game.projectiles = Game.projectiles.filter(p => p.life > 0);
 }
-function explode(x, y) {
+function explode(x, y, quiet) {   // quiet: a scene's explosion (the fryer) isn't Dan's fireworks
   if (typeof Look !== 'undefined') Look.mark('scorch', x, y + 6);   // the swamp remembers (until morning)
   Sound.play('boom'); Game.shake = 10; Game.flash = .6;
   for (let i = 0; i < 40; i++) { const a = rnd(0, 6.28), s = rnd(20, 90); Game.parts.push({ kind: 'spark', x, y: y - 16, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: rnd(.4, 1), c: pick([PAL.red, PAL.white, PAL.blue, PAL.yellow]) }); }
   for (const a of Game.animals) if (Math.hypot(a.x - x, a.y - y) < 110) { a.state = 'flee'; a.timer = 6; a.stun = 1.5; }
+  if (quiet) return;
   const L = Game.day_; L.fireworks++;
   const where = World.region(x, y) === 'mainland' ? 'THE GULP-N-GO' : World.region(x, y) === 'pasture' ? 'A COW PASTURE' : World.region(x, y) === 'glades' ? 'THE EVERGLADES' : 'HIS OWN SWAMP';
   if (L.fireworks === 1) headline(`FLORIDA MAN SETS OFF FIREWORKS AT ${where} "TO SCARE THE GATORS," SCARES EVERYONE ELSE`, 6);

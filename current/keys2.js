@@ -84,6 +84,7 @@ const KeysCases = {
     KeysChase.tick(dt);
     // walked (or boated) the bridge instead of the set piece: fine, it counts
     if (c.n === 8 && c.d === 1 && qOpen('bridge') && KEYS() && D.x > 47 * TS) this.bridgeDone(null);
+    if (c.n === 8 && c.d === 2 && !Q('bed') && qDone('flag') && qDone('citizens') && qDone('sunset2')) addQuest('bed', 'Big day tomorrow. Sleep on the houseboat');   // the arrow always has somewhere to go
     if (c.n === 8 && c.d === 2 && !F.citRooster) {
       const r = Game.animals.find(a => a.citizen);
       if (r && Math.hypot(r.x - S_.door.x, r.y - S_.door.y) < 44) { F.citRooster = true; r.tag = 'CITIZEN'; r.herd = false; this.citizenText(); Sound.play('catch'); toast('The rooster hops onto the houseboat. He is a citizen now. He has already crowed at the Coast Guard.', 4); headline('ROOSTER GRANTED CITIZENSHIP BY SELF-DECLARED "REPUBLIC OF DAN"', 3); }
@@ -229,7 +230,7 @@ const KeysCases = {
       if (c.n === 9 && c.d === 1 && qOpen('gus')) {
         if (!F.tarponFed) { addQuest('tarpon', 'Feed Gus’s tarpon (end of the dock)', false, 'gus'); return say([['OLD GUS', 'Let me see that coin.'], ['', 'Gus looks at the coin for a very long time. His hands shake.'], ['OLD GUS', 'Nuestra Señora de la Cerveza. 1733. I found her in ’84, son. Filed the claim. Nobody believed me. The paperwork got lost.'],
           ['OLD GUS', 'I’ll tell you where she lies. But first: feed my tarpon. The tarpon trust you, I trust you.']]), true; }
-        done('gus'); F.wreckKnown = true; addQuest('bed', 'Big day tomorrow. Sleep on the houseboat', true);
+        done('gus'); F.wreckKnown = true; addQuest('bed', 'Big day tomorrow. Sleep on the houseboat');
         return say([['OLD GUS', 'They LIKE you. Hell, they never liked me.'], ['OLD GUS', 'She’s off the Southernmost Point. Straight out from the buoy, past the reef. Forty feet down.'], ['OLD GUS', 'That TV fella’s gonna try to take her. Don’t let him, son. Not after forty years.'], ['DAN', 'Gus... I got you.']]), true;
       }
       return say([['OLD GUS', pick(['Fifty years diving these reefs. Nine hundred beer cans. One ship.', 'The tarpon are older than you. Smarter too.', 'You ever hold a gold coin, son? It’s heavier than it looks. So’s the past.'])]]), true;

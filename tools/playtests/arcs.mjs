@@ -12,7 +12,7 @@ const out = await p.evaluate(() => {
   const r = {}, log = [];
   const ALL = { acquitted: true, case2Won: true, case3Won: true, case4Won: true, case5Won: true };
   for (const [id, chs] of Object.entries(ARCS)) for (let ci = 0; ci < chs.length; ci++) {
-    const c = chs[ci]; const reg = c.where; if (c.sq) continue;   // sidequests.js chapters drive themselves: variety.mjs plays those go(reg, reg === 'miami' ? 14 : 25, ALL); Game.flags.arcs = Game.flags.arcs || {}; Game.flags.arcs[id] = { ch: ci, st: 'idle' };
+    const c = chs[ci]; const reg = c.where; if (c.sq) continue; go(reg, reg === 'miami' ? 14 : 25, ALL); Game.flags.arcs = Game.flags.arcs || {}; Game.flags.arcs[id] = { ch: ci, st: 'idle' };   // (sidequests.js chapters drive themselves: variety.mjs plays those)
     if (id === 'darlene' && ci === 2) Game.flags.arcs.merle = { ch: 3, st: 'idle' };
     Game.quests = Game.quests.filter(q => q.opt);   // no story in the way
     const n = Game.npcs.find(x => x.id === id); if (!n) { r[id + ci] = 'NO NPC in ' + reg; continue; }
@@ -22,7 +22,7 @@ const out = await p.evaluate(() => {
     Game.hour = 21; Object.assign(Game.inv, { beer: 9, hotdog: 3, firework: 3, can: 7, scratch: 1 }); Game.flags.up = Object.assign(Game.flags.up || {}, { billy: true });
     Game.catchBag.push({ name: 'Largemouth Bass', lbs: 8, sp: {} }); Game.day_.wrestles = 5;
     const q = Q('arc_' + id), tg = q && Arcs.target(q);
-    if (c.act) { const at = c.act.at(); if (at === n || Game.npcs.includes(at)) { Story.talk(at); } else { Game.dan.x = at.x; Game.dan.y = at.y + 4; step(2); const a = interaction(); if (!a || !/./.test(a.label)) { r[id + ci] = 'no act prompt'; continue; } a.fn(); } talk(0); }
+    if (c.act) { const at = c.act.at(); if (at === n || Game.npcs.includes(at)) { Story.talk(at); } else { Game.dan.x = at.x; Game.dan.y = at.y + 4; step(2); const a = interaction(); if (!a || !/./.test(a.label)) { r[id + ci] = 'no act prompt'; continue; } a.fn(); } for (let i = 0; i < 60 * 30 && !s.acted && s.st === 'active' && (Game.mode !== 'play' || i < 30); i++) { if (Game.mode === 'talk') { const cs = [...document.querySelectorAll('.choice')]; if (cs.length) cs[0].click(); else Input.press('a'); } step(1); } talk(0); }   // acts can be whole cutscenes: wait them out
     if (s.st === 'active') { Story.talk(n); talk(0); }
     step(30); talk(0);
     r[id + ci] = s.ch === ci + 1 && s.st === 'idle' ? 'ok' : `stuck ch=${s.ch} st=${s.st} acted=${s.acted} target=${!!tg}`;
@@ -40,4 +40,4 @@ const out = await p.evaluate(() => {
   return r;
 });
 console.log(out); const bad = Object.entries(out).filter(([k, v]) => !String(v).startsWith('ok'));
-console.log(bad.length ? 'FAILURES: ' + JSON.stringify(bad) : 'all arcs ok'); console.log('errors:', errs.length ? [...new Set(errs)].slice(0, 6) : 'none'); await b.close();
+console.log(bad.length ? 'FAILURES: ' + JSON.stringify(bad) : 'all arcs ok'); if (bad.length) errs.push('stuck arcs: ' + bad.map(b => b[0]).join(', '));   // a stuck story is a failure, not a footnote console.log('errors:', errs.length ? [...new Set(errs)].slice(0, 6) : 'none'); await b.close();

@@ -57,24 +57,26 @@ function callRow(who, text) {
 }
 function updateCall(T_, dt) {
   const e = T_.q[0], C = T_.call, n = e.rows.length;
-  if (Input.tapped('a')) {
+  if (Input.tapped('a')) {   // tap 1: fast-forward (every line still shows) · tap 2: the whole call · when it's over: hang up
     if (C.row >= n) return advanceTalk();
+    if (!C.fast) { C.fast = true; C.pause = 0; if (C.el) { C.el.lastChild.textContent = e.rows[C.row][1]; T_.typed = e.rows[C.row][1].length; } return; }
     ui.talkLine.textContent = ''; e.rows.slice(-3).forEach(([w, t]) => callRow(w, t)); C.row = n; C.hang = 99; T_.typed = T_.full.length;
     return;
   }
   if (C.row >= n) { if ((C.hang -= dt) <= 0) advanceTalk(); return; }   // nobody tapped: it hangs up by itself after a beat
   if (C.pause > 0) { C.pause -= dt; return; }
   const [who, text] = e.rows[C.row]; if (!C.el) { C.el = callRow(who, ''); T_.typed = 0; T_.full = text; }
-  const before = Math.floor(T_.typed); T_.typed += dt * (Game.fx.powder > 0 ? 140 : 62);
+  const before = Math.floor(T_.typed); T_.typed += dt * (Game.fx.powder > 0 ? 140 : 62) * (C.fast ? 4 : 1);
   if (Math.floor(T_.typed) !== before && Math.floor(T_.typed) % 3 === 0 && text[Math.floor(T_.typed)] !== ' ') Sound.voice(who);
   C.el.lastChild.textContent = text.slice(0, Math.floor(T_.typed));
-  if (T_.typed >= text.length) { C.el.lastChild.textContent = text; C.el = null; C.row++; C.pause = .5; C.hang = Math.max(2.2, text.length * .04); }
+  if (T_.typed >= text.length) { C.el.lastChild.textContent = text; C.el = null; C.row++; C.pause = C.fast ? .15 : .5; C.hang = Math.max(2.2, text.length * .04); }
 }
 function renderChoices() {
   const ch = Game.talk.choices; if (!ch || ui.talkChoices.childElementCount) return;
+  const t0 = performance.now();   // choices grow the box upward, right under a tapping finger: ignore clicks for a beat
   ch.forEach(([label, fn], i) => {
     const b = document.createElement('button'); b.className = 'choice'; b.textContent = `${i + 1}. ${label}`;
-    b.addEventListener('click', e => { e.stopPropagation(); pickChoice(i); }); ui.talkChoices.append(b);
+    b.addEventListener('click', e => { e.stopPropagation(); if (!window.TRAILER && performance.now() - t0 < 350) return; pickChoice(i); }); ui.talkChoices.append(b);
   });
 }
 function pickChoice(i) { const ch = Game.talk.choices; if (!ch || !ch[i]) return; Sound.play('pickup'); const fn = ch[i][1]; Game.talk.choices = null; advanceTalk(fn); }
@@ -97,7 +99,7 @@ function advanceTalk(choiceFn) {
   if (choiceFn) { const extra = choiceFn(); if (Game.mode === 'shop') { ui.talk.hidden = true; Game.talk = null; Game.afterShop = T_.then; return; } if (Array.isArray(extra)) T_.q.unshift(...packTalk(extra)); }   // a shop keeps the talk's ending for when it closes
   if (Game.talk !== T_) return;                       // the choice started a new conversation
   if (T_.q.length) return showTalk();
-  ui.talk.hidden = true; Game.mode = T_.prev === 'talk' ? 'play' : (T_.prev || 'play'); Game.talk = null;
+  ui.talk.hidden = true; Game.mode = T_.prev === 'talk' ? 'play' : (T_.prev || 'play'); Game.talk = null; Game.talkEndAt = performance.now();
   if (T_.then) T_.then();
   if (Game.afterTalk && Game.mode === 'play') { const f = Game.afterTalk; Game.afterTalk = null; f(); }   // actions that must wait for the talk box to close (minigames, travel)
 }
@@ -125,7 +127,8 @@ function questTarget(q) {
   switch (q && q.id) {
     case 'boat': return Game.dan.ride === 'boat' ? null : Game.boat;
     case 'fish': return Game.dan.ride === 'boat' ? null : S_.dockEnd;
-    case 'merle': case 'merle2': case 'party': return who('merle') || S_.merle;
+    case 'merle2': return Game.money >= 40 ? who('merle') || S_.merle : who('darlene') || S_.darlene;   // short of the $40: go sell fish
+    case 'merle': case 'party': return who('merle') || S_.merle;
     case 'sleep1': case 'sleep2': case 'board': return S_.door;
     case 'darlene': case 'stock': return who('darlene') || S_.darlene;
     case 'ice': return S_.icemachine;
@@ -219,8 +222,10 @@ const Story = {
     if (Game.day === 1) {
       if (D.ride === 'boat') done('boat');
       const n = Game.catchBag.filter(f => !f.junk).length;
+      const fq = Q('fish'); if (fq && fq.done && n < 3 && !qDone('merle')) { fq.done = false; renderQuests(); }   // a pelican took one: back to the water
       if (!Q('fish').done) { questText('fish', `Catch 3 fish (${Math.min(3, n)}/3)`); if (n >= 3) done('fish'); }
     }
+    if (Game.day === 2 && qOpen('merle2')) questText('merle2', Game.money >= 40 ? 'Pay Merle his $40 (he’ll sign)' : `Get Merle to sign (he wants $40, you have $${Game.money})`);
     if (Game.day === 2 && Game.cold && h > 11) { Game.cold = false; toast('It warmed up to 61°. The iguanas have stopped falling. Mostly.'); }
     if (Game.day === 2 && !F.bday2 && Q('darlene').done && Q('rhonda').done && Q('merle2').done) {
       F.bday2 = true; addQuest('sleep2', 'Go home to bed');
@@ -293,7 +298,7 @@ const Story = {
       SC.walk('merle', fx + 14, fy + 2, 40), SC.face('merle', 'left'),
       SC.line('merle', 'Like God intended.', 1.1),
       SC.emote('dan', '!', .9, PAL.red), SC.wait(.3),
-      SC.fx(() => { explode(fx, fy); fire(40); Look.mark('scorch', fx, fy + 4, { big: 1 }, true); }), SC.shake(10), SC.flash(.8),
+      SC.fx(() => { explode(fx, fy, true); fire(40); Look.mark('scorch', fx, fy + 4, { big: 1 }, true); }), SC.shake(10), SC.flash(.8),
       SC.all([SC.walk('merle', fx + 58, fy + 10, 130), SC.emote('merle', '!!', 1.2, PAL.orange)]),
       SC.fx(() => fire(20)), SC.wait(1.1),
       SC.face('merle', 'left'), SC.line('merle', '...Worth it.', 1.5),
@@ -455,7 +460,7 @@ const Gazette = {
     $('gzMeter').style.width = Game.allegations + '%';
     $('gzMeterLabel').textContent = `${Game.allegations}% FLORIDA MAN`;
     ui.talk.hidden = true; showHud(false);
-    ui.gazette.hidden = false; $('nextBtn').focus();
+    ui.gazette.hidden = false; Game.gazetteAt = performance.now(); if (window.TRAILER) $('nextBtn').focus(); else setTimeout(() => { if (!ui.gazette.hidden) $('nextBtn').focus(); }, 700);   // mashing E/space/taps must not skip the paper
     Sound.play('headline');
   },
 };

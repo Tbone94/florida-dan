@@ -103,7 +103,7 @@ const Bridge = {
     // HUD: the mile markers
     const k = clamp(s.dist / (BRIDGE_MILES * BRIDGE_PX), 0, 1);
     OR(40, 8, 240, 8, PAL.inkL); R(40, 8, 240 * k, 8, PAL.teal); for (let m = 1; m < BRIDGE_MILES; m++) R(40 + 240 * m / BRIDGE_MILES, 8, 1, 8, PAL.ink);
-    label('SEVEN MILE BRIDGE', 160, 26, PAL.white, 7); label(`${(k * BRIDGE_MILES).toFixed(1)} MI · ${Math.round(s.v * .3)} MPH`, 160, 36, PAL.yellow, 6);
+    label('SEVEN MILE', 60, 34, PAL.white, 7); label('BRIDGE', 60, 44, PAL.white, 7); label(`${(k * BRIDGE_MILES).toFixed(1)} MI`, 262, 34, PAL.yellow, 7); label(`${Math.round(s.v * .3)} MPH`, 262, 44, PAL.yellow, 6);   // on the water, not over the oncoming lane
     if (s.msgT > 0) msgBox(s.msg, 65);
     if (s.t < 3) label(isTouch ? 'STICK: STEER · UP: GAS · DOWN: BRAKE' : '← → STEER · ↑ GAS · ↓ BRAKE', 160, 172, PAL.white, 6);
   },

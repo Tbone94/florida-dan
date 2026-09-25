@@ -47,13 +47,15 @@ function moveDan(dt) {
   } else {
     if (World.at(D.x, D.y) === T.SHALLOW) sp *= .5; else if (World.at(D.x, D.y) === T.SAWGRASS) sp *= .75;
     const nx = D.x + ax * sp * dt, ny = D.y + ay * sp * dt;
-    if (canWalk(nx, D.y)) D.x = nx; if (canWalk(D.x, ny)) D.y = ny;
+    const bx = !canWalk(nx, D.y), by = !canWalk(D.x, ny); if (!bx) D.x = nx; if (!by) D.y = ny;
+    if (bx && ax && Math.abs(ax) >= Math.abs(ay)) { for (const s of [3, -3, 6, -6]) if (canWalk(nx, D.y + s) && canWalk(D.x, D.y + Math.sign(s) * 2)) { D.y += Math.sign(s) * Math.min(2, sp * dt); break; } }   // a corner: slide round it
+    if (by && ay && Math.abs(ay) >= Math.abs(ax)) { for (const s of [3, -3, 6, -6]) if (canWalk(D.x + s, ny) && canWalk(D.x + Math.sign(s) * 2, D.y)) { D.x += Math.sign(s) * Math.min(2, sp * dt); break; } }
     if (Input.held('run') && Math.random() < dt * 9) Game.parts.push({ kind: 'dust', x: D.x - ax * 6, y: D.y, vx: -ax * 12, vy: -6, life: .45 });
     if (Game.fx.powder > 0 && Math.random() < dt * 20) Game.parts.push({ kind: 'speed', x: D.x - ax * 8, y: D.y - 8 + rnd(-6, 6), vx: -ax * 40, vy: -ay * 40, life: .25 });
   }
 }
 let bonkT = 0;
-function bonk() { if (Game.t - bonkT < .8) return; bonkT = Game.t; Game.shake = 4; Sound.play('hurt'); toast(pick(['OW. Cooler’s fine though.', 'Who put that THERE?', 'Bonk.'])); }
+function bonk() { const quiet = Game.t - bonkT < 3; if (Game.t - bonkT < .8) return; bonkT = Game.t; Game.shake = 4; Sound.play('hurt'); if (!quiet) toast(pick(['OW. Cooler’s fine though.', 'Who put that THERE?', 'Bonk.'])); }
 
 function drawDan(x, y, t) {
   const D = Game.dan, F = Game.fx;
@@ -277,7 +279,8 @@ function updateCritter(c, dt) {
     }
     return;
   }
-  if (c.state === 'flee') { c.x -= dx / (dist || 1) * 60 * dt; c.y -= dy / (dist || 1) * 60 * dt; c.flip = dx > 0; if (c.timer <= 0) { c.state = 'wander'; c.hx = c.x; c.hy = c.y; } return; }
+  if (c.state === 'flee') { const fx = -dx / (dist || 1) * 60 * dt, fy = -dy / (dist || 1) * 60 * dt, ok = (x, y) => c.type === 'pelican' || (!WET(World.at(x, y)) && !World.solidAt(x, y));   // run away on land, not into the sea
+    if (ok(c.x + fx, c.y)) c.x += fx; if (ok(c.x, c.y + fy)) c.y += fy; c.flip = dx > 0; if (c.timer <= 0) { c.state = 'wander'; c.hx = c.x; c.hy = c.y; } return; }
   if (c.timer <= 0) { c.timer = rnd(2, 5); const a = rnd(0, 6.28), s = c.type === 'cow' ? 5 : 10; c.vx = Math.cos(a) * s; c.vy = Math.sin(a) * s; if (Math.random() < .3) c.vx = c.vy = 0; }
   const nx = c.x + c.vx * dt, ny = c.y + c.vy * dt;
   const okT = c.type === 'pelican' ? true : c.type === 'cow' ? World.region(nx, ny) === 'pasture' && !World.solidAt(nx, ny) : WALKABLE(World.at(nx, ny)) && !World.solidAt(nx, ny);

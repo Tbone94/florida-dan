@@ -3,9 +3,9 @@
 # plus plain syntax errors (node --check). Prose comments that merely look like code go in ALLOW as file:first-words.
 import re, pathlib, subprocess, sys
 cur = pathlib.Path(__file__).resolve().parent.parent.parent / 'current'
-ALLOW = ('// FLORIDA DAN', '// walk someone to', 'let VW = 320;', '// Trash Baby: face him', '// label() lives', '// gfx-only shots', "// tips wait out", '// chapter: {')
+ALLOW = ('// FLORIDA DAN', '// walk someone to', 'let VW = 320;', '// Trash Baby: face him', '// label() lives', '// gfx-only shots', "// tips wait out", '// chapter: {', '// a real sneak along', '// phone calls play as one')
 bad = 0
-for f in sorted(cur.glob('*.js')):
+for f in sorted(cur.glob('*.js')) + sorted(cur.parent.glob('tools/playtests/*.mjs')):   # the tests too: a // comment ate half a test line once
     r = subprocess.run(['node', '--check', str(f)], capture_output=True, text=True)
     if r.returncode: print('SYNTAX', f.name, r.stderr.strip().split('\n')[-1]); bad = 1
     for i, line in enumerate(f.read_text().split('\n'), 1):

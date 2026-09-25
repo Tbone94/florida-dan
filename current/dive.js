@@ -120,7 +120,7 @@ const Dive = {
     const cash = s.got.reduce((n, it) => n + ((DIVE_LOOT[it.k] || {}).cash || 0), 0); label(`HAUL ${s.got.length}${cash ? ` · $${cash}` : ''}`, 312, 15, PAL.yellow, 6, 'right');
     if (s.y <= DV_SURF + 4 && s.t > 1) label(`${K('a').replace(/<[^>]+>/g, '')} CLIMB OUT`, 160, 50, PAL.white, 6);
     if (s.msgT > 0) msgBox(s.msg, 152);
-    if (s.t < 3 && s.y < 60) label(isTouch ? 'STICK: SWIM · PUSH ALL THE WAY: KICK' : 'ARROWS: SWIM · SHIFT: KICK', 160, 172, PAL.white, 6);
+    if (s.t < 3 && s.y < 60 && s.msgT <= 0) label(isTouch ? 'STICK: SWIM · PUSH ALL THE WAY: KICK' : 'ARROWS: SWIM · SHIFT: KICK', 160, 172, PAL.white, 6);
   },
   drawLoot(it, x, y, t) {
     const L = DIVE_LOOT[it.k], bob = Math.round(Math.sin(it.t * 2) * 1);

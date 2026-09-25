@@ -18,7 +18,7 @@ const r = await p.evaluate(() => {
   // --- Miami
   Game.day = 18; World.load('miami'); spawn(); Gigs.newDay(); for (const id in ARCS) ARC(id).no = Game.day; Game.mode = 'play'; ui.talk.hidden = true; Game.talk = null;   // neighbor stories declined: this test is about shops and gigs
   out.push('Miami offers: ' + JSON.stringify(Game.day_.gig.offers) + ' coral=' + !!Game.npcs.find(n => n.id === 'coral'));
-  const coral = Game.npcs.find(n => n.id === 'coral'); Story.talk(coral); talk(/Browse/); out.push('surf shop: ' + [...ui.shopList.children].map(x => x.dataset.k).join(','));
+  const coral = Game.npcs.find(n => n.id === 'coral'); delete Game.day_.gig.offers.coral; Story.talk(coral); talk(/Browse/); out.push('surf shop: ' + [...ui.shopList.children].map(x => x.dataset.k).join(','));
   for (const row of [...ui.shopList.children]) row.click(); Game.mode = 'play'; ui.shop.hidden = true;
   out.push('owned: ' + ['detector', 'cigboat', 'aviators'].filter(hasUp).join(','));
   // detector: stand on a loot spot
