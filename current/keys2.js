@@ -58,10 +58,10 @@ const KeysCases = {
     if (c.n === 8 && c.d === 2) {
       Game.hour = 7; F.flagAtMoes = true;
       setQuests([['flag', 'Get the jorts flag back (it’s flying over Sloppy Moe’s)'], ['citizens', 'Recruit 3 citizens for the Republic (0/3)'], ['sunset2', 'Get recognized at the Mallory Square sunset celebration (after 5 PM)']]);
-      this.citizenText();
+      this.citizenText(); if (F.flagBack) { F.flagAtMoes = false; done('flag'); }   // a replay remembers the lobster trade
       return say([['', 'THE REPUBLIC OF DAN. DAY ONE.'], ['PETTY OFFICER KRUZ', '(megaphone) Sir. SIR. We towed your... nation... back to the dock at 4 AM. You were asleep in a pool float.'],
         [PHONE_B, 'Dan. They’re charging you with SECESSION. Maritime secession. I had to look it up. It’s a real crime because of YOU.'], ['DAN', 'The Republic of Dan has diplomatic immunity.'],
-        [PHONE_B, '...You know what? Fine. A real country needs a flag, citizens, and somebody who recognizes it. Get all three and I’ll argue it.'], [PHONE_B, 'God help me, I’ll argue it.']]);
+        [PHONE_B, '...Fine. A country needs a flag, citizens, and somebody who recognizes it. Get all three. I’ll argue it.'], [PHONE_B, 'God help me, I’ll argue it.']]);
     }
     if (c.n === 8 && c.d === 3) { Game.hour = 8; setQuests([['court', 'Monroe County Courthouse (north end of Duval)']]); return say([['', 'COURT DAY. MONROE COUNTY.'], [PHONE_B, 'Flag. Citizens. Recognition. I have a legal argument and I hate it.'], ['DAN', 'Wear something nice. We’re representing a nation.']]); }
     if (c.n === 9 && c.d === 1) {
@@ -167,11 +167,11 @@ const KeysCases = {
     Scene.play([
       SC.fx(() => { Game.hour = Math.max(Game.hour, 19.1); Object.assign(D, { x: KSP().door.x - 6, y: KSP().door.y, dir: 'left', ride: null }); Game.inv.beer = Math.max(0, (Game.inv.beer || 0) - 2); Game.fx.buzz = Math.max(Game.fx.buzz, 70); }),
       SC.cam(hx, hy - 12, 1.5, 1.1), SC.line('dan', 'Beer eleven.', 1.2), SC.emote('dan', '♥', .8, PAL.hat),
-      SC.say([['DAN', 'People of the Florida Keys.'], ['DAN', 'I been charged. I been sued. I been called a Florida Man in FOUR COUNTIES.'], ['DAN', 'So tonight...'], ['DAN', 'I secede.'],
+      SC.say([['DAN', 'People of the Florida Keys.'], ['DAN', 'I been charged. I been sued. I been called a Florida Man in THREE COUNTIES.'], ['DAN', 'So tonight...'], ['DAN', 'I secede.'],
         ['', 'He takes off his jorts and runs them up the houseboat’s flagpole. They are, technically, blue.'], ['DAN', 'I hereby declare this houseboat... THE REPUBLIC OF DAN!']]),
       SC.fx(() => { F.declared = true; }), SC.shake(3), SC.react('cheer'),
       SC.prop('cutter', (cx, cy, t) => { const x = Math.round(cut.x - cx), y = Math.round(cut.y - cy); shadow(x + 30, y + 14, 70, 7); OR(x, y, 60, 14, PAL.white); R(x + 8, y + 3, 5, 10, '#ff8a3d'); R(x + 14, y + 3, 3, 10, '#2a4f7a'); OR(x + 30, y - 12, 20, 12, PAL.white); R(x + 34, y - 9, 12, 4, PAL.waterL); R(x + 40, y - 20, 1, 8, PAL.grey); label('U.S. COAST GUARD', x + 30, y - 16, '#2a4f7a', 4); }),
-      SC.tween(() => cut.x, v => { cut.x = v; }, hx - 120, 2.4), SC.line(cut, 'COAST GUARD: Vessel, you are flying... pants?', 1.8),
+      SC.tween(() => cut.x, v => { cut.x = v; }, hx - 120, 2.4), SC.line(cut, 'COAST GUARD: Is that flag... PANTS?', 1.8),
       SC.line('dan', 'This is a SOVEREIGN NATION!', 1.4), SC.fly(() => SPR.icons.firework, hx - 6, hy - 10, cut.x + 30, cut.y - 4, .8, 8, true), SC.fx(() => burst(cut.x + 30, cut.y - 10)), SC.shake(6), SC.flash(.5),
       SC.line(cut, 'COAST GUARD: ...Did he just SHOOT at us?', 1.8), SC.line('dan', 'Warning shot!', 1.3), SC.line(cut, 'COAST GUARD: With a FIREWORK?', 1.6), SC.line('dan', 'It’s all the Republic can afford!', 1.8),
       SC.cam(hx, hy - 12, 1.1, 1.2),
@@ -189,7 +189,7 @@ const KeysCases = {
       if (c.n === 8 && c.d === 1 && qOpen('lou')) { done('lou'); F.houseboat = true; addQuest('sunset', 'Watch the sunset from your houseboat (after 6 PM)');
         return say([['CAPTAIN LOU', 'You the fella from the beer commercial? The one who burps for forty seconds?'], ['DAN', 'Forty-one. They cut one.'],
           ['CAPTAIN LOU', 'Houseboat’s the “Knot Guilty,” end of the dock. Rules: no parties. No fireworks. No flags. ESPECIALLY no flags.'], ['DAN', 'Why especially no flags?'], ['CAPTAIN LOU', 'It’s Key West, son. People get ideas.']]), true; }
-      return say([['CAPTAIN LOU', pick(['Forty years on this dock. Seen everything. Then I met you.', 'Tide’s coming in. So’s the Coast Guard, about you.', 'The Knot Guilty’s a fine vessel. Please stop saying it’s a country.'])]]), true;
+      return say([['CAPTAIN LOU', pick(['Twenty-six years on this dock. Seen everything. Then I met you.', 'Tide’s coming in. So’s the Coast Guard, about you.', 'The Knot Guilty’s a fine vessel. Please stop saying it’s a country.'])]]), true;
     }
     if (n.id === 'kruz') return say([['PETTY OFFICER KRUZ', pick(['Sir, I have been instructed not to recognize your nation.', 'Please do not fire anything at my boat today.', 'The rooster is also not a citizen. Of anything.'])]]), true;
     if (n.id === 'moe') {
@@ -218,7 +218,7 @@ const KeysCases = {
       if (c.n === 8 && c.d === 2 && qOpen('sunset2')) {
         if (Game.hour < 17) return say([['MANGO MIKE', 'The sunset celebration starts at five, amigo. Tightrope guy, cat guy, the man with the knives. And now... you?', [['“Wait around for the show.”', () => { Game.hour = 17; toast('Dan hangs out at Mallory Square. A man juggles fire. A cat jumps through it. Five o’clock.', 4); return [['MANGO MIKE', 'SHOWTIME, amigo.']]; }], ['“I’ll come back.”', () => null]]]]), true;
         return say([['MANGO MIKE', 'Ladies and gentlemen, the man who seceded from the United States in his UNDERWEAR!'], ['MANGO MIKE', 'Dance for the crowd, amigo. If they love you, the Conch Republic recognizes you. That’s the law. I made it up just now.', [
-          ['“Hit it.”', () => { Game.afterTalk = () => Dance.start(() => { F.recognized = true; done('sunset2'); react('cheer'); headline('SUNSET CROWD AT MALLORY SQUARE FORMALLY "RECOGNIZES" FLORIDA MAN’S HOUSEBOAT AS A NATION', 5); say([['', 'Four hundred people applaud as the sun goes down. A man in a pirate hat salutes. A cat does a flip.'], ['MANGO MIKE', 'By the power vested in me by nobody: the Republic of Dan is RECOGNIZED!']]); }, { who: 'MANGO MIKE', sprite: 'mike', sunset: true }); return null; }],
+          ['“Hit it.”', () => { Game.afterTalk = () => Dance.start(() => { F.recognized = true; done('sunset2'); react('cheer'); headline('SUNSET CROWD AT MALLORY SQUARE FORMALLY "RECOGNIZES" FLORIDA MAN’S HOUSEBOAT AS A NATION', 5); say([['', 'Four hundred people applaud as the sun goes down. A man in a pirate hat salutes. A cat does a flip.'], ['MANGO MIKE', 'By the authority of the sunset: the Republic of Dan is RECOGNIZED!']]); }, { who: 'MANGO MIKE', sprite: 'mike', sunset: true }); return null; }],
           ['“Not yet.”', () => [['MANGO MIKE', 'The sun won’t wait long, amigo.']]]]]]), true;
       }
       return say([['MANGO MIKE', pick(['Every night the sun goes down and everybody claps. Key West, baby.', 'I have a cat act. The cat doesn’t know.', 'Tip the tightrope guy. He has a family. They’re also on the tightrope.'])]]), true;
@@ -230,7 +230,7 @@ const KeysCases = {
         done('gus'); F.wreckKnown = true; addQuest('bed', 'Big day tomorrow. Sleep on the houseboat', true);
         return say([['OLD GUS', 'They LIKE you. Hell, they never liked me.'], ['OLD GUS', 'She’s off the Southernmost Point. Straight out from the buoy, past the reef. Forty feet down.'], ['OLD GUS', 'That TV fella’s gonna try to take her. Don’t let him, son. Not after forty years.'], ['DAN', 'Gus... I got you.']]), true;
       }
-      return say([['OLD GUS', pick(['Forty years diving these reefs. Found a lot of beer cans. And one ship.', 'The tarpon are older than you. Smarter too.', 'You ever hold a gold coin, son? It’s heavier than it looks. So’s the past.'])]]), true;
+      return say([['OLD GUS', pick(['Fifty years diving these reefs. Nine hundred beer cans. One ship.', 'The tarpon are older than you. Smarter too.', 'You ever hold a gold coin, son? It’s heavier than it looks. So’s the past.'])]]), true;
     }
     if (n.id === 'rex') return say([['REX DOUBLOON', pick(['Gold Fever, season nine. Tuesdays at nine. Eight central.', 'I have a permit. It’s laminated.', 'You know what’s better than treasure? RATINGS.'])]]), true;
     if (n.id === 'madison') return say([['MADISON', pick(['Can you do that again but angrier? Great. Love it.', 'Rex can’t actually dive. Don’t tell anyone. We use a guy named Pedro.', 'This is going to be a VERY good episode for you. Legally, bad. Television, good.'])]]), true;
@@ -310,7 +310,7 @@ const KeysCourt = {
   republic() {
     CourtCases.begin(); const F = Game.flags;
     say([['BAILIFF', 'All rise for the Honorable Judge Wesley Pinder.'], ['JUDGE PINDER', 'Mr. Dupree. You are charged with secession. From the United States. In a rented houseboat.'], ...CourtCases.clean(8),
-      ['JUDGE PINDER', 'Prosecution.'], ['PROSECUTOR REYES', 'Your Honor, I will describe the events of Saturday evening. The defense may object to any falsehoods.'], ['BRENDA', '(whispering) Only the lies, Dan. You KNOW this.']],
+      ['JUDGE PINDER', 'Prosecution.'], ['PROSECUTOR REYES', 'Your Honor, I will describe the events of the other night. The defense may object to any falsehoods.'], ['BRENDA', '(whispering) Only the lies, Dan. You KNOW this.']],
     () => { Objection.speaker = 'PROSECUTOR REYES'; Objection.run([
       { text: 'The defendant declared his houseboat an independent nation.', lie: false, over: 'He did. There is video. There is a LOT of video.' },
       { text: 'The defendant fired a missile at a Coast Guard cutter.', lie: true, bust: 'It was a Freedom Rocket. From a fireworks stand. It says “NOT A MISSILE” on the side.' },
@@ -322,9 +322,9 @@ const KeysCourt = {
   republicEnd() {
     const F = Game.flags, have = [F.flagBack && 'a flag', (F.citCat && F.citRooster && F.citBrayden) && 'three citizens', F.recognized && 'recognition'].filter(Boolean);
     say([['BRENDA', have.length ? `Your Honor, the Republic of Dan has ${have.join(', ')}. Under international law, that makes it... a country. Technically.` : 'Your Honor, the Republic of Dan has... a houseboat. And spirit.'],
-      ...(F.citCat ? [['MISS PEARL', 'Mr. Toes is a citizen. He’s very proud. He wore a bow tie.']] : []), ...(F.citBrayden ? [['BRAYDEN', 'I gave up AMERICA for this, bro. For PANTS COUNTRY.']] : []),
+      ...(F.citCat ? [['MISS PEARL', 'Mr. Toes is a citizen. He’s very proud. He wore his good collar.']] : []), ...(F.citBrayden ? [['BRAYDEN', 'I gave up AMERICA for this, bro. For PANTS COUNTRY.']] : []),
       ['JUDGE PINDER', '...Mr. Dupree. Do you know what happened in this town in April of 1982?'], ['DAN', 'No sir.'],
-      ['JUDGE PINDER', 'Key West seceded. The Conch Republic. We declared war on the United States, surrendered after one minute, and asked for a billion dollars in foreign aid.'], ['JUDGE PINDER', 'My grandfather was Secretary of Rum.'],
+      ['JUDGE PINDER', 'Key West seceded. The Conch Republic. We declared war on America and surrendered one minute later.'], ['JUDGE PINDER', 'Then we asked for a billion dollars in foreign aid.'], ['JUDGE PINDER', 'My grandfather was Secretary of Rum.'],
       ['JUDGE PINDER', 'This court finds the defendant NOT GUILTY. The Conch Republic formally recognizes the Republic of Dan as a sister nation.'], ['JUDGE PINDER', 'Also: stop shooting at the Coast Guard.'],
       ['DAN', 'I’m still not a Florida Man.'], ['BRENDA', 'Dan, you just got recognized as a FOREIGN NATION by a JUDGE.']],
     () => { headline('JUDGE RULES FLORIDA MAN’S HOUSEBOAT "A SISTER NATION" OF THE CONCH REPUBLIC; COAST GUARD "REVIEWING OPTIONS"', 9); F.case8Won = true; F.creditsPending = 8; endDay('court'); });
@@ -345,16 +345,16 @@ const KeysCourt = {
     const F = Game.flags;
     say([['BRENDA', F.wBell ? 'Exhibit A: the ship’s bell. It reads “N.S. de la Cerveza, 1733.” The defense calls Augustus “Gus” Albury.' : 'The defense calls Augustus “Gus” Albury.'],
       ['OLD GUS', 'I found her in ’84, Your Honor. Forty years nobody believed me. That boy believed me. He fed my tarpon.'],
-      ['', '*CRASH*'], ['', 'The doors burst open. It’s Chuck. He walked the Seven Mile Bridge. All seven miles. He is wearing a tiny snorkel.'], ['JUDGE PINDER', 'IS THAT AN ALLIGATOR?'], ['DAN', 'That’s Chuck. He comes to all my trials.'],
-      ['', 'Chuck walks straight to Rex Doubloon and sits on him. Rex confesses that Pedro did everything and the permit was a typo.'],
-      ['JUDGE PINDER', 'The wreck belongs to Mr. Albury’s claim. The treasure goes to the museum. Mr. Dupree is NOT GUILTY, and is named co-finder. Mr. Doubloon is under arrest for salvage fraud.'],
-      ['', 'THAT NIGHT: DUVAL STREET.'], ['', 'The whole island throws a parade. Gus rides in front with the bell. Mr. Toes rides on the houseboat. The roosters march. Brayden cries.'],
+      ['', '*CRASH*'], ['', 'The doors burst open. It’s Chuck. He walked the Seven Mile Bridge. All seven miles. He is wearing a tiny snorkel.'], ['JUDGE PINDER', 'IS THAT AN ALLIGATOR IN A SNORKEL?'], ['DAN', 'That’s Chuck. He’s my plus-one.'],
+      ['', 'Chuck climbs into Rex Doubloon’s lap and stares. Rex confesses. Pedro did the diving. The permit was a typo.'],
+      ['JUDGE PINDER', 'The wreck is Mr. Albury’s. The treasure goes to a museum. Mr. Dupree: NOT GUILTY. And co-finder.'], ['JUDGE PINDER', 'Mr. Doubloon: under arrest for salvage fraud. And the tan is fake.'],
+      ['', 'THAT NIGHT: DUVAL STREET.'], ['', 'The whole island throws a parade. Gus rings the bell. The roosters march. Brayden cries.'],
       ['MANGO MIKE', 'Ladies and gentlemen, KEY WEST’S FLORIDA MAN OF THE YEAR!'], ['DAN', '', [
-        ['“I am NOT a Florida Man.” (puts on the sash)', () => [['', 'He says it on a float shaped like a lobster. Four thousand people cheer.']]],
+        ['“I am NOT a Florida Man.” (puts on sash)', () => [['', 'He says it on a float shaped like a lobster. Four thousand people cheer.']]],
         ['“This one’s for Gus.”', () => [['OLD GUS', '*crying*'], ['', 'The tarpon jump in the harbor. Nobody can explain it.']]],
         ['Raise a Swamp Lite to the sunset', () => [['', 'The whole street raises a beer at once. The sun goes down. Everybody claps. It’s Key West.']]]]],
       [PHONE_B, 'Dan. Before you say anything. Do NOT go to Orlando.'], ['DAN', 'What’s in Orlando?'], [PHONE_B, 'A mouse, Dan. A very powerful mouse. With LAWYERS.']],
-    () => { headline('FLORIDA MAN CLEARED IN "GRAND THEFT GALLEON" CASE, NAMED CO-FINDER OF 1733 SHIPWRECK, LEADS DUVAL STREET PARADE ON LOBSTER FLOAT', 10); F.case9Won = true; F.creditsPending = 9; endDay('court'); });
+    () => { headline('FLORIDA MAN CLEARED IN "GRAND THEFT GALLEON" CASE, LEADS KEY WEST PARADE ON LOBSTER FLOAT', 10); F.case9Won = true; F.creditsPending = 9; endDay('court'); });
   },
 };
 
@@ -364,7 +364,7 @@ Object.assign(GIGS, {
     offer: [['MOE', 'Three roosters walked in at 9 AM and ordered nothing. They’re on the bar. They won’t leave.'], ['MOE', 'Yell ’em out. Thirty bucks. They only respect yelling.']],
     start() { const S_ = KSP(); for (let i = 0; i < 3; i++) Game.animals.push(makeCritter('rooster', S_.moe.x - 20 + i * 18, S_.moe.y + 4, { herd: true, gigR: true })); },
     check: () => { const S_ = KSP(), rs = Game.animals.filter(a => a.gigR); return rs.length === 3 && rs.every(r => Math.hypot(r.x - S_.moe.x, r.y - S_.moe.y) > 110); },
-    hl: 'FLORIDA MAN EVICTS THREE ROOSTERS FROM BAR USING ONLY HIS VOICE; ROOSTERS "WILL BE BACK"' },
+    hl: 'FLORIDA MAN EVICTS THREE ROOSTERS FROM BAR USING ONLY HIS VOICE; ROOSTERS "ALREADY BACK"' },
   lobsters: { giver: 'joelle', pay: 45, quest: 'Bring Joelle 2 spiny lobsters (dive for them)',
     offer: [['JOELLE', 'Lobster fritters are on the menu and I have zero lobsters.'], ['JOELLE', 'Two spiny lobsters, forty-five bucks. Grab ’em off the reef. With your HANDS, apparently.']],
     talkActive: () => (Game.inv.lobster || 0) >= 2 ? (Game.inv.lobster -= 2, 'done') : [['JOELLE', `Two lobsters, Dan. You got ${Game.inv.lobster || 0}. The reef is right there.`]],

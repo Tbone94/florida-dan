@@ -9,7 +9,7 @@ const Bribe = {
     const hs = (Game.day_.headlines || []).slice(-3).reverse();
     if (!hs.length) return say([['', 'Dan peers into the Swamp Gazette box. Nothing about him today.'], ['DAN', 'Huh. Weird. Feels bad, actually.']]);
     say([['', 'Dan folds some cash into the Gazette box with a note that says “please.”'], ['GAZETTE', 'WHICH STORY DO YOU WANT GONE?', [
-      ...hs.map(h => [`Bury “${h.length > 38 ? h.slice(0, 36) + '…' : h}” ($${Bribe.cost(h)})`, () => Bribe.bury(h)]),
+      ...hs.map(h => [`Bury “${h.length > 24 ? h.slice(0, 22) + '…' : h}” ($${Bribe.cost(h)})`, () => Bribe.bury(h)]),
       ['Never mind', () => [['DAN', 'Let the people have their news.']]]]]]);
   },
   bury(h) {

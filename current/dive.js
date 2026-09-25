@@ -68,7 +68,7 @@ const Dive = {
   hurt(f) {
     const s = this.s; f.cd = 1.4; Game.shake = 4; Sound.play('hurt'); s.air -= f.k === 'cuda' ? .18 : .1; s.vx += (s.x < f.x ? -1 : 1) * 120; s.vy -= 40;
     if (f.k === 'cuda') { const lost = s.got.filter(g => !g.keep).pop(); if (lost) { s.got.splice(s.got.indexOf(lost), 1); lost.took = false; lost.x = s.x; lost.y = DV_FLOOR - 6; } }
-    this.say(f.k === 'cuda' ? pick(['BARRACUDA. It took a bite AND your stuff.', 'The barracuda has no respect for Dan.']) : pick(['JELLYFISH. Nobody pee on Dan.', 'Stung. Right on the jorts.']), 1.8);
+    this.say(f.k === 'cuda' ? pick(['BARRACUDA. It took a bite AND your stuff.', 'The barracuda has no respect for Dan.']) : pick(['JELLYFISH. Do NOT pee on Dan.', 'Stung. Right on the jorts.']), 1.8);
     Game.day_.stings = (Game.day_.stings || 0) + 1;
     if (f.k === 'jelly' && Game.day_.stings === 2) headline('FLORIDA MAN STUNG BY JELLYFISH TWICE IN ONE DAY, BLAMES "THE JELLYFISH"', 3);
   },

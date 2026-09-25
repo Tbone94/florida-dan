@@ -49,7 +49,7 @@ function buildKeys() {
   for (const [x, y, c] of [[68, 53, '#ff5ea8'], [72, 55, '#27c6b4'], [84, 54, '#ffd23f'], [9, 44, '#ff8a3d']]) add('umbrella', x, y, .6, .4, false, { c });
   W.spots = {
     dan: { x: 63.2 * TS, y: 14.6 * TS }, door: { x: 60 * TS, y: 12.6 * TS }, arrive: { x: 5.5 * TS, y: 29.6 * TS }, stationDoor: { x: 5.5 * TS, y: 29.1 * TS },
-    court: { x: 83 * TS, y: 13.3 * TS }, hide: { x: 73.1 * TS, y: 50.2 * TS }, boat: { x: 61.5 * TS, y: 14.8 * TS }, cooler: { x: 7.4 * TS, y: 32.8 * TS },
+    court: { x: 83 * TS, y: 13.3 * TS }, hide: { x: 73.1 * TS, y: 50.2 * TS }, boat: { x: 61.5 * TS, y: 14.8 * TS }, cooler: { x: 68.5 * TS, y: 14.6 * TS },
     dockEnd: { x: 6.5 * TS, y: 50.5 * TS }, ramp: { x: 61.5 * TS, y: 13 * TS }, beach: { x: 80.5 * TS, y: 54 * TS }, pier: { x: 67.5 * TS, y: 3.6 * TS },
     bait: { x: 10 * TS, y: 39.4 * TS }, tarpon: { x: 6.5 * TS, y: 51.5 * TS }, bar: { x: 53 * TS, y: 25.4 * TS }, moe: { x: 67.6 * TS, y: 24 * TS }, moeDoor: { x: 72 * TS, y: 23.6 * TS },
     conch: { x: 80.2 * TS, y: 23.6 * TS }, tees: { x: 80.2 * TS, y: 39.6 * TS }, sixtoe: { x: 68.8 * TS, y: 40.4 * TS }, mallory: { x: 67.5 * TS, y: 7.5 * TS },
@@ -123,7 +123,7 @@ const Keys = {
   spawn() {
     const S_ = World.spots;
     Game.npcs = [
-      makeNPC('lou', 'Captain Lou', S_.marina.x + 14, S_.marina.y + 8, 'left'),
+      makeNPC('lou', 'Captain Lou', 62.5 * TS, 12.4 * TS, 'down'),   // on the dock: NOT on Dan's wake-up spot (he couldn't take a step)
       makeNPC('moe', 'Moe', S_.moe.x, S_.moe.y, 'down'),
       makeNPC('joelle', 'Joelle', S_.conch.x, S_.conch.y, 'down'),
       makeNPC('dwayne', 'Dwayne', S_.tees.x, S_.tees.y, 'down'),
@@ -175,11 +175,11 @@ const Keys = {
     const D = Game.dan, S_ = World.spots, list = [], near = (p, r) => p && Math.hypot(D.x - p.x, D.y - p.y) < r;
     list.push(...KeysCases.interactions());
     if (D.ride) return list;
-    if (this.canDiveHere()) list.push(this.waterPrompt());
     if (near(S_.door, 20) && sleepReady()) list.push({ label: 'Sleep on the houseboat', fn: () => sleep() });
     if (near(S_.court, 22)) { const cs = Cases.courtCase(); list.push({ label: cs ? 'Enter the courthouse' : 'Monroe County Courthouse (closed)', fn: () => cs ? Court.start(cs) : toast('The Monroe County Courthouse. A rooster is asleep on the steps. It has seniority.') }); }
     if (near(S_.stationDoor, 22)) list.push({ label: 'Greyhound', fn: () => busMenu() });
     if (near(S_.buoy, 26)) list.push({ label: 'Take a photo at the Southernmost Point', fn: () => KeysCases.buoyPhoto() });
+    if (this.canDiveHere() && !near(Game.boat, 30) && !(near(S_.door, 20) && sleepReady())) list.push(this.waterPrompt());   // last: boarding, sleeping, doors all beat 'Dive in'
     if (Game.urgent > 0 && near(S_.hide, 22)) list.push({ label: 'USE THE TOILET', fn: () => { Game.urgent = 0; Sound.play('splash'); toast('A Duval Street porta-potty at 2 PM. There are roosters in here.'); Game.chill = 100; } });
     return list;
   },

@@ -26,7 +26,7 @@ const Input = (() => {
   const keys = new Set(), hit = new Set(), stick = { active: false, x: 0, y: 0, id: null };
   const MAP = { ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right',
     KeyE: 'a', Space: 'a', Enter: 'a', KeyQ: 'b', ShiftLeft: 'run', ShiftRight: 'run', KeyF: 'punch', KeyM: 'mute', Escape: 'pause', KeyP: 'pause', KeyJ: 'journal',
-    Digit1: 's1', Digit2: 's2', Digit3: 's3', Digit4: 's4', Digit5: 's5', Digit6: 's6', Digit7: 's7', Digit8: 's8', Digit9: 's9', Digit0: 's10', Minus: 's11', Equal: 's12', BracketLeft: 's13' };
+    Digit1: 's1', Digit2: 's2', Digit3: 's3', Digit4: 's4', Digit5: 's5', Digit6: 's6', Digit7: 's7', Digit8: 's8', Digit9: 's9', Digit0: 's10', Minus: 's11', Equal: 's12', BracketLeft: 's13', BracketRight: 's14', Backslash: 's15' };
   addEventListener('keydown', e => {
     const k = MAP[e.code]; if (!k) return;
     if (e.target.tagName === 'BUTTON' && k === 'a') return;

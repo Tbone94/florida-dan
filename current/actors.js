@@ -143,7 +143,7 @@ function updateGator(gt, dt) {
   const range = gt.chuck ? 110 : 76, active = Game.mode === 'play';
   if (gt.state === 'flee') { if (gt.timer <= 0) gt.state = 'wander'; }
   else if (active && gt.cd <= 0 && (Game.gatorCalm || 0) <= 0 && dist < range && gatorCan(D.x, D.y + 2) && (gt.chaseT || 0) < 7) {
-    if (gt.state !== 'chase') { if (gt.chuck && !Game.day_.chuckSeen) { Game.day_.chuckSeen = true; toast("Oh hell no. It's CHUCK."); } }
+    if (gt.state !== 'chase') { if (gt.chuck && !Game.day_.chuckSeen) { Game.day_.chuckSeen = true; toast('Oh hell no. It’s CHUCK.'); } }
     gt.state = 'chase';
   } else if (gt.state === 'chase') gt.state = 'wander';
   gt.chaseT = gt.state === 'chase' ? (gt.chaseT || 0) + dt : 0;
@@ -168,7 +168,7 @@ function gatorBite(gt, dx, dy, dist) {
   knockback(dx / dist, dy / dist, hasUp('waders') ? 12 : 22);
   Sound.play('chomp'); hurtDan(hasUp('waders') ? 7 : 15); react('flop');
   Game.day_.bites++;
-  let msg = pick(['OW! SON OF A BITCH!', 'HE BIT MY ASS! MY ACTUAL ASS!', "That's my good leg, you scaly f*ck!", 'NOT THE JORTS!', 'Mother of GOD that hurts!']);
+  let msg = pick(['OW! SON OF A BITCH!', 'HE BIT MY ASS! MY ACTUAL ASS!', 'That’s my good leg, you scaly f*ck!', 'NOT THE JORTS!', 'Mother of GOD that hurts!']);
   if (Game.inv.beer > 0 && Math.random() < .5) { Game.inv.beer--; msg = `${gt.chuck ? 'Chuck' : 'Gator'} stole a Swamp Lite. Rude as hell.`; }
   else if (Game.inv.fish > 0 && Math.random() < .5) { Game.inv.fish--; Game.catchBag.pop(); msg = `${gt.chuck ? 'Chuck' : 'A gator'} ate one of your fish. Outta the BAG.`; }
   toast(msg);

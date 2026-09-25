@@ -39,7 +39,7 @@ const CourtCases = {
   // fewer headlines during the case = a nicer judge (and a collectible)
   clean(n) {
     const got = Game.headlines.length - (Game.flags['caseStart' + n] || 0), J = KEYS() ? 'JUDGE PINDER' : DAYTONA() ? 'JUDGE PETTIBONE' : MIAMI() ? 'JUDGE VEGA' : 'JUDGE HARLAN';
-    if (got <= CLEAN_LIMIT[n]) { headline('FLORIDA MAN MAKES IT THROUGH A WHOLE CASE WITH BARELY ANY HEADLINES; SCIENTISTS "CONCERNED"', 1); return [[J, `Only ${got} headlines this week, Mr. Dupree. For you, that is practically a vow of silence.`]]; }
+    if (got <= CLEAN_LIMIT[n]) { headline('FLORIDA MAN MAKES IT THROUGH A WHOLE CASE WITH BARELY ANY HEADLINES; FLORIDA "WORRIED ABOUT HIM"', 1); return [[J, `Only ${got} headline${got === 1 ? '' : 's'} this week, Mr. Dupree. For you, that is practically a vow of silence.`]]; }
     return [[J, `You made the paper ${got} times this week, Mr. Dupree. ${got} times. I read every one. At breakfast.`]];
   },
   manatee() {
@@ -62,7 +62,7 @@ const CourtCases = {
       ['BRENDA', 'And the defense calls... Manny the Manatee.'], ['', 'The doors open. Merle wheels in a kiddie pool on a dolly. It has cartoon sharks on it. There is a manatee in it.'],
       ['JUDGE HARLAN', '...Is that a manatee in a kiddie pool in my courtroom.'], ['MANNY THE MANATEE', 'Your Honor. Daniel was a gentle and respectful rider.'], ['JUDGE HARLAN', 'IT TALKS?'], ['DAN', 'You can hear him too?!'],
       ['MANNY THE MANATEE', 'I direct the court to minute three of the video. Where Daniel was NOT the first to ride me that night.'], ['KAYDEN', '(from the gallery) BRO. ZOOM IN.'],
-      ['', 'Everyone squints at Kayden’s phone. In the corner of the video, clinging to Manny’s tail, wearing a tiny pink visor: CHUCK.'],
+      ['', 'Everyone squints at Kayden’s phone. There, clinging to Manny’s tail, in a tiny pink visor: CHUCK.'],
       ['JUDGE HARLAN', '...Case dismissed. Somebody arrest that alligator.'], ['CHUCK', '*hiss* (from the back row)'], ['RHONDA', 'On it.']],
     () => { headline('MANATEE TESTIFIES IN COURT; FLORIDA MAN ACQUITTED, ALLIGATOR CHARGED INSTEAD', 10); F.case2Won = true; F.creditsPending = 2; endDay('court'); });
   },
@@ -92,9 +92,9 @@ const CourtCases = {
   parade() {
     Game.scene = 'parade'; Game.mode = 'court';
     say([['', 'ONE WEEK LATER. THE FIRST ANNUAL COUNTY ROAD 29 WATER PARADE.'], ['MERLE', 'Ladies, gentlemen, gators, and apes! This year’s FLORIDA MAN OF THE YEAR is...'],
-      ['MERLE', '...my cousin, DANNY DUPREE!'], ['', 'The crowd goes wild. Kayden is livestreaming. Chuck is wearing the tie again. Manny blows a bubble. Gary eats a roller dog.'],
+      ['MERLE', '...my cousin, DANNY DUPREE!'], ['', 'The crowd goes wild. Kayden livestreams. Chuck wears the tie. Manny blows a bubble. Gary eats a roller dog.'],
       ['BRENDA', 'Dan. Say something. Anything. Please. Make it normal.'], ['DAN', '', [
-        ['“I am NOT a Florida Man.” (puts on the sash)', () => [['', 'He says it wearing the sash. On an airboat. Next to a Skunk Ape. The crowd loses its mind.']]],
+        ['“I am NOT a Florida Man.” (puts on sash)', () => [['', 'He says it wearing the sash. On an airboat. Next to a Skunk Ape. The crowd loses its mind.']]],
         ['“I’d like to thank my gator.”', () => [['CHUCK', '*proud hiss*'], ['', 'Chuck gets a standing ovation.']]],
         ['Crack a Swamp Lite and wave', () => [['', '*crack*'], ['', 'Three hundred people crack a Swamp Lite at the same time. The sound is heard in Georgia.']]]]],
       ['', 'Daniel Wayne Dupree is now, legally and officially, the most Florida Man in Florida.']],
@@ -160,6 +160,7 @@ function caseTarget(q) {
     case 'trailcam': case 'lure': return P.trailcam;
     case 'track': case 'rehearse': case 'reunion': return ape || P.den;
   }
+  if (typeof KeysCases !== 'undefined' && Cases.info().n >= 8) { const k = KeysCases.target(q); if (k !== undefined) return k; }
   if (typeof DaytonaCases !== 'undefined') { const d = DaytonaCases.target(q); if (d !== undefined) return d; }
   return MiamiCases.target(q);
 }

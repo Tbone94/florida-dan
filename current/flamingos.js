@@ -36,10 +36,10 @@ const Flamingos = {
     if (nb) toast(`${(nb.name || nb.id).toUpperCase()}: ${FLAMINGO_SAYS[nb.id] || pick(['...Why.', 'Oh, hell yes.', 'Is that... for me?', 'Sir. SIR.'])}`, 3);
     else toast(pick(['*thunk* A flamingo. Right there. Perfect.', 'Dan steps back. Admires it. Nods.', 'It looks like it belongs. It does not belong.']), 2.2);
     const road = k === T.ROAD || k === T.ROADV || (T.TRACK !== undefined && k === T.TRACK);
-    if (!F.flamFirst) { F.flamFirst = true; headline('FLORIDA MAN AT CENTER OF “FLAMINGO INCIDENT” SEEN BUYING MORE FLAMINGOS', 3); }
-    else if (road && !F.flamRoad) { F.flamRoad = true; headline('LAWN FLAMINGO PLACED IN MIDDLE OF ROAD; DRIVERS GO AROUND IT “OUT OF RESPECT”', 2); }
-    else if (World.spots.court && Math.hypot(World.spots.court.x - f.x, World.spots.court.y - f.y) < 90 && !F.flamCourt) { F.flamCourt = true; headline('PLASTIC FLAMINGO LEFT OUTSIDE COURTHOUSE; JUDGE CALLS IT “A THREAT”', 3); }
-    else if (here === 5 && !F['flamFlock_' + Game.region]) { F['flamFlock_' + Game.region] = true; headline('FLOCK OF PLASTIC FLAMINGOS APPEARS OVERNIGHT; NEIGHBORS “NOT SURPRISED”', 2); }
+    if (!F.flamFirst) { F.flamFirst = true; headline('FLORIDA MAN AT CENTER OF "FLAMINGO INCIDENT" SEEN BUYING MORE FLAMINGOS', 3); }
+    else if (road && !F.flamRoad) { F.flamRoad = true; headline('FLORIDA MAN PLANTS LAWN FLAMINGO IN MIDDLE OF ROAD; DRIVERS GO AROUND IT "OUT OF RESPECT"', 2); }
+    else if (World.spots.court && Math.hypot(World.spots.court.x - f.x, World.spots.court.y - f.y) < 90 && !F.flamCourt) { F.flamCourt = true; headline('FLORIDA MAN LEAVES PLASTIC FLAMINGO OUTSIDE COURTHOUSE; JUDGE CALLS IT "A THREAT"', 3); }
+    else if (here === 5 && !F['flamFlock_' + Game.region]) { F['flamFlock_' + Game.region] = true; headline('FLORIDA MAN’S PLASTIC FLAMINGO FLOCK APPEARS OVERNIGHT; NEIGHBORS "FEEL WATCHED"', 2); }
     else if (n === 15 && !F.flamArmy) { F.flamArmy = true; headline('FLORIDA MAN’S FLAMINGO ARMY NOW OUTNUMBERS LOCAL POLICE', 3); }
   },
   interaction() {   // facing one: stand it back up, or pull it up and take it with you

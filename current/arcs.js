@@ -27,7 +27,7 @@ const ARCS = {
         ['', 'A gator surfaces under the deck, looks at the lovebirds, and sinks back down. Even he knows.']], () => { headline('FLORIDA MAN WINGMANS AT SWAMP BAR; DATE GOES "SHOCKINGLY WELL"', 3); fin(); }) },
       pay: () => [['MERLE', 'Danny. She held my hand. With the pickle hand. I’m never washin’ it.']], cash: 30, ref: 5 },
     { gate: F => F.case2Won, where: 'swamp', text: 'Merle’s proposal: bring 3 Freedom Rockets to the fireworks stand after 7 PM',
-      ask: [['MERLE', 'I’m gonna do it, Danny. I’m gonna ask her.'], ['DAN', 'MERLE!'], ['MERLE', 'Fireworks stand. Tonight. When she says yes, you light three Freedom Rockets. When she says no, you light three Freedom Rockets and I run.']],
+      ask: [['MERLE', 'I’m gonna do it, Danny. I’m gonna ask her.'], ['DAN', 'MERLE!'], ['MERLE', 'Fireworks stand. Tonight. She says yes, you light three Freedom Rockets.'], ['MERLE', 'She says no, you light three Freedom Rockets and I run.']],
       act: { at: () => AS().fireworks, when: () => Game.hour >= 19 && (Game.inv.firework || 0) >= 3, wait: () => (Game.inv.firework || 0) < 3 ? 'Proposal rockets (need 3 Freedom Rockets)' : 'Proposal rockets (after 7 PM)', label: 'Light the proposal rockets', run: fin => {
         Game.inv.firework -= 3; const S = AS().fireworks, keep = ['merle', 'darlene'].map(id => who(id)).filter(Boolean).map(n => ({ n, x: n.x, y: n.y, hx: n.hx, hy: n.hy }));
         Scene.play([SC.cam(S.x, S.y - 14, 1.5, .7), SC.place('merle', S.x - 12, S.y + 22, 'right'), SC.place('darlene', S.x + 12, S.y + 22, 'left'), SC.walk('dan', S.x - 30, S.y + 30, 50), SC.face('dan', 'right'),
@@ -61,15 +61,15 @@ const ARCS = {
       act: { at: () => who('darlene') || AS().darlene, when: () => true, label: 'Practice being a normal customer', run: fin => say([['DARLENE', 'Okay. I’m the secret shopper. Say something normal.'], ['DAN', '', [
         ['“Nice weather.”', () => [['DARLENE', '...Perfect. Normal. Keep going.'], ['DAN', 'Hurricane’s comin’ Thursday, might ride it out on the roof with a cooler.'], ['DARLENE', 'DAN.']]],
         ['“Pump 3, and a pack of menthols.”', () => [['DARLENE', 'Oh my God. That’s it. That’s a normal man.'], ['DAN', '...and do you sell live bait AND nunchucks.'], ['DARLENE', 'SO close.']]],
-        ['“Is the ice machine accepting raccoons today?”', () => [['DARLENE', 'I’m going to be fired.']]]]],
+        ['“Ice machine takin’ raccoons today?”', () => [['DARLENE', 'I’m going to be fired.']]]]],
         ['', 'The real secret shopper walks in. He is wearing jorts, a visor, and holding a live iguana.'], ['SECRET SHOPPER', 'Five stars. Most Florida gas station I have ever seen. Corporate is going to LOVE this.'], ['DARLENE', '...I got a raise?']], () => { fin(); }) },
       pay: () => [['DARLENE', 'Dan. They’re making me regional manager. Of THIS. Here’s thirty bucks. Don’t ever change. Actually, change a little.']], cash: 30, ref: 4 },
     { gate: F => F.case2Won && ARC('merle').ch >= 3, where: 'swamp', text: 'Darlene’s bachelorette: borrow Rita’s karaoke machine + bring 6 Swamp Lites',
       ask: [['DARLENE', 'Merle and me are gettin’ HITCHED. I need a bachelorette. At the Sunshine Motor Inn pool.'], ['DAN', 'I’m in charge?'], ['DARLENE', 'Nobody else said yes. Get Rita’s karaoke machine. And six Swamp Lites. Minimum.']],
       act: { at: () => who('rita') || AS().motel, when: () => true, label: 'Borrow Rita’s karaoke machine', back: true, run: fin => say([['RITA', 'The karaoke machine? It only plays one song.'], ['DAN', 'Which song?'], ['RITA', '“Friends in Low Places.” It is stuck on it. Forever. It’s yours.']], fin) },
       ready: () => (Game.inv.beer || 0) >= 6, take: () => { Game.inv.beer -= 6; }, readyHint: 'Six Swamp Lites, Dan. SIX.',
-      pay: () => [['', 'The bachelorette party goes until 2 AM. “Friends in Low Places” plays 41 times. A gator attends. Nobody asks who invited him.'], ['DARLENE', 'Best night of my LIFE. You’re a good man, Dan Dupree. Don’t tell anybody I said that.']],
-      cash: 40, ref: 8, after: () => headline('BACHELORETTE PARTY AT SUNSHINE MOTOR INN ENDS WITH KARAOKE AND ONE (1) ALLIGATOR', 4) },
+      pay: () => [['', 'The party goes till 2 AM. “Friends in Low Places” plays 41 times. A gator shows up. Nobody asks.'], ['DARLENE', 'Best night of my LIFE. You’re a good man, Dan Dupree. Don’t tell anybody I said that.']],
+      cash: 40, ref: 8, after: () => headline('FLORIDA MAN THROWS MOTEL BACHELORETTE PARTY; GUESTS INCLUDE "ONE (1) ALLIGATOR"', 4) },
   ],
   rhonda: [
     { gate: () => Game.day >= 5, where: 'swamp', text: 'Catch whoever’s tagging “FLORIDA MAN WAS HERE” (Kevin’s dumpster, after 8 PM)',
@@ -78,7 +78,7 @@ const ARCS = {
         ['', 'A figure in a trench coat shakes a spray can. It is Kevin. The trench coat is a garbage bag.'], ['KEVIN', 'Bro. It’s art. I’m reclaiming the narrative.'], ['DAN', '', [
           ['Turn Kevin in', () => [['RHONDA', 'KEVIN. Of course. Come on, Picasso.'], ['KEVIN', 'Worth it. Tell my dumpster I love it.']]],
           ['Cover for Kevin', () => { giveItem('scratch', 2, true); return [['DAN', '(to Rhonda) It was... a raccoon. Big one. Named Gregory.'], ['RHONDA', '...Gregory CAN’T SPELL, Dan.'], ['KEVIN', '(later) Thanks, bro. Two scratch-offs. My whole fortune.']]; }]]]],
-        () => { headline('LOCAL “ARTIST” TAGS WATER TOWER "FLORIDA MAN WAS HERE"; FLORIDA MAN "IMPRESSED BY THE SPELLING"', 2); fin(); }) },
+        () => { headline('LOCAL "ARTIST" TAGS WATER TOWER "FLORIDA MAN WAS HERE"; FLORIDA MAN "IMPRESSED BY THE SPELLING"', 2); fin(); }) },
       pay: () => [['RHONDA', 'Case closed. I owe you one, Dupree. Don’t make me regret it. You will make me regret it.']], cash: 25, ref: 5 },
     { gate: F => F.acquitted && Game.day >= 6, where: 'swamp', text: 'Ride along with Rhonda (don’t touch anything)',
       ask: [['RHONDA', 'The Sheriff says I need “community outreach.” You’re the community. Get in the cruiser. Don’t touch ANYTHING.']],
@@ -87,11 +87,11 @@ const ARCS = {
         ['Eat her donut', () => [['', 'Dan eats Rhonda’s donut. It was a jelly. It was her birthday donut.'], ['RHONDA', '...I’m going to arrest you for that someday. Not today. But someday.']]],
         ['Sit perfectly still and behave', () => [['', 'Dan sits perfectly still for eleven minutes. It is the longest he has ever behaved.'], ['RHONDA', 'Dan? Are you okay? Blink twice if you’re having a stroke.']]]]],
         ['', 'They catch a guy doing 90 in a golf cart. It is Wayne. The golf cart is full of oregano.']], () => { Game.heat = 0; headline('DEPUTY TAKES FLORIDA MAN ON RIDE-ALONG; "SOMEHOW HE WAS THE CALM ONE"', 2); fin(); }) },
-      pay: () => [['RHONDA', 'That’s outreach. I’m telling the Sheriff it went great. Your stars are wiped. Don’t make me regret it.']], cash: 0, ref: 6 },
+      pay: () => [['RHONDA', 'That’s outreach. I’m telling the Sheriff it went great. Your stars are wiped. Now get out of my cruiser.']], cash: 0, ref: 6 },
     { gate: F => F.case3Won, where: 'swamp', text: 'Give a speech at Rhonda’s promotion (courthouse, after 5 PM)',
       ask: [['RHONDA', 'They’re making me Sergeant. There’s a ceremony. Somebody has to give a speech about me.'], ['DAN', 'I’d be honored.'], ['RHONDA', 'You were not my first choice. You were my ninth. Courthouse steps, after five.']],
-      act: { at: () => AS().court, when: () => Game.hour >= 17, wait: 'Rhonda’s promotion speech (after 5 PM)', label: 'Give Rhonda’s promotion speech', run: fin => say([['', 'Dan taps the microphone. It is Merle’s karaoke mic. It is still playing “Friends in Low Places.”'], ['DAN', '', [
-        ['Tell them she’s arrested you 40 times', () => [['DAN', 'This woman has arrested me forty times. FORTY. She is the best there is.'], ['', 'The crowd weeps. Rhonda weeps. The Sheriff arrests Dan for an old parking ticket, then lets him go out of respect.']]],
+      act: { at: () => AS().court, when: () => Game.hour >= 17, wait: 'Rhonda’s promotion speech (after 5 PM)', label: 'Give Rhonda’s promotion speech', run: fin => say([['', 'Dan taps the microphone. It’s Rita’s karaoke machine. It only plays “Friends in Low Places.”'], ['DAN', '', [
+        ['Tell them she’s arrested you 40 times', () => [['DAN', 'This woman has arrested me forty times. FORTY. She is the best there is.'], ['', 'Rhonda cries. The Sheriff arrests Dan for an old parking ticket, then lets him go. Out of respect.']]],
         ['Tell them she caught Gregory', () => [['DAN', 'She brought down Gregory. A raccoon. In a bucket hat. Nobody else could.'], ['', 'A raccoon in the crowd boos. Everyone ignores him.']]],
         ['Just salute', () => [['', 'Dan salutes. He holds it for a full minute. It is the most dignified thing he has ever done. Rhonda salutes back.']]]]]], () => { headline('FLORIDA MAN GIVES SPEECH AT DEPUTY’S PROMOTION; DEPUTY "HAS NEVER BEEN PROUDER OR MORE CONFUSED"', 3); fin(); }) },
       pay: () => [['SGT. RHONDA', 'Sergeant. SERGEANT, Dan. ...Thanks. Here. It’s from the “community outreach” budget. Buy something legal.']], cash: 50, ref: 10 },
@@ -100,7 +100,7 @@ const ARCS = {
     { gate: () => Game.day >= 5, where: 'swamp', text: 'Wrestle a gator so Kevin can study its teeth (then tell Kevin)',
       ask: [['KEVIN', 'Bro. I used to be a dentist. I wanna get back in. I need to see a gator’s teeth. Up close. For my portfolio.'], ['DAN', 'You want ME to open a gator’s mouth.'], ['KEVIN', 'I want you to HOLD it open. I’ll do the rest. From over here.']],
       start: s => { s.w = Game.day_.wrestles; s.d = Game.day; }, ready: s => Game.day_.wrestles > (s.d === Game.day ? s.w : 0), readyHint: 'Gator. Teeth. Wrestle one, bro.',
-      pay: () => [['KEVIN', 'Bro. Eighty teeth. ZERO cavities. That gator flosses more than I do.'], ['KEVIN', 'I’m opening a practice. In the dumpster. Dr. Kevin, D.D.S. (Dumpster Dental Services).']], cash: 20, ref: 3, after: () => headline('DUMPSTER RESIDENT OPENS DENTAL PRACTICE; FIRST PATIENT AN ALLIGATOR', 2) },
+      pay: () => [['KEVIN', 'Bro. Eighty teeth. ZERO cavities. That gator flosses more than I do.'], ['KEVIN', 'I’m opening a practice. In the dumpster. Dr. Kevin, D.D.S. (Dumpster Dental Services).']], cash: 20, ref: 3, after: () => headline('FLORIDA MAN HOLDS GATOR’S JAWS OPEN FOR DUMPSTER DENTIST; GATOR HAS "ZERO CAVITIES"', 2) },
     { gate: F => F.case2Won, where: 'swamp', text: 'Talk Rita out of evicting Kevin’s dumpster',
       ask: [['KEVIN', 'Bro. Rita says my dumpster is on motel property. She’s evicting it. It’s rent-controlled, bro. I pay in compliments.']],
       act: { at: () => who('rita') || AS().motel, when: () => true, label: 'Negotiate for Kevin’s dumpster', run: fin => say([['RITA', 'That dumpster is on MY lot, Dan.'], ['DAN', '', [
@@ -146,14 +146,14 @@ const ARCS = {
       act: { at: () => who('bubba') || AS().bubba, when: () => true, label: 'Pose for the billboard', run: fin => say([['BUBBA', 'Okay. Look into the camera. Give me “I did it, but I got bailed out.”'], ['DAN', '', [
         ['Flex', () => [['', '*click* Dan flexes. Something in his shoulder pops. It is the best photo ever taken in Collier County.']]],
         ['Hold up a live bass', () => [['', '*click* The bass looks more guilty than Dan. Bubba loves it.']]],
-        ['Point at the camera like it owes you money', () => [['', '*click* Bubba tears up. “That’s it. That’s the face of bail.”']]]]]], () => { headline('FLORIDA MAN’S FACE NOW ON BAIL BONDS BILLBOARD; COUNTY "NOT SURPRISED"', 3); fin(); }) },
+        ['Point like the camera owes you money', () => [['', '*click* Bubba tears up. “That’s it. That’s the face of bail.”']]]]]], () => { headline('FLORIDA MAN’S FACE NOW ON BAIL BONDS BILLBOARD; DRIVERS "FEEL JUDGED"', 3); fin(); }) },
       pay: () => [['BUBBA', 'You’re famous now, Dan. Sort of. Here’s your modeling fee. It’s mostly quarters.']], cash: 40, ref: 2 },
   ],
   boomer: [
     { gate: () => Game.day >= 4, where: 'swamp', text: 'Bring Boomer 6 empties for rocket casings',
-      ask: [['BOOMER', 'I’m building the finale. The BIG one. I need empty cans. Six. Swamp Lite cans make the best casings. Don’t ask why. Physics.']],
+      ask: [['BOOMER', 'I’m building the BIG finale. Need six empty Swamp Lite cans. Best rocket casings there is. Don’t ask. Physics.']],
       ready: () => (Game.inv.can || 0) >= 6, take: () => { Game.inv.can -= 6; }, readyHint: 'Six empties. Drink up, it’s for science.',
-      pay: () => [['BOOMER', 'PERFECT. These are gonna make the loudest thing in Florida. Here, take two rockets for yourself. Point ’em at the sky. Mostly.']], cash: 20, ref: 2, after: () => giveItem('firework', 2, true) },
+      pay: () => [['BOOMER', 'PERFECT. Loudest thing in Florida, comin’ up. Take two rockets. Point ’em at the sky. Mostly.']], cash: 20, ref: 2, after: () => giveItem('firework', 2, true) },
   ],
   earl: [
     { gate: () => Game.day >= 3, where: 'swamp', text: 'Throw Bessie the cow a birthday party (bring a roller dog to the pasture)',
@@ -191,9 +191,9 @@ const ARCS = {
       ask: [['SHEILA', 'Dan, honey. My late husband Marty is at the bottom of the condo pool.'], ['DAN', 'Oh no.'], ['SHEILA', 'In a coffee can, Dan. His ashes. The board “accidentally” knocked him in. Get Marty.']],
       act: { at: () => AS().condo, r: 34, when: () => true, label: 'Dive for Marty', run: fin => say([['', 'Dan cannonballs into the condo pool. Eleven retirees scream. One applauds.'], ['', 'At the bottom: a Folgers can, a hearing aid, and a set of teeth that is not Marty’s.'], ['DAN', '', [
         ['Bring up just Marty', () => [['SHEILA', 'MARTY! Oh, he looks wonderful.'], ['DAN', 'He’s a can, Sheila.'], ['SHEILA', 'He was ALWAYS a can.']]],
-        ['Bring up everything', () => [['', 'Dan returns the hearing aid to Irv, the teeth to nobody, and Marty to Sheila. The condo board is furious. Sheila is delighted.']]]]]],
+        ['Bring up everything', () => [['', 'The hearing aid goes to Irv. The teeth go to nobody. Marty goes to Sheila. The condo board is furious.']]]]]],
         () => { headline('FLORIDA MAN CANNONBALLS INTO CONDO POOL TO RESCUE WOMAN’S HUSBAND (HE’S IN A COFFEE CAN)', 4); fin(); }) },
-      pay: () => [['SHEILA', 'You’re a mensch, Dan. A soggy, terrible mensch. Here — Marty would’ve wanted you to have this. He was cheap, so it’s not much.']], cash: 50, ref: 4 },
+      pay: () => [['SHEILA', 'You’re a mensch, Dan. A soggy, terrible mensch. Here. From Marty. He was cheap, so it’s not much.']], cash: 50, ref: 4 },
   ],
   raul: [
     { gate: () => MIAMI(), where: 'miami', text: 'Film Raul’s skate trick for the ’Gram (talk to Raul)',
@@ -210,7 +210,7 @@ const ARCS = {
       ask: [['CORAL', 'Dude. You’ve lived in Florida your whole life and you’ve never surfed?'], ['DAN', 'I’ve ridden a cooler into a lake.'], ['CORAL', 'That’s... close. Lesson’s on me. Meet me on the sand.']],
       act: { at: () => AS().surf || AS().pier, r: 40, when: () => true, label: 'Take the surf lesson', run: fin => say([['CORAL', 'Paddle, paddle, paddle... POP UP!'], ['DAN', '', [
         ['Pop up like a pro', () => [['', 'Dan pops up. He stands. He RIDES. For almost two seconds. It is the greatest moment of his life.']]],
-        ['Pop up on the cooler instead', () => [['', 'Dan paddles out on his motorized cooler. The headlights come on. A lifeguard radios the Coast Guard. They come. They take photos.']]],
+        ['Pop up on the cooler instead', () => [['', 'Dan paddles out on the cooler. The headlights come on. The Coast Guard shows up. They take photos.']]],
         ['Just float and drink a beer', () => [['CORAL', 'That’s... honestly, that’s most of surfing, dude.']]]]]],
         () => { headline('FLORIDA MAN TAKES SURF LESSON; "HE’S A NATURAL," SAYS INSTRUCTOR, WHO IS LYING', 2); fin(); }) },
       pay: () => [['CORAL', 'You’re a surfer now, dude. Sort of. Here, the shack pays interns. You’re my intern now. You’re fired. Here’s your pay.']], cash: 25, ref: 2 },

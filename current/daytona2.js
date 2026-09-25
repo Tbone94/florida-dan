@@ -182,7 +182,7 @@ const DaytonaCases = {
     if (c.n === 6 && c.d === 1) {
       setQuests([['bus6', 'Take the Greyhound to Daytona (bus station)']]);
       if (DAYTONA()) { done('bus6'); addQuest('marshal', 'Report to Tammy Jo in the pits (through the speedway tunnel)'); }
-      return say([['', 'A letter arrives. It is printed on a checkered flag.'], ['LETTER', 'DEAR FLORIDA MAN OF THE YEAR: You have been selected as GRAND MARSHAL of the Daytona 250! Drive the pace car. Wave. Do NOT stop anywhere.'],
+      return say([['', 'A letter arrives. It is printed on a checkered flag.'], ['LETTER', 'DEAR FLORIDA MAN OF THE YEAR: You’re GRAND MARSHAL of the Daytona 250! Drive the pace car. Wave. Do NOT stop anywhere.'],
         [PHONE_B, 'Dan. Do not go to Daytona.'], ['DAN', 'Brenda, they’re letting me drive the PACE CAR.'], [PHONE_B, 'That is exactly why you should not go to Daytona.']]);
     }
     if (c.n === 6 && c.d === 2) {
@@ -287,7 +287,7 @@ const DaytonaCases = {
         ['Run the drill', () => { Game.afterTalk = () => this.pitStop(() => { done('tires'); say([['WRENCH', 'Free tires, as promised. I hate it here.']]); }, () => say([['WRENCH', 'Too slow. Sixty bucks or try again.']])); return null; }], ['“Later.”', () => [['WRENCH', 'Tires ain’t goin’ anywhere. Unlike Rusty’s old ones.']]]]]]), true;
       return say([['WRENCH', 'Wrench’s Speed Shop. Whatcha need?', [['Browse', () => { Game.mode = 'shop'; openShop('speed'); return null; }], ['“Just looking.”', () => [['WRENCH', 'Lookin’s free. Touchin’s twenty.']]]]]]), true;
     }
-    if (n.id === 'needles') return say([['NEEDLES', pick(['Ink & Regret. No refunds, no crying, no names of exes.', 'You want a gator? Everybody wants a gator. I can do a gator in my sleep. I have.', 'I only tattoo sober people. ...Mostly sober people.']), [['Browse', () => { Game.mode = 'shop'; openShop('ink'); return null; }], ['“I’m good.”', () => [['NEEDLES', 'That’s what they all say. Then they come back.']]]]]]), true;
+    if (n.id === 'needles') return say([['NEEDLES', pick(['Ink & Regret. No refunds, no crying, no names of exes.', 'You want a gator? Everybody wants a gator. I can do a gator in my sleep. I have.', 'I only tattoo sober people. ...Mostly sober people.']), [['Browse', () => { Game.mode = 'shop'; openShop('ink'); return null; }], ['“I’m good.”', () => [['NEEDLES', 'They all say that. Then they come back with an ex’s name.']]]]]]), true;
     if (n.id === 'biker') return say([['BIKER', pick(['Nice cooler, man.', 'Tiny says you’re alright. That means you’re alright.', 'Bike Week is a state of mind. So is Daytona. So is jail.'])]]), true;
     return false;
   },
@@ -352,8 +352,8 @@ const DaytonaCourt = {
     say([['BRENDA', wit.length ? `The defense calls ${wit.join(' and ')}.` : 'The defense has... no witnesses. It’s been a long week, Your Honor.'],
       ...(F.witRusty ? [['RUSTY', 'He changed four tires in eight seconds, Your Honor. That man is a RACER.']] : []),
       ...(F.witDonna ? [['DONNA', 'Best sales day in Donut Hut history. I would like him to do it again. Every Sunday.']] : []),
-      ['JUDGE PETTIBONE', '...The court finds the defendant NOT GUILTY of Reckless Pacing. The court was also hungry that day. The court got a donut.'],
-      ['RUSTY', 'Your Honor, one more thing. My driver quit this morning. Dan... the Daytona 250 is in three days.'], ['DAN', 'Rusty. Are you asking me to drive a stock car.'], ['RUSTY', 'I’m BEGGIN’ you.'], [PHONE_B, 'Absolutely not.'], ['DAN', 'Absolutely yes.']],
+      ['JUDGE PETTIBONE', '...NOT GUILTY of Reckless Pacing. The court was also hungry that day. The court got a donut.'],
+      ['RUSTY', 'Your Honor, one more thing. My driver quit this morning. Dan... the Daytona 250 is in three days.'], ['DAN', 'Rusty. Are you asking me to drive a stock car.'], ['RUSTY', 'I’m BEGGIN’ you.'], ['BRENDA', 'Absolutely not.'], ['DAN', 'Absolutely yes.']],
     () => { headline('FLORIDA MAN CLEARED OF "RECKLESS PACING"; JUDGE "HUNGRY NOW"', 8); F.case6Won = true; F.creditsPending = 6; endDay('court'); });
   },
   race() {
@@ -372,7 +372,7 @@ const DaytonaCourt = {
     const F = Game.flags;
     say([['JUDGE PETTIBONE', 'Mr. Sterling, is there anything you would like to say?'], ['CHIP STERLING', 'I... I just wanted to win ONE time. Without paying for it.'], ['', '*CRASH*'], ['', 'The doors burst open. It’s Chuck. He took the Greyhound again. He is wearing a tiny checkered flag.'],
       ['JUDGE PETTIBONE', 'IS THAT AN ALLIGATOR?'], ['DAN', 'That’s Chuck. He comes to all my trials. He’s like a support animal but mean.'], ['', 'Chuck walks up to Chip Sterling and sits on him. Chip confesses to everything, very quickly.'],
-      ['JUDGE PETTIBONE', 'Case dismissed. Mr. Sterling, you are under arrest for sabotage. Mr. Dupree, you are... the Daytona 250 champion. God help us.'], ['BRENDA', 'Dan. You’re a champion.'], ['DAN', 'I’m still not a Florida Man.'], ['BRENDA', 'You are the MOST Florida Man.']],
+      ['JUDGE PETTIBONE', 'Case dismissed. Mr. Sterling: under arrest. Sabotage. Mr. Dupree: Daytona 250 champion. God help us.'], ['BRENDA', 'Dan. You’re a champion.'], ['DAN', 'I’m still not a Florida Man.'], ['BRENDA', 'You are the MOST Florida Man.']],
     () => { headline('ENERGY DRINK MOGUL ARRESTED FOR SABOTAGING FLORIDA MAN’S STOCK CAR; FLORIDA MAN "NOT SURPRISED"', 10); F.case7Won = true; F.creditsPending = 7; endDay('court'); });
   },
 };
@@ -387,13 +387,13 @@ Object.assign(GIGS, {
     offer: [['TINY', 'Lost my lucky helmet on the beach last night. Don’t ask how. I don’t know how.'], ['TINY', 'Find it, thirty-five bucks. Don’t wear it. It’s lucky for ME.']],
     start() { for (let k = 0; k < 300; k++) { const x = rnd(70, 78) * TS, y = rnd(4, 56) * TS; if (World.at(x, y) === T.SAND && !World.solidAt(x, y)) { Game.pickups.push({ kind: 'helmet', x, y }); break; } } },
     talkActive: () => Game.dan.carry === 'helmet' ? (Game.dan.carry = null, 'done') : [['TINY', 'Beach, man. Somewhere on the beach. Probably.']],
-    hl: 'FLORIDA MAN RETURNS BIKER’S "LUCKY HELMET" FOUND IN SAND; BIKER WEEPS OPENLY' },
+    hl: 'FLORIDA MAN RETURNS BIKER’S "LUCKY HELMET" FOUND IN SAND; BIKER "NOT CRYING, IT’S SAND"' },
   pitcrew: { giver: 'tammy', pay: 30, quest: 'Run a pit crew drill for Tammy Jo (talk to her to start)',
     offer: [['TAMMY JO', 'The crews need a pace-setter for pit drills. Somebody fast. Or somebody who mashes buttons like a raccoon.'], ['TAMMY JO', 'Thirty bucks. Four tires. Go.']],
     start() { Game.afterTalk = () => DaytonaCases.pitStop(() => { G_().pitDone = true; }, () => toast('Too slow. Talk to Tammy Jo to try again.')); },
     talkActive: () => G_().pitDone ? 'done' : (Game.afterTalk = () => DaytonaCases.pitStop(() => { G_().pitDone = true; }, () => toast('Too slow. Talk to Tammy Jo to try again.')), [['TAMMY JO', 'Again! Tires! GO!']]),
     check: () => !!G_().pitDone,
-    hl: 'FLORIDA MAN SETS PIT DRILL RECORD, IS NOT EMPLOYED BY ANY RACING TEAM' },
+    hl: 'FLORIDA MAN SETS PIT DRILL RECORD; CREW CHIEF ASKS IF HE "HAS A DAY JOB"' },
 });
 ICONS.helmet = { key: { o: 'ink', b: 'black', w: 'white', r: 'red' }, rows: [
   '..........', '...oooo...', '..obbbbo..', '.obbwwbbo.', '.obrrrrbo.', '.obbbbbbo.', '.oooooooo.', '..........', '..........', '..........'] };

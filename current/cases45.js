@@ -34,7 +34,7 @@ const MiamiCases = {
     }
     if (c.n === 4 && c.d === 1) {
       setQuests([['bus', 'Catch the Greyhound to Miami (bus stop by the mailbox)']]);
-      return say([['', 'A letter arrives. It is laminated.'], ['LETTER', 'CONGRATULATIONS, FLORIDA MAN OF THE YEAR! Your prize: one (1) free weekend at the HOTEL NEON, South Beach. Greyhound ticket enclosed.'],
+      return say([['', 'A letter arrives. It is laminated.'], ['LETTER', 'CONGRATULATIONS, FLORIDA MAN OF THE YEAR! You win one (1) free weekend at the HOTEL NEON, Miami. Bus ticket enclosed.'],
         [PHONE_B, 'Dan. Do NOT go to Miami.'], ['DAN', 'It’s free, Brenda.'], [PHONE_B, 'Nothing in Miami is free, Dan. NOTHING.'], ['TEXT: MERLE', 'bring me back a shot glass. and a boat']]);
     }
     if (c.n === 4 && c.d === 2) {
@@ -51,7 +51,7 @@ const MiamiCases = {
       F.suit = false;
       F.balesDone = false;   // a replayed day 14 re-counts (bales already in the bag still count)
       setQuests([['bales', 'Grab the bales on the beach before the goons do (0/4)'], ['flyer', 'Return the bales to their owner (post a flyer at Café Abuela)']]);
-      return say([['RADIO', '...after last night’s storm, dozens of mystery bales have washed up on South Beach. Locals call them “square grouper.” Police say: do NOT touch them.'],
+      return say([['RADIO', '...dozens of mystery bales washed up on South Beach overnight. Locals call them “square grouper.”'], ['RADIO', 'Police say: do NOT touch them.'],
         ['DAN', 'Somebody lost their stuff. That’s sad.'], ['DAN', 'I’m gonna return it. Like a good citizen. There might be a reward.'], ['', 'Two men in black suits are already jogging toward the beach.']]);
     }
     if (c.n === 5 && c.d === 2) {
@@ -114,7 +114,7 @@ const MiamiCases = {
     }
     if (n.canadian) return say([['THE CANADIAN', 'Sorry, eh? Is this chair taken? I got here at 5.'], ['DAN', '(Maybe a firm “GIT” would help.)']]), true;
     if (n.id === 'doc') {
-      if (c.n === 5 && c.d === 1 && F.flyer && !F.docTalk) return say([['DR. SNIFFLES', 'Shh. SHH. The sinus medicine? I don’t know where it comes from. Nobody knows.'], ['DAN', 'Rocket and Tubbs are standing right behind me.'], ['DR. SNIFFLES', 'Okay a yacht. It comes from a yacht. The boss throws a party at the marina tomorrow night. Password’s “medical.” I never said that.']], () => { F.docTalk = true; done('doc'); addQuest('bed', 'Go back to the hotel (sleep)'); }), true;
+      if (c.n === 5 && c.d === 1 && F.flyer && !F.docTalk) return say([['DR. SNIFFLES', 'Shh. SHH. The sinus medicine? I don’t know where it comes from. Nobody knows.'], ['DAN', 'Rocket and Tubbs are standing right behind me.'], ['DR. SNIFFLES', 'Okay. A yacht. The boss throws a party at the marina tomorrow night. Password’s “medical.” I never said that.']], () => { F.docTalk = true; done('doc'); addQuest('bed', 'Go back to the hotel (sleep)'); }), true;
       return say([['DR. SNIFFLES', pick(['Welcome to the clinic. I am a doctor. It says so on my coat. In Sharpie.', 'Sinuses clogged? Soul clogged? Step into my tent.', 'My medical license is in the car. The car is in the ocean. Long story.'])], ['DR. SNIFFLES', 'Consultation?', [['See the “medicine”', () => { Game.mode = 'shop'; openShop('clinic'); return null; }], ['“I’m good, doc.”', () => [['DR. SNIFFLES', 'That’s what they all say. Then they come back.']]]]]]), true;
     }
     if (n.id === 'rocket' || n.id === 'tubbs') {
@@ -155,7 +155,7 @@ const MiamiCases = {
   },
   flyer() {
     const F = Game.flags;
-    say([['', 'Dan tapes a flyer to the café window: “FOUND: 4 BALES OF YOUR STUFF. REWARD WELCOME. CALL DAN.” He writes his real phone number.'],
+    say([['', 'Dan tapes up a flyer: “FOUND: 4 BALES OF YOUR STUFF. REWARD WELCOME. CALL DAN.” With his real number.'],
       ['', 'Eleven seconds later, a pastel convertible screeches up.'], ['DET. ROCKET', 'Miami-Dade Vice. Put the bales down, Dupree.'], ['DET. TUBBS', 'Slowly. And the flyer. Especially the flyer.'],
       ['DAN', 'I was RETURNING them!'], ['DET. ROCKET', 'To the CARTEL?'], ['DAN', 'To the OWNER. Who... is the cartel. Okay. I see it now.'],
       [PHONE_B, 'Dan. They’re charging you with possession with intent to clear sinuses.'], ['DET. TUBBS', 'Or. You help us catch the Sinus Cartel, and this goes away.'],

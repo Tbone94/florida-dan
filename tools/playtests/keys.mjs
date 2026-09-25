@@ -27,7 +27,12 @@ await ev(() => {
     break; } };
   window.need = (ok, msg) => { if (!ok) bad.push(msg); };
   window.talkTo = id => { const n = Game.npcs.find(q => q.id === id); if (!n) { bad.push('no npc ' + id + ' in ' + Game.region); return; } Object.assign(Game.dan, { x: n.x, y: n.y + 16, dir: 'up', ride: null }); Story.talk(n); };
-  window.nextDay_ = () => { endDay('late'); step(2); $('nextBtn').click(); if (!$('credits').hidden) $('creditsBtn').click(); talk(); };
+  // every morning: Dan can actually WALK from where he wakes (Captain Lou once spawned on top of him), and the open quest has an arrow
+  window.morning = () => { if (Game.mode !== 'play') return; const D = Game.dan, x0 = D.x, y0 = D.y; let moved = 0;
+    for (const k of ['up', 'down', 'left', 'right']) { Input.set(k, true); step(25); Input.set(k, false); moved = Math.max(moved, Math.hypot(D.x - x0, D.y - y0)); Object.assign(D, { x: x0, y: y0 }); }
+    need(moved > 6, `day ${Game.day} (${Game.region}): Dan can't move from his wake-up spot`);
+    for (const q of Game.quests.filter(q => !q.done && !q.opt)) { let t; try { t = questTarget(q); } catch (e) { t = 'THROW ' + e.message; } need(t && !String(t).startsWith('THROW') || (q.id === 'bus8' && KEYS()), `day ${Game.day}: no arrow for quest ${q.id}`); } };
+  window.nextDay_ = () => { endDay('late'); step(2); $('nextBtn').click(); if (!$('credits').hidden) $('creditsBtn').click(); talk(); morning(); };
   talk(); for (const id in ARCS) ARC(id).no = 999;
   Object.assign(Game.flags, { case1Won: true, case2Won: true, case3Won: true, case4Won: true, case5Won: true, case6Won: true, case7Won: true, noChase: true, trashBaby: true });
   // the morning after the Daytona 250: nextDay sets keysFrom

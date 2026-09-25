@@ -16,7 +16,7 @@ const Court = {
     if (cs === 'sinus') return MiamiCourt.sinus();
     Game.mode = 'court'; Game.courtChuck = 0; showHud(false);
     const hs = Game.headlines.map(h => h.text), picks = hs.slice(-4);
-    const ev = picks.length ? picks.flatMap((h, i) => [['PROSECUTOR VANCE', `Exhibit ${'ABCD'[i]}: “${h}”`], ['DAN', OBJECTIONS[i % OBJECTIONS.length]], ['JUDGE HARLAN', i % 2 ? 'Overruled.' : 'Overruled. ...Did you really spoon a cow?']])
+    const ev = picks.length ? picks.flatMap((h, i) => [['PROSECUTOR VANCE', `Exhibit ${'ABCD'[i]}: “${h}”`], ['DAN', OBJECTIONS[i % OBJECTIONS.length]], ['JUDGE HARLAN', /COW/.test(h) ? 'Overruled. ...Did you really spoon a cow?' : ['Overruled.', 'Overruled. Sit DOWN, Mr. Dupree.', 'Overruled.', 'Overruled. Nice try, though.'][i]]])
       : [['PROSECUTOR VANCE', 'Your Honor, the defendant has... zero headlines this week?'], ['JUDGE HARLAN', 'In Florida? Suspicious as hell.']];
     const wit = Q('darlene') ? ['darlene', 'rhonda', 'merle2'].filter(id => Q(id) && Q(id).done).length : 3;
     const pants = Game.flags.pants;
@@ -26,9 +26,9 @@ const Court = {
       ['JUDGE HARLAN', 'Charges: assault on a lawn flamingo, and — I’m quoting the complaint — “being a Florida Man.”'],
       ...(pants ? [['JUDGE HARLAN', '...Are those black jorts? Formal jorts? Respect.']] : [['JUDGE HARLAN', 'Counselor, why is your client in regular jorts.'], ['BRENDA', 'I asked him, Your Honor. I ASKED him.']]),
       ['JUDGE HARLAN', 'How do you plead?', [
-        ['“Not guilty.”', () => [['JUDGE HARLAN', 'Noted.']]],
+        ['“Not guilty.”', () => [['JUDGE HARLAN', 'Noted. Nobody believes you, but noted.']]],
         ['“Not a Florida Man.”', () => [['JUDGE HARLAN', 'That’s not a plea, son.'], ['DAN', 'It’s a lifestyle, Your Honor.']]],
-        ...(Game.inv.beer > 0 ? [['*crack open a Swamp Lite*', () => { Game.inv.beer--; Sound.play('crack'); return [['', '*crack*'], ['JUDGE HARLAN', '...Is that a Swamp Lite?'], ['DAN', 'Want one?'], ['JUDGE HARLAN', 'After. Proceed.']]; }]] : []),
+        ...(Game.inv.beer > 0 ? [['Crack open a Swamp Lite', () => { Game.inv.beer--; Sound.play('crack'); return [['', '*crack*'], ['JUDGE HARLAN', '...Is that a Swamp Lite?'], ['DAN', 'Want one?'], ['JUDGE HARLAN', 'After. Proceed.']]; }]] : []),
       ]],
       ['PROSECUTOR VANCE', 'Your Honor, the State submits this week’s edition of the Swamp Gazette.'],
       ...ev,

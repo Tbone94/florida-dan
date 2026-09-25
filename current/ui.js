@@ -11,7 +11,7 @@ function buildHotbar() {
   ui.hotbar.innerHTML = '';
   HOTBAR.forEach((k, i) => {
     const b = document.createElement('button'); b.className = 'slot'; b.id = 'slot-' + k; b.title = `${ITEMS[k].name} — ${ITEMS[k].desc}`;
-    b.innerHTML = `<span class="key">${('1234567890-=['[i] || '')}</span><img alt="" src="${SPR.iconURL[k]}"><span class="n">0</span>`;
+    b.innerHTML = `<span class="key">${('1234567890-=[]\\'[i] || '')}</span><img alt="" src="${SPR.iconURL[k]}"><span class="n">0</span>`;
     b.addEventListener('click', e => { e.currentTarget.blur(); useItem(k); });
     ui.hotbar.append(b); slotEls[k] = b;
   });
@@ -136,7 +136,7 @@ function buy(k, b) {
   box.append(f); setTimeout(() => f.remove(), 950);
   b.classList.remove('bought'); void b.offsetWidth; b.classList.add('bought');
   shopMsg(`Bought: ${name} for $${price}.`);
-  if (!shopItems().includes(k)) { if (shopItems().length) renderShop(shopItems()[0]); else { closeShop(); toast({ surf: 'Coral’s sold out. She’s closing early to go surf.', ink: 'Ink & Regret is out of regrets. For now.', speed: 'Wrench is out of parts. He’s eyeing your car.' }[vendor] || 'Bubba’s sold out. You bought everything. He’s buying a boat.'); } } else refreshShop();
+  if (!shopItems().includes(k)) { if (shopItems().length) renderShop(shopItems()[0]); else { closeShop(); toast({ tees: 'Dwayne’s out of everything but regret. And one shirt that says “MY OTHER CAR IS A COOLER.”', surf: 'Coral’s sold out. She’s closing early to go surf.', ink: 'Ink & Regret is out of regrets. For now.', speed: 'Wrench is out of parts. He’s eyeing your car.' }[vendor] || 'Bubba’s sold out. You bought everything. He’s buying a boat.'); } } else refreshShop();
   const w = $('wallet'); if (w) { w.classList.remove('tick'); void w.offsetWidth; w.classList.add('tick'); }
 }
 function shopMsg(msg, bad) { const el = $('shopMsg'); el.textContent = msg; el.className = bad ? 'bad' : 'good'; el.hidden = false; clearTimeout(shopMsg.t); shopMsg.t = setTimeout(() => el.hidden = true, 2200); }
@@ -188,7 +188,7 @@ $('journalBtn').addEventListener('click', e => { e.currentTarget.blur(); if (Gam
 // a save in the middle of a day (bus, purchase) keeps the dawn's headlines/catch/money AND story flags, because Continue
 // replays the day from the top (a half-done day's flags could strand it: Manny never spawning, the ape already "met").
 // Things you own for good stay live: upgrades, flamingos, Trash Baby's porch, tips already shown.
-const KEEP_FLAG = /^(up|tbStay|flamingos|flam[A-Z]|hints)/;
+const KEEP_FLAG = /^(up|tbStay|flamingos|flam[A-Z]|hints|flagBack|citCat)/;   // + Keys trades that ate inventory (the lobsters, the fish)
 const saveFlags = d => { if (!d || !d.flags) return Game.flags; const f = JSON.parse(JSON.stringify(d.flags)); for (const k in Game.flags) if (KEEP_FLAG.test(k)) f[k] = Game.flags[k]; return f; };
 function save() {
   const d = Game.dawn && Game.dawn.day === Game.day ? Game.dawn : null;

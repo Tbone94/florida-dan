@@ -25,7 +25,7 @@ const Lambo = {
     say([['', '*SPLOOSH*'], ['', 'The pink Lamborghini drives directly into the Atlantic Ocean. It floats for one beautiful second. Then it does not.'],
       ['', 'Dan wades back to shore. A crowd has gathered. Every phone is out.'], ['TOURIST', 'Sir, why did you drive into the ocean?!'], ['DAN', 'The car don’t surf.'],
       [PHONE_B, 'Dan. DAN. You’re trending in fourteen countries.']], () => {
-      headline('FLORIDA MAN VALETS INFLUENCER’S PINK LAMBORGHINI DIRECTLY INTO ATLANTIC OCEAN; "THE CAR DON’T SURF," HE EXPLAINS', 9);
+      headline('FLORIDA MAN VALETS PINK LAMBORGHINI DIRECTLY INTO ATLANTIC OCEAN; "THE CAR DON’T SURF," HE EXPLAINS', 9);
       done('valet'); addQuest('bed', 'Go back to the Hotel Neon (sleep)');
     });
   },
@@ -57,7 +57,7 @@ const Dance = {
   update(dt) {
     const s = this.s; if (!s) { Game.mode = 'play'; return; }
     s.t += dt; s.flashT -= dt;
-    const hit = ['up', 'down', 'left', 'right'].find(k => Input.tapped(k));
+    const hit = ['up', 'down', 'left', 'right'].find(k => Input.tapped(k)) || (isTouch ? Wrestle.swipe() : null);   // a flick of the touch stick counts (keyboard arrows are already taps)
     if (hit) {
       const n = s.seq.find(n => n.hit === null && Math.abs(n.t - s.t) < .24);
       if (n && n.dir === hit) { n.hit = true; s.score++; s.flash = pick(['NICE!', 'SMOOTH!', 'HIPS DON’T LIE!', 'WEDDING MOVES!']); Sound.play('cash'); }
@@ -218,7 +218,7 @@ const MiamiCourt = {
   sinus() {
     CourtCases.begin();
     say([['BAILIFF', 'All rise. The United States of Florida versus... a pelican.'], ['JUDGE VEGA', 'Mr. Dupree. We meet again. You’re not the defendant this time. You’re the WITNESS.'], ['DAN', 'That’s a first.'], ...CourtCases.clean(5),
-      ['', 'At the defense table sits Señor Pelícano, in a tiny orange jumpsuit.'], ['DEFENSE ATTORNEY', 'Your Honor, my client is a simple pelican. The defense may object to... wait, that’s YOUR job, Mr. Dupree. Object to my lies.']],
+      ['', 'At the defense table sits Señor Pelícano, in a tiny orange jumpsuit.'], ['DEFENSE ATTORNEY', 'My client is a simple pelican. The defense may obj— wait. That’s YOUR job, Mr. Dupree. Object to my lies.']],
     () => { Objection.speaker = 'DEFENSE ATTORNEY'; Objection.run([
       { text: 'My client is just a regular pelican who enjoys fish.', lie: true, bust: 'He has a GOLD CHAIN, Counselor.' },
       { text: 'My client has never been on a yacht.', lie: true, bust: 'We have forty photos of him on a yacht. In a suit.' },
@@ -229,7 +229,7 @@ const MiamiCourt = {
   },
   sinusEnd() {
     const F = Game.flags;
-    say([['DET. ROCKET', 'Your Honor, Mr. Dupree went undercover in a pastel suit and blended in at a cartel yacht party.'], ['JUDGE VEGA', 'HIM? Blended in?'], ['DET. TUBBS', 'Mostly. He got thrown in the bay once.'],
+    say([['DET. ROCKET', 'Your Honor, Mr. Dupree went undercover in a pastel suit and blended in at a cartel yacht party.'], ['JUDGE VEGA', 'HIM? Blended in?'], ['DET. TUBBS', Game.headlines.some(h => /THROWN OFF YACHT/.test(h.text)) ? 'Mostly. He got thrown in the bay once.' : 'Mostly. Nobody noticed the jorts under the suit.'],
       ['', '*CRASH*'], ['', 'The doors burst open. It’s Chuck. He took the Greyhound. He is wearing tiny sunglasses.'], ['JUDGE VEGA', 'IS THAT AN ALLIGATOR IN MY COURTROOM?'], ['DAN', 'He does this. You get used to it.'],
       ['', 'Chuck walks straight to Señor Pelícano and eats his tiny hat. The pelican confesses to everything.'], ['SEÑOR PELÍCANO', '*sad squawk*'],
       ['JUDGE VEGA', 'Guilty. Ten to twenty in a very nice aviary. And Mr. Dupree...'], ['JUDGE VEGA', 'By the power vested in me by absolutely nobody, Miami-Dade names you... Honorary Detective.'],

@@ -64,7 +64,7 @@ const Cases = {
     if (c.n === 2 && c.d === 3) { Game.hour = 8; setQuests([['court', 'Get to court by 10 AM']]); return say([['', 'WEDNESDAY. COURT DAY.'], [PHONE_B, 'Courthouse. Ten AM. Bring the manatee.'], ['DAN', 'He’s in the kiddie pool in the truck bed.'], [PHONE_B, 'Your truck doesn’t have WHEELS, Dan.'], ['DAN', '...He’s in the kiddie pool.']]); }
     if (c.n === 3 && c.d === 1) {
       setQuests([['trailcam', 'Check the trail cam in the Glades'], ['dogs', 'Buy 3 roller dogs for bait (0/3)'], ['lure', 'Set the bait in the Glades after dark']]);
-      return say([['', 'MONDAY. CASE THREE.'], ['RADIO', '...a trail camera in the Everglades has captured a seven-foot creature drinking a Swamp Lite at 3 AM. Experts say it is either the legendary Skunk Ape, or “a guy.”'],
+      return say([['', 'MONDAY. CASE THREE.'], ['RADIO', '...a trail cam in the Everglades caught a seven-foot creature drinking a Swamp Lite at 3 AM.'], ['RADIO', 'Experts say it’s either the legendary Skunk Ape... or “a guy.”'],
         ['RHONDA', '*knock knock* Dan. The Skunk Ape on that trail cam is wearing YOUR HAT.'], ['DAN', 'Lotta guys have this hat.'], ['RHONDA', 'It says DAN on it.'],
         [PHONE_B, 'Dan. They’re charging you with impersonating a cryptid. And “public mudity.” Court is Wednesday.'], [PHONE_B, 'The only defense is the REAL Skunk Ape. Which does not exist.'],
         ['DAN', 'Oh, it exists. We’ve met. I think. It was a long night.']]);
@@ -77,7 +77,7 @@ const Cases = {
     // endless
     setQuests([]);
     Favors.roll(MIAMI() ? 1 : 2);
-    say([['', `DAY ${n}. ${pick(['The swamp is 91° and rising.', 'A pelican stares at Dan through the window.', 'Somewhere, a headline is waiting to happen.'])}`], ['DAN', pick(['Another beautiful day in paradise.', 'My head. My whole head.', 'Let’s make some news.', 'Florida Man of the Year, reporting for duty.'])]]);
+    say([['', `DAY ${n}. ${pick(['It’s 91° and rising.', 'A pelican stares at Dan through the window.', 'Somewhere, a headline is waiting to happen.'])}`], ['DAN', pick(['Another beautiful day to not be a Florida Man.', 'My head. My whole head.', 'Let’s make some news.', 'Florida Man of the Year, reporting for duty.'])]]);
   },
 
   tick(dt) {
@@ -88,7 +88,7 @@ const Cases = {
     if (c.n === 2 && c.d === 1) {
       if (F.contentStart != null && !F.contentDone) {
         const got = Game.headlines.length - F.contentStart; questText('content', `Do 3 Florida Man things for Kayden’s camera (${Math.min(3, got)}/3)`);
-        if (got >= 3) { F.contentDone = true; done('content'); questText('kayden', 'Go back to Kayden (boat ramp)'); toast('KAYDEN (texting): BRO. BRO. come back to the ramp'); }
+        if (got >= 3) { F.contentDone = true; done('content'); questText('kayden', 'Go back to Kayden (boat ramp)'); Phone.text('KAYDEN', 'BRO. BRO. come back to the ramp'); }
       }
       if (F.trashStart && !F.trashDone) { const n = Game.inv.trash || 0; questText('trash', `Fish trash out of the lagoon by boat (${Math.min(5, n)}/5)`); if (n >= 5) { F.trashDone = true; done('trash'); questText('pam', 'Bring the trash to Dr. Pam'); } }
       if (Q('kayden') && qDone('kayden') && Q('pam') && qDone('pam') && !F.c2d1) { F.c2d1 = true; addQuest('bed', 'Go home to bed'); }
@@ -135,7 +135,7 @@ const Cases = {
         if (!F.trashStart) {
           F.trashStart = true; addQuest('trash', 'Fish trash out of the lagoon by boat (0/5)', false, 'pam');
           say([['DR. PAM', 'You’re the man from the manatee video.'], ['DAN', 'Allegedly.'], ['DR. PAM', 'I’ve rescued manatees for thirty years. I have never seen one look that... happy.'],
-            ['DR. PAM', 'I’ll write a letter for your case if you clean up the lagoon. Take your boat out and fish the trash out of the water. Five pieces.'], ['DAN', 'That’s it?'], ['DR. PAM', 'You’ll see.']]);
+            ['DR. PAM', 'Clean up my lagoon and I’ll write the judge a letter. Take your boat. Fish out five pieces of trash.'], ['DAN', 'That’s it?'], ['DR. PAM', 'You’ll see.']]);
           return true;
         }
         if (F.trashDone) {

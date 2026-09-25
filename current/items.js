@@ -38,7 +38,7 @@ function useItem(k) {
       if (Math.random() < .6 && !Game.dan.ride) Look.mark('can', Game.dan.x + rnd(-8, 8), Game.dan.y + rnd(2, 6));   // litter: extremely Florida
       F.buzz = Math.min(130, F.buzz + 22); Game.chill = Math.min(100, Game.chill + 12); L.beers++; Game.inv.can = (Game.inv.can || 0) + 1;
       Sound.play('crack');
-      toast(F.buzz > 80 ? pick(["Dan's seein' two of everything. Twice the gators.", 'Wooo. WOOOO. Okay.', 'The ground is movin’, Brenda.']) : pick(['*crack* ...ahhhhh.', 'Breakfast of champions.', 'Hydration.', 'Tastes like freedom and aluminum.', 'That’s the good sh*t.']));
+      toast(F.buzz > 80 ? pick(['Dan’s seein’ two of everything. Twice the gators.', 'Wooo. WOOOO. Okay.', 'The ground is movin’, Brenda.']) : pick(['*crack* ...ahhhhh.', 'Breakfast of champions.', 'Hydration.', 'Tastes like freedom and aluminum.', 'That’s the good sh*t.']));
       if (L.beers === 6) headline(`FLORIDA MAN DRINKS SIX BEERS BEFORE ${Game.hour < 12 ? 'NOON' : 'DINNER'}, CITES "HYDRATION"`, 5);
       if (F.buzz >= 110) blackout();
       break;
@@ -89,7 +89,7 @@ function useItem(k) {
 function blackout() {
   const S_ = World.spots, at = (p, dx = 0, dy = 0) => p ? [p.x + dx, p.y + dy] : null;
   const away = MIAMI() ? [   // Miami and Daytona wake-ups (the swamp spots don't exist there)
-    ['the Hotel Neon fountain', ...(at(S_.door, 0, 20) || []), 'FLORIDA MAN FOUND ASLEEP IN HOTEL FOUNTAIN, TOLD STAFF HE WAS "A WATER FEATURE"'],
+    ['the Hotel Neon fountain', ...(at(S_.door, 0, 20) || []), 'FLORIDA MAN FOUND ASLEEP IN HOTEL FOUNTAIN, TELLS STAFF HE’S "A WATER FEATURE"'],
     ['the end of the pier, holding a stranger’s bait bucket', ...(at(S_.pier) || []), 'FLORIDA MAN WAKES UP ON PIER WITH STRANGER’S BAIT BUCKET, SAYS THEY’RE "CLOSE NOW"'],
     ['Café Abuela’s patio, under a tablecloth', ...(at(S_.cafe, 0, 16) || []), 'FLORIDA MAN FOUND UNDER CAFÉ TABLECLOTH; ABUELA FED HIM ANYWAY'],
   ] : KEYS() ? [
@@ -112,7 +112,7 @@ function blackout() {
   if (Game.car && typeof Car !== 'undefined') Car.exit();
   if (Game.dan.ride === 'boat') Object.assign(Game.boat, { x: World.spots.boat.x, y: World.spots.boat.y, dir: 'right' });   // someone tows the SS Budget home; it would be stranded in open water otherwise
   Game.dan.ride = null;
-  say([['', 'Everything goes black...'], ['', `Dan wakes up in ${where}. It's ${Math.min(20, Math.floor(Game.hour) + 3)}:00. His mouth tastes like a pennies.`],
+  say([['', 'Everything goes black...'], ['', `Dan wakes up in ${where}. It’s ${(Math.min(20, Math.floor(Game.hour) + 3) + 11) % 12 + 1} ${Math.min(20, Math.floor(Game.hour) + 3) < 12 ? 'AM' : 'PM'}. His mouth tastes like pennies.`],
     ['DAN', pick(['...Nobody saw that.', 'Where are my flip-flops. Where is my DIGNITY.', 'Brenda can never know about this.'])]], () => {
     let p = [x, y + 12];   // nearest walkable spot to where he's supposed to wake up
     for (let r = 0; r < 120 && !canWalk(p[0], p[1]); r += 4) for (let a = 0; a < 6.28; a += .5) { const q = [x + Math.cos(a) * r, y + Math.sin(a) * r]; if (canWalk(q[0], q[1])) { p = q; break; } }

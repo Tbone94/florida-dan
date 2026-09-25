@@ -15,6 +15,11 @@ for (let day = 1; day <= 30; day++) {
     Object.assign(Game.flags, day > 16 ? { case5Won: true } : {}, day === 16 ? { flyer: true } : {}, day === 22 ? { raceWon: true } : {});
     Game.flags.noChase = false;
     World.load(region); Game.day = day; startDay(); talk();
+    if (Game.mode === 'play') {   // can Dan actually walk away from where he woke up? (a spawn once boxed him in)
+      const D = Game.dan, x0 = D.x, y0 = D.y; let moved = 0;
+      for (const k of ['up', 'down', 'left', 'right']) { Input.set(k, true); step(12); Input.set(k, false); moved = Math.max(moved, Math.hypot(D.x - x0, D.y - y0)); Object.assign(D, { x: x0, y: y0 }); }
+      if (moved < 6) errs0.push(`STUCK at wake-up in ${region}`);
+    }
     // wander + mash
     const keys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'], acts = ['KeyE', 'KeyQ', 'KeyF', 'ShiftLeft', 'Digit1', 'Digit2', 'KeyE']; let held = null, arrowErr = 0;
     for (let f = 0; f < 900; f++) {

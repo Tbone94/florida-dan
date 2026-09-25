@@ -7,7 +7,7 @@
 function msgBox(msg, cy) {
   let lines = [msg]; if (labelWidth(msg, 6) > 290) { const mid = msg.lastIndexOf(' ', Math.floor(msg.length / 2) + 6); lines = [msg.slice(0, mid), msg.slice(mid + 1)]; }
   const w = Math.min(310, Math.max(...lines.map(l => labelWidth(l, 6))) + 12), h = lines.length * 10 + 4;
-  OR(160 - w / 2, cy - h / 2, w, h, PAL.white); lines.forEach((l, i) => label(l, 160, cy - h / 2 + 10 + i * 10, PAL.ink, 6));
+  OR(160 - w / 2, cy - h / 2, w, h, PAL.inkL); R(160 - w / 2, cy - h / 2, w, 1, PAL.yellow); lines.forEach((l, i) => label(l, 160, cy - h / 2 + 10 + i * 10, PAL.white, 6));   // label() outlines in ink: dark text on white smears
 }
 const BRIDGE_MILES = 7, BRIDGE_PX = 900;   // px of road per mile
 const LANE = { mine: 176, other: 144 }, RAIL = { l: 124, r: 196 };

@@ -169,14 +169,14 @@ function punch() {
     if (a.hits >= 3) { a.hits = 0; a.state = 'flee'; a.timer = 7; a.cd = 9; a.stun = 1.5; a.belly = 1.5; toast(a.chuck ? 'Chuck backs off. Chuck will remember this.' : pick(['That gator has had ENOUGH.', 'Gator: humbled. Dan: undefeated.', 'The gator swims off to rethink its life.'])); if (a.chuck) done('chuck'); }
     else if (Math.random() < (a.chuck ? .45 : .22)) { a.stun = .25; a.cd = 0; a.state = 'chase'; toast(a.chuck ? 'Chuck did NOT like that.' : 'Uh oh. It’s mad now.'); }
     if (!Game.flags.punchedGator) { Game.flags.punchedGator = true; headline(a.chuck ? 'FLORIDA MAN PUNCHES GATOR NAMED CHUCK; CHUCK "WILL REMEMBER THIS"' : 'FLORIDA MAN PUNCHES ALLIGATOR IN THE FACE, SAYS IT "LOOKED AT HIM FUNNY"', 6); }
-  } else if (a.type === 'deer') { a.state = 'flee'; a.timer = 4; Heat.add(5); toast('YOU PUNCHED A KEY DEER. They’re ENDANGERED, Dan. There’s like eight hundred of them and now they ALL know your face.', 4.5); if (!Game.flags.deerPunch) { Game.flags.deerPunch = true; headline('FLORIDA MAN PUNCHES ENDANGERED KEY DEER; DEER "FINE," FLORIDA MAN "IN SO MUCH TROUBLE"', 15); }
+  } else if (a.type === 'deer') { a.state = 'flee'; a.timer = 4; Heat.add(5); toast('YOU PUNCHED A KEY DEER. They’re ENDANGERED, Dan. There’s like 800 left and they ALL know your face now.', 4.5); if (!Game.flags.deerPunch) { Game.flags.deerPunch = true; headline('FLORIDA MAN PUNCHES ENDANGERED KEY DEER; DEER "FINE," FLORIDA MAN "IN SO MUCH TROUBLE"', 15); }
   } else if (a.type === 'cow') { a.moo = 1.4; a.state = 'flee'; a.timer = 3; toast('You punched a cow. The cow did not deserve that.'); if (!Game.day_.cowPunch) { Game.day_.cowPunch = true; headline('FLORIDA MAN PUNCHES COW, IMMEDIATELY APOLOGIZES TO COW', 5); } }
   else if (a.type === 'python') { a.stun = 2.5; toast('The python is dazed. GRAB IT.'); headline('FLORIDA MAN PUNCHES PYTHON, APOLOGIZES, THEN BAGS IT', 4); }
   else { if (a.type === 'pelican') headline('FLORIDA MAN PUNCHES PELICAN; PELICAN "STILL SMUG"', 4); a.state = 'flee'; a.timer = 4; toast(a.type === 'raccoon' ? 'Raccoon: punched. Your dignity: also gone.' : a.type === 'pelican' ? 'You punched a pelican. It is somehow still smug.' : 'Iguana: bonked.'); }
 }
 function punchNPC(n) {
   n.scared = 1.5;
-  const lines = { rhonda: ['RHONDA', 'Rhonda sidesteps it without looking up. “Try that again, Dan.”'], merle: ['MERLE', 'Not the FACE, Danny! I got a fish fry to host!'], darlene: ['DARLENE', 'I will ban you from this Gulp-N-Go, Daniel.'],
+  const lines = { rhonda: ['RHONDA', '*sidesteps without looking up* Try that again, Dan.'], merle: ['MERLE', 'Not the FACE, Danny! I got a fish fry to host!'], darlene: ['DARLENE', 'I will ban you from this Gulp-N-Go, Daniel.'],
     tourist: ['TOURIST', 'Oh my gosh. OH MY GOSH. This is the REAL Florida experience!'] };
   const [who, line] = lines[n.id] || [n.name.toUpperCase(), 'HEY!'];
   toast(`${who}: ${line}`, 3.5);
@@ -275,7 +275,7 @@ function update(dt) {
   Game.hour += dt / 30 * (Game.fx.high > 0 ? .6 : 1) * (Game.fx.powder > 0 ? 1.3 : 1);
   Game.chill = Math.max(0, Game.chill - dt * (hasUp('zapper') ? .1 : .2));
   Game.gitCd = (Game.gitCd || 0) - dt; Game.punchCd = (Game.punchCd || 0) - dt; Game.dan.punchT = (Game.dan.punchT || 0) - dt;
-  if (Game.chill <= 0) { Game.chill = 40; headline('FLORIDA MAN SCREAMS AT PELICAN FOR 40 MINUTES; PELICAN UNBOTHERED', 4); return say([['', 'Dan has run out of chill.'], ['DAN', 'WHAT ARE YOU LOOKIN AT, PELICAN? HUH? YEAH, YOU. YOU AND YOUR STUPID FACE-BAG!'], ['', 'The pelican is unbothered. Dan feels better, weirdly.']]); }
+  if (Game.chill <= 0) { Game.chill = 40; headline('FLORIDA MAN SCREAMS AT PELICAN FOR 40 MINUTES; PELICAN UNBOTHERED', 4); return say([['', 'Dan has run out of chill.'], ['DAN', 'WHAT ARE YOU LOOKIN’ AT, PELICAN? HUH? YEAH, YOU. YOU AND YOUR STUPID FACE-BAG!'], ['', 'The pelican is unbothered. Dan feels better, weirdly.']]); }
   if (Game.hour >= 22 && Cases.nightWork()) Game.hour = Math.min(Game.hour, 23.9);   // the Skunk Ape / Manny don't keep office hours
   else if (Game.hour >= 22) { Game.hour = 22; return say([['', 'It’s 10 PM. The mosquitoes have unionized.'], ['DAN', 'Aight. Bed. Wherever I’m standing is bed now.']], () => endDay('late')); }
   moveDan(dt);
@@ -338,11 +338,11 @@ const Events = {
     this.t = rnd(45, 80);
     const ev = pick(['lovebugs', 'merletext', 'mosquitos', 'brenda', 'tourist', 'sirens', 'weather']);
     if (ev === 'lovebugs') { toast('LOVEBUG SEASON. They’re doin’ it. On your FACE.'); for (let i = 0; i < 40; i++) Game.parts.push({ kind: 'bug', x: Game.dan.x + rnd(-80, 80), y: Game.dan.y + rnd(-60, 40), vx: rnd(-20, 20), vy: rnd(-20, 20), life: rnd(4, 8) }); }
-    if (ev === 'merletext') Phone.text('MERLE', pick(['u up', 'chuck is on my porch again. hes eatin my crocs', 'found a boat in my yard. not mine. is it yours', 'do u know how to get a raccoon out of a toilet asking for a friend', 'lottery numbers are 4 8 15 16 23 42 trust me', 'I think my trailer is haunted by a tourist']));
-    if (ev === 'mosquitos' && World.region(Game.dan.x, Game.dan.y) === 'glades') { toast('Mosquitos the size of sparrows. Dan donates a pint.'); Game.chill = Math.max(0, Game.chill - 10); }
-    if (ev === 'brenda') toast(`TEXT FROM BRENDA: ${Game.allegations > 60 ? 'why is my phone blowing up with your name' : pick(['how are we doing. be honest', 'remember: NORMAL', 'please do not do anything on camera'])}`, 4.5);
+    if (ev === 'merletext') Phone.text('MERLE', pick(['u up', 'chuck is on my porch again. hes eatin my crocs', 'found a boat in my yard. not mine. is it yours', 'do u know how to get a raccoon out of a toilet asking for a friend', 'lottery numbers are 4 8 15 16 23 42 trust me', 'i think my trailer is haunted. by a tourist']));
+    if (ev === 'mosquitos' && World.region(Game.dan.x, Game.dan.y) === 'glades') { toast('Mosquitoes the size of Buicks. Dan donates a pint.'); Game.chill = Math.max(0, Game.chill - 10); }
+    if (ev === 'brenda') Phone.text('BRENDA', Game.allegations > 60 ? 'why is my phone blowing up with your name' : pick(['how are we doing. be honest', 'remember: NORMAL', 'please do not do anything on camera']));
     if (ev === 'sirens') Sound.play('siren');
-    if (ev === 'weather' && Game.day !== 3) toast(pick(['It’s 96 degrees and 100% humidity. The air is soup.', 'Sudden downpour. 4 minutes. Then sun. Classic.', 'A thunderstorm rolled in, got bored, and left.']));
+    if (ev === 'weather' && Game.day !== 2 && Game.day !== 3) toast(pick(['It’s 96 degrees and 100% humidity. The air is soup.', 'Sudden downpour. 4 minutes. Then sun. Classic.', 'A thunderstorm rolled in, got bored, and left.']));
   },
 };
 

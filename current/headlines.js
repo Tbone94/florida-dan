@@ -38,7 +38,7 @@ const HEADLINES = [
   ['bro', /RENOUNCES U\.S\. CITIZENSHIP/, 'Brayden (bro) wants a chug-off.'],
   ['recognized', /FORMALLY "RECOGNIZES"/, 'Dance for the Mallory Square sunset crowd.'],
   ['sister', /SISTER NATION/, 'Win Case Eight.'],
-  ['snorkel', /SNORKELING IN JORTS/, 'Go under. Anywhere.'],
+  ['snorkel', /GOES SNORKELING IN JORTS/, 'Go under. Anywhere.'],
   ['lobster', /LOBSTER WITH BARE HANDS/, 'Spiny lobsters hide on the reef.'],
   ['goldCoin', /300-YEAR-OLD GOLD COIN/, 'Snorkel under the old bridge.'],
   ['tarpon', /FEEDS TARPON BY HAND/, 'Old Gus’s tarpon are hungry.'],
@@ -100,7 +100,7 @@ const HEADLINES = [
   ['bitten3', /BITTEN BY GATORS THREE TIMES/, 'Let the gators win. Thrice.'],
   // ---- substances ----
   ['sixBeers', /SIX BEERS/, 'Hydrate. A lot.'],
-  ['sinus', /SINUS MEDICINE/, 'It’s for your sinuses.'],
+  ['sinus', /POWDER IS "SINUS MEDICINE/, 'It’s for your sinuses.'],
   ['ascend', /ASCENDS/, 'Sinus medicine + something from a cow pie.'],
   ['munchies', /EXTREMELY HIGH/, 'The munchies want a roller dog.'],
   ['incident', /HAS "INCIDENT"/, 'Never trust a roller dog. Never trust a toilet to be close.'],

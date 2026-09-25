@@ -8,7 +8,7 @@ const GIGS = {
     talkActive: () => Game.inv.beer >= 6 ? (Game.inv.beer -= 6, 'done') : [['SKEETER', `Six Swamp Lites, Dan. You got ${Game.inv.beer || 0}.`]],
     hl: 'FLORIDA MAN DELIVERS BEER BY BOAT TO BAR THAT IS ALSO BASICALLY A BOAT' },
   pool: { giver: 'lurleen', pay: 30, quest: 'Get the gator out of Lurleen’s kiddie pool',
-    offer: [['LURLEEN', 'Dan! There is an ALLIGATOR in the kiddie pool. The KIDDIE pool.'], ['LURLEEN', 'The kids named him Gregory. Gregory has to go.']],
+    offer: [['LURLEEN', 'Dan! There is an ALLIGATOR in the kiddie pool. The KIDDIE pool.'], ['LURLEEN', 'The kids named him Waffles. Waffles has to go.']],
     start() { const P = World.props.find(p => p.kind === 'kpool'); const a = makeGator(P.x + 16, P.y + 10, false); a.gig = 'pool'; a.cd = 1e9; Game.animals.push(a); },
     hl: 'FLORIDA MAN REMOVES ALLIGATOR FROM KIDDIE POOL; KIDS "WANTED TO KEEP HIM"' },
   mattress: { giver: 'rita', pay: 20, quest: 'Haul the Room 4 mattress to the Gulp-N-Go dumpster',

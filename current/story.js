@@ -141,7 +141,7 @@ function questText(id, text) { const q = Q(id); if (q && q.text !== text) { q.te
 
 const PHONE_B = 'PHONE: BRENDA (PUBLIC DEFENDER)';
 // a "well? I'm waitin'" from somebody who also runs the only shop you need must not wall off the counter
-const SHOPKEEPS = ['darlene', 'wayne', 'bubba', 'abuela', 'doc', 'coral', 'wrench', 'needles'];
+const SHOPKEEPS = ['darlene', 'wayne', 'bubba', 'abuela', 'doc', 'coral', 'wrench', 'needles', 'tom', 'joelle', 'dwayne'];
 function sideNag(n, lines) {
   if (!SHOPKEEPS.includes(n.id)) return say(lines);
   const [who, text] = lines[lines.length - 1];
@@ -154,15 +154,15 @@ const TOURIST_TALKS = [
     ['“I’m NOT a Florida Man.”', () => [['TOURIST', 'That’s EXACTLY what a Florida Man would say!!']]],
     ['Offer them a roller dog', () => [['TOURIST', 'I... I’m going to go.']]]]]],
   [['TOURIST', 'Excuse me, which way to Disney?'], ['DAN', '', [
-    ['Point at the swamp', () => [['TOURIST', 'Through... the alligators?'], ['DAN', 'Shortcut.']]],
-    ['“Take a left at the gator. Keep goin’ till you regret it.”', () => [['TOURIST', 'Thank you so much!'], ['', 'The tourist heads confidently toward the gator.']]],
+    ['Point at the nearest swamp', () => [['TOURIST', 'Through... the alligators?'], ['DAN', 'Shortcut.']]],
+    ['“Left at the gator. Go till you regret it.”', () => [['TOURIST', 'Thank you so much!'], ['', 'The tourist heads confidently toward the gator.']]],
     ['“Disney? In THIS economy?”', () => [['TOURIST', '...Honestly? Fair.']]]]]],
   [['TOURIST', 'Is it safe to swim here?'], ['DAN', '', [
     ['“Totally.”', () => [['TOURIST', 'Great!'], ['DAN', '(It is not.)']]],
     ['“Only if you’re faster than Chuck.”', () => [['TOURIST', 'Who’s Chuck?'], ['DAN', 'You’ll know.']]],
     ['Point at the nearest gator', () => [['TOURIST', '...I’m gonna stay in the rental car.']]]]]],
   [['TOURIST', 'What IS that smell?'], ['DAN', '', [
-    ['“That’s the swamp, bud.”', () => [['TOURIST', 'Does it always smell like that?'], ['DAN', 'Only on days that end in Y.']]],
+    ['“That’s Florida, bud.”', () => [['TOURIST', 'Does it always smell like that?'], ['DAN', 'Only on days that end in Y.']]],
     ['“That’s me.”', () => [['TOURIST', '...Oh.']]],
     ['“Freedom.”', () => [['TOURIST', 'It smells like feet.'], ['DAN', 'Same thing.']]]]]],
 ];
@@ -198,7 +198,7 @@ const Story = {
     if (n === 3) {
       setQuests([['plywood', 'Grab plywood from the dumpster'], ['board', 'Board up the cabin'], ['stock', 'Get 6 beers (0/6)'], ['party', 'Merle’s party (4 PM, or wait at Merle’s)']]);
       say([
-        ['RADIO', '...Hurricane Wanda, Category Two, making landfall tonight. Residents are urged to evacuate, or at minimum, to not do anything stupid.'], ['DAN', 'Hurricane party.'],
+        ['RADIO', '...Hurricane Wanda, Category Two, hits tonight. Residents should evacuate. Or at minimum, not do anything stupid.'], ['DAN', 'Hurricane party.'],
         [PHONE_B, 'Dan. I can hear you thinking “hurricane party.” STAY. INSIDE.'],
         ['TEXT: MERLE', 'HURRICANE PARTY @ MINE 2NITE. BYOB. bring plywood. or dont. we’ll see what happens'], ['TEXT: MERLE', 'made a gumbo'],
       ]);
@@ -308,7 +308,7 @@ const Story = {
       return say([['MERLE', `HOT DANG! ${real.length} fish!`], ...(gar ? [['MERLE', '...Is that a GAR, Danny? I said NO GAR. You KNOW what happened last time.']] : []),
         ['MERLE', 'Now watch this. I got a frozen turkey too. Straight into the fryer. Frozen. Like God intended.'], ['DAN', 'Merle, I really don’t think you’re supposed to—']], () => Scene.play(this.fryScene(), () => {
         F.fry = true; Game.catchBag = Game.catchBag.filter(f => f.junk); Game.inv.fish = 0;
-        headline('FLORIDA MAN’S COUSIN DEEP-FRIES FROZEN TURKEY, SUMMONS FIRE DEPARTMENT; FLORIDA MAN SAYS HE "WAS JUST STANDING THERE"', 8);
+        headline('FLORIDA MAN’S COUSIN DEEP-FRIES FROZEN TURKEY; FLORIDA MAN "WAS JUST STANDING THERE"', 8);
         say([['MERLE', 'Here. Found this in the bottom of the fryer. It’s yours now. Don’t ask.'], ['', 'Got: “Sinus Medicine” ×1 (slot 5)'],
           ['DAN', 'It’s for my sinuses.'], ['MERLE', 'I didn’t ask, Danny.'], ['MERLE', 'Anyway you still owe me forty bucks.']], () => { giveItem('powder'); done('merle'); addQuest('sleep1', 'Go home to bed'); });
       }));
@@ -351,7 +351,7 @@ const Story = {
       return say([['RHONDA', 'Morning, Dan. Somebody stole the stop sign off 29 and Fifth.'], ['RHONDA', 'You wouldn’t know anything about that.', [['“Absolutely not.”', () => [['RHONDA', 'Uh huh.']]], ['“...Define ‘stole.’”', () => [['RHONDA', 'I’m gonna pretend you said no.']]], ['Offer her a Swamp Lite', () => [['RHONDA', 'I am IN UNIFORM, Dan.']]]]],
         ['RHONDA', 'Bring it back and I’ll THINK about signing your little paper. Also—'], ...bounty()], () => addQuest('sign', 'Grab the stop sign off your roof', false, 'rhonda'));
     }
-    return say([['RHONDA', pick(['Dan.', 'Keep it under 40 on that cooler, Dan.', 'I’m watchin’ you, Dan.'])], ['RHONDA', 'Something you need?', [['Turn in pythons', bounty], ['Nothing, officer', () => [['RHONDA', 'That’s what I thought.']]]]]]);
+    return say([['RHONDA', pick(['Dan.', 'Keep it under 40 on that cooler, Dan.', 'I’m watchin’ you, Dan.'])], ['RHONDA', 'Something you need?', [['Turn in pythons', bounty], ['“Nothing, officer.”', () => [['RHONDA', 'That’s what I thought.']]]]]]);
   },
 
   party() {
@@ -407,7 +407,7 @@ const Story = {
     if (name === 'shroom' && Game.day !== 3) {
       if (!Game.animals.some(a => a.spirit) && Game.flags.mannyMet !== true && Math.random() < .5) toast('...something is glowing out in the water.');
     }
-    if (name === 'caught') { const f = Game.catchBag[Game.catchBag.length - 1]; if (f && f.id === 'cart') headline('FLORIDA MAN RETURNS SHOPPING CART VIA SWAMP; STORE "DOES NOT WANT IT"', 3); if (f && f.legend) headline('FLORIDA MAN LANDS LEGENDARY “BIG RONNIE,” WEEPS OPENLY AT DOCK', 5);
+    if (name === 'caught') { const f = Game.catchBag[Game.catchBag.length - 1]; if (f && f.id === 'cart') headline('FLORIDA MAN RETURNS SHOPPING CART VIA SWAMP; STORE "DOES NOT WANT IT"', 3); if (f && f.legend) headline('FLORIDA MAN LANDS LEGENDARY "BIG RONNIE," WEEPS OPENLY AT DOCK', 5);
       if (f && f.id === 'phone') headline('FLORIDA MAN FISHES IPHONE OUT OF SWAMP, IGNORES 17 MISSED CALLS FROM "MOM"', 3);
       if (f && !f.junk && Game.fx.buzz > 60) headline('FLORIDA MAN CATCHES FISH WHILE DRUNK, CALLS IT "A TECHNIQUE"', 4); }
   },
@@ -422,7 +422,7 @@ const Story = {
 // the bed only offers itself in the evening or when bed is the objective (no "sleep" button under your thumb at 6 AM)
 const sleepReady = () => { const q = Game.quests.find(q => !q.done && !q.opt); return Game.hour >= 17 || !q || ['bed', 'sleep1', 'sleep2'].includes(q.id); };
 function sleep() {
-  if (Game.day >= 5) { const why = Cases.sleepBlock(); if (why) return toast(why); return say([['DAN', pick(['Welp. That’s a day.', 'Nite, swamp.', 'Another one for the books. The police books.'])]], () => endDay('sleep')); }
+  if (Game.day >= 5) { const why = Cases.sleepBlock(); if (why) return toast(why); return say([['DAN', pick(['Welp. That’s a day.', Game.region === 'swamp' ? 'Nite, swamp.' : 'Nite, Florida.', 'Another one for the books. The police books.'])]], () => endDay('sleep')); }
   const F = Game.flags;
   if (Game.day === 1 && !F.fry) return toast('Can’t sleep. Merle’s fish fry. Three fish. It’s the only thing Dan’s ever been asked to do.');
   if (Game.day === 2 && !F.bday2 && Game.hour < 19) return toast('Still need those three signatures. Brenda’s counting on you. God help her.');

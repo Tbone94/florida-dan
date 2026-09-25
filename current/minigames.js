@@ -7,9 +7,9 @@ const SPECIES = [
   { id: 'gar', name: 'Florida Gar', lb: [2, 11], pull: .8, jump: .5, w: 14, h: .17, c1: '#6b6a3a', c2: '#c9c29a', q: ['Dinosaur fish. Merle’s gonna be pissed.', 'All teeth, no manners.'] },
   { id: 'cat', name: 'Channel Catfish', lb: [2, 16], pull: .9, jump: 0, w: 18, h: .3, deep: true, c1: '#5d5a66', c2: '#d8d0c0', q: ['Whiskers! Straight to the fryer.', 'Slimy lil bastard.'] },
   { id: 'bowfin', name: 'Mudfish', lb: [2, 9], pull: .85, jump: .15, w: 10, h: .3, c1: '#6b4a2e', c2: '#a8774f', q: ['Mudfish. Nobody wants you, bud. I love you though.'] },
-  { id: 'boot', name: "Somebody's Boot", lb: [1, 2], pull: .15, jump: 0, w: 5, junk: true, q: ['Size 11. Not mine. ...Probably.'] },
+  { id: 'boot', name: 'Somebody’s Boot', lb: [1, 2], pull: .15, jump: 0, w: 5, junk: true, q: ['Size 11. Not mine. ...Probably.'] },
   { id: 'cart', name: 'Shopping Cart', lb: [25, 31], pull: .5, jump: 0, w: 3, junk: true, q: ['How does this keep happenin’.'] },
-  { id: 'phone', name: "Somebody's iPhone", lb: [.4, .4], pull: .1, jump: 0, w: 2, junk: true, q: ['17 missed calls from “MOM.” Not my problem.'] },
+  { id: 'phone', name: 'Somebody’s iPhone', lb: [.4, .4], pull: .1, jump: 0, w: 2, junk: true, q: ['17 missed calls from “MOM.” Not my problem.'] },
   { id: 'ronnie', name: 'BIG RONNIE', lb: [13, 15.5], pull: 1.2, jump: .35, w: 0, legend: true, h: .42, c1: '#2c5e22', c2: '#e8d39a', q: ['BIG RONNIE. THE LEGEND. I’m gonna cry. I’m cryin’.'] },
 ];
 const OCEAN = [
