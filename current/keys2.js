@@ -117,10 +117,12 @@ const KeysCases = {
       if (!F.wBall) extra.push({ k: 'ball', name: 'a cannonball', keep: true, say: 'A cannonball. Heavy. Dan sinks a little.', draw: (x, y) => { g.fillStyle = PAL.ink; g.beginPath(); g.arc(x, y, 4, 0, 7); g.fill(); R(x - 2, y - 2, 1, 1, PAL.grey); } });
       if (!F.wChest) extra.push({ k: 'chest', name: 'a treasure chest', keep: true, say: 'A CHEST. An actual pirate chest. Dan screams into his snorkel.', draw: (x, y, t) => { OR(x - 8, y - 6, 16, 10, '#7a4a2b'); R(x - 8, y - 3, 16, 1, '#c9a36a'); R(x - 1, y - 4, 2, 3, '#ffd23f'); if (Math.floor(t * 3) % 4 === 0) R(x + 4, y - 7, 1, 1, '#ffd23f'); } });
     }
+    extra.push(...SideQuests.diveExtras(at, wreckHere));   // neighbor-story loot (sidequests.js)
     Dive.start({ zone: wreckHere && c.n === 9 ? 'reef' : zone, extra, intro: extra.length && c.n === 9 && c.d === 2 ? 'Down there: the shape of a ship. A very old ship.' : undefined, then: r => this.diveDone(r) });
   },
   diveDone(r) {
     const F = Game.flags, c = this.c(), has = k => r.got.some(g => g.k === k);
+    SideQuests.diveDone(r);
     if (has('doubloon')) { F.doubloon = true; done('snorkel'); return this.rexShowsUp(); }
     if (c.n === 9 && c.d === 2) {
       if (has('bell')) F.wBell = true; if (has('ball')) F.wBall = true;

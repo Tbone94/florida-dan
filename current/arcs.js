@@ -220,7 +220,7 @@ const ARCS = {
 const ARC = id => { const F = Game.flags; F.arcs = F.arcs || {}; return F.arcs[id] || (F.arcs[id] = { ch: 0, st: 'idle' }); };
 const Arcs = {
   chapter(id) { const L = ARCS[id], s = ARC(id); return L && L[s.ch]; },
-  hereOK: c => c.where === 'miami' ? MIAMI() : c.where === 'daytona' ? DAYTONA() : SWAMP(),
+  hereOK: c => c.where === 'miami' ? MIAMI() : c.where === 'daytona' ? DAYTONA() : c.where === 'keys' ? KEYS() : SWAMP(),
   // a pink ! : this neighbor has a new chapter for you (never while the story needs them)
   offering(n) {
     const c = this.chapter(n.id), s = ARC(n.id);

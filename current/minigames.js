@@ -175,7 +175,7 @@ const Fishing = {
     OR(back, y - h * .55 + wig, 3, h * 1.1, sp.c1); R(front - dir * 4, y - h * .2, 1, 1, PAL.black);
     if (sp.id === 'gar') OR(dir > 0 ? front : front - 7, y - 1, 7, 2, sp.c1);
     if (sp.id === 'cat') { R(front - dir * 2, y + 1, dir * 5, 1, PAL.ink); R(front - dir * 2, y + 2, dir * 4, 1, PAL.ink); }
-    if (sp.legend) label('RONNIE', x, y - h / 2 - 3, PAL.yellow, 5);
+    if (sp.legend && (sp.tag || sp.id === 'ronnie')) label(sp.tag || 'RONNIE', x, y - h / 2 - 3, PAL.yellow, 5);   // (the Silver King used to say RONNIE)
   },
   gatorSide(G, t) {
     const x = Math.round(G.x), y = Math.round(G.y), sw = Math.sin(t * 8) * 2, dir = G.flee ? 1 : -1, P = (u, v, w, h, c) => OR(dir > 0 ? x + u : x - u - w, y + v, w, h, c);

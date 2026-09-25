@@ -12,7 +12,7 @@ const out = await p.evaluate(() => {
   const r = {}, log = [];
   const ALL = { acquitted: true, case2Won: true, case3Won: true, case4Won: true, case5Won: true };
   for (const [id, chs] of Object.entries(ARCS)) for (let ci = 0; ci < chs.length; ci++) {
-    const c = chs[ci]; const reg = c.where; go(reg, reg === 'miami' ? 14 : 25, ALL); Game.flags.arcs = Game.flags.arcs || {}; Game.flags.arcs[id] = { ch: ci, st: 'idle' };
+    const c = chs[ci]; const reg = c.where; if (c.sq) continue;   // sidequests.js chapters drive themselves: variety.mjs plays those go(reg, reg === 'miami' ? 14 : 25, ALL); Game.flags.arcs = Game.flags.arcs || {}; Game.flags.arcs[id] = { ch: ci, st: 'idle' };
     if (id === 'darlene' && ci === 2) Game.flags.arcs.merle = { ch: 3, st: 'idle' };
     Game.quests = Game.quests.filter(q => q.opt);   // no story in the way
     const n = Game.npcs.find(x => x.id === id); if (!n) { r[id + ci] = 'NO NPC in ' + reg; continue; }
