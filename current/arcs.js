@@ -224,8 +224,9 @@ const Arcs = {
   // a pink ! : this neighbor has a new chapter for you (never while the story needs them)
   offering(n) {
     const c = this.chapter(n.id), s = ARC(n.id);
-    return !!c && s.st === 'idle' && s.no !== Game.day && this.hereOK(c) && c.gate(Game.flags) && !Game.quests.some(q => !q.done && !q.opt && q.id.startsWith(n.id)) && Game.mode !== 'title';
+    return !!c && s.st === 'idle' && s.no !== Game.day && this.hereOK(c) && c.gate(Game.flags) && !Game.quests.some(q => !q.done && !q.opt && q.id.startsWith(n.id)) && Game.mode !== 'title' && !sideBusy() && !storyWants(n);
   },
+  anyActive() { const A = Game.flags.arcs || {}; return Object.keys(A).some(id => A[id].st === 'active'); },
   talk(n) {
     // a step that happens by talking to someone (Rita's karaoke machine, Boomer's gnome...)
     for (const id in ARCS) { const s2 = ARC(id), c2 = this.chapter(id); if (c2 && s2.st === 'active' && c2.act && !s2.acted && this.hereOK(c2) && c2.act.at() === n) { this.act(id); return true; } }

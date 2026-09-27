@@ -11,7 +11,7 @@ const r = await p.evaluate(() => {
   const go = (o, dy = 16) => { Object.assign(Game.dan, { x: o.x, y: o.y + dy, ride: null, dir: 'up' }); Game.mode = 'play'; };
   const act = () => { const a = interaction(); if (a) a.fn(); return a && a.label; };
   const mash = () => { for (let i = 0; i < 400 && Game.mode === 'mash'; i++) { Input.press('a'); step(1); } };
-  const objection = () => { for (let i = 0; i < 900 && (Game.mode === 'objection' || Game.mode === 'talk' || Game.mode === 'court'); i++) { if (Game.mode === 'objection') { const s = Objection.s; if (s && s.phase === 'show' && s.list[s.i].lie) Input.press('a'); step(2); } else if (Game.mode === 'talk') talk(); else step(2); if (Game.mode === 'gazette') break; } };
+  const objection = () => { for (let i = 0; i < 900 && (Game.mode === 'objection' || Game.mode === 'talk' || Game.mode === 'court' || Game.mode === 'scene'); i++) { if (Game.mode === 'objection') { const s = Objection.s; if (s && s.phase === 'show' && s.list[s.i].lie) Input.press('a'); step(2); } else if (Game.mode === 'talk') talk(); else step(2); if (Game.mode === 'gazette') break; } };
   const nextDay = () => { endDay('sleep'); if (Game.flags.creditsPending) { $('nextBtn').click(); $('creditsBtn').click(); } else $('nextBtn').click(); talk(); };
   const drivePath = (from, count) => { const P = pathPts(), N = P.length; for (let k = 0; k < count; k++) { const q = P[(from + k) % N]; Game.car.x = q.x; Game.car.y = q.y; Game.dan.x = q.x; Game.dan.y = q.y; step(1); if (Game.mode === 'talk') break; } };
   // ---- setup: Miami, day 17, after Case 5

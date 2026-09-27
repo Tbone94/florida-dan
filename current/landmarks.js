@@ -91,7 +91,7 @@ function drawLandmark(p, x, y, w, h, t) {
       R(x + 2, y - 16, 2, 14, PAL.woodD); R(x + w - 4, y - 16, 2, 14, PAL.woodD);
       for (let i = 0; i < w + 4; i += 8) R(x - 2 + i, y - 18, 8, 4, i % 16 ? PAL.white : PAL.red);   // striped awning
       OR(x + 4, y - 32, w - 8, 12, PAL.yellow); label('FIREWORKS', x + w / 2, y - 23, PAL.red, 6);
-      OR(x + w / 2 - 50, y + h + 4, 100, 9, PAL.white); label('& BOILED PEANUTS', x + w / 2, y + h + 12, PAL.red, 6);
+      OR(x + w / 2 - 50, y - 44, 100, 10, PAL.white); R(x + w / 2 - 1, y - 34, 2, 2, PAL.woodD); label('& BOILED PEANUTS', x + w / 2, y - 36, PAL.red, 6);   // a banner over the stand (on the ground, Boomer stood on it)
       break;
     }
     case 'pot': { shadow(x + 8, y + 14, 14); OR(x + 2, y + 2, 12, 9, PAL.greyD); R(x + 3, y + 2, 10, 2, PAL.mudL);

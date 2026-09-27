@@ -44,7 +44,7 @@ const Gigs = {
     const ids = Object.keys(GIGS).filter(id => { const d = GIGS[id]; return Game.npcs.some(n => n.id === d.giver) && !storyBusy(d.giver) && (!d.ok || d.ok()); }).sort(() => Math.random() - .5).slice(0, Game.region === 'swamp' ? 3 : 2);   // nobody offers a gig on a day they're in the story
     for (const id of ids) G.offers[GIGS[id].giver] = id;
   },
-  offering: n => { const G = G_(); return !G.active && !!G.offers[n.id]; },
+  offering: n => { const G = G_(); return !G.active && !!G.offers[n.id] && !Arcs.anyActive() && !storyWants(n); },   // no pitch mid-errand, or while the story needs them
   hasOffer: id => Gigs.offering({ id }),
   active: () => G_().active,
   drop() { const G = G_(); if (!G.active) return; G.active = null; Game.quests = Game.quests.filter(q => !q.gig); renderQuests(); note('Side gig abandoned. They’ll get over it.'); },

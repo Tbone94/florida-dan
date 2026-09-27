@@ -1,5 +1,5 @@
 // the mobile pass (9/26): the use prompt floats over the target (never on the hotbar), touch buttons read A/B/X,
-// flavor comments stay off screen while notes that matter still show, and the chunked tile cache draws exactly
+// every narration comment stays off screen, and the chunked tile cache draws exactly
 // what the old every-tile path drew in every region.
 import { chromium } from '/Users/happycamper/Projects/_tools/record-kit/node_modules/playwright/index.mjs';
 const b = await chromium.launch({ channel: 'chrome' });
@@ -21,7 +21,8 @@ const r = await p.evaluate(() => {
   window.TRAILER = false;   // the real flavor-comment behavior from here on
   // prompt over Merle, clear of the hotbar
   const m = Game.npcs.find(n => n.id === 'merle'); Object.assign(Game.dan, { x: m.x + 16, y: m.y + 2, dir: 'left', ride: null }); step(30);
-  if (ui.prompt.hidden || !/Talk to Merle/.test(ui.prompt.textContent)) bad.push('no Merle prompt: ' + ui.prompt.textContent);
+  if (ui.prompt.hidden || !/Talk to Merle/.test(ui.prompt.dataset.label)) bad.push('no Merle prompt: ' + ui.prompt.dataset.label);
+  else if (ui.prompt.textContent.trim() !== 'A') bad.push('prompt shows words: ' + ui.prompt.textContent);
   else {
     const pr = rect(ui.prompt), hb = rect(ui.hotbar), st = rect(stage);
     const cx = clamp(Game.cam.x, 0, MW * TS - VW), mx = st.left + (m.x - cx) / VW * st.width;
@@ -32,19 +33,37 @@ const r = await p.evaluate(() => {
   }
   // prompt over the boat, and gone when nothing's near
   Object.assign(Game.dan, { x: Game.boat.x + 18, y: Game.boat.y - 16 }); step(20);
-  if (/Board/.test(ui.prompt.textContent)) { const pr = rect(ui.prompt), st = rect(stage), bx = st.left + (Game.boat.x - clamp(Game.cam.x, 0, MW * TS - VW)) / VW * st.width; if (Math.abs((pr.left + pr.right) / 2 - bx) > 40) bad.push('boat prompt not over the boat'); }
+  if (/Board/.test(ui.prompt.dataset.label)) { const pr = rect(ui.prompt), st = rect(stage), bx = st.left + (Game.boat.x - clamp(Game.cam.x, 0, MW * TS - VW)) / VW * st.width; if (Math.abs((pr.left + pr.right) / 2 - bx) > 40) bad.push('boat prompt not over the boat'); }
   const far = { x: 30 * TS, y: 26 * TS }; let spot = null;
   for (let y = 10; y < 50 && !spot; y += 2) for (let x = 10; x < 80 && !spot; x += 2) { Object.assign(Game.dan, { x: x * TS + 8, y: y * TS + 8 }); if (canWalk(Game.dan.x, Game.dan.y) && !interaction()) spot = { x, y }; }
   step(10); if (spot && (!ui.prompt.hidden || $('btnA').classList.contains('ready'))) bad.push('prompt/A glow stuck on with nothing to use');
-  // flavor stays off screen; notes show and clear
+  // every narration comment stays off screen
   toast('Dan smokes like a man with no plans.'); step(2); if (!ui.toast.hidden) bad.push('a flavor toast showed');
-  note('Too slow. Talk to Tammy Jo to try again.'); step(2);
-  if ($('note').hidden) bad.push('note did not show'); else { const nr = rect($('note')), hb = rect(ui.hotbar); if (overlap(nr, hb)) bad.push('note overlaps the hotbar'); if (rect($('note')).left < rect(stage).left + rect(stage).width * .2) bad.push('note is still on the left'); }
-  step(60 * 4); if (!$('note').hidden) bad.push('note never cleared');
+  note('Too slow. Talk to Tammy Jo to try again.'); step(2); if (!ui.toast.hidden || $('note')) bad.push('a note showed (all narration is off screen now)');
   Game.inv.beer = 5; Game.inv.fish = 0; let stolen = false;
   for (let i = 0; i < 20 && !stolen; i++) { const gt = Game.animals.find(a => a.type === 'gator'); const before = Game.inv.beer; gatorBite(gt, 1, 0, 1); if (Game.inv.beer < before) stolen = true; }
-  if (stolen && !/Swamp Lite/.test($('note').textContent)) bad.push('stolen beer did not make a note');
-  Game.flags.hints = {}; hint('test', 'tip'); if (ui.hint.parentElement.id !== 'tips') bad.push('hint is not in the top tip stack');
+  if (stolen && !ui.toast.hidden) bad.push('the stolen-beer comment showed');
+  Game.flags.hints = {}; hint('test', `${K('punch')} punch &nbsp; ${K('b')} yell GIT &nbsp; ${K('a')} wrestle`); step(1); if (ui.hint.parentElement.id !== 'tips') bad.push('hint is not in the top tip stack');
+  else if (!ui.objective.hidden && overlap(rect(ui.hint), rect(ui.objective))) bad.push('tip overlaps the objective note');
+  // hurricane debris: pixel art, never more than 3, never piling up while a talk box is open
+  if (!debrisSprite('kevin') || !debrisSprite('chair') || !debrisSprite('trampoline') || !debrisSprite('flamingo')) bad.push('a debris sprite is missing');
+  Game.storm = 1; for (let i = 0; i < 60 * 20; i++) { step(1); if (Game.parts.filter(p => p.kind === 'debris').length > 3) { bad.push('more than 3 debris at once'); break; } }
+  if (Game.parts.some(p => p.kind === 'text' && /trampoline|lawn chair/.test(p.text))) bad.push('storm still throws words');
+  Game.parts = []; say([['DAN', 'Wind.']]); for (let i = 0; i < 60 * 10; i++) { Input.poll(); update(1 / 60); render(); hud(); }
+  if (Game.parts.some(p => p.kind === 'debris')) bad.push('debris spawned while the talk box was open'); Game.talk = null; ui.talk.hidden = true; Game.mode = 'play'; Game.storm = 0; Game.parts = [];
+  // the cooler: drives over pickups, and stops asking to be parked once you've parked it
+  Object.assign(Game.dan, { ride: 'cooler' }); Object.assign(Game.cooler, { x: Game.dan.x, y: Game.dan.y }); const beers = Game.inv.beer || 0;
+  Game.pickups.push({ kind: 'beer', x: Game.dan.x + 6, y: Game.dan.y }); step(2); if ((Game.inv.beer || 0) !== beers + 1) bad.push('cooler did not scoop up a beer');
+  Game.flags.parkedCooler = false; step(2); if (ui.prompt.hidden) bad.push('first-time park prompt missing');
+  Game.flags.parkedCooler = true; step(2); if (!ui.prompt.hidden) bad.push('park prompt still showing after parking once');
+  const ia = interaction(); if (!ia || !/Park/.test(ia.label)) bad.push('A no longer parks the cooler'); Game.dan.ride = null;
+  // talk order: nobody pitches a side job mid-errand; the story beat beats a side offer
+  const dar = Game.npcs.find(n => n.id === 'darlene'); const Gs = Game.day_.gig || (Game.day_.gig = { offers: {}, active: null, done: [] });
+  Game.flags.arcs = Game.flags.arcs || {}; Game.flags.arcs.__t = { ch: 0, st: 'active' }; Gs.offers.darlene = Object.keys(GIGS)[0];
+  if (dar && Gigs.offering(dar)) bad.push('Darlene pitches a gig while another side quest is active'); if (dar && Arcs.offering(dar)) bad.push('Darlene pitches her story mid-errand');
+  delete Game.flags.arcs.__t; delete Gs.offers.darlene;
+  const mq = Game.quests.find(q => !q.done && !q.opt), mt = mq && questTarget(mq), sn = mt && Game.npcs.find(n => n === mt || Math.hypot(n.x - mt.x, n.y - mt.y) < 40);
+  if (sn) { Gs.offers[sn.id] = Object.keys(GIGS)[0]; if (Gigs.offering(sn)) bad.push(`${sn.id} pitches a gig while the story needs them`); delete Gs.offers[sn.id]; }
   // chunked ground == the old every-tile path, everywhere
   const home = Game.region, res = {};
   for (const reg of ['swamp', 'miami', 'daytona', 'keys', 'orlando']) {

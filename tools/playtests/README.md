@@ -11,6 +11,7 @@ tools/playtests/runall.sh
 - `keys.mjs [mobile] [outdir]` — the Keys: both cases end to end with asserts (bridge run, declaration, citizens, sunset dance, dives, tarpon, Rex chase, trials), set-piece screenshots.
 - `phone.mjs`, `flam.mjs`, `lambo.mjs`, `fixes2.mjs` — self-playing calls/texts/whistle, lawn flamingos, the Lambo soft-lock, the 9/24 bug-pass regressions.
 - `variety.mjs [outdir]` — the side-quest variety pass (sidequests.js): every new gig and Keys/Daytona neighbor-story chapter end to end, each choice branch, fail/retry paths, real cooler/boat driving and sneaking. `PORT=8814` targets another server.
+- `regionside.mjs` — every region, story day + endless: whoever the story needs never pitches a side job; nobody pitches mid-errand.
 - `mobileux.mjs` — the 9/26 mobile pass: floating use prompt (over the target, off the hotbar), A/B/X touch labels, flavor comments hidden / notes shown, tile chunk cache pixel-matches the old path in every region.
 - `lint.py` — runs first: syntax, code swallowed by `//` comments, and const clashes across scripts.
 - `dayt.mjs` / `dayt2.mjs` — Daytona Cases 6–7 end to end; Daytona gigs, shops, race loss/retry, motel sleep, pier fishing.

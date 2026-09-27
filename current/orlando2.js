@@ -336,12 +336,48 @@ CLEAN_LIMIT[10] = 9; CLEAN_LIMIT[11] = 9;
 CREDITS[10] = ['WHIMSY LICENSED', 'Kyle juices oranges now. He can see the sky.<br>Todd’s video hit six million views. The castle videos did not.<br>Dan has a $25 whimsy license. It’s laminated.', 'Next case'];
 CREDITS[11] = ['THE END', 'Eleven cases. Five counties. One sash, one sister nation, one whimsy license.<br>Daniel Wayne Dupree: a Florida Man. He said so himself. In open court.<br><br>The swamp, Miami, Daytona, the Keys and Orlando are all yours. Forever.', 'Keep being Dan',
   'Starring Dan, Brenda (in person), Merle, Darlene, Deputy Rhonda, Kayden, Dr. Pam, Kevin, Abuela, Tammy Jo, Old Gus, Kyle, Trash Baby, Manny, Gary the Skunk Ape, and Chuck as himself.'];
+// The Orlando trials play out on the court stage (courtCut: people walk in, the side door blows in, bubbles) and keep the
+// talk box for the lines that matter. Stage coords, feet at x, y; the action stays above y≈122 (a phone's talk box covers
+// the bottom third). The gallery for the finale: [actor id, sprite, x] (feet at y 114), plus Gary, Manny and the rooster.
 const OrlandoCourt = {
+  SEATS: [['judge', 'HARLAN'], ['vega', 'VEGA'], ['pettibone', 'PETTIBONE'], ['pinder', 'PINDER'], ['blossom', 'BLOSSOM']],
+  GALLERY: [['g_merle', 'merle', 44], ['g_darlene', 'darlene', 60], ['g_rhonda', 'rhonda', 76], ['g_kayden', 'kayden', 92], ['g_abuela', 'abuela', 108],
+    ['g_tammy', 'tammy', 216], ['g_gus', 'gus', 232], ['g_pam', 'pam', 248], ['g_kyle', 'kyle', 264]],
+  seatX: i => 100 + i * 30,   // the panel bench stops short of the jury box (it used to cover the jurors)
+  act: id => (Game.courtActors || []).find(a => a.id === id),
+  // a bubble at a chosen height, so two people can talk at once without their bubbles landing on each other
+  line(id, text, d = 1.6, hi = 30) { return { start() { Scene.bubbles.push({ who: () => OrlandoCourt.act(id), text, life: d, hi }); if (Sound.voice) Sound.voice(String(id).toUpperCase()); }, dur: d }; },
+  hop(id, h = 5, d = .4) { return { dur: d, start(s) { s.a = OrlandoCourt.act(id); }, tick(dt, t, s) { if (s.a) s.a.lift = Math.sin(Math.min(1, t / d) * Math.PI) * h; }, finish(s) { if (s.a) s.a.lift = 0; } }; },
+  // bubble spots over Squeaky Corp's table (drawOrlandoCourt draws Mr. Pembrook and the CEO there)
+  stage() { CT.add('pembrook', null, 252, 74, 'down', { anchor: true }); CT.add('ceo', null, 278, 74, 'down', { anchor: true }); },
+  // Chuck through the side door, in mouse ears (the ears ride along on top of whatever Chuck is doing)
+  chuckIn(x, y) {
+    Game.courtChuck = 1; CT.gator('chuck', x, y, 'left');
+    CT.add('chuckEars', null, x, 999, 'down', { draw: () => {
+      const c = OrlandoCourt.act('chuck'); if (!c) return; const k = 1.4, x0 = Math.round(c.x), y0 = Math.round(c.y), d = c.dir;
+      if (Game.courtExtra.squash) g.drawImage(SPR.cheddarton.down[0], 0, 0, 16, 12, 270, 71, 16, 9);   // the CEO's face, peeking out from under Chuck
+      for (const v of [-8, 5]) { const u = 6 * k, w = 3 * k, vv = v * k; const [px, py] = d === 'right' ? [x0 + u, y0 + vv] : d === 'left' ? [x0 - u - w, y0 + vv] : d === 'down' ? [x0 + vv, y0 + u] : [x0 + vv, y0 - u - w]; OR(Math.round(px), Math.round(py), 5, 5, '#3a3440'); R(Math.round(px) + 1, Math.round(py) + 1, 3, 3, '#ff9ec7'); }
+    } });
+  },
   whimsy() {
-    CourtCases.begin(); const F = Game.flags; Game.courtExtra.ceo = true;
-    say([['BAILIFF', 'All rise for the Honorable Judge Beverly Blossom.'], ['JUDGE BLOSSOM', 'Squeaky Corporation versus Daniel Wayne Dupree. My, what a crowd.'], ...CourtCases.clean(10),
-      ['JUDGE BLOSSOM', 'Grand Theft Mouse. Mascot Impersonation. And Unlicensed Whimsy.'], ['MR. PEMBROOK', 'Your Honor, Squeaky Corp will prove this man stole a MOUSE.'], ['BRENDA', '(whispering) Lies only, Dan. You’ve done this TEN times.']],
-    () => { Objection.speaker = 'MR. PEMBROOK'; Objection.run([
+    CourtCases.begin(); const F = Game.flags; Game.courtExtra.ceo = true; this.stage();
+    if (F.kyleIn) CT.add('kyle', 'kyle', 214, 114, 'down');
+    CT.add('briefcase', null, 234, 104, 'down', { draw: a => { OR(a.x - 5, a.y - 7, 10, 7, '#5a3a20'); R(a.x - 2, a.y - 9, 4, 2, PAL.ink); } });
+    const open = [...CourtCases.clean(10), ['JUDGE BLOSSOM', 'Squeaky Corporation versus Dupree. Grand Theft Mouse. Mascot Impersonation. And Unlicensed Whimsy.']];
+    courtCut([
+      SC.say(open),
+      SC.line('pembrook', 'He stole a MOUSE, Your Honor.', 1.6),
+      SC.line('ceo', 'The children saw him DRINK!', 1.6),
+      SC.line('dan', 'Kids see dads drink, man.', 1.5),
+      SC.sound('boom'), SC.shake(10), SC.flash(.5), SC.fx(() => this.chuckIn(314, 100)),
+      SC.all([SC.walk('chuck', 262, 100, 95), SC.emote('jury', '!!', .9, PAL.red)]), SC.place('chuck', 262, 100, 'left'),
+      SC.line('judge', 'Are those... EARS?', 1.4),
+      SC.line('dan', 'That’s Chuck. Outlet ears.', 1.5),
+      SC.fx(() => { const c = this.act('chuck'); if (c) c.chomp = 1; CT.remove('briefcase'); }), SC.sound('chomp'), SC.shake(5),
+      SC.line('pembrook', 'MY BRIEFCASE!', 1.3),
+      SC.fx(() => { const c = this.act('chuck'); if (c) Object.assign(c, { chomp: 0, state: 'wander' }); }),
+      SC.line('lawyer', 'Lies only, Dan.', 1.3),
+    ], () => { Objection.speaker = 'MR. PEMBROOK'; Objection.run([
       { text: 'The defendant wore the Mr. Squeaky suit inside SqueakyLand.', lie: false, over: 'He did. There are 900 photos. He’s doing a thumbs-up in all of them.' },
       { text: 'The defendant attacked Mr. Squeaky and tore his head off.', lie: true, bust: 'He HUGGED him. Too hard. The head came off on its own.' },
       { text: 'The suit was stolen from a Squeaky Corp employee.', lie: !!F.kyleIn, bust: 'The employee GAVE it to him, then left in his underwear. Kyle is here. Hi, Kyle.', over: 'Nobody can find the employee. Very convenient for the mouse.' },
@@ -349,74 +385,111 @@ const OrlandoCourt = {
       { text: 'Mr. Squeaky has never once taken his head off in public.', lie: !!F.phoneGot, bust: 'Todd’s video, minute two. The head pops off and a man named Kyle says “thank GOD.”', over: 'No footage says otherwise. The mouse’s record stands.' },
     ], () => this.whimsyEnd()); });
   },
+  // Kyle takes the stand, the verdict, and the CEO storms out past Chuck
   whimsyEnd() {
-    const F = Game.flags;
-    say([['BRENDA', F.kyleIn ? 'The defense calls Kyle. Formerly Mr. Squeaky.' : 'The defense calls... nobody. Kyle is at a juice stand.'], ...(F.kyleIn ? [['KYLE', 'I gave him the suit. Best day of my life. I saw the SUN, Your Honor.']] : []),
-      ['MR. PEMBROOK', 'Squeaky Corp’s CEO would like to address the court.'], ['', 'A man in a mouse-ear tie stands. Wendell Cheddarton. He smells like money and churros.'],
-      ['CHEDDARTON', 'That man ruined the Magic. The children saw Mr. Squeaky DRINK.'], ['DAN', 'Kids see their dads drink every Saturday, man.'],
-      ['', '*CRASH*'], ['', 'The doors burst open. It’s Chuck. He took I-4. He is wearing mouse ears.'], ['JUDGE BLOSSOM', 'Is that— are those EARS?'], ['DAN', 'That’s Chuck. He comes to all my trials. He got the ears at the outlet.'],
-      ['', 'Chuck eats Mr. Pembrook’s briefcase. Mr. Pembrook withdraws two charges.'], ['JUDGE BLOSSOM', 'The suit was a gift. The head came off by itself. Not guilty of theft or impersonation.'],
-      ['JUDGE BLOSSOM', 'Unlicensed Whimsy... Mr. Dupree, you owe the county one $25 whimsy license.'], ['DAN', 'I’m still not a Florida Man.'], ['BRENDA', 'You got sued by a MOUSE, Dan.'],
-      ['CHEDDARTON', '(on the steps) Squeaky Corp never loses, Mr. Dupree. I have friends in Tallahassee.'], ['CHEDDARTON', 'You’ll be hearing from us. And our mouse.']],
-    () => { Game.money = Math.max(0, Game.money - 25); headline('JUDGE: FLORIDA MAN "NOT A MOUSE THIEF," MUST BUY $25 WHIMSY LICENSE; GATOR IN EARS EATS BRIEFCASE', 10); F.case10Won = true; F.creditsPending = 10; endDay('court'); });
+    const F = Game.flags, E = Game.courtExtra;
+    courtCut([
+      SC.line('lawyer', F.kyleIn ? 'The defense calls Kyle.' : 'Kyle’s at a juice stand.', 1.5),
+      ...(F.kyleIn ? [SC.walk('kyle', 196, 98, 60), SC.place('kyle', 196, 98, 'down'), SC.line('kyle', 'I GAVE him the suit!', 1.5), SC.all([SC.line('kyle', 'I saw the SUN, Your Honor.', 1.7), this.hop('kyle')])] : []),
+      SC.say([['JUDGE BLOSSOM', 'The suit was a gift. The head came off by itself. Not guilty of theft or impersonation.'], ['JUDGE BLOSSOM', 'Unlicensed Whimsy, though... you owe the county one $25 whimsy license.']]),
+      SC.line('dan', 'Still not a Florida Man.', 1.5), SC.line('lawyer', 'You got sued by a MOUSE, Dan.', 1.6),
+      SC.fx(() => { E.ceoOut = true; CT.add('ceo', 'cheddarton', 278, 72, 'down'); }), SC.walk('ceo', 302, 112, 55), SC.place('ceo', 302, 112, 'left'),
+      SC.line('ceo', 'Squeaky Corp never loses.', 1.6), SC.line('ceo', 'You’ll hear from our mouse.', 1.6),
+      SC.fx(() => { const c = this.act('chuck'); if (c) Object.assign(c, { chomp: 1, dir: 'right' }); }), SC.sound('chomp'), SC.shake(5), SC.emote('ceo', '!!', .6, PAL.red),
+      SC.walk('ceo', 340, 112, 150), SC.fx(() => { const c = this.act('chuck'); if (c) c.chomp = 0; }), SC.wait(.3),
+    ], () => { Game.money = Math.max(0, Game.money - 25); headline('JUDGE: FLORIDA MAN "NOT A MOUSE THIEF," MUST BUY $25 WHIMSY LICENSE; GATOR IN EARS EATS BRIEFCASE', 10); F.case10Won = true; F.creditsPending = 10; endDay('court'); });
   },
   finale() {
     CourtCases.begin(); const F = Game.flags, E = Game.courtExtra; E.panel = true; E.ceo = true; E.gang = !!F.gangHere; Game.courtJudge = 'JUDGE HARLAN';
-    say([['BAILIFF', 'All rise. For the first time in Florida history: a five-judge panel.'], ['', 'In walk Judge Harlan, Judge Vega, Judge Pettibone, Judge Pinder and Judge Blossom.'],
-      ['JUDGE HARLAN', 'Mr. Dupree. Eleven cases. Five counties. We ALL asked to be here.'], ['JUDGE PINDER', 'I brought the rooster. He’s in the gallery. He has seniority.'], ...CourtCases.clean(11),
-      ['JUDGE HARLAN', 'In re: Daniel Wayne Dupree. A petition under the Florida Man Act.'], ['JUDGE HARLAN', 'The question is simple. Is the respondent... a Florida Man?'],
-      ['MR. PEMBROOK', 'Your Honors, Squeaky Corp will now read the respondent’s headlines. All of them.'], ['BRENDA', '(whispering) Last time, Dan. Lies only. Make it count.']],
-    () => { Objection.speaker = 'MR. PEMBROOK'; Objection.run([
+    this.stage(); E.seat = {};
+    this.SEATS.forEach(([s], i) => { CT.add('j' + i, null, this.seatX(i), 66, 'down', { anchor: true }); CT.add('w' + i, s, 316 + i * 18, 112, 'left'); });
+    CT.add('rooster', 'rooster', 26, 104, 'down');
+    if (E.gang) {
+      this.GALLERY.forEach(([id, s, x]) => CT.add(id, s, x, 114, 'down'));
+      CT.add('g_gary', null, 196, 114, 'down', { draw: a => { g.save(); g.translate(Math.round(a.x - 12), Math.round(a.y - 27 - (a.lift || 0))); g.scale(1.3, 1.3); g.drawImage(SPR[a.flip ? 'skunkapeL' : 'skunkape'], 0, 0); g.restore(); label('GARY', a.x, a.y - 30, PAL.yellow, 5); } });
+      CT.add('g_manny', null, 132, 114, 'down', { draw: (a, t) => { OR(a.x - 14, a.y - 8, 28, 8, PAL.blue); R(a.x - 12, a.y - 6, 24, 2, PAL.waterL); g.drawImage(SPR.manatee, a.x - 12, Math.round(a.y - 15 + Math.sin(t * 2) - (a.lift || 0))); label('MANNY', a.x, a.y - 18, PAL.glow, 5); } });
+    }
+    const open = [...CourtCases.clean(11), ['JUDGE HARLAN', 'In re: Daniel Wayne Dupree, under the Florida Man Act. The question is simple. Is the respondent... a Florida Man?']];
+    courtCut([
+      SC.all([...this.SEATS.map((_, i) => SC.walk('w' + i, this.seatX(i), 90, 110)), SC.line('gallery', 'FIVE judges?!', 1.6)]),
+      SC.all(this.SEATS.map((_, i) => SC.walk('w' + i, this.seatX(i), 62, 80))),
+      SC.all(this.SEATS.map((_, i) => SC.lift('w' + i, 40, .3))),
+      SC.fx(() => this.SEATS.forEach((_, i) => { CT.remove('w' + i); E.seat[i] = true; })),
+      SC.line('j0', 'We ALL asked to be here.', 1.6),
+      SC.all([SC.line('j3', 'The rooster has seniority.', 1.6), this.hop('rooster', 6)]),
+      SC.say(open),
+      SC.line('pembrook', 'We’ll read ALL his headlines.', 1.6),
+      SC.line('lawyer', 'Last time, Dan. Lies only.', 1.6),
+    ], () => { Objection.speaker = 'MR. PEMBROOK'; Objection.run([
       { text: 'The respondent once wrestled an alligator in open court.', lie: false, over: 'He did. In MY courtroom. I kept the alligator.' },
-      { text: 'The respondent rode a manatee through a hurricane.', lie: false, over: 'Forty million views. The manatee testified. Very persuasive manatee.' },
       { text: 'The respondent personally ran the Sinus Cartel.', lie: true, bust: 'A PELICAN ran the Sinus Cartel. Señor Pelícano. He’s doing ten to twenty.' },
       { text: 'Squeaky Corp had nothing to do with the Florida Man Act.', lie: !!F.memo, bust: 'Exhibit M: the memo. “Draft 9. By Squeaky Corp Legal.” From their own safe.', over: 'Nobody can prove otherwise. The mouse is very careful.' },
       { text: 'No respectable Floridian acts like the respondent.', lie: !!F.ridePhoto, bust: 'Exhibit P: your CEO. Shirtless. Shotgunning a beer on Space Squeak Mountain.', over: 'The court has no evidence to the contrary. Sadly.' },
       { text: 'Nobody in this state would vouch for the respondent.', lie: !!F.gangHere, bust: 'Counselor. Turn around.', over: 'The gallery is... empty. That’s rough, son.' },
     ], () => this.finaleEnd()); });
   },
+  // everybody testifies (two at a time), Chuck sits on the CEO, Dan approaches the bench, the question
   finaleEnd() {
-    const F = Game.flags, E = Game.courtExtra, gang = !!F.gangHere;
-    say([['BRENDA', gang ? 'The defense calls... everybody.' : 'The defense calls Daniel Dupree. That’s it. That’s the list.'], ...(gang ? [['', 'The doors open. They just keep coming in.'],
-      ['MERLE', 'Merle Dupree. Cousin. He fixed my roof in a hurricane. With a stop sign.'], ['DARLENE', 'Eleven years he’s bought a Swamp Lite and asked about my kids. Every day.'],
-      ['RHONDA', 'I’ve arrested him nine times. He’s never once been mean to me.'], ['ABUELA', 'He returned the cartel’s medicine. With a flyer. He is an idiot. He is MY idiot.'],
-      ['TAMMY JO', 'He won the Daytona 250 and gave the trophy to the pit crew.'], ['OLD GUS', 'Forty years nobody believed me. He did.'],
-      ['SKUNK APE', 'HRRRM. HRM HRRRRM.'], ['BRENDA', 'Gary says “he shares his beer.”'], ['', 'From the kiddie pool in the aisle, a manatee says “Daaaniel.” Everyone hears it.']] : []),
-      ['CHEDDARTON', 'OBJECTION! Friends are NOT evidence!'], ['', '*CRASH*'], ['', 'The doors explode inward. It’s Chuck. Of course it’s Chuck. Tiny tie. Mouse ears.'],
-      ['JUDGE HARLAN', '...Hey, Chuck.'], ['JUDGE PINDER', 'Chuck.'], ['JUDGE BLOSSOM', 'Hi, Chuck.'], ['', 'Chuck walks over to Cheddarton, sits on him, and stays there. Nobody moves him.'],
-      ['JUDGE HARLAN', 'Mr. Dupree. Eleven cases ago you stood in my courtroom and I asked for your plea.'], ['JUDGE HARLAN', 'You said being a Florida Man was a lifestyle. I said that wasn’t a plea.'],
-      ['JUDGE HARLAN', 'I was right. It isn’t a plea. It isn’t a crime, either.'], ['JUDGE HARLAN', 'The Florida Man Act is struck down. The petition is DENIED. The cooler stays.'],
-      ['JUDGE HARLAN', 'One more question, son. For the record. For all of us.'], ['JUDGE HARLAN', 'Are you a Florida Man?', [
-        ['“I am NOT a Florida Man.”', () => [['', 'The whole gallery, all at once:'], ['EVERYBODY', 'YES YOU ARE!'], ['DAN', '...Yeah. Yeah, I am.'], ['DAN', 'I’m a Florida Man. And these are my Florida people.'], ['BRENDA', 'Eleven cases, Dan. You finally said it.']]],
-        ['“...Yeah. I am.”', () => [['DAN', 'I fight gators. I ride manatees. I lose my pants. A lot.'], ['DAN', 'And every time I fell in the swamp, somebody in this room pulled me out.'], ['DAN', 'So yeah. Florida Man. Proud of it.'], ['BRENDA', 'Eleven cases, Dan. You finally said it.']]],
-        ['Crack a Swamp Lite', () => { Sound.play('crack'); return [['', '*crack*'], ['JUDGE HARLAN', '...Is that a Swamp Lite?'], ['DAN', 'Want one?'], ['JUDGE HARLAN', 'Eleven cases ago I said “after.” ...Yeah. Now.'], ['', 'Four hundred cans open at once. Five judges. One gator. Brenda.'], ['BRENDA', 'Dan. You didn’t even answer the question.'], ['DAN', 'That WAS the answer, Brenda.']]; }]]],
-      ['', 'Brenda hugs Dan. Chuck hugs Dan. Gary hugs everyone. Rhonda allows it.'],
-      ['JUDGE HARLAN', 'Court is adjourned. Forever. Somebody get the alligator a lawyer.']],
-    () => { E.hug = true; headline('FLORIDA MAN ACT STRUCK DOWN; FLORIDA MAN ADMITS HE IS "A FLORIDA MAN" IN OPEN COURT; ALLIGATOR SITS ON CEO', 15); this.parade(); });
+    const F = Game.flags, E = Game.courtExtra, gang = !!F.gangHere, L = (id, s, d, hi) => this.line(id, s, d, hi); let pick = 0;
+    courtCut([
+      SC.line('lawyer', gang ? 'The defense calls... everybody.' : 'We call Dan. That’s the list.', 1.6),
+      ...(gang ? [
+        SC.all([...this.GALLERY.map(([id]) => this.hop(id)), this.hop('g_gary'), this.hop('g_manny', 3)]),
+        SC.all([L('g_merle', 'Fixed my roof. Stop sign.'), L('g_tammy', 'Gave his trophy to the crew.', 1.6, 50)]),
+        SC.all([L('g_rhonda', 'Nine arrests. Never mean.'), L('g_gus', 'Nobody believed me. He did.', 1.6, 50)]),
+        SC.all([L('g_abuela', 'He is an idiot. MY idiot.'), L('g_gary', 'HRRRM. HRM HRRRRM.', 1.6, 50)]),
+        SC.all([L('g_darlene', 'Asks about my kids. Daily.'), L('lawyer', 'Gary: “he shares his beer.”', 1.8)]),
+        SC.all([L('g_manny', 'Daaaniel.', 1.5), ...this.SEATS.map((_, i) => SC.emote('j' + i, '!', .9))]),
+      ] : []),
+      SC.line('ceo', gang ? 'Friends are NOT evidence!' : 'He has NO witnesses!', 1.5),
+      SC.sound('boom'), SC.shake(10), SC.flash(.5), SC.fx(() => this.chuckIn(314, 104)),
+      SC.walk('chuck', 292, 96, 100), SC.walk('chuck', 280, 66, 70), SC.place('chuck', 280, 66, 'right'), SC.fx(() => { const c = this.act('chuck'); if (c) c.state = 'wander'; E.squash = true; }),
+      SC.sound('punch'), SC.shake(4), SC.emote('ceo', '!!', 1, PAL.red),
+      SC.all([SC.line('j0', '...Hey, Chuck.', 1.3), SC.line('j4', 'Hi, Chuck.', 1.3)]), SC.line('j3', 'Chuck.', 1),
+      SC.fx(() => CT.cast()), SC.walk('dan', 160, 104, 70), SC.place('dan', 160, 104, 'up'),
+      SC.say([['JUDGE HARLAN', 'Mr. Dupree. Eleven cases ago you told me being a Florida Man was a lifestyle. I said that wasn’t a plea.'],
+        ['JUDGE HARLAN', 'I was right. It isn’t a plea. It isn’t a crime, either.'], ['JUDGE HARLAN', 'The Florida Man Act is struck down. The petition is DENIED. The cooler stays.'],
+        ['JUDGE HARLAN', 'One more question, son. For the record. For all of us. Are you a Florida Man?', [
+          ['“I am NOT a Florida Man.”', () => { pick = 0; return null; }],
+          ['“...Yeah. I am.”', () => { pick = 1; return null; }],
+          ['Crack a Swamp Lite', () => { pick = 2; Sound.play('crack'); return null; }]]]]),
+    ], () => courtCut(this.answer(pick, gang), () => { E.hug = true; headline('FLORIDA MAN ACT STRUCK DOWN; FLORIDA MAN ADMITS HE IS "A FLORIDA MAN" IN OPEN COURT; ALLIGATOR SITS ON CEO', 15); this.parade(); }));
+  },
+  // the answer, the room's answer, then the hug
+  answer(pick, gang) {
+    const E = Game.courtExtra, crowd = gang ? 'gallery' : 'pembrook', hops = gang ? [...this.GALLERY.map(([id]) => this.hop(id, 6)), this.hop('g_gary', 6)] : [];
+    const end = [
+      SC.all([SC.walk('lawyer', 176, 104, 70), ...(gang ? [SC.walk('g_gary', 86, 116, 130)] : [])]), SC.place('lawyer', 176, 104, 'left'),
+      SC.fx(() => { E.hug = true; }), SC.face('dan', 'right'), SC.emote('dan', '♥', 1.2, PAL.hat),
+      ...(gang ? [SC.place('g_gary', 86, 116), SC.line('g_rhonda', '...I’ll allow it.', 1.4)] : []),
+      SC.line('j0', 'Court is adjourned. Forever.', 1.7), SC.line('j0', 'Get that gator a lawyer.', 1.5),
+    ];
+    if (pick === 0) return [SC.all([SC.line('jury', 'YES YOU ARE!', 1.6), SC.line('j2', 'YES YOU ARE!', 1.6), SC.line(crowd, 'YES YOU ARE!', 1.6), ...hops]),
+      SC.say([['DAN', '...Yeah. Yeah, I am. I’m a Florida Man. And these are my Florida people.'], ['BRENDA', 'Eleven cases, Dan. You finally said it.']]), ...end];
+    if (pick === 1) return [SC.say([['DAN', 'I fight gators. I ride manatees. I lose my pants. A lot.'], ['DAN', 'And every time I fell in the swamp, somebody in this room pulled me out. So yeah. Florida Man. Proud of it.'], ['BRENDA', 'Eleven cases, Dan. You finally said it.']]),
+      SC.all([SC.line(crowd, 'DAN! DAN! DAN!', 1.6), SC.line('jury', 'DAN! DAN! DAN!', 1.6), ...hops]), ...end];
+    return [SC.line('j0', '...Is that a Swamp Lite?', 1.5), SC.line('dan', 'Want one?', 1.2), SC.line('j0', 'I said “after.” It’s after.', 1.7),
+      SC.sound('crack'), SC.all([SC.line('jury', '*crack*', 1.3), SC.line('j1', '*crack*', 1.3), SC.line('j3', '*crack*', 1.3), SC.line(crowd, '*crack*', 1.3), ...hops]), SC.sound('crack'),
+      SC.say([['BRENDA', 'Dan. You didn’t even answer the question.'], ['DAN', 'That WAS the answer, Brenda.']]), ...end];
   },
   parade() {
     Game.scene = 'finale'; Game.mode = 'court';
     say([['', 'THAT NIGHT. SQUEAKYLAND. They’ve never let a Florida Man lead the parade. Until now.'], ['KYLE', '(back in the suit, by choice, one night only) Ladies and gentlemen... FLORIDA MAN!'],
-      ['', 'Merle waves the turkey fryer. Manny waves a flipper. Trash Baby steals a churro.'], ['BRENDA', 'So. What now?'],
-      ['DAN', 'The swamp. Miami. Daytona. The Keys. Orlando. It’s all ours, Brenda.'], ['DAN', 'Wanna get a Swamp Lite?'], ['BRENDA', '...Yeah. Yeah, I do.']],
+      ['BRENDA', 'So. What now?'], ['DAN', 'The swamp. Miami. Daytona. The Keys. Orlando. It’s all ours, Brenda. Wanna get a Swamp Lite?'], ['BRENDA', '...Yeah. Yeah, I do.']],
     () => { headline('FLORIDA MAN LEADS SQUEAKYLAND PARADE ON GIANT COOLER FLOAT; MOUSE "FINE WITH IT, HONESTLY"', 6); Game.flags.case11Won = true; Game.flags.theEnd = true; Game.flags.creditsPending = 11; endDay('court'); });
   },
 };
-// the court, Orlando style: the five-judge panel, the CEO's table, the whole gang in the gallery, Chuck in ears
+// the court, Orlando style: the five-judge panel, Squeaky Corp's table (the gang, Chuck and Kyle are court actors)
 function drawOrlandoCourt(E, t) {
   if (E.panel) {
-    R(52, 0, 216, 18, '#6b4a2e'); for (let x = 60; x < 268; x += 20) R(x, 0, 1, 18, '#5a3d25');   // five judges don't fit under the motto
-    OR(56, 18, 208, 34, PAL.woodD); R(56, 18, 208, 4, PAL.woodL); OR(148, 23, 24, 11, PAL.yellow); OR(152, 25, 16, 7, PAL.blue);
-    [['judge', 'HARLAN'], ['vega', 'VEGA'], ['pettibone', 'PETTIBONE'], ['pinder', 'PINDER'], ['blossom', 'BLOSSOM']].forEach(([s, nm], i) => { const x = 72 + i * 40; g.drawImage(SPR[s].down[0], 0, 0, 16, 18, x, 2, 16, 18); label(nm, x + 8, i % 2 ? 50 : 43, PAL.yellow, 4); });
+    R(84, 0, 156, 18, '#6b4a2e'); for (let x = 100; x < 240; x += 20) R(x, 0, 1, 18, '#5a3d25');   // (covers the regular judge + bench)
+    OR(84, 18, 156, 34, PAL.woodD); R(84, 18, 156, 4, PAL.woodL); OR(148, 23, 24, 11, PAL.yellow); OR(152, 25, 16, 7, PAL.blue);
+    R(241, 18, 79, 28, '#6b4a2e'); for (let x = 260; x < VW; x += 20) R(x, 18, 1, 28, '#5a3d25');   // the bench hid half the motto: paint it out, hang it on the right wall
+    [['IN GOD', 24], ['WE TRUST', 32], ['(MOSTLY)', 40]].forEach(([s, y]) => label(s, 293, y, PAL.yellow, 5));
+    OrlandoCourt.SEATS.forEach(([s, nm], i) => { const x = OrlandoCourt.seatX(i); if (!E.seat || E.seat[i]) g.drawImage(SPR[s].down[0], 0, 0, 16, 18, x - 8, 2, 16, 18); label(nm, x, i % 2 ? 51 : 43, PAL.yellow, 4); });
   }
-  if (E.ceo) { g.drawImage(SPR.pembrook.down[0], 244, 50); g.drawImage(SPR.cheddarton.down[0], 270, 50); if (E.hug) { OR(262, 66, 30, 9, PAL.gator); R(268, 63, 4, 3, '#3a3440'); R(280, 63, 4, 3, '#3a3440'); } }
-  if (E.gang) {
-    ['merle', 'darlene', 'rhonda', 'kayden', 'abuela'].forEach((s, i) => g.drawImage(SPR[s].up[0], 0, 0, 16, 14, 8 + i * 20, 158, 16, 14));
-    ['tammy', 'gus', 'pam', 'kyle'].forEach((s, i) => g.drawImage(SPR[s].up[0], 0, 0, 16, 14, 222 + i * 20, 158, 16, 14));
-    g.save(); g.translate(294, 118); g.scale(1.3, 1.3); g.drawImage(SPR.skunkape, 0, 0); g.restore(); label('GARY', 305, 114, PAL.yellow, 5);
-    OR(106, 162, 36, 10, PAL.blue); R(108, 164, 32, 2, PAL.waterL); g.drawImage(SPR.manatee, 112, 152 + Math.sin(t * 2)); label('MANNY', 124, 150, PAL.glow, 5);
-  }
-  if (E.hug) { const b = Math.round(Math.abs(Math.sin(t * 6)) * 2); label('♥', 165, 112 - b, PAL.hat, 10); for (let i = 0; i < 20; i++) R((hash2(i, 1) * VW + t * 30) % VW, (hash2(i, 2) * VH + t * (40 + i)) % VH, 2, 1, [PAL.hat, PAL.yellow, PAL.teal, PAL.white][i % 4]); }
+  if (E.ceo) { g.drawImage(SPR.pembrook.down[0], 244, 50); if (!E.squash && !E.ceoOut) g.drawImage(SPR.cheddarton.down[0], 270, 50); if (E.hug && !OrlandoCourt.act('chuck')) { OR(262, 66, 30, 9, PAL.gator); R(268, 63, 4, 3, '#3a3440'); R(280, 63, 4, 3, '#3a3440'); } }
+  if (E.hug) { const d = OrlandoCourt.act('dan'), hx = d && !d.anchor ? d.x + 8 : 165, hy = d && !d.anchor ? d.y - 24 : 112, b = Math.round(Math.abs(Math.sin(t * 6)) * 2); label('♥', hx, hy - b, PAL.hat, 10); for (let i = 0; i < 20; i++) R((hash2(i, 1) * VW + t * 30) % VW, (hash2(i, 2) * VH + t * (40 + i)) % VH, 2, 1, [PAL.hat, PAL.yellow, PAL.teal, PAL.white][i % 4]); }
 }
 // the last parade: fireworks over the Cheese Castle, the whole cast on a giant cooler float with its headlights on
 function drawFinale(t) {

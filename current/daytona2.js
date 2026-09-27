@@ -336,46 +336,82 @@ ICONS.donutsign = { key: { o: 'ink', p: 'hat', w: 'white', y: 'yellow' }, rows: 
 CLEAN_LIMIT[6] = 9; CLEAN_LIMIT[7] = 9;
 CREDITS[6] = ['NOT GUILTY (OF PACING)', 'The drive-thru has a sign now: NO RACE CARS.<br>Donna sold a record 492 donuts. Rusty is sober-ish and back in business.<br>And Rusty’s driver just quit.', 'Next case'];
 CREDITS[7] = ['DAYTONA 250 CHAMPION', 'Chip Sterling is doing community service: washing stock cars with a toothbrush.<br>The #29 hangs in Rusty’s garage. Swamp Lite made Dan a commercial. It is 40 seconds of him burping.<br><br>The swamp, Miami and Daytona are all yours now. Ride the Greyhound anytime.', 'Keep being Dan'];
+// Case 7's gallery: Tiny, in Chip's green Gator Juice jacket (he waves when the jacket comes up in the objections)
+function drawCourtTiny(a, t) {
+  const s = Objection.s, it = s && s.list[s.i], wave = !!(it && it.tiny && s.phase === 'react'), up = wave ? Math.round(Math.abs(Math.sin(t * 10)) * 3) : 0;
+  const x = Math.round(a.x - 8), y = Math.round(a.y - 22 - up);
+  g.drawImage(SPR.tiny.down[0], x, y);
+  R(x + 3, y + 12, 10, 5, '#86c94a'); R(x + 7, y + 12, 2, 5, PAL.black);   // the jacket, open over the tank
+  if (wave) R(x + 14, y + 4 + (Math.floor(t * 8) % 2), 2, 6, '#e0956a');
+}
+// Chuck's tiny checkered flag rides on his back (drawn right after him)
+function drawChuckFlag(a) {
+  const c = (Game.courtActors || []).find(q => q.id === 'chuck'); if (!c) return; a.x = c.x; a.y = c.y + .5;
+  const x = Math.round(c.x + (c.dir === 'right' ? -25 : 18)), y = Math.round(c.y - 12);   // on his tail end, clear of his CHUCK name tag
+  R(x, y, 1, 13, PAL.ink); for (let i = 0; i < 3; i++) for (let j = 0; j < 2; j++) R(x + 1 + i * 2, y + j * 2, 2, 2, (i + j) % 2 ? PAL.black : PAL.white);
+}
 const DaytonaCourt = {
   donut() {
     CourtCases.begin();
-    say([['BAILIFF', 'All rise for the Honorable Judge Beau Pettibone.'], ['JUDGE PETTIBONE', 'Mr. Dupree. I have read about you. In three counties. At breakfast. It ruined three breakfasts.'], ...CourtCases.clean(6),
-      ['JUDGE PETTIBONE', 'Reckless Pacing. Unlawful Parade. Prosecution.'], ['PROSECUTOR DUKE', 'Your Honor, I will describe the incident. The defense may object to anything false.'], ['BRENDA', '(whispering) Only the LIES, Dan.']],
+    say([['JUDGE PETTIBONE', 'Mr. Dupree. Reckless Pacing and Unlawful Parade. I read about you in three counties. It ruined three breakfasts.'], ...CourtCases.clean(6)],
     () => { Objection.speaker = 'PROSECUTOR DUKE'; Objection.run([
       { text: 'The defendant drove the pace car off the track.', lie: false, over: 'He did. We all watched. On television.' },
-      { text: 'The defendant was going over 100 miles per hour.', lie: true, bust: 'He was doing eleven. The pace car was doing eleven. That is the WHOLE POINT of a pace car.' },
+      { text: 'The defendant was going over 100 miles per hour.', lie: true, bust: 'He was doing eleven. That is the WHOLE POINT of a pace car.' },
       { text: 'Forty race cars followed him into a Donut Hut.', lie: false, over: 'Forty-one, if you count the ambulance.' },
-      { text: 'The defendant ordered one donut.', lie: true, bust: 'He ordered forty-one dozen. It’s on the receipt. It’s a very long receipt.' },
+      { text: 'The defendant ordered one donut.', lie: true, bust: 'He ordered forty-one dozen. It’s a very long receipt.' },
       { text: 'The defendant is a licensed race car driver.', lie: true, bust: 'He has a cooler license. That is not a thing.' },
     ], () => this.donutEnd()); });
   },
+  // the witnesses walk in from the side door, Donna bribes the bench with a donut, Rusty begs Dan to race
   donutEnd() {
-    const F = Game.flags, wit = [F.witRusty && 'Rusty Lugnuts', F.witDonna && 'Donna'].filter(Boolean);
-    say([['BRENDA', wit.length ? `The defense calls ${wit.join(' and ')}.` : 'The defense has... no witnesses. It’s been a long week, Your Honor.'],
-      ...(F.witRusty ? [['RUSTY', 'He changed four tires in eight seconds, Your Honor. That man is a RACER.']] : []),
-      ...(F.witDonna ? [['DONNA', 'Best sales day in Donut Hut history. I would like him to do it again. Every Sunday.']] : []),
-      ['JUDGE PETTIBONE', '...NOT GUILTY of Reckless Pacing. The court was also hungry that day. The court got a donut.'],
-      ['RUSTY', 'Your Honor, one more thing. My driver quit this morning. Dan... the Daytona 250 is in three days.'], ['DAN', 'Rusty. Are you asking me to drive a stock car.'], ['RUSTY', 'I’m BEGGIN’ you.'], ['BRENDA', 'Absolutely not.'], ['DAN', 'Absolutely yes.']],
-    () => { headline('FLORIDA MAN CLEARED OF "RECKLESS PACING"; JUDGE "HUNGRY NOW"', 8); F.case6Won = true; F.creditsPending = 6; endDay('court'); });
+    const F = Game.flags, ru = !!F.witRusty, dn = !!F.witDonna;
+    const rustyIn = [SC.fx(() => CT.add('rusty', 'rusty', 312, 116, 'left')), SC.walk('rusty', 238, 102, 80), SC.face('rusty', 'down')];
+    courtCut([
+      SC.line('lawyer', ru && dn ? 'We call Rusty and Donna!' : ru ? 'The defense calls Rusty!' : dn ? 'The defense calls Donna!' : 'We have... no witnesses.', 1.5),
+      ...(ru ? rustyIn : []),
+      ...(ru ? [SC.line('rusty', 'Four tires. Eight seconds.', 1.5), SC.line('rusty', 'That man is a RACER.', 1.3)] : []),
+      ...(dn ? [SC.fx(() => CT.add('donna', 'donna', 314, 118, 'left')), SC.walk('donna', 212, 100, 80), SC.face('donna', 'up'),
+        SC.line('donna', 'Best donut day EVER.', 1.3), SC.line('donna', 'Do it again. Every Sunday.', 1.5),
+        SC.sound('whiff'), SC.fly(DONUT, 212, 84, 160, 14, .7, 9, true), SC.sound('munch'), SC.emote('judge', '♥', 1, PAL.hat)] : []),
+      SC.say([['JUDGE PETTIBONE', 'NOT GUILTY of Reckless Pacing. The court was also hungry that day. The court got a donut.']]),
+      ...(ru ? [] : rustyIn),
+      SC.emote('rusty', '!', .8),
+      SC.say([['RUSTY', 'Dan! My driver quit this morning. The Daytona 250 is in three days. I’m BEGGIN’ you.']]),
+      SC.line('lawyer', 'Absolutely not.', 1.2), SC.line('dan', 'Absolutely yes.', 1.5),
+    ], () => { headline('FLORIDA MAN CLEARED OF "RECKLESS PACING"; JUDGE "HUNGRY NOW"', 8); F.case6Won = true; F.creditsPending = 6; endDay('court'); });
   },
+  // Chip Sterling strolls in to sue; Tiny sits in the gallery wearing the evidence
   race() {
     CourtCases.begin();
-    say([['BAILIFF', 'All rise. Again. For Judge Pettibone. Again.'], ['JUDGE PETTIBONE', 'Mr. Dupree. Three days ago you were a defendant. Now you are the Daytona 250 champion. And a defendant.'], ...CourtCases.clean(7),
-      ['JUDGE PETTIBONE', 'Sterling v. Dupree. Unlicensed racing. Unauthorized burnouts. Emotional damages.'], ['CHIP’S LAWYER', 'I will describe the facts, Your Honor.'], ['BRENDA', '(whispering) Lies only, Dan. You know the drill.']],
+    CT.add('tiny', 'tiny', 112, 120, 'down', { draw: drawCourtTiny });
+    courtCut([
+      SC.fx(() => CT.add('chip', 'chip', 314, 116, 'left')), SC.walk('chip', 230, 100, 70), SC.face('chip', 'down'),
+      SC.line('chip', 'I want my DAMAGES.', 1.5),
+    ], () => say([['JUDGE PETTIBONE', 'Sterling v. Dupree. Mr. Dupree: three days ago, a defendant. Now, Daytona 250 champion. And a defendant.'], ...CourtCases.clean(7)],
     () => { Objection.speaker = 'CHIP’S LAWYER'; Objection.run([
       { text: 'Mr. Dupree won the race.', lie: false, over: 'He did. By a lot. I watched it twice.' },
       { text: 'Mr. Sterling was home asleep the night the #29 was sabotaged.', lie: true, bust: 'He bought forty donuts at 3 AM on a company card. Donna kept the receipt.' },
-      { text: 'Mr. Sterling has never owned a green Gator Juice jacket.', lie: true, bust: 'A biker named Tiny is wearing it RIGHT NOW. In the gallery. Wave, Tiny.' },
+      { text: 'Mr. Sterling has never owned a green Gator Juice jacket.', lie: true, tiny: true, bust: 'Tiny is wearing it RIGHT NOW. In the gallery. Wave, Tiny.' },
       { text: 'Mr. Dupree did a burnout in victory lane.', lie: false, over: 'For eleven minutes. The paint is still on the asphalt.' },
-      { text: 'Mr. Sterling has a spotless record.', lie: true, bust: 'He has four speeding tickets and a restraining order from a mascot.' },
-    ], () => this.raceEnd()); });
+      { text: 'Mr. Sterling has a spotless record.', lie: true, bust: 'Four speeding tickets and a restraining order from a mascot.' },
+    ], () => this.raceEnd()); }));
   },
+  // Chuck crashes in (Greyhound, checkered flag), sits on Chip, and Chip confesses to everything
   raceEnd() {
     const F = Game.flags;
-    say([['JUDGE PETTIBONE', 'Mr. Sterling, is there anything you would like to say?'], ['CHIP STERLING', 'I... I just wanted to win ONE time. Without paying for it.'], ['', '*CRASH*'], ['', 'The doors burst open. It’s Chuck. He took the Greyhound again. He is wearing a tiny checkered flag.'],
-      ['JUDGE PETTIBONE', 'IS THAT AN ALLIGATOR?'], ['DAN', 'That’s Chuck. He comes to all my trials. He’s like a support animal but mean.'], ['', 'Chuck walks up to Chip Sterling and sits on him. Chip confesses to everything, very quickly.'],
-      ['JUDGE PETTIBONE', 'Case dismissed. Mr. Sterling: under arrest. Sabotage. Mr. Dupree: Daytona 250 champion. God help us.'], ['BRENDA', 'Dan. You’re a champion.'], ['DAN', 'I’m still not a Florida Man.'], ['BRENDA', 'You are the MOST Florida Man.']],
-    () => { headline('ENERGY DRINK MOGUL ARRESTED FOR SABOTAGING FLORIDA MAN’S STOCK CAR; FLORIDA MAN "NOT SURPRISED"', 10); F.case7Won = true; F.creditsPending = 7; endDay('court'); });
+    courtCut([
+      SC.line('judge', 'Anything to say, Sterling?', 1.5),
+      SC.line('chip', 'I wanted to win ONE time.', 1.5), SC.line('chip', 'Without paying for it.', 1.4),
+      SC.wait(.3), SC.sound('boom'), SC.shake(10), SC.flash(.5),
+      SC.fx(() => { Game.courtChuck = 1; CT.gator('chuck', 314, 116, 'left'); CT.add('cflag', null, 314, 116.5, 'down', { draw: drawChuckFlag }); }),
+      SC.emote('jury', '!!', .9, PAL.red),
+      SC.all([SC.walk('chuck', 294, 110, 60), SC.line('judge', 'IS THAT AN ALLIGATOR?!', 1.6)]),
+      SC.all([SC.walk('chuck', 260, 104, 45), SC.line('dan', 'That’s Chuck.', 1.1)]),
+      SC.line('dan', 'Support animal. But mean.', 1.5),
+      SC.sound('punch'), SC.shake(5), SC.emote('chip', '!!', .8, PAL.red),
+      SC.line('chip', 'I CONFESS! ALL OF IT!', 1.5),
+      SC.say([['JUDGE PETTIBONE', 'Case dismissed. Mr. Sterling: under arrest. Mr. Dupree: Daytona 250 champion. God help us.'], ['DAN', 'I’m still not a Florida Man.'], ['BRENDA', 'Dan. You are the MOST Florida Man.']]),
+    ], () => { headline('ENERGY DRINK MOGUL ARRESTED FOR SABOTAGING FLORIDA MAN’S STOCK CAR; FLORIDA MAN "NOT SURPRISED"', 10); F.case7Won = true; F.creditsPending = 7; endDay('court'); });
   },
 };
 

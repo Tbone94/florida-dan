@@ -192,48 +192,105 @@ const BoatChase = {
 CLEAN_LIMIT[4] = 9; CLEAN_LIMIT[5] = 9;
 CREDITS[4] = ['CASE DISMISSED', 'The octopus got a record deal.<br>“THE CAR DON’T SURF” is number one in eleven countries.<br>Dan got free cafecito for life.', 'Next case'];
 CREDITS[5] = ['HONORARY DETECTIVE DAN', 'The Sinus Cartel is busted. Señor Pelícano is doing ten to twenty in a very nice aviary.<br>The swamp and Miami are both yours: ride the Greyhound anytime.<br><br>(More of Florida is coming.)', 'Keep being Dan'];
+// court cast: a tiny pelican in a tiny orange jumpsuit (and a tiny hat Chuck is about to eat), Chuck's tiny sunglasses,
+// DJ Flamingo wearing the octopus, and the props that fly across the room
+const MIAMI_HAT = (() => { const c = document.createElement('canvas'); c.width = 9; c.height = 5; const x = c.getContext('2d'); x.fillStyle = '#1b1320'; x.fillRect(0, 3, 9, 2); x.fillRect(2, 0, 5, 4); x.fillStyle = '#ff4fd8'; x.fillRect(2, 2, 5, 1); return c; })();
+const MIAMI_BADGE = (() => { const c = document.createElement('canvas'); c.width = 7; c.height = 8; const x = c.getContext('2d'); x.fillStyle = '#1b1320'; x.fillRect(0, 0, 7, 8); x.fillStyle = '#ff9ecf'; x.fillRect(1, 1, 5, 6); x.fillStyle = '#9fe8f0'; x.fillRect(3, 2, 1, 4); x.fillRect(2, 3, 3, 2); return c; })();
+const miamiPelican = (a, t) => {
+  const bob = a.moving ? Math.round(Math.abs(Math.sin(t * 14))) : 0;
+  g.save(); g.translate(Math.round(a.x), Math.round(a.y - 18 - bob)); if (a.flip) g.scale(-1, 1); g.scale(1.5, 1.5); g.translate(-7, 0);
+  g.drawImage(SPR.pelican, 0, 0);
+  R(1, 6, 8, 4, '#ff8a1e'); R(4, 6, 1, 4, '#c85a10');
+  if (a.hat) g.drawImage(MIAMI_HAT, 1, -4);
+  g.restore();
+};
+const miamiShades = a => {
+  const c = (Game.courtActors || []).find(x => x.id === 'chuck'); if (!c || c.belly) return;
+  a.y = c.y + 3; const k = c.dir === 'right' ? 1 : -1, x = Math.round(c.x + k * 14), y = Math.round(c.y);
+  for (const oy of [-9, 4]) { R(x - 3, y + oy, 6, 5, PAL.ink); R(x - 2, y + oy + 1, 4, 3, '#3b3f8c'); R(x - 1, y + oy + 1, 1, 1, PAL.white); }
+  R(x - 1, y - 4, 2, 8, PAL.ink);
+};
+const miamiDJ = (a, t) => {
+  const img = SPR.dj[a.dir || 'down'][a.moving ? a.frame || 0 : 0], x = Math.round(a.x), top = Math.round(a.y - img.height);
+  g.drawImage(img, x - 8, top);
+  const w = Math.round(Math.sin(t * 6)), o = '#ff5a3c';
+  R(x - 6, top - 10, 12, 8, PAL.ink); R(x - 5, top - 9, 10, 7, o); R(x - 3, top - 9, 3, 2, '#ffa08a');
+  R(x - 4, top - 6, 3, 3, PAL.white); R(x + 1, top - 6, 3, 3, PAL.white); R(x - 3, top - 5, 1, 1, PAL.ink); R(x + 2, top - 5, 1, 1, PAL.ink);
+  for (let i = 0; i < 5; i++) { const tx = x - 7 + i * 3 + (i === 0 ? -1 : i === 4 ? 1 : 0), len = 3 + ((i + w) & 1) + (i === 0 || i === 4 ? 3 : 0); R(tx - 1, top - 3, 3, len + 1, PAL.ink); R(tx, top - 3, 1, len, o); }
+};
+
+const miamiStage = () => CT.add('jurypop', null, 97, 70, 'down', { anchor: true });   // jury reactions pop in the gap beside the box, not on a juror's face
 const MiamiCourt = {
   lambo() {
     CourtCases.begin();
-    say([['BAILIFF', 'All rise for the Honorable Judge Esperanza Vega.'], ['JUDGE VEGA', 'Mr. Dupree. Collier County sent me a warning about you. It was forty pages.'], ['DAN', 'Only forty?'], ...CourtCases.clean(4),
-      ['JUDGE VEGA', 'Grand Theft Lambo. Prosecution.'], ['PROSECUTOR CHAD', 'Your Honor, I will describe the events. The defense may object to anything false.'], ['BRENDA', '(whispering) Only the LIES, Dan.']],
+    say([['JUDGE VEGA', 'Mr. Dupree. Collier County sent me a warning about you. It was forty pages.'], ['DAN', 'Only forty?'], ...CourtCases.clean(4),
+      ['PROSECUTOR CHAD', 'Grand Theft Lambo, Your Honor. I’ll describe the events. The defense may object to anything false.']],
     () => { Objection.speaker = 'PROSECUTOR CHAD'; Objection.run([
       { text: 'The defendant took the car without permission.', lie: true, bust: 'The valet literally ASKED him to move it. It’s on video.' },
       { text: 'The car is pink.', lie: false, over: 'It is EXTREMELY pink, Counselor.' },
-      { text: 'The defendant drove into the ocean on purpose.', lie: true, bust: 'The gas pedal was stuck. We all saw the video. Everyone on Earth saw the video.' },
+      { text: 'The defendant drove into the ocean on purpose.', lie: true, bust: 'The gas pedal was stuck. Everyone on Earth saw the video.' },
       { text: 'When the car was recovered, an octopus was inside it.', lie: false, over: '...That did happen. I still don’t understand it.' },
       { text: 'The defendant has never been to court before.', lie: true, bust: 'He has been to court FOUR TIMES this month, Chad.' },
     ], () => this.lamboEnd()); });
   },
+  // the witnesses walk in and vouch (bubbles), then DJ Flamingo shows up wearing the octopus and drops the charges
   lamboEnd() {
-    const F = Game.flags, wit = [F.witAbuela && 'Abuela', F.witRaul && 'Raul', F.witSheila && 'Sheila'].filter(Boolean);
-    say([['BRENDA', wit.length ? `The defense calls ${wit.join(' and ')}.` : 'The defense has... no witnesses, Your Honor. It’s been a week.'],
-      ...(F.witAbuela ? [['ABUELA', 'He listened to my WHOLE story. Forty-five minutes. He is a good boy.']] : []),
-      ...(F.witRaul ? [['RAUL', 'He beat me down Ocean Drive, Your Honor. On a cafecito. LEGEND.']] : []),
-      ...(F.witSheila ? [['SHEILA', 'He got the Canadian off my chair. I would die for this man.']] : []),
-      ['DJ FLAMINGO', 'Your Honor... I want to drop the charges.'], ['JUDGE VEGA', 'Why?'], ['DJ FLAMINGO', 'The octopus video has ninety million views. My new single is called “THE CAR DON’T SURF.” It’s number one.'],
-      ['JUDGE VEGA', '...Case dismissed. Everyone out. And somebody find that octopus a lawyer.']],
-    () => { headline('FLORIDA MAN CLEARED IN PINK LAMBO CASE AFTER OCTOPUS GOES VIRAL; "THE CAR DON’T SURF" HITS NUMBER ONE', 10); F.case4Won = true; F.creditsPending = 4; endDay('court'); });
+    miamiStage(); const F = Game.flags, wit = [F.witAbuela && ['abuela', 112, 'He heard my WHOLE story!'], F.witRaul && ['raul', 134, 'He beat me. On a cafecito!'], F.witSheila && ['sheila', 196, 'I would die for this man.']].filter(Boolean);
+    wit.forEach(([id], i) => CT.add(id, id, 318 + i * 22, 118, 'left'));
+    courtCut([
+      ...(wit.length ? [SC.all(wit.map(([id, x]) => SC.walk(id, x, 100, 120))), SC.all(wit.map(([id]) => SC.face(id, 'down'))), ...wit.slice(0, -1).map(([id, , l]) => SC.line(id, l, 1.3))] : []),
+      SC.fx(() => CT.add('dj', 'dj', 318, 118, 'left', { draw: miamiDJ })), SC.sound('headline'),
+      SC.all([SC.walk('dj', 226, 100, 110), wit.length ? SC.line(wit[wit.length - 1][0], wit[wit.length - 1][2], 1.4) : SC.line('lawyer', 'We have... no witnesses.', 1.6)]),
+      SC.face('dj', 'down'), SC.emote('jurypop', '!?', .9),
+      SC.line('dj', 'I wanna drop the charges.', 1.5), SC.line('judge', 'Why?', 1),
+      SC.say([['DJ FLAMINGO', 'The octopus video has ninety million views. My new single, “THE CAR DON’T SURF,” is number one.'],
+        ['JUDGE VEGA', '...Case dismissed. And somebody find that octopus a lawyer.']]),
+    ], () => { headline('FLORIDA MAN CLEARED IN PINK LAMBO CASE AFTER OCTOPUS GOES VIRAL; "THE CAR DON’T SURF" HITS NUMBER ONE', 10); F.case4Won = true; F.creditsPending = 4; endDay('court'); });
   },
+  // the defendant waddles in: a pelican in a tiny orange jumpsuit
   sinus() {
-    CourtCases.begin();
-    say([['BAILIFF', 'All rise. The United States of Florida versus... a pelican.'], ['JUDGE VEGA', 'Mr. Dupree. We meet again. You’re not the defendant this time. You’re the WITNESS.'], ['DAN', 'That’s a first.'], ...CourtCases.clean(5),
-      ['', 'At the defense table sits Señor Pelícano, in a tiny orange jumpsuit.'], ['DEFENSE ATTORNEY', 'My client is a simple pelican. The defense may obj— wait. That’s YOUR job, Mr. Dupree. Object to my lies.']],
+    CourtCases.begin(); miamiStage();
+    CT.add('pelican', null, 318, 118, 'left', { draw: miamiPelican, hat: true });
+    courtCut([
+      SC.all([SC.walk('pelican', 244, 100, 45), SC.emote('jurypop', '?!', 1.2)]),
+      SC.line('pelican', '*smug squawk*', 1.3),
+    ], () => say([['JUDGE VEGA', 'The United States of Florida versus... a pelican. Mr. Dupree, this time you’re the WITNESS.'], ['DAN', 'That’s a first.'], ...CourtCases.clean(5),
+      ['DEFENSE ATTORNEY', 'My client is a simple pelican. The defense may obj— wait. That’s YOUR job, Mr. Dupree. Object to my lies.']],
     () => { Objection.speaker = 'DEFENSE ATTORNEY'; Objection.run([
       { text: 'My client is just a regular pelican who enjoys fish.', lie: true, bust: 'He has a GOLD CHAIN, Counselor.' },
       { text: 'My client has never been on a yacht.', lie: true, bust: 'We have forty photos of him on a yacht. In a suit.' },
       { text: 'Pelicans cannot operate cigarette boats.', lie: true, bust: 'This one can. He did. Mr. Dupree chased him.' },
       { text: 'The defendant’s bales washed up on South Beach.', lie: false, over: 'That part’s true. Dan tried to RETURN them.' },
       { text: 'My client has never stolen a fish from Daniel Dupree.', lie: true, bust: 'He stole a bass on MONDAY, Your Honor. I was THERE.' },
-    ], () => this.sinusEnd()); });
+    ], () => this.sinusEnd()); }));
   },
+  // Rocket and Tubbs testify, Chuck crashes in (Greyhound, tiny sunglasses) and eats the pelican's hat, Dan gets a pastel badge
   sinusEnd() {
-    const F = Game.flags;
-    say([['DET. ROCKET', 'Your Honor, Mr. Dupree went undercover in a pastel suit and blended in at a cartel yacht party.'], ['JUDGE VEGA', 'HIM? Blended in?'], ['DET. TUBBS', Game.headlines.some(h => /THROWN OFF YACHT/.test(h.text)) ? 'Mostly. He got thrown in the bay once.' : 'Mostly. Nobody noticed the jorts under the suit.'],
-      ['', '*CRASH*'], ['', 'The doors burst open. It’s Chuck. He took the Greyhound. He is wearing tiny sunglasses.'], ['JUDGE VEGA', 'IS THAT AN ALLIGATOR IN MY COURTROOM?'], ['DAN', 'He does this. You get used to it.'],
-      ['', 'Chuck walks straight to Señor Pelícano and eats his tiny hat. The pelican confesses to everything.'], ['SEÑOR PELÍCANO', '*sad squawk*'],
-      ['JUDGE VEGA', 'Guilty. Ten to twenty in a very nice aviary. And Mr. Dupree...'], ['JUDGE VEGA', 'By the power vested in me by absolutely nobody, Miami-Dade names you... Honorary Detective.'],
-      ['DET. ROCKET', 'Here’s your badge, partner. It’s pastel.'], ['DAN', 'I’m not a detective.'], ['BRENDA', 'Dan.'], ['DAN', 'I’m also not a Florida Man.'], ['BRENDA', 'DAN.']],
-    () => { headline('FLORIDA MAN BUSTS SINUS CARTEL RUN BY A PELICAN; "I KNEW IT WAS THAT PELICAN," HE SAYS', 10); F.case5Won = true; F.creditsPending = 5; endDay('court'); });
+    const F = Game.flags, thrown = Game.headlines.some(h => /THROWN OFF YACHT/.test(h.text));
+    CT.add('rocket', 'rocket', 318, 118, 'left'); CT.add('tubbs', 'tubbs', 340, 118, 'left');
+    courtCut([
+      SC.all([SC.walk('rocket', 184, 100, 110), SC.walk('tubbs', 206, 100, 110)]), SC.face('rocket', 'down'), SC.face('tubbs', 'down'),
+      SC.line('rocket', 'Dan went undercover. In pastel.', 1.6), SC.line('judge', 'HIM? Blended in?', 1.3),
+      SC.line('tubbs', 'Mostly.', .9), SC.line('tubbs', thrown ? 'He got thrown in the bay.' : 'Nobody saw the jorts.', 1.4),
+    ], () => this.sinusChuck(F));
+  },
+  sinusChuck(F) {
+    const hat = () => { const p = (Game.courtActors || []).find(a => a.id === 'pelican'); if (p) p.hat = false; };
+    courtCut([
+      SC.wait(.3), SC.sound('boom'), SC.shake(10), SC.flash(.5),
+      SC.fx(() => { Game.courtChuck = 1; CT.gator('chuck', 318, 118, 'left'); CT.add('shades', null, 318, 121, 'left', { draw: miamiShades }); }),
+      SC.emote('jurypop', '!!', .9, PAL.red),
+      SC.all([SC.walk('chuck', 280, 112, 80), SC.line('judge', 'ALLIGATOR IN MY COURTROOM?', 1.6)]),
+      SC.line('dan', 'He took the Greyhound.', 1.4),
+      SC.fx(() => { const c = (Game.courtActors || []).find(a => a.id === 'chuck'); if (c) c.chomp = 1; hat(); }), SC.sound('chomp'), SC.shake(5),
+      SC.fly(MIAMI_HAT, 244, 82, 250, 110, .45, 9, true),
+      SC.fx(() => { const c = (Game.courtActors || []).find(a => a.id === 'chuck'); if (c) c.chomp = 0; }), SC.sound('munch'),
+      SC.line('pelican', '*sad squawk*', 1.3),
+      SC.say([['JUDGE VEGA', 'The pelican confesses. Guilty. Ten to twenty in a very nice aviary.'],
+        ['JUDGE VEGA', 'And Mr. Dupree: by the power vested in me by absolutely nobody, Miami-Dade names you... Honorary Detective.']]),
+      SC.walk('rocket', 178, 114, 80), SC.face('rocket', 'left'),
+      SC.all([SC.fly(MIAMI_BADGE, 174, 100, 160, 122, .5, 0, true), SC.line('rocket', 'Your badge. It’s pastel.', 1.5)]), SC.sound('cash'),
+      SC.say([['DAN', 'I’m not a detective. I’m also not a Florida Man.'], ['BRENDA', 'DAN.']]),
+    ], () => { headline('FLORIDA MAN BUSTS SINUS CARTEL RUN BY A PELICAN; "I KNEW IT WAS THAT PELICAN," HE SAYS', 10); F.case5Won = true; F.creditsPending = 5; endDay('court'); });
   },
 };

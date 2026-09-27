@@ -21,9 +21,10 @@ await ev(() => {
   window.talk = (pick = 0) => { for (let i = 0; i < 400 && (Game.mode === 'talk' || Game.mode === 'scene'); i++) { if (Game.mode === 'scene') { Input.set('a', true); step(10); Input.set('a', false); continue; } step(6); const cs = [...document.querySelectorAll('.choice')]; if (cs.length) cs[Math.min(pick, cs.length - 1)].click(); else Input.press('a'); step(1); } };
   window.mash = () => { for (let i = 0; i < 60 * 12 && Game.mode === 'mash'; i++) { Input.press('a'); step(1); } };
   window.dance = () => { for (let i = 0; i < 60 * 16 && Game.mode === 'dance'; i++) { const s = Dance.s; if (s) { const n = s.seq.find(q => q.hit === null && Math.abs(q.t - s.t) < .06); if (n) Input.press(n.dir); } step(1); } };
-  window.objection = () => { for (let i = 0; i < 60 * 40 && (Game.mode === 'objection' || Game.mode === 'talk' || Game.mode === 'court'); i++) {
+  window.objection = () => { for (let i = 0; i < 60 * 40 && (Game.mode === 'objection' || Game.mode === 'talk' || Game.mode === 'court' || Game.mode === 'scene'); i++) {
     if (Game.mode === 'objection') { const s = Objection.s; if (s && s.phase === 'show' && s.list[s.i].lie && s.t > .3) Input.press('a'); if (s && s.phase === 'react' && s.t > .5) Input.press('a'); step(1); continue; }
     if (Game.mode === 'talk') { step(6); const cs = [...document.querySelectorAll('.choice')]; if (cs.length) cs[0].click(); else Input.press('a'); step(1); continue; }
+    if (Game.mode === 'scene') { step(1); continue; }   // court cutscenes play through in real time
     break; } };
   window.need = (ok, msg) => { if (!ok) bad.push(msg); };
   window.talkTo = id => { const n = Game.npcs.find(q => q.id === id); if (!n) { bad.push('no npc ' + id + ' in ' + Game.region); return; } Object.assign(Game.dan, { x: n.x, y: n.y + 16, dir: 'up', ride: null }); Story.talk(n); };

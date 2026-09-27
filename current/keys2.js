@@ -309,55 +309,123 @@ const KeysChase = {
 CLEAN_LIMIT[8] = 9; CLEAN_LIMIT[9] = 9;
 CREDITS[8] = ['THE REPUBLIC STANDS', 'The Republic of Dan has three citizens: a cat, a rooster, and Brayden (bro).<br>The Coast Guard has asked, politely, that its flag stop being pants.<br>Captain Lou has put up a sign: NO NATIONS.', 'Next case'];
 CREDITS[9] = ['FINDERS KEEPERS', 'The Nuestra Señora de la Cerveza is going to a museum. Old Gus cut the ribbon. He cried. The tarpon came.<br>Rex Doubloon’s show was cancelled. Madison got a new show. It’s about Dan.<br><br>NEXT: ORLANDO. The mouse is watching.<br>The swamp, Miami, Daytona and the Keys are all yours.', 'Keep playing'];
+// little court props for the Keys trials (drawn feet-at-x,y like any court actor)
+const KEYS_PROPS = {
+  tarpon: null,
+  tarponImg() {   // the Silver King, 18x8, facing left (he leaps through the courtroom)
+    if (this.tarpon) return this.tarpon;
+    const c = document.createElement('canvas'); c.width = 18; c.height = 8; const x = c.getContext('2d'), f = (col, a, b, w, h) => { x.fillStyle = col; x.fillRect(a, b, w, h); };
+    f(PAL.ink, 1, 2, 13, 5); f(PAL.ink, 2, 1, 10, 7); f(PAL.ink, 13, 0, 5, 8);
+    f('#d8e6ee', 2, 2, 10, 4); f('#d8e6ee', 1, 3, 12, 2); f('#d8e6ee', 14, 1, 3, 2); f('#d8e6ee', 14, 5, 3, 2); f(PAL.white, 3, 5, 8, 1); f(PAL.ink, 3, 3, 1, 1);
+    return (this.tarpon = c);
+  },
+  flag(a) {   // the jorts flag of the Republic of Dan, hoisted by a.lift
+    const x = Math.round(a.x), y = Math.round(a.y), top = y - 12 - Math.round(a.lift || 0);
+    R(x - 1, y - 42, 3, 42, PAL.ink); R(x, y - 41, 1, 41, PAL.woodL); R(x - 1, y - 44, 3, 3, PAL.yellow);
+    OR(x + 2, top, 13, 4, PAL.jorts); OR(x + 2, top + 4, 5, 6, PAL.jorts); OR(x + 10, top + 4, 5, 6, PAL.jorts); R(x + 2, top, 13, 1, PAL.jortsD);
+  },
+  bell(a) {   // the ship's bell, carried at waist height
+    const x = Math.round(a.x), y = Math.round(a.y) - 9;
+    OR(x - 1, y - 8, 3, 2, '#8a6420'); OR(x - 3, y - 6, 7, 4, '#c9912a'); OR(x - 4, y - 2, 9, 3, '#c9912a'); R(x - 3, y - 5, 1, 3, PAL.yellow); R(x, y + 1, 1, 2, PAL.ink);
+  },
+  snorkel(a) {   // Chuck's tiny snorkel rides his head
+    const c = (Game.courtActors || []).find(q => q.id === 'chuck'); if (!c || c.hidden || c.belly || (c.dir !== 'left' && c.dir !== 'right')) return;
+    a.y = c.y + .5; const s = c.dir === 'left' ? -1 : 1, x = Math.round(c.x + s * 17), y = Math.round(c.y);
+    OR(x - 1, y - 8, 3, 14, '#9fd8ee'); OR(x + s * 4, y - 19, 2, 12, PAL.yellow); R(x + s * 4 - 1, y - 20, 4, 2, PAL.hat);
+  },
+  sash(a) {   // KEY WEST'S FLORIDA MAN OF THE YEAR
+    const d = (Game.courtActors || []).find(q => q.id === 'dan'); if (!d) return; a.y = d.y + .5;
+    const x = Math.round(d.x), y = Math.round(d.y);
+    for (let i = 0; i < 7; i++) { R(x - 5 + i * 1.5, y - 16 + i * 1.3, 2, 2, PAL.yellow); R(x - 5 + i * 1.5, y - 14 + i * 1.3, 2, 1, '#c9912a'); }
+  },
+  beers(a) {   // everybody raises a Swamp Lite
+    const b = SPR.icons && SPR.icons.beer; if (!b) return; const up = Math.round(Math.sin(Game.t * 6) * 1);
+    for (const q of Game.courtActors || []) if (!q.anchor && !q.hidden && SPR[q.sprite] && !SPR[q.sprite].width) g.drawImage(b, Math.round(q.x + 6), Math.round(q.y - 24 + up));
+    for (let i = 0; i < 6; i++) g.drawImage(b, 18 + (i % 3) * 22 + 12, 22 + Math.floor(i / 3) * 16 + up);
+  },
+  sunset: a => R(0, 0, VW, VH, `rgba(255,120,40,${(a.k || 0).toFixed(2)})`),
+};
 const KeysCourt = {
   republic() {
-    CourtCases.begin(); const F = Game.flags;
-    say([['BAILIFF', 'All rise for the Honorable Judge Wesley Pinder.'], ['JUDGE PINDER', 'Mr. Dupree. You are charged with secession. From the United States. In a rented houseboat.'], ...CourtCases.clean(8),
-      ['JUDGE PINDER', 'Prosecution.'], ['PROSECUTOR REYES', 'Your Honor, I will describe the events of the other night. The defense may object to any falsehoods.'], ['BRENDA', '(whispering) Only the lies, Dan. You KNOW this.']],
-    () => { Objection.speaker = 'PROSECUTOR REYES'; Objection.run([
+    CourtCases.begin();
+    say([['JUDGE PINDER', 'Mr. Dupree. You are charged with secession. From the United States. In a rented houseboat.'], ...CourtCases.clean(8)],
+      () => courtCut([SC.line('lawyer', 'Only the LIES, Dan.', 1.4)], () => { const F = Game.flags; Objection.speaker = 'PROSECUTOR REYES'; Objection.run([
       { text: 'The defendant declared his houseboat an independent nation.', lie: false, over: 'He did. There is video. There is a LOT of video.' },
       { text: 'The defendant fired a missile at a Coast Guard cutter.', lie: true, bust: 'It was a Freedom Rocket. From a fireworks stand. It says “NOT A MISSILE” on the side.' },
       { text: 'The defendant’s flag was made from his own jorts.', lie: false, over: 'Size 44. The court has seen the flag. The court wishes it had not.' },
       { text: 'The “Republic of Dan” has no citizens.', lie: !!(F.citCat || F.citRooster || F.citBrayden), bust: 'It has citizens. One of them is a rooster, but still.', over: 'Correct. Nobody signed up. Not even the rooster.' },
       { text: 'The defendant was completely sober.', lie: true, bust: 'Eleven beers. He announced the number. Twice.' },
-    ], () => this.republicEnd()); });
+    ], () => this.republicEnd()); }));
   },
+  // the Republic's flag goes up, its citizens march in, and the Conch Republic recognizes a sister nation (shown, not told)
   republicEnd() {
     const F = Game.flags, have = [F.flagBack && 'a flag', (F.citCat && F.citRooster && F.citBrayden) && 'three citizens', F.recognized && 'recognition'].filter(Boolean);
-    say([['BRENDA', have.length ? `Your Honor, the Republic of Dan has ${have.join(', ')}. Under international law, that makes it... a country. Technically.` : 'Your Honor, the Republic of Dan has... a houseboat. And spirit.'],
-      ...(F.citCat ? [['MISS PEARL', 'Mr. Toes is a citizen. He’s very proud. He wore his good collar.']] : []), ...(F.citBrayden ? [['BRAYDEN', 'I gave up AMERICA for this, bro. For PANTS COUNTRY.']] : []),
-      ['JUDGE PINDER', '...Mr. Dupree. Do you know what happened in this town in April of 1982?'], ['DAN', 'No sir.'],
-      ['JUDGE PINDER', 'Key West seceded. The Conch Republic. We declared war on America and surrendered one minute later.'], ['JUDGE PINDER', 'Then we asked for a billion dollars in foreign aid.'], ['JUDGE PINDER', 'My grandfather was Secretary of Rum.'],
-      ['JUDGE PINDER', 'This court finds the defendant NOT GUILTY. The Conch Republic formally recognizes the Republic of Dan as a sister nation.'], ['JUDGE PINDER', 'Also: stop shooting at the Coast Guard.'],
-      ['DAN', 'I’m still not a Florida Man.'], ['BRENDA', 'Dan, you just got recognized as a FOREIGN NATION by a JUDGE.']],
-    () => { headline('JUDGE RULES FLORIDA MAN’S HOUSEBOAT "A SISTER NATION" OF THE CONCH REPUBLIC; COAST GUARD "REVIEWING OPTIONS"', 9); F.case8Won = true; F.creditsPending = 8; endDay('court'); });
+    const door = (id, spr, dx = 0) => SC.fx(() => CT.add(id, spr, 312 + dx, 118, 'left')), cit = [];
+    if (F.citCat) cit.push(SC.walk('pearl', 262, 110, 70), SC.walk('cat', 246, 113, 70));
+    if (F.citRooster) cit.push(SC.walk('rooster', 226, 106, 80));
+    if (F.citBrayden) cit.push(SC.walk('brayden', 282, 106, 60));
+    courtCut([
+      SC.say([['BRENDA', have.length ? `Your Honor, the Republic of Dan has ${have.join(', ')}. That makes it... a country. Technically.` : 'Your Honor, the Republic of Dan has... a houseboat. And spirit.']]),
+      F.flagBack && [SC.fx(() => CT.add('flag', null, 212, 120, 'down', { draw: KEYS_PROPS.flag, lift: 0 })), SC.sound('pickup'), SC.lift('flag', 28, 1.2), SC.line('jury', 'Are those... JORTS?', 1.4)],
+      cit.length && [F.citCat && [door('pearl', 'pearl'), door('cat', 'cat', 14)], F.citRooster && door('rooster', 'rooster', 6), F.citBrayden && door('brayden', 'brayden', 24), SC.all(cit),
+        F.citCat && SC.line('pearl', 'He wore his good collar.', 1.5), F.citRooster && [SC.sound('talk'), SC.line('rooster', 'COCK-A-DOODLE-DAN!', 1.3)], F.citBrayden && SC.line('brayden', 'PANTS COUNTRY, BRO!', 1.4)],
+      SC.say([['JUDGE PINDER', 'Mr. Dupree. In 1982, Key West seceded too. The Conch Republic. We declared war on America and surrendered one minute later.'], ['JUDGE PINDER', 'Then we asked for a billion dollars in foreign aid. My grandfather was Secretary of Rum.']]),
+      SC.sound('headline'), SC.shake(4), SC.line('judge', 'NOT GUILTY.', 1.2),
+      SC.all([SC.line('judge', 'Sister nations!', 1.6), SC.emote('jury', '!!', 1, PAL.yellow), F.citBrayden && SC.emote('brayden', '!!', 1), F.citRooster && SC.emote('rooster', '!', 1)].filter(Boolean)),
+      SC.say([['JUDGE PINDER', 'Also: stop shooting at the Coast Guard.'], ['DAN', 'I’m still not a Florida Man.'], ['BRENDA', 'Dan. A JUDGE just recognized you as a FOREIGN NATION.']]),
+    ].flat(Infinity), () => { headline('JUDGE RULES FLORIDA MAN’S HOUSEBOAT "A SISTER NATION" OF THE CONCH REPUBLIC; COAST GUARD "REVIEWING OPTIONS"', 9); F.case8Won = true; F.creditsPending = 8; endDay('court'); });
   },
   galleon() {
-    CourtCases.begin(); const F = Game.flags;
-    say([['BAILIFF', 'All rise. Again. Judge Pinder. Again.'], ['JUDGE PINDER', 'Mr. Dupree. Three days ago you were a nation. Today you are a treasure thief. Allegedly.'], ...CourtCases.clean(9),
-      ['JUDGE PINDER', 'Doubloon Entertainment v. Dupree. Grand Theft Galleon.'], ['REX’S LAWYER', 'Your Honor, I will lay out the facts.'], ['BRENDA', '(whispering) Lies only, Dan. You’ve done this like nine times.']],
-    () => { Objection.speaker = 'REX’S LAWYER'; Objection.run([
+    CourtCases.begin(); CT.add('rex', 'rex', 262, 100, 'down');   // Rex Doubloon, plaintiff, at the prosecution table
+    say([['JUDGE PINDER', 'Mr. Dupree. Three days ago you were a nation. Today, a treasure thief. Allegedly.'], ...CourtCases.clean(9)],
+      () => courtCut([SC.line('rex', 'Grand Theft GALLEON!', 1.4), SC.line('lawyer', 'Lies only, Dan. Again.', 1.3)], () => { const F = Game.flags; Objection.speaker = 'REX’S LAWYER'; Objection.run([
       { text: 'Mr. Doubloon has a permit to salvage off Key West.', lie: false, over: 'He does. It is laminated. He showed it to the bailiff four times.' },
-      { text: 'Mr. Doubloon personally discovered the wreck.', lie: true, bust: 'Mr. Doubloon cannot swim. A man named Pedro does all the diving. Pedro is in the gallery. Wave, Pedro.' },
-      { text: 'Nobody had ever claimed this wreck before.', lie: !!F.claimGot, bust: 'Salvage Claim #84-117. Filed by Augustus Albury in 1984. It was in a men’s room. It still counts.', over: 'Correct. No claim has been produced. It was probably lost. In a bar.' },
+      { text: 'Mr. Doubloon personally discovered the wreck.', lie: true, bust: 'Mr. Doubloon cannot swim. A man named Pedro does all the diving. Wave, Pedro.' },
+      { text: 'Nobody had ever claimed this wreck before.', lie: !!F.claimGot, bust: 'Salvage Claim #84-117. Filed by Augustus Albury in 1984. In a men’s room. It still counts.', over: 'Correct. No claim has been produced. It was probably lost. In a bar.' },
       { text: 'Mr. Dupree chased Mr. Doubloon’s boat and jumped on him.', lie: false, over: 'He did. It’s the season finale. It’s very good television.' },
-      { text: 'Mr. Doubloon’s permit covers the Southernmost Point.', lie: true, bust: 'The permit is for coordinates in the middle of Lake Okeechobee. Someone typed it wrong. Probably Rex.' },
-    ], () => this.galleonEnd()); });
+      { text: 'Mr. Doubloon’s permit covers the Southernmost Point.', lie: true, bust: 'The permit is for the middle of Lake Okeechobee. Someone typed it wrong. Probably Rex.' },
+    ], () => this.galleonEnd()); }));
   },
+  // Gus testifies, Chuck crashes in (snorkel) and stares Rex into a confession, and the parade comes to the courthouse
   galleonEnd() {
-    const F = Game.flags;
-    say([['BRENDA', F.wBell ? 'Exhibit A: the ship’s bell. It reads “N.S. de la Cerveza, 1733.” The defense calls Augustus “Gus” Albury.' : 'The defense calls Augustus “Gus” Albury.'],
-      ['OLD GUS', 'I found her in ’84, Your Honor. Forty years nobody believed me. That boy believed me. He fed my tarpon.'],
-      ['', '*CRASH*'], ['', 'The doors burst open. It’s Chuck. He walked the Seven Mile Bridge. All seven miles. He is wearing a tiny snorkel.'], ['JUDGE PINDER', 'IS THAT AN ALLIGATOR IN A SNORKEL?'], ['DAN', 'That’s Chuck. He’s my plus-one.'],
-      ['', 'Chuck climbs into Rex Doubloon’s lap and stares. Rex confesses. Pedro did the diving. The permit was a typo.'],
-      ['JUDGE PINDER', 'The wreck is Mr. Albury’s. The treasure goes to a museum. Mr. Dupree: NOT GUILTY. And co-finder.'], ['JUDGE PINDER', 'Mr. Doubloon: under arrest for salvage fraud. And the tan is fake.'],
-      ['', 'THAT NIGHT: DUVAL STREET.'], ['', 'The whole island throws a parade. Gus rings the bell. The roosters march. Brayden cries.'],
-      ['MANGO MIKE', 'Ladies and gentlemen, KEY WEST’S FLORIDA MAN OF THE YEAR!'], ['DAN', '', [
-        ['“I am NOT a Florida Man.” (puts on sash)', () => [['', 'He says it on a float shaped like a lobster. Four thousand people cheer.']]],
-        ['“This one’s for Gus.”', () => [['OLD GUS', '*crying*'], ['', 'The tarpon jump in the harbor. Nobody can explain it.']]],
-        ['Raise a Swamp Lite to the sunset', () => [['', 'The whole street raises a beer at once. The sun goes down. Everybody claps. It’s Key West.']]]]],
-      [PHONE_B, 'Dan. Before you say anything. Do NOT go to Orlando.'], ['DAN', 'What’s in Orlando?'], [PHONE_B, 'A mouse, Dan. A very powerful mouse. With LAWYERS.']],
-    () => { headline('FLORIDA MAN CLEARED IN "GRAND THEFT GALLEON" CASE, LEADS KEY WEST PARADE ON LOBSTER FLOAT', 10); F.case9Won = true; F.creditsPending = 9; endDay('court'); });
+    const F = Game.flags; let pick = 0;
+    const A = id => (Game.courtActors || []).find(a => a.id === id);
+    courtCut([
+      SC.line('lawyer', 'Defense calls Gus Albury.', 1.3),
+      SC.fx(() => { CT.add('gus', 'gus', 312, 118, 'left'); if (F.wBell) CT.add('bell', null, 321, 119, 'left', { draw: KEYS_PROPS.bell }); }),
+      SC.all([SC.walk('gus', 106, 104, 90), F.wBell && SC.walk('bell', 115, 105, 90)].filter(Boolean)), SC.face('gus', 'down'),
+      F.wBell && [SC.sound('cash'), SC.emote('bell', 'DING!', 1, PAL.yellow), SC.line('lawyer', 'Exhibit A: her bell. 1733.', 1.6)],
+      SC.say([['OLD GUS', 'I found her in ’84, Your Honor. Forty years nobody believed me. That boy believed me. He fed my tarpon.']]),
+      // *CRASH*: Chuck walked the Seven Mile Bridge. In a snorkel.
+      SC.wait(.3), SC.sound('boom'), SC.shake(10), SC.flash(.5),
+      SC.fx(() => { Game.courtChuck = 1; CT.gator('chuck', 316, 118, 'left'); CT.add('snorkel', null, 316, 118, 'left', { draw: KEYS_PROPS.snorkel }); }),
+      SC.emote('jury', '!!', .9, PAL.red),
+      SC.all([SC.walk('chuck', 226, 108, 95), SC.line('judge', 'IN A SNORKEL?!', 1.6)]),
+      SC.line('dan', 'That’s Chuck. My plus-one.', 1.5),
+      SC.face('chuck', 'right'), SC.walk('chuck', 238, 104, 30), SC.emote('chuck', '...', 1.4, PAL.white), SC.wait(.4),
+      SC.all([SC.emote('rex', '!!', .9, PAL.red), SC.shake(3)]),
+      SC.line('rex', 'OKAY! PEDRO DID THE DIVING!', 1.5), SC.line('rex', 'THE PERMIT WAS A TYPO!', 1.4),
+      SC.say([['JUDGE PINDER', 'The wreck is Mr. Albury’s. The treasure goes to a museum. Mr. Dupree: NOT GUILTY. And co-finder.'], ['JUDGE PINDER', 'Mr. Doubloon: under arrest for salvage fraud. And the tan is fake.']]),
+      SC.line('rex', 'It’s AIRBRUSHED!', 1.2), SC.all([SC.walk('rex', 330, 116, 85), SC.walk('chuck', 340, 116, 80)]), SC.hide('rex'), SC.hide('chuck'),   // Chuck sees him out
+      SC.sound('chomp'), SC.shake(4), SC.emote('jury', '!', .8, PAL.red),
+      // the whole island throws a parade, and it marches right into the courthouse
+      SC.fx(() => { CT.cast(); CT.add('dtable', null, 165, 150, 'down', { draw: () => OR(130, 140, 70, 10, PAL.woodL) });
+        [['r1', 'rooster', 0], ['r2', 'rooster', 14], ['r3', 'rooster', 28], ['brayden', 'brayden', 44], ['mike', 'mike', 64]].forEach(([id, s, dx]) => CT.add(id, s, 318 + dx, 118, 'left')); }),
+      SC.all([SC.walk('dan', 160, 112, 60), SC.walk('r1', 128, 100, 75), SC.walk('r2', 140, 92, 75), SC.walk('r3', 196, 92, 75), SC.walk('brayden', 230, 108, 75), SC.walk('mike', 184, 112, 75), SC.line('jury', 'PARADE!', 1.2)]),
+      SC.face('dan', 'down'), SC.face('mike', 'left'),
+      F.wBell ? [SC.sound('cash'), SC.emote('bell', 'DING!', .8, PAL.yellow), SC.sound('cash')] : SC.sound('cash'),
+      SC.all([SC.line('brayden', '*sobbing*', 1.3), SC.emote('r3', '!', 1)]),
+      SC.say([['MANGO MIKE', 'Ladies and gentlemen, KEY WEST’S FLORIDA MAN OF THE YEAR!'], ['DAN', '', [
+        ['“I am NOT a Florida Man.” (puts on sash)', () => { pick = 0; return null; }],
+        ['“This one’s for Gus.”', () => { pick = 1; return null; }],
+        ['Raise a Swamp Lite to the sunset', () => { pick = 2; return null; }]]]]),
+    ].flat(Infinity), () => courtCut([
+      pick === 0 && [SC.fx(() => CT.add('sash', null, 160, 113, 'down', { draw: KEYS_PROPS.sash })), SC.sound('cash'), SC.all([SC.line('jury', 'DAN! DAN! DAN!', 1.6), SC.emote('mike', '!!', 1, PAL.yellow), SC.emote('brayden', '!!', 1)])],
+      pick === 1 && [SC.line('gus', '*crying*', 1.2), SC.sound('splash'), SC.fly(() => KEYS_PROPS.tarponImg(), 318, 104, -20, 92, 1.3, 0, true), SC.line('judge', 'Can’t explain it.', 1.5)],
+      pick === 2 && [SC.sound('crack'), SC.fx(() => CT.add('beers', null, 0, 998, 'down', { draw: KEYS_PROPS.beers })), SC.line('jury', 'TO KEY WEST!', 1.3),
+        SC.fx(() => CT.add('sunset', null, 0, 999, 'down', { draw: KEYS_PROPS.sunset, k: 0 })), SC.tween(() => A('sunset').k, v => { A('sunset').k = v; }, .35, 1), SC.line('mike', '*everybody claps*', 1.4)],
+    ].flat(Infinity), () => say([[PHONE_B, 'Dan. Before you say anything. Do NOT go to Orlando.'], ['DAN', 'What’s in Orlando?'], [PHONE_B, 'A mouse, Dan. A very powerful mouse. With LAWYERS.']],
+      () => { headline('FLORIDA MAN CLEARED IN "GRAND THEFT GALLEON" CASE, LEADS KEY WEST PARADE ON LOBSTER FLOAT', 10); F.case9Won = true; F.creditsPending = 9; endDay('court'); })));
   },
 };
 

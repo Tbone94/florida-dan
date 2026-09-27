@@ -8,12 +8,15 @@ const Scene = {
   q: null, i: 0, t: 0, then: null, cam: null, bars: 0, skipT: 0, bubbles: [], flyers: [], props: [],
   skip() { if (Game.mode === 'scene') this.skipping = true; },
   on: () => Game.mode === 'scene' || (Game.mode === 'talk' && Game.talk && Game.talk.prev === 'scene'),
-  play(steps, then) {
+  inCourt: () => Scene.court && Scene.on(),
+  // opts.court: the scene plays on the courtroom stage (courtCut in court.js): stage coords, court actors, back to 'court' after
+  play(steps, then, opts = {}) {
+    this.court = !!opts.court;
     this.q = steps.flat().filter(Boolean); this.i = 0; this.then = then || null; this.skipT = 0; this.bubbles = []; this.skipping = false;
     this.cam = { x: Game.cam.x + VW / 2, y: Game.cam.y + VH / 2 + 10, z: 1 };
-    this.hud = !ui.hudTop.hidden; showHud(false); ui.prompt.hidden = true; ui.hint.hidden = true;
+    this.hud = this.court ? false : !ui.hudTop.hidden; showHud(false); ui.prompt.hidden = true; ui.hint.hidden = true;
     Game.dan.moving = false; Input.releaseAll();
-    Game.mode = 'scene'; $('lbox').classList.add('on'); this.begin();
+    Game.mode = 'scene'; $('lbox').classList.add('on'); $('lbox').classList.toggle('court', this.court); this.begin();
   },
   begin() {
     const s = this.q[this.i]; if (!s) return this.end();
@@ -21,7 +24,7 @@ const Scene = {
   },
   tick(dt) {
     Game.gatorCalm = Math.max(Game.gatorCalm || 0, .5); Game.raccoonCd = Math.max(Game.raccoonCd || 0, .5);   // nobody gets bitten mid-cutscene
-    tickWorld(dt); updateParts(dt); tickFx(dt);
+    if (!this.court) tickWorld(dt); updateParts(dt); tickFx(dt);
     this.bars = Math.min(1, this.bars + dt * 3);
     for (const b of this.bubbles) b.life -= dt; this.bubbles = this.bubbles.filter(b => b.life > 0);
     for (const f of this.flyers) f.t += dt; this.flyers = this.flyers.filter(f => f.t < f.d);
@@ -39,7 +42,7 @@ const Scene = {
       if (s.finish) s.finish(s);
       this.i++; this.begin(); if (!this.skipping) break;
     }
-    if (this.q) this.aim(dt);   // the last step can end the scene: don't re-aim (that left the zoom on in normal play)
+    if (this.q && !this.court) this.aim(dt);   // the last step can end the scene: don't re-aim (that left the zoom on in normal play)
   },
   aim() {   // the scene camera: centre + zoom through the shader's view window
     const c = this.cam, z = c.z, x0 = clamp(c.x - VW / 2, 0, MW * TS - VW), y0 = clamp(c.y - VH / 2 - 10, 0, MH * TS - VH);
@@ -49,9 +52,10 @@ const Scene = {
   },
   end() {
     const then = this.then; this.q = null; this.then = null; Game.view = null; this.bubbles = []; this.flyers = []; this.props = []; Game.dan.lift = 0;
-    if (Game.mode === 'scene') Game.mode = 'play';
+    if (Game.mode === 'scene') Game.mode = this.court ? 'court' : 'play';
+    const wasCourt = this.court; this.court = false;
     for (const n of Game.npcs) n.moving = false; Game.dan.moving = false;
-    if (Game.mode === 'play') showHud(this.hud !== false);
+    if (Game.mode === 'play' && !wasCourt) showHud(this.hud !== false);
     this.bars = 0; Input.releaseAll(); $('lbox').classList.remove('on');
     if (then) then();
   },
@@ -81,7 +85,7 @@ function rocket(x, y, h = 90) {   // a Freedom Rocket: a fire trail up, then a b
 }
 const burst = (x, y) => { explode(x + rnd(-8, 8), y); Game.flash = Math.max(Game.flash, .12); };
 // ---------- step builders ----------
-const actorOf = a => typeof a === 'function' ? a() : a === 'dan' ? Game.dan : typeof a === 'string' ? (Game.npcs.find(n => n.id === a) || Game.animals.find(n => n.id === a || n.type === a)) : a;
+const actorOf = a => typeof a === 'function' ? a() : Scene.court && typeof a === 'string' ? (Game.courtActors || []).find(c => c.id === a) : a === 'dan' ? Game.dan : typeof a === 'string' ? (Game.npcs.find(n => n.id === a) || Game.animals.find(n => n.id === a || n.type === a)) : a;
 const SC = {
   wait: s => ({ dur: s }),
   fx: fn => ({ start: fn, dur: 0 }),

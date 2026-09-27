@@ -84,7 +84,9 @@ function promptAt(act) {
   return { x: D.x, y: D.y - (D.ride ? 34 : 38) };
 }
 function showPrompt(act) {
-  const pv = act ? `${K('a')}<span>${act.label}</span>` : ''; if (ui.prompt._v !== pv) { ui.prompt._v = pv; ui.prompt.innerHTML = pv; }
+  if (act && act.quiet) act = null;   // (the action still works on A; it just doesn't need a bubble any more)
+  const pv = act ? K('a') : '', lb = act ? act.label : ''; if (ui.prompt._v !== pv) { ui.prompt._v = pv; ui.prompt.innerHTML = pv; }   // just the button: people know it means talk / use
+  if (ui.prompt.dataset.label !== lb) { ui.prompt.dataset.label = lb; ui.prompt.setAttribute('aria-label', lb); }
   ui.prompt.hidden = !act; Game.promptPt = act ? promptAt(act) : null;
   if (isTouch && ui.btnA._on !== !!act) { ui.btnA._on = !!act; ui.btnA.classList.toggle('ready', !!act); }   // the A button glows while there's something to press
 }

@@ -106,7 +106,7 @@ function interaction() {
   }
   if (D.ride === 'cooler' && KEYS() && Keys.coolerPrompt()) return Keys.coolerPrompt();
   if (D.ride === 'cooler' && ORLANDO() && Orlando.coolerPrompt()) return Orlando.coolerPrompt();
-  if (D.ride === 'cooler') return { label: 'Park the cooler', fn: () => { D.ride = null; D.y += 10; if (!canWalk(D.x, D.y)) D.y -= 10; } };
+  if (D.ride === 'cooler') return { label: 'Park the cooler', quiet: !!Game.flags.parkedCooler, fn: () => { Game.flags.parkedCooler = true; D.ride = null; D.y += 10; if (!canWalk(D.x, D.y)) D.y -= 10; } };
   // vehicles you're standing right on top of beat anything else nearby (a cooler parked by the courthouse door)
   if (!D.ride && near(Game.cooler, 13)) return { label: 'Ride the motorized cooler', at: { x: Game.cooler.x, y: Game.cooler.y - 20 }, fn: () => { D.ride = 'cooler'; D.x = Game.cooler.x; D.y = Game.cooler.y; Sound.play('engine'); if (Game.fx.buzz > 50 || Game.fx.powder > 0) Game.day_.dui = true; } };
   if (!MIAMI() && hasUp('recliner') && !D.ride) { const rc = World.props.find(p => p.kind === 'recliner'); if (rc && near({ x: rc.x + 8, y: rc.y + 4 }, 18)) return { label: 'Nap in the recliner', at: { x: rc.x + 8, y: rc.y - 12 }, fn: recliner }; }
@@ -250,7 +250,7 @@ function yell() {
 function update(dt) {
   if (Game.hitstop > 0) { Game.hitstop -= dt; return; }   // punch freeze-frame
   Game.t += dt; Game.kick = Math.max(0, (Game.kick || 0) - dt * 7);
-  if (toastT > 0 && (toastT -= dt) <= 0) { $('note').hidden = true; ui.toast.hidden = true; }
+  if (toastT > 0 && (toastT -= dt) <= 0) ui.toast.hidden = true;
   Game.flash = Math.max(0, Game.flash - dt * 2); Game.shake = Math.max(0, Game.shake - dt * 18);
   updateHeadlineBanner(dt); Phone.update(dt);
   switch (Game.mode) {
@@ -298,7 +298,8 @@ function update(dt) {
   for (const p of Game.pickups) {
     if (p.kind === 'cowpie') continue;
     const d = Math.hypot(p.x - Game.dan.x, p.y - Game.dan.y);
-    if (p.kind === 'trash' ? !(Game.dan.ride === 'boat' && d < 18) : (Game.dan.ride || d >= 12)) continue;
+    const cool = Game.dan.ride === 'cooler', carryK = p.kind === 'mattress' || p.kind === 'helmet' || p.kind === 'rollerdog';
+    if (p.kind === 'trash' ? !(Game.dan.ride === 'boat' && d < 18) : cool && !carryK ? d >= 16 : (Game.dan.ride || d >= 12)) continue;   // the cooler scoops up whatever it drives over
     if (p.kind === 'mattress' || p.kind === 'helmet') { if (Game.dan.carry) continue; p.got = true; Game.dan.carry = p.kind; Sound.play('pickup'); toast(p.kind === 'helmet' ? 'Tiny’s lucky helmet. It smells like victory and nachos.' : 'Dan hoists the mattress. It is damp. Do not think about why.'); continue; }
     if (p.kind === 'rollerdog') { if (Game.dan.carry) continue; p.got = true; Game.dan.carry = 'rollerdog'; Sound.play('pickup'); note('Got the roller dog machine! Still warm. Take it back to Darlene.'); continue; }
     p.got = true; giveItem(p.kind); toast(pick(PICKUP_LINES[p.kind] || [`Got ${ITEMS[p.kind] ? ITEMS[p.kind].name : p.kind}.`]));
@@ -363,6 +364,28 @@ function updateParts(dt) {
   Game.parts = Game.parts.filter(p => p.life > 0);
   if (Game.parts.length > 400) Game.parts.splice(0, Game.parts.length - 400);
 }
+// hurricane debris, drawn once: a folding lawn chair, a backyard trampoline, a plastic flamingo, Kevin
+const DEBRIS = {};
+function debrisSprite(what) {
+  if (DEBRIS[what] !== undefined) return DEBRIS[what];
+  if (what === 'flamingo') return DEBRIS[what] = SPR.flamingo || null;
+  if (what === 'kevin') { const k = SPR.kevin && SPR.kevin.down; return DEBRIS[what] = k ? k[0] : null; }
+  const cv = document.createElement('canvas'), c = cv.getContext('2d'), px = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(x, y, w, h); };
+  if (what === 'chair') {   // aluminum frame, green-and-white webbing
+    cv.width = 14; cv.height = 12;
+    px(1, 0, 1, 11, PAL.ink); px(12, 0, 1, 11, PAL.ink); px(1, 6, 12, 1, PAL.ink); px(2, 11, 3, 1, PAL.ink); px(9, 11, 3, 1, PAL.ink);
+    for (let i = 0; i < 5; i++) px(2, 1 + i, 10, 1, i % 2 ? PAL.white : PAL.grass);
+    for (let i = 0; i < 4; i++) px(2 + i * 3, 7, 2, 3, i % 2 ? PAL.white : PAL.grass);
+    px(1, 0, 1, 11, '#c8ccd2'); px(12, 0, 1, 11, '#c8ccd2');
+  } else {   // trampoline: black mat, blue safety pad, spindly legs
+    cv.width = 22; cv.height = 10;
+    c.fillStyle = PAL.ink; c.beginPath(); c.ellipse(11, 4, 11, 4, 0, 0, 7); c.fill();
+    c.fillStyle = PAL.blue || '#4f7bd1'; c.beginPath(); c.ellipse(11, 4, 10, 3.3, 0, 0, 7); c.fill();
+    c.fillStyle = '#16121c'; c.beginPath(); c.ellipse(11, 4, 7.5, 2.2, 0, 0, 7); c.fill();
+    for (const lx of [3, 9, 13, 19]) px(lx, 6, 1, 4, '#9aa0a8');
+  }
+  return DEBRIS[what] = cv;
+}
 function drawParts(cx, cy) {
   for (const p of Game.parts) {
     const x = p.x - cx, y = p.y - cy;
@@ -376,6 +399,7 @@ function drawParts(cx, cy) {
     else if (p.kind === 'dust') { g.globalAlpha = Math.min(.6, p.life * 1.4); R(x - 2, y - 2, 4, 3, PAL.sandD); g.globalAlpha = 1; }
     else if (p.kind === 'bug') { R(x, y, 2, 1, PAL.black); R(x + 2, y, 1, 1, PAL.red); }
     else if (p.kind === 'text') label(p.text, x, y, PAL.yellow, 9);
+    else if (p.kind === 'debris') { const s = debrisSprite(p.what); if (s) { g.save(); g.translate(Math.round(x), Math.round(y)); g.rotate(Math.round((3.2 - p.life) * p.spin * 4) / 4); g.drawImage(s, -(s.width >> 1), -(s.height >> 1)); g.restore(); } }
   }
 }
 
@@ -432,14 +456,16 @@ function drawStorm(t) {
   const s = Game.storm;
   g.globalAlpha = .55 * s; for (let i = 0; i < 120 * s; i++) { const x = (hash2(i, 1) * 400 + t * 220) % 360 - 20, y = (hash2(i, 2) * 220 + t * 380) % 200 - 10; R(x, y, 1, 5, PAL.waterL); } g.globalAlpha = 1;
   if (s > .6 && Math.random() < .004) { Game.flash = .8; setTimeout(() => Sound.play('boom'), 250); }
-  if (s > .5 && Math.random() < .006) Game.parts.push({ kind: 'text', x: Game.cam.x - 10, y: Game.cam.y + rnd(20, 150), vx: 160, vy: -10, life: 2.5, text: pick(['a lawn chair', 'someone’s trampoline', 'a flamingo', 'Kevin']) });
+  // Florida blows past: a few real things tumbling across (only while the world moves, so a talk box can't pile them up at the edge)
+  if (s > .5 && (Game.mode === 'play' || Game.mode === 'scene') && Math.random() < .006 && Game.parts.filter(p => p.kind === 'debris').length < 3)
+    Game.parts.push({ kind: 'debris', what: pick(['chair', 'trampoline', 'flamingo', 'kevin']), x: Game.cam.x - 24, y: Game.cam.y + rnd(20, 140), vx: rnd(150, 190), vy: rnd(-18, 6), spin: rnd(4, 9) * (Math.random() < .5 ? -1 : 1), life: 3.2 });
 }
 
 function render() {
   g.setTransform(1, 0, 0, 1, 0, 0); Look.litCv = null; const LG = Look.grade();
   const scene = Game.mode === 'fish' ? () => Fishing.draw() : Game.mode === 'wrestle' ? () => Wrestle.draw() : Game.mode === 'raccoon' ? () => Minigame.drawRaccoon() : Game.mode === 'mash' ? () => Mash.draw()
     : Game.mode === 'dance' ? () => Dance.draw() : Game.mode === 'bridge' ? () => Bridge.draw() : Game.mode === 'dive' ? () => Dive.draw() : Game.mode === 'sneak' ? () => Sneak.draw() : Game.mode === 'coaster' ? () => Coaster.draw()
-    : (Game.mode === 'objection' || Game.scene === 'parade' || Game.mode === 'court' || (Game.mode === 'talk' && Game.talk && Game.talk.prev === 'court') || (Game.mode === 'gazette' && Game.flags.inCourt)) ? () => Court.draw(Game.t) : null;
+    : (Scene.inCourt() || Game.mode === 'objection' || Game.scene === 'parade' || Game.mode === 'court' || (Game.mode === 'talk' && Game.talk && Game.talk.prev === 'court') || (Game.mode === 'gazette' && Game.flags.inCourt)) ? () => Court.draw(Game.t) : null;
   if (!scene) drawWorld();
   else if (VW === VW0) scene();
   else {   // wide screen: the fixed-layout scenes keep their 320px stage, centred between dark wings

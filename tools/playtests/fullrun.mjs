@@ -39,7 +39,7 @@ for (let day = 1; day <= 36; day++) {
     const cs = Cases.courtCase();
     if (cs && Game.mode === 'play') {
       how = 'court:' + cs; Court.start(cs);
-      for (let i = 0; i < 3000 && Game.mode !== 'gazette'; i++) {
+      for (let i = 0; i < 7000 && Game.mode !== 'gazette'; i++) {
         if (Game.mode === 'talk') { const c = [...document.querySelectorAll('.choice')]; if (c.length) c[0].click(); else Input.press('a'); }
         if (Game.mode === 'objection') { const s = Objection.s; if (s && s.phase === 'show' && s.list[s.i].lie) Input.press('a'); }
         if (Game.mode === 'wrestle') { Input.press('a'); const w = Wrestle.w; if (w && w.prompt) Input.press(w.prompt); }

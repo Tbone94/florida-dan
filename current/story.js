@@ -66,10 +66,10 @@ function updateCall(T_, dt) {
   if (C.row >= n) { if ((C.hang -= dt) <= 0) advanceTalk(); return; }   // nobody tapped: it hangs up by itself after a beat
   if (C.pause > 0) { C.pause -= dt; return; }
   const [who, text] = e.rows[C.row]; if (!C.el) { C.el = callRow(who, ''); T_.typed = 0; T_.full = text; }
-  const before = Math.floor(T_.typed); T_.typed += dt * (Game.fx.powder > 0 ? 140 : 62) * (C.fast ? 4 : 1);
+  const before = Math.floor(T_.typed); T_.typed += dt * (Game.fx.powder > 0 ? 90 : 38) * (C.fast ? 5 : 1);   // a pace you can read along with (tap to hurry it)
   if (Math.floor(T_.typed) !== before && Math.floor(T_.typed) % 3 === 0 && text[Math.floor(T_.typed)] !== ' ') Sound.voice(who);
   C.el.lastChild.textContent = text.slice(0, Math.floor(T_.typed));
-  if (T_.typed >= text.length) { C.el.lastChild.textContent = text; C.el = null; C.row++; C.pause = C.fast ? .15 : .5; C.hang = Math.max(2.2, text.length * .04); }
+  if (T_.typed >= text.length) { C.el.lastChild.textContent = text; C.el = null; C.row++; C.pause = C.fast ? .15 : Math.max(1, text.length * .035); C.hang = Math.max(2.6, text.length * .05); }   // a beat to finish reading before the next line
 }
 function renderChoices() {
   const ch = Game.talk.choices; if (!ch || ui.talkChoices.childElementCount) return;
@@ -99,14 +99,14 @@ function advanceTalk(choiceFn) {
   if (choiceFn) { const extra = choiceFn(); if (Game.mode === 'shop') { ui.talk.hidden = true; Game.talk = null; Game.afterShop = T_.then; return; } if (Array.isArray(extra)) T_.q.unshift(...packTalk(extra)); }   // a shop keeps the talk's ending for when it closes
   if (Game.talk !== T_) return;                       // the choice started a new conversation
   if (T_.q.length) return showTalk();
-  ui.talk.hidden = true; Game.mode = T_.prev === 'talk' ? 'play' : (T_.prev || 'play'); Game.talk = null; Game.talkEndAt = performance.now();
+  ui.talk.hidden = true; ui.talkChoices.innerHTML = ''; Game.mode = T_.prev === 'talk' ? 'play' : (T_.prev || 'play'); Game.talk = null; Game.talkEndAt = performance.now();
   if (T_.then) T_.then();
   if (Game.afterTalk && Game.mode === 'play') { const f = Game.afterTalk; Game.afterTalk = null; f(); }   // actions that must wait for the talk box to close (minigames, travel)
 }
 
 let toastT = 0;
 function toast(msg, secs = 3) { ui.toast.textContent = msg; if (window.TRAILER) { ui.toast.hidden = false; toastT = secs; } }   // flavor comments: off screen for good (the world, the talk box and the headlines carry the jokes)
-function note(msg, secs = 3) { ui.toast.textContent = msg; const n = $('note'); n.textContent = msg; n.hidden = false; toastT = Math.min(secs, 3.5); }   // the few that matter: a small tape strip up top
+const note = toast;   // (was a strip up top; the owner wants every narration comment off the screen)
 
 // ---------- quests ----------
 function Q(id) { return Game.quests.find(q => q.id === id); }
@@ -119,6 +119,13 @@ function addQuest(id, text, opt, before) {
   if (i >= 0) Game.quests.splice(i, 0, q); else Game.quests.push(q); renderQuests();
 }
 const currentQuest = () => Game.quests.find(q => !q.done && !q.opt) || Game.quests.find(q => !q.done && q.gig) || Game.quests.find(q => !q.done && q.arc && Arcs.target(q));   // a gig gets the arrow once the real objective is done
+// the main story needs this person right now (the objective points at them): their side stories and gigs wait their turn
+function storyWants(n) {
+  const q = Game.quests.find(q => !q.done && !q.opt), t = q && questTarget(q);
+  return !!t && (t === n || (t.x !== undefined && Math.hypot(t.x - n.x, t.y - n.y) < 40));
+}
+// in the middle of a side job: nobody else pitches a new one (Darlene doesn't ask for a favor while you're buying Bessie's roller dog)
+const sideBusy = () => !!(Game.day_ && Game.day_.gig && Game.day_.gig.active) || Arcs.anyActive();
 // where the objective arrow points
 function questTarget(q) {
   const S_ = World.spots, who = id => Game.npcs.find(n => n.id === id);
@@ -252,7 +259,7 @@ const Story = {
 
   // --- people ---
   talk(n) {
-    if (!Game.skipSide) { if (Arcs.talk(n)) return; if (Gigs.talk(n)) return; }   // a neighbor's story beats a side gig (skipSide: sideNag's "can I buy somethin'?")
+    if (!Game.skipSide && !storyWants(n)) { if (Arcs.talk(n)) return; if (Gigs.talk(n)) return; }   // the main story first; then a neighbor's story beats a side gig (skipSide: sideNag's "can I buy somethin'?")
     if (n.id === 'coral') return say([['CORAL', pick(['Surf & Dive! We sell gear. The engine in the back is “for display.”', 'You look like a guy who’d buy a metal detector. That’s a compliment.', 'Waves are flat, prices are fair, questions are discouraged.'])], ['CORAL', 'Wanna look?', [['Browse', () => { Game.mode = 'shop'; openShop('surf'); return null; }], ['“Nah.”', () => [['CORAL', 'Hang loose. Or don’t. Free country.']]]]]]);
     if (Game.day >= 5 && Cases.talk(n)) return;
     const F = Game.flags, day = Game.day;
