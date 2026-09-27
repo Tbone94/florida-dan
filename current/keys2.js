@@ -103,7 +103,7 @@ const KeysCases = {
     const F = Game.flags, first = !F.bridgeDone; F.bridgeDone = true;
     if (qOpen('bridge')) { done('bridge'); addQuest('lou', 'Find Captain Lou at the Key West marina (end of US-1, then north)'); }
     if (!res) { if (first) { toast('Dan crossed seven miles of ocean the hard way. Brenda is concerned.', 4); headline('FLORIDA MAN CROSSES SEVEN MILE BRIDGE "THE LONG WAY"', 2); } return; }
-    toast(`Seven miles in ${res.secs.toFixed(1)}s. ${res.hits ? `${res.hits} “incidents.”` : 'Clean. Suspiciously clean.'}${res.record && !first ? ' NEW RECORD!' : ''}`, 4);
+    note(`Seven miles in ${res.secs.toFixed(1)}s. ${res.hits ? `${res.hits} “incidents.”` : 'Clean. Suspiciously clean.'}${res.record && !first ? ' NEW RECORD!' : ''}`, 4);
     if (first) headline(res.hits >= 3 ? 'FLORIDA MAN DRIVES MOTORIZED COOLER DOWN SEVEN MILE BRIDGE, HITS "ONLY SOME" RVS' : 'FLORIDA MAN RIDES MOTORIZED COOLER ACROSS SEVEN MILE BRIDGE AT HIGHWAY SPEED; RETIREES "SHAKEN"', res.hits >= 3 ? 6 : 4);
     else if (res.record) headline(`FLORIDA MAN SETS SEVEN MILE BRIDGE COOLER RECORD: ${res.secs.toFixed(1)} SECONDS`, 2);
   },
@@ -161,7 +161,7 @@ const KeysCases = {
   },
   buoyPhoto() {
     const F = Game.flags; Sound.play('pickup'); Game.flash = .5;
-    toast(pick(['*click* Dan, the buoy, and 40 strangers. Everybody takes the same photo.', '*click* Southernmost Point. 90 miles to Cuba. Dan considers it.', '*click* A rooster photobombs. It’s a better photo now.']), 3.5);
+    note(pick(['*click* Dan, the buoy, and 40 strangers. Everybody takes the same photo.', '*click* Southernmost Point. 90 miles to Cuba. Dan considers it.', '*click* A rooster photobombs. It’s a better photo now.']), 3.5);
     if (!F.buoyHl) { F.buoyHl = true; headline('FLORIDA MAN WAITS 45 MINUTES IN LINE TO TAKE PHOTO WITH BUOY, CALLS IT "WORTH IT"', 1); }
   },
   // ---------- the declaration (case 8, day 1, sunset) ----------
@@ -219,7 +219,7 @@ const KeysCases = {
     }
     if (n.id === 'mike') {
       if (c.n === 8 && c.d === 2 && qOpen('sunset2')) {
-        if (Game.hour < 17) return say([['MANGO MIKE', 'The sunset celebration starts at five, amigo. Tightrope guy, cat guy, the man with the knives. And now... you?', [['“Wait around for the show.”', () => { Game.hour = 17; toast('Dan hangs out at Mallory Square. A man juggles fire. A cat jumps through it. Five o’clock.', 4); return [['MANGO MIKE', 'SHOWTIME, amigo.']]; }], ['“I’ll come back.”', () => null]]]]), true;
+        if (Game.hour < 17) return say([['MANGO MIKE', 'The sunset celebration starts at five, amigo. Tightrope guy, cat guy, the man with the knives. And now... you?', [['“Wait around for the show.”', () => { Game.hour = 17; note('Dan hangs out at Mallory Square. A man juggles fire. A cat jumps through it. Five o’clock.', 4); return [['MANGO MIKE', 'SHOWTIME, amigo.']]; }], ['“I’ll come back.”', () => null]]]]), true;
         return say([['MANGO MIKE', 'Ladies and gentlemen, the man who seceded from the United States in his UNDERWEAR!'], ['MANGO MIKE', 'Dance for the crowd, amigo. If they love you, the Conch Republic recognizes you. That’s the law. I made it up just now.', [
           ['“Hit it.”', () => { Game.afterTalk = () => Dance.start(() => { F.recognized = true; done('sunset2'); react('cheer'); headline('SUNSET CROWD AT MALLORY SQUARE FORMALLY "RECOGNIZES" FLORIDA MAN’S HOUSEBOAT AS A NATION', 5); say([['', 'Four hundred people applaud as the sun goes down. A man in a pirate hat salutes. A cat does a flip.'], ['MANGO MIKE', 'By the authority of the sunset: the Republic of Dan is RECOGNIZED!']]); }, { who: 'MANGO MIKE', sprite: 'mike', sunset: true }); return null; }],
           ['“Not yet.”', () => [['MANGO MIKE', 'The sun won’t wait long, amigo.']]]]]]), true;
@@ -245,9 +245,9 @@ const KeysCases = {
   interactions() {
     const D = Game.dan, S_ = KSP(), list = [], near = (p, r) => p && Math.hypot(D.x - p.x, D.y - p.y) < r, c = this.c(), F = Game.flags;
     if (D.ride) return list;
-    if (c.n === 8 && c.d === 1 && qOpen('sunset') && near(S_.door, 22)) list.push(Game.hour < 18 ? { label: 'Wait for the sunset on the houseboat', fn: () => { Game.hour = 18.3; toast('Dan sits on the houseboat roof with a cooler. The sky turns orange. He has eleven beers left. Then ten.', 4); } } : { label: 'Toast the sunset', fn: () => this.declare() });
-    if (c.n === 9 && c.d === 1 && qOpen('tarpon') && near(S_.tarpon, 26)) list.push({ label: 'Feed the tarpon', fn: () => this.tarpon(() => { F.tarponFed = true; done('tarpon'); headline('FLORIDA MAN FEEDS TARPON BY HAND, KEEPS "MOST" FINGERS', 3); toast('The tarpon ate. Dan kept all ten fingers. Go tell Gus.', 3); }, () => toast('A tarpon jumped out and took the whole bucket. Tom has more. Try again.', 3)) });
-    if (c.n === 9 && c.d === 2 && qOpen('claim') && F.claimTip && near(S_.moeDoor, 18)) list.push({ label: 'Grab Gus’s claim from the men’s room', fn: () => { F.claimGot = true; done('claim'); Sound.play('pickup'); toast('Salvage Claim #84-117: G. Albury, “N.S. de la Cerveza.” Framed. Slightly damp. Do not ask why.', 4.5); } });
+    if (c.n === 8 && c.d === 1 && qOpen('sunset') && near(S_.door, 22)) list.push(Game.hour < 18 ? { label: 'Wait for the sunset on the houseboat', fn: () => { Game.hour = 18.3; note('Dan sits on the houseboat roof with a cooler. The sky turns orange. He has eleven beers left. Then ten.', 4); } } : { label: 'Toast the sunset', fn: () => this.declare() });
+    if (c.n === 9 && c.d === 1 && qOpen('tarpon') && near(S_.tarpon, 26)) list.push({ label: 'Feed the tarpon', fn: () => this.tarpon(() => { F.tarponFed = true; done('tarpon'); headline('FLORIDA MAN FEEDS TARPON BY HAND, KEEPS "MOST" FINGERS', 3); note('The tarpon ate. Dan kept all ten fingers. Go tell Gus.', 3); }, () => note('A tarpon jumped out and took the whole bucket. Tom has more. Try again.', 3)) });
+    if (c.n === 9 && c.d === 2 && qOpen('claim') && F.claimTip && near(S_.moeDoor, 18)) list.push({ label: 'Grab Gus’s claim from the men’s room', fn: () => { F.claimGot = true; done('claim'); Sound.play('pickup'); note('Salvage Claim #84-117: G. Albury, “N.S. de la Cerveza.” Framed. Slightly damp. Do not ask why.', 4.5); } });
     return list;
   },
   target(q) {
@@ -290,7 +290,7 @@ const KeysChase = {
     if (Math.random() < dt * 8) Game.parts.push({ kind: 'foam', x: b.x - dx / (d || 1) * 12, y: b.y - dy / (d || 1) * 12 + 3, vx: 0, vy: 0, life: .8 });
     const D = Game.dan, close = D.ride === 'boat' && Math.hypot(D.x - b.x, D.y - b.y) < 22;
     this.hold = close ? this.hold + dt : Math.max(0, this.hold - dt * .6);
-    if (close && Math.random() < dt * 3) toast(pick(['STAY ON HIM!', 'Rex is yelling at his cameraman!', 'Closer... CLOSER...']), .8);
+    if (close && Math.random() < dt * 3) note(pick(['STAY ON HIM!', 'Rex is yelling at his cameraman!', 'Closer... CLOSER...']), .8);
     if (this.hold > 1.2) this.caught();
   },
   caught() {

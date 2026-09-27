@@ -20,7 +20,7 @@ const PWA = (() => {
   async function install() {
     if (deferred) { deferred.prompt(); const c = await deferred.userChoice.catch(() => ({})); deferred = null; if (c.outcome === 'accepted') show(false); return; }
     tip.innerHTML = 'Tap Chrome’s <b>⋮</b> menu (top right) → <b>Install app</b> or <b>Add to Home screen</b>'; tip.hidden = false;
-    if (Game.mode === 'journal') toast('Chrome menu ⋮ (top right) → Install app', 5);
+    if (Game.mode === 'journal') note('Chrome menu ⋮ (top right) → Install app', 5);
   }
   btns.forEach(b => b.addEventListener('click', e => { e.stopPropagation(); install(); }));
   if (iOS && !standalone && isTouch) tip.hidden = false;

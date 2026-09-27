@@ -105,13 +105,14 @@ function advanceTalk(choiceFn) {
 }
 
 let toastT = 0;
-function toast(msg, secs = 3) { ui.toast.textContent = msg; ui.toast.hidden = false; toastT = secs; }
+function toast(msg, secs = 3) { ui.toast.textContent = msg; if (window.TRAILER) { ui.toast.hidden = false; toastT = secs; } }   // flavor comments: off screen for good (the world, the talk box and the headlines carry the jokes)
+function note(msg, secs = 3) { ui.toast.textContent = msg; const n = $('note'); n.textContent = msg; n.hidden = false; toastT = Math.min(secs, 3.5); }   // the few that matter: a small tape strip up top
 
 // ---------- quests ----------
 function Q(id) { return Game.quests.find(q => q.id === id); }
 const qOpen = id => { const q = Q(id); return !!q && !q.done; };   // quest exists and isn't finished
 const qDone = id => { const q = Q(id); return !!q && q.done; };
-function done(id) { const q = Q(id); if (q && !q.done) { q.done = true; Sound.play('catch'); toast('✓ ' + q.text.replace(/\s*\(.*\)$/, '')); } renderQuests(); }
+function done(id) { const q = Q(id); if (q && !q.done) { q.done = true; Sound.play('catch'); note('✓ ' + q.text.replace(/\s*\(.*\)$/, '')); } renderQuests(); }
 function setQuests(list) { Game.quests = list.map(([id, text, opt]) => ({ id, text, opt: !!opt, done: false })); renderQuests(); }
 function addQuest(id, text, opt, before) {
   if (Q(id)) return; const q = { id, text, opt: !!opt, done: false }, i = before ? Game.quests.findIndex(x => x.id === before) : -1;
@@ -392,26 +393,26 @@ const Story = {
     const near = (p, r) => Math.hypot(D.x - p.x, D.y - p.y) < r;
     if (D.ride) return list;
     if (near(S_.door, 18)) {
-      if (Game.day === 3 && Game.inv.plywood >= 2 && !F.boarded) list.push({ label: 'Board up the windows', fn: () => { Game.inv.plywood -= 2; F.boarded = true; Sound.play('chomp'); done('board'); toast('Boarded. Dan used the stop sign as a third board. Rhonda will never know.'); } });
+      if (Game.day === 3 && Game.inv.plywood >= 2 && !F.boarded) list.push({ label: 'Board up the windows', fn: () => { Game.inv.plywood -= 2; F.boarded = true; Sound.play('chomp'); done('board'); note('Boarded. Dan used the stop sign as a third board. Rhonda will never know.'); } });
       else if (sleepReady()) list.push({ label: 'Hit the hay', fn: () => sleep() });
     }
     if (F.stopSignOnRoof && !Game.inv.sign && near({ x: S_.door.x - 34, y: S_.door.y }, 18)) list.push({ label: 'Climb the ladder to the roof', fn: () => Scene.play(Story.roofScene(), () => say([['DAN', '(from the dirt) I MEANT to do that.']], () => { Game.inv.sign = 1; F.stopSignOnRoof = false; hurtDan(5); done('sign'); headline('FLORIDA MAN FALLS OFF ROOF WHILE RETRIEVING STOLEN STOP SIGN HE "DID NOT STEAL"', 5); })) });
     if (Game.day === 2 && !F.raccoonOut && near(S_.icemachine, 20)) list.push({ label: 'Reach into the ice machine', fn: () => Minigame.raccoon() });
     if (near({ x: 37.7 * TS, y: 40.6 * TS }, 20)) list.push({ label: 'Dig in the dumpster', fn: () => {
       if (Game.day === 3 && !F.plywood) { F.plywood = true; Game.inv.plywood = 2; done('plywood'); return say([['', 'Dan finds two sheets of plywood.'], ['', 'He also finds a man named Kevin, asleep.'], ['KEVIN', 'Five more minutes.'], ['', 'Dan lets Kevin sleep.']]); }
-      if (!Game.day_.dumpster) { Game.day_.dumpster = true; const k = pick(['hotdog', 'scratch', 'beer', 'cig']); giveItem(k); return toast(`Dumpster had a ${ITEMS[k].name}. Still good. Probably.`); }
-      toast(pick(['Nothing but regret in there.', 'Kevin says hi.', 'A raccoon hissed at you. Fair.']));
+      if (!Game.day_.dumpster) { Game.day_.dumpster = true; const k = pick(['hotdog', 'scratch', 'beer', 'cig']); giveItem(k); return note(`Dumpster had a ${ITEMS[k].name}. Still good. Probably.`); }
+      note(pick(['Nothing but regret in there.', 'Kevin says hi.', 'A raccoon hissed at you. Fair.']));
     } });
-    if (Game.urgent > 0 && (near({ x: 25.8 * TS, y: 43.3 * TS }, 20) || near(S_.door, 20))) list.push({ label: 'USE THE TOILET', fn: () => { Game.urgent = 0; Sound.play('splash'); toast('...Made it. Dan has never been closer to God.'); Game.chill = 100; } });
-    if (near(S_.court, 22)) { const cs = Cases.courtCase(); list.push({ label: cs ? 'Enter the courthouse' : 'Courthouse (closed)', fn: () => { if (cs) Court.start(cs); else toast(Game.day > 4 ? 'Dan waves at the courthouse. The courthouse does not wave back.' : 'Not till Friday. Dan is in no hurry.'); } }); }
+    if (Game.urgent > 0 && (near({ x: 25.8 * TS, y: 43.3 * TS }, 20) || near(S_.door, 20))) list.push({ label: 'USE THE TOILET', fn: () => { Game.urgent = 0; Sound.play('splash'); note('...Made it. Dan has never been closer to God.'); Game.chill = 100; } });
+    if (near(S_.court, 22)) { const cs = Cases.courtCase(); list.push({ label: cs ? 'Enter the courthouse' : 'Courthouse (closed)', fn: () => { if (cs) Court.start(cs); else note(Game.day > 4 ? 'Dan waves at the courthouse. The courthouse does not wave back.' : 'Not till Friday. Dan is in no hurry.'); } }); }
     if (Game.day >= 5) list.push(...Cases.interactions());
-    for (const p of Game.pickups) if (p.kind === 'cowpie' && near(p, 14)) list.push({ label: 'Pick the mushroom off the cow pie', fn: () => { p.got = true; giveItem('shroom'); toast(pick(['Harvested one (1) cow pie mushroom. Organic.', 'Dan wipes it on his tank top. Clean enough.'])); } });
+    for (const p of Game.pickups) if (p.kind === 'cowpie' && near(p, 14)) list.push({ label: 'Pick the mushroom off the cow pie', fn: () => { p.got = true; giveItem('shroom'); note(pick(['Harvested one (1) cow pie mushroom. Organic.', 'Dan wipes it on his tank top. Clean enough.'])); } });
     return list;
   },
 
   event(name) {
     if (name === 'shroom' && Game.day !== 3) {
-      if (!Game.animals.some(a => a.spirit) && Game.flags.mannyMet !== true && Math.random() < .5) toast('...something is glowing out in the water.');
+      if (!Game.animals.some(a => a.spirit) && Game.flags.mannyMet !== true && Math.random() < .5) note('...something is glowing out in the water.');
     }
     if (name === 'caught') { const f = Game.catchBag[Game.catchBag.length - 1]; if (f && f.id === 'cart') headline('FLORIDA MAN RETURNS SHOPPING CART VIA SWAMP; STORE "DOES NOT WANT IT"', 3); if (f && f.legend) headline('FLORIDA MAN LANDS LEGENDARY "BIG RONNIE," WEEPS OPENLY AT DOCK', 5);
       if (f && f.id === 'phone') headline('FLORIDA MAN FISHES IPHONE OUT OF SWAMP, IGNORES 17 MISSED CALLS FROM "MOM"', 3);
@@ -428,13 +429,13 @@ const Story = {
 // the bed only offers itself in the evening or when bed is the objective (no "sleep" button under your thumb at 6 AM)
 const sleepReady = () => { const q = Game.quests.find(q => !q.done && !q.opt); return Game.hour >= 17 || !q || ['bed', 'sleep1', 'sleep2'].includes(q.id); };
 function sleep() {
-  if (Game.day >= 5) { const why = Cases.sleepBlock(); if (why) return toast(why); return say([['DAN', pick(['Welp. That’s a day.', Game.region === 'swamp' ? 'Nite, swamp.' : 'Nite, Florida.', 'Another one for the books. The police books.'])]], () => endDay('sleep')); }
+  if (Game.day >= 5) { const why = Cases.sleepBlock(); if (why) return note(why); return say([['DAN', pick(['Welp. That’s a day.', Game.region === 'swamp' ? 'Nite, swamp.' : 'Nite, Florida.', 'Another one for the books. The police books.'])]], () => endDay('sleep')); }
   const F = Game.flags;
-  if (Game.day === 1 && !F.fry) return toast('Can’t sleep. Merle’s fish fry. Three fish. It’s the only thing Dan’s ever been asked to do.');
-  if (Game.day === 2 && !F.bday2 && Game.hour < 19) return toast('Still need those three signatures. Brenda’s counting on you. God help her.');
-  if (Game.day === 3 && !F.party) return toast('Can’t sleep through a hurricane PARTY. That’s un-American.');
-  if (Game.day === 4) return toast('Court. Today. The courthouse. East end of 29. GO.');
-  if (Game.hour < 17 && Game.day >= 5) return toast('Too early. Even for Dan.');
+  if (Game.day === 1 && !F.fry) return note('Can’t sleep. Merle’s fish fry. Three fish. It’s the only thing Dan’s ever been asked to do.');
+  if (Game.day === 2 && !F.bday2 && Game.hour < 19) return note('Still need those three signatures. Brenda’s counting on you. God help her.');
+  if (Game.day === 3 && !F.party) return note('Can’t sleep through a hurricane PARTY. That’s un-American.');
+  if (Game.day === 4) return note('Court. Today. The courthouse. East end of 29. GO.');
+  if (Game.hour < 17 && Game.day >= 5) return note('Too early. Even for Dan.');
   say([['DAN', pick(['Welp. That’s a day.', 'Nite, swamp.', 'Another one for the books. The police books.'])]], () => endDay('sleep'));
 }
 

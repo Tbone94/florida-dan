@@ -255,7 +255,7 @@ const Arcs = {
       if (c.ref) Game.allegations = Math.max(0, Game.allegations - c.ref);
       if (c.after) c.after();
       done('arc_' + id); react('cheer');
-      toast(`${c.cash ? `+$${c.cash} · ` : ''}${up.split(' ')[0]} vouches for you: FLA MAN −${c.ref || 0}%`, 3.5);
+      note(`${c.cash ? `+$${c.cash} · ` : ''}${up.split(' ')[0]} vouches for you: FLA MAN −${c.ref || 0}%`, 3.5);
       s.ch++; s.st = 'idle'; s.acted = false;
       Game.flags.arcsDone = (Game.flags.arcsDone || 0) + 1;
       if (Game.flags.arcsDone === 12) headline('ENTIRE NEIGHBORHOOD SIGNS PETITION DECLARING FLORIDA MAN "NOT THAT BAD, ACTUALLY"', 1);
@@ -274,8 +274,8 @@ const Arcs = {
   wait: A => (typeof A.wait === 'function' ? A.wait() : A.wait) || A.label,
   act(id) {
     const s = ARC(id), c = this.chapter(id), A = c.act;
-    if (!A.when()) return toast(this.wait(A), 2.5);
-    A.run(() => { s.acted = true; if (!A.back && !c.ready) this.finish(id); else if (A.back) toast(`Now back to ${(who(id) || { name: id }).name}.`, 2.5); });
+    if (!A.when()) return note(this.wait(A), 2.5);
+    A.run(() => { s.acted = true; if (!A.back && !c.ready) this.finish(id); else if (A.back) note(`Now back to ${(who(id) || { name: id }).name}.`, 2.5); });
   },
   target(q) {
     const id = q.arc, c = this.chapter(id), s = ARC(id); if (!c || !this.hereOK(c)) return null;

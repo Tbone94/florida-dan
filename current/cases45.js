@@ -67,12 +67,12 @@ const MiamiCases = {
     Lambo.tick(dt);
     if (c.n === 5 && c.d === 1 && !F.balesDone) {
       const n = Game.inv.bale || 0; questText('bales', `Grab the bales on the beach before the goons do (${Math.min(4, n)}/4)`);
-      if (n >= 4) { F.balesDone = true; done('bales'); toast('That’s four. Somebody’s gonna be SO grateful.'); }
+      if (n >= 4) { F.balesDone = true; done('bales'); note('That’s four. Somebody’s gonna be SO grateful.'); }
       for (const gn of Game.npcs.filter(g => g.baleGrab)) {   // the goons race you for them
         const b = Game.pickups.filter(p => p.kind === 'bale').sort((p, q) => Math.hypot(p.x - gn.x, p.y - gn.y) - Math.hypot(q.x - gn.x, q.y - gn.y))[0];
         if (!b) continue; const dx = b.x - gn.x, dy = b.y - gn.y, d = Math.hypot(dx, dy) || 1;
         gn.x += dx / d * 30 * dt; gn.y += dy / d * 30 * dt; gn.dir = dirOf(dx, dy); gn.moving = true; gn.t += dt; if (Math.floor(gn.t * 6) % 2 !== gn.frame) gn.frame ^= 1;
-        if (d < 8) { b.got = true; toast('A goon grabbed a bale! They’re FAST for guys in suits.'); if (Game.pickups.filter(p => p.kind === 'bale' && !p.got).length + (Game.inv.bale || 0) < 4) Game.pickups.push({ kind: 'bale', x: rnd(64, 71) * TS, y: rnd(4, 56) * TS }); }
+        if (d < 8) { b.got = true; note('A goon grabbed a bale! They’re FAST for guys in suits.'); if (Game.pickups.filter(p => p.kind === 'bale' && !p.got).length + (Game.inv.bale || 0) < 4) Game.pickups.push({ kind: 'bale', x: rnd(64, 71) * TS, y: rnd(4, 56) * TS }); }
       }
     }
     if (c.n === 4 && c.d === 3 && Race.on) Race.tick(dt);
@@ -165,7 +165,7 @@ const MiamiCases = {
     });
   },
   shopExtras() { return []; },
-  bought(k) { if (k === 'suit') { Game.flags.suit = true; done('suit'); toast('Dan is now wearing a pastel suit. He looks like a very tired sherbet.'); headline('FLORIDA MAN BUYS PASTEL SUIT, IMMEDIATELY SPILLS CAFECITO ON IT', 2); } },
+  bought(k) { if (k === 'suit') { Game.flags.suit = true; done('suit'); note('Dan is now wearing a pastel suit. He looks like a very tired sherbet.'); headline('FLORIDA MAN BUYS PASTEL SUIT, IMMEDIATELY SPILLS CAFECITO ON IT', 2); } },
   target(q) {
     const S_ = MSP(), who = id => Game.npcs.find(n => n.id === id);
     switch (q.id) {

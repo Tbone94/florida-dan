@@ -162,9 +162,9 @@ const Daytona = {
     list.push(...DaytonaCases.interactions());
     if (D.ride) return list;
     if (near(S_.door, 18) && sleepReady()) list.push({ label: 'Go to your room (sleep)', fn: () => sleep() });
-    if (near(S_.court, 22)) { const cs = Cases.courtCase(); list.push({ label: cs ? 'Enter the courthouse' : 'Volusia County Courthouse (closed)', fn: () => cs ? Court.start(cs) : toast('The Volusia County Courthouse. There’s a NASCAR flag on the flagpole. Under the other flag.') }); }
+    if (near(S_.court, 22)) { const cs = Cases.courtCase(); list.push({ label: cs ? 'Enter the courthouse' : 'Volusia County Courthouse (closed)', fn: () => cs ? Court.start(cs) : note('The Volusia County Courthouse. There’s a NASCAR flag on the flagpole. Under the other flag.') }); }
     if (near(S_.stationDoor, 22)) list.push({ label: 'Greyhound', fn: () => busMenu() });
-    if (Game.urgent > 0 && near(S_.hide, 22)) list.push({ label: 'USE THE TOILET', fn: () => { Game.urgent = 0; Sound.play('splash'); toast('Made it. A speedway porta-potty on race week. Dan will not describe it.'); Game.chill = 100; } });
+    if (Game.urgent > 0 && near(S_.hide, 22)) list.push({ label: 'USE THE TOILET', fn: () => { Game.urgent = 0; Sound.play('splash'); note('Made it. A speedway porta-potty on race week. Dan will not describe it.'); Game.chill = 100; } });
     return list;
   },
 };
@@ -173,9 +173,9 @@ const Daytona = {
 const REGION_NAMES = { swamp: 'the swamp', miami: 'Miami', daytona: 'Daytona' };
 function busMenu() {
   const n = Cases.info().n, F = Game.flags;
-  if (n === 4 || n === 5 || ((n === 6 || n === 7) && DAYTONA()) || ((n === 8 || n === 9) && KEYS()) || ((n === 10 || n === 11) && ORLANDO())) return toast('Brenda would kill you. Finish the case first.');
+  if (n === 4 || n === 5 || ((n === 6 || n === 7) && DAYTONA()) || ((n === 8 || n === 9) && KEYS()) || ((n === 10 || n === 11) && ORLANDO())) return note('Brenda would kill you. Finish the case first.');
   const dests = ['swamp', 'miami', 'daytona', 'keys', 'orlando'].filter(r => r !== Game.region && (r === 'swamp' || (r === 'miami' && (F.case5Won || n >= 4)) || (r === 'daytona' && (F.case5Won)) || (r === 'keys' && (F.case7Won)) || (r === 'orlando' && (F.case9Won))));
-  if (!dests.length) return toast('The bus only goes one way right now. Nowhere.');
+  if (!dests.length) return note('The bus only goes one way right now. Nowhere.');
   say([['DRIVER', 'Where to?', [...dests.map(r => [`To ${REGION_NAMES[r]}`, () => { Game.afterTalk = () => travel(r); return null; }]), ['“Nowhere. Just looking at the bus.”', () => [['DRIVER', 'People do that. It’s a nice bus.']]]]]]);
 }
 const TRAVEL_LINES = {

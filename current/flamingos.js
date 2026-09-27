@@ -24,11 +24,11 @@ const Flamingos = {
   },
   place() {
     const D = Game.dan;
-    if (D.ride) { toast(`Not from the ${D.ride === 'boat' ? 'boat' : 'driver’s seat'}, Dan.`); Sound.play('fail'); return; }
+    if (D.ride) { note(`Not from the ${D.ride === 'boat' ? 'boat' : 'driver’s seat'}, Dan.`); Sound.play('fail'); return; }
     const f = facingPoint(12), k = World.at(f.x, f.y);
-    if (!WALKABLE(k) || WET(k)) { toast('Not in the water, Dan. It would float off and some manatee would have a flamingo.'); Sound.play('fail'); return; }
-    if (World.solidAt(f.x, f.y)) { toast('Something’s in the way. The flamingo needs dirt.'); Sound.play('fail'); return; }
-    if (this.at(f, 7)) { toast('There’s already a flamingo there. They need their space.'); Sound.play('fail'); return; }
+    if (!WALKABLE(k) || WET(k)) { note('Not in the water, Dan. It would float off and some manatee would have a flamingo.'); Sound.play('fail'); return; }
+    if (World.solidAt(f.x, f.y)) { note('Something’s in the way. The flamingo needs dirt.'); Sound.play('fail'); return; }
+    if (this.at(f, 7)) { note('There’s already a flamingo there. They need their space.'); Sound.play('fail'); return; }
     Game.inv.flamingo--; this.list().push({ r: Game.region, x: Math.round(f.x), y: Math.round(f.y) }); this.sync();
     D.punchT = .12; Sound.play('plant'); updateHotbar();
     const n = this.list().length, here = this.list().filter(q => q.r === Game.region).length, F = Game.flags;
@@ -51,7 +51,7 @@ const Flamingos = {
   },
   punch(pt) {   // it's what he's known for
     const p = this.at(pt, 12); if (!p) return false;
-    if (p.down) { toast('He’s already down, Dan.', 1.6); Sound.play('whiff'); return true; }
+    if (p.down) { note('He’s already down, Dan.', 1.6); Sound.play('whiff'); return true; }
     p.down = Game.dan.x < p.x + 4 ? 1 : -1; if (p.placed) p.placed.down = p.down;
     Sound.play('punch'); Game.shake = 3; Game.hitstop = .06; Game.kick = 1;
     Game.parts.push({ kind: 'text', x: p.x + 4, y: p.y - 14, vx: 0, vy: -16, life: .7, text: pick(PUNCH_WORDS) });

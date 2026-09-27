@@ -58,7 +58,7 @@
   #objective::before { content: "▶"; position: absolute; left: .6em; color: var(--yellow); }
   #objective.new { animation: objNew .6s steps(3); }
   @keyframes objNew { 0% { background: var(--yellow); color: var(--ink); } 100% { background: rgba(26, 20, 35, .88); } }
-  #hint { position: absolute; left: .6em; bottom: 4.4em; padding: .3em .6em; font-weight: 700; font-size: .82em; background: rgba(15, 11, 21, .9); border: 2px solid var(--teal); color: var(--paper); white-space: nowrap; }
+  #hint { padding: .3em .6em; font-weight: 700; font-size: .78em; background: rgba(15, 11, 21, .9); border: 2px solid var(--teal); color: var(--paper); white-space: normal; text-align: center; text-wrap: balance; }
   .key { display: inline-block; min-width: 1.5em; padding: 0 .35em; margin-right: .15em; text-align: center; background: var(--paper); color: var(--ink); border: 2px solid var(--ink); border-bottom-width: 4px; border-radius: 4px; font-size: .85em; line-height: 1.35; }
   .key.pad { border-radius: 999px; background: var(--yellow); }
 
@@ -81,9 +81,17 @@
   .slot.pop { animation: pop .35s steps(3); }
   @keyframes pop { 50% { transform: scale(1.25); background: var(--pink); } }
 
-  #prompt { position: absolute; left: 50%; bottom: 4.1em; transform: translateX(-50%); background: rgba(15, 11, 21, .92); color: var(--paper); font-weight: 700; padding: .3em .8em .3em .45em; font-size: .92em; letter-spacing: .06em; border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); white-space: nowrap; }
-  #toast { position: absolute; left: .6em; bottom: .6em; max-width: 30%; width: max-content; text-align: left; font-weight: 700; font-size: .92em; line-height: 1.3; color: var(--paper); background: rgba(15, 11, 21, .9); border: 2px solid var(--pink); box-shadow: 3px 3px 0 rgba(0, 0, 0, .45); padding: .3em .6em; }
-  #urgent { position: absolute; left: 50%; top: 5.2em; transform: translateX(-50%); background: var(--red); color: var(--paper); font-weight: 700; padding: .2em .7em; font-size: .9em; animation: blink .5s steps(2) infinite; border: 2px solid var(--ink); }
+  #prompt { position: absolute; left: 0; top: 0; transform: translate(-999px, -999px); display: flex; align-items: center; gap: .35em; max-width: 16em; background: rgba(15, 11, 21, .92); color: var(--paper); font-weight: 700; padding: .15em .6em .15em .2em; font-size: .78em; letter-spacing: .04em; border: 2px solid var(--ink); box-shadow: 2px 2px 0 var(--ink); white-space: nowrap; will-change: transform; }
+  #prompt span { overflow: hidden; text-overflow: ellipsis; }
+  #prompt::after { content: ""; position: absolute; left: 50%; bottom: -8px; margin-left: -6px; border: 6px solid transparent; border-bottom: 0; border-top-color: var(--inkT, #2b2530); }
+  #prompt .key { margin: 0; flex: none; }
+  #prompt .key.pad { width: 1.7em; height: 1.7em; min-width: 0; padding: 0; line-height: 1.45; font-size: .95em; border-bottom-width: 2px; animation: bob 1s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(-2px); } }
+  #tips { position: absolute; left: 50%; top: 2.7em; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: .35em; width: max-content; max-width: 48%; pointer-events: none; }
+  #tips > * { position: static !important; transform: none; max-width: 100%; }
+  #note { font-weight: 700; font-size: .8em; line-height: 1.25; text-align: center; white-space: normal; text-wrap: balance; padding: .3em .8em; }
+  #toast { position: absolute; left: .6em; bottom: .6em; max-width: 30%; width: max-content; text-align: left; font-weight: 700; font-size: .92em; line-height: 1.3; }   /* trailer shots only: in the game, flavor comments stay off screen */
+  #urgent { background: var(--red); color: var(--paper); font-weight: 700; padding: .2em .7em; font-size: .9em; animation: blink .5s steps(2) infinite; border: 2px solid var(--ink); }
   @keyframes blink { 50% { background: var(--yellow); color: var(--ink); } }
 
   #banner { position: absolute; left: 50%; top: .6em; width: min(34em, 76%); transform: translate(-50%, -160%) rotate(-1deg); transition: transform .35s steps(5); background: var(--paper); color: var(--ink); border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--red); padding: .35em .7em .55em; z-index: 3; }
@@ -198,10 +206,15 @@
   #pad { position: fixed; inset: 0; pointer-events: none; z-index: 6; }
   #stick { position: absolute; left: 20px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); width: 124px; height: 124px; border: 3px solid rgba(251, 247, 239, .5); border-radius: 50%; pointer-events: auto; background: rgba(26, 20, 35, .35); }
   #nub { position: absolute; left: 50%; top: 50%; width: 48px; height: 48px; margin: -24px 0 0 -24px; background: rgba(251, 247, 239, .75); border-radius: 50%; }
-  .tbtn { position: absolute; width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--ink); font: 700 18px var(--pixel); color: var(--ink); pointer-events: auto; }
+  .tbtn { position: absolute; width: 70px; height: 70px; border-radius: 50%; border: 3px solid var(--ink); font: 700 28px/1 var(--pixel); color: var(--ink); pointer-events: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0; box-shadow: 0 4px 0 rgba(0, 0, 0, .45); -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; }
+  .tbtn small { font-size: 9px; letter-spacing: .08em; margin-top: 2px; opacity: .8; }
+  .tbtn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0, 0, 0, .45); }
   #btnA { right: 20px; bottom: calc(60px + env(safe-area-inset-bottom, 0px)); background: var(--yellow); }
-  #btnB { right: 100px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--pink); font-size: 15px; }
-  #btnF { right: 100px; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); background: var(--teal); width: 54px; height: 54px; font-size: 12px; }
+  #btnA.ready { box-shadow: 0 4px 0 rgba(0, 0, 0, .45), 0 0 0 5px rgba(255, 210, 63, .35); animation: ready 1s ease-in-out infinite; }
+  @keyframes ready { 50% { box-shadow: 0 4px 0 rgba(0, 0, 0, .45), 0 0 0 9px rgba(255, 210, 63, .12); } }
+  #btnB { right: 100px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--pink); }
+  #btnF { right: 100px; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); background: var(--teal); width: 56px; height: 56px; font-size: 22px; }
+  #btnF small { font-size: 8px; }
 
   @media (max-width: 760px) {
     #objective { max-width: min(40%, 40vw); font-size: .8em; }
@@ -210,14 +223,10 @@
   body.portrait .clockBox { min-width: 8.5em; }
   #rotate { position: fixed; left: 16px; right: 16px; bottom: calc(160px + env(safe-area-inset-bottom, 0px)); text-align: center; font-size: 13px; color: var(--yellow); letter-spacing: .08em; pointer-events: none; }
   /* phones: the stick lives in the bottom-left, so the comment box sits just above it */
-  @media (pointer: coarse) { #toast { bottom: 11em; max-width: 45%; } #hint { bottom: 15em; } }
   /* phones in landscape: the game fills the screen, so dialogue/prompts sit between the stick and the buttons, clear of the notch */
   @media (pointer: coarse) and (orientation: landscape) {
     #hudTop { left: calc(.6em + env(safe-area-inset-left, 0px)); right: calc(.6em + env(safe-area-inset-right, 0px)); }
     #talk { left: calc(150px + env(safe-area-inset-left, 0px)); right: calc(185px + env(safe-area-inset-right, 0px)); width: auto; transform: none; max-width: none; }
-    #toast { left: calc(.6em + env(safe-area-inset-left, 0px)); bottom: calc(150px + env(safe-area-inset-bottom, 0px)); max-width: 40%; }
-    #hint { left: calc(.6em + env(safe-area-inset-left, 0px)); bottom: calc(150px + 4.5em + env(safe-area-inset-bottom, 0px)); }
-    #prompt { bottom: calc(22px + env(safe-area-inset-bottom, 0px)); }
     #hotbar { bottom: calc(4px + env(safe-area-inset-bottom, 0px)); max-width: calc(100% - 380px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)); overflow-x: auto; scrollbar-width: none; justify-content: flex-start; }   /* never under the stick or GIT */
     #stick { left: calc(18px + env(safe-area-inset-left, 0px)); }
     #btnA { right: calc(18px + env(safe-area-inset-right, 0px)); }
@@ -228,7 +237,7 @@
   #title .build { position: fixed; right: calc(8px + env(safe-area-inset-right, 0px)); bottom: 6px; font-size: 10px; opacity: .55; letter-spacing: .08em; }
   @media (pointer: coarse) { #banner { width: min(24em, 52%); padding: .25em .55em .4em; } #bannerText { font-size: .86em; } #banner .kick { font-size: .56em; } }
   .iostip { font-size: .8em; color: var(--paper); background: rgba(15, 11, 21, .8); border: 2px solid var(--teal); padding: .35em .7em; letter-spacing: .04em; }
-  @media (prefers-reduced-motion: reduce) { #banner { transition: none; } .slot.pop, #urgent, #wrestlePrompt { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { #banner { transition: none; } .slot.pop, #urgent, #wrestlePrompt, #prompt .key.pad, #btnA.ready { animation: none; } }
 
   /* ---------- Dan's fridge door: every menu is junk from Dan's life (stickers, receipts, clippings, magnets) ---------- */
   :root { --marker: "Permanent Marker", "Comic Sans MS", cursive; --enamel: #efe8d8; --enamelD: #d6ccb6; --sticky: #ffe56b; --receipt: #fbf8f1; --news: #f1ebdc; --inkT: #2b2530; --tape: rgba(236, 222, 178, .95); }
@@ -280,9 +289,9 @@
   #objective::before { color: var(--red); top: .12em; }
   #objective.new { animation: objPop .45s steps(3); }
   @keyframes objPop { 0% { transform: translateX(-50%) rotate(-1deg) scale(1.2); } }
-  #toast { background: var(--tape); color: var(--inkT); border: none; box-shadow: 0 3px 6px rgba(0, 0, 0, .3); padding: .4em 1em; clip-path: polygon(0 10%, 4% 0, 50% 5%, 96% 0, 100% 12%, 98.5% 50%, 100% 90%, 95% 100%, 50% 95%, 4% 100%, 0 88%, 1.5% 50%); }
-  #hint { background: var(--sticky); color: var(--inkT); border: none; box-shadow: 0 3px 6px rgba(0, 0, 0, .3); transform: rotate(-1.5deg); }
-  #prompt { background: var(--receipt); color: var(--inkT); border: 2px solid var(--inkT); border-radius: 6px; box-shadow: 0 3px 0 var(--inkT); }
+  #note, #toast { background: var(--tape); color: var(--inkT); border: none; box-shadow: 0 3px 6px rgba(0, 0, 0, .3); padding: .35em 1em; clip-path: polygon(0 10%, 4% 0, 50% 5%, 96% 0, 100% 12%, 98.5% 50%, 100% 90%, 95% 100%, 50% 95%, 4% 100%, 0 88%, 1.5% 50%); }
+  #hint { background: var(--sticky); color: var(--inkT); border: none; box-shadow: 0 3px 6px rgba(0, 0, 0, .3); }
+  #prompt { background: var(--receipt); color: var(--inkT); border: 2px solid var(--inkT); border-radius: 999px; box-shadow: 0 3px 0 rgba(43, 37, 48, .6); }
   #banner, #banner.fresh { background: var(--news); border: none; box-shadow: 0 6px 14px rgba(0, 0, 0, .4); }
   #journalBtn { font: 400 .85em var(--marker); letter-spacing: 0; color: var(--inkT); background: var(--enamel); border: 2px solid var(--inkT); border-radius: 999px; padding: .05em .7em .1em; box-shadow: 0 2px 0 var(--inkT); }
   #journalBtn .jk { font: 700 .75em var(--pixel); background: var(--inkT); color: var(--enamel); border-radius: 3px; padding: 0 .3em; margin-left: .2em; }
@@ -361,15 +370,14 @@
       </div>
     </div>
     <div id="objective" hidden></div>
-    <div id="hint" hidden></div>
-    <div id="urgent" hidden></div>
+    <div id="tips"><div id="urgent" hidden></div><div id="hint" hidden></div><div id="note" hidden></div></div>
     <div id="hotbar" class="panel" hidden></div>
     <div id="prompt" hidden></div>
     <div id="toast" hidden></div>
     <div id="banner"><span class="kick" id="bannerKick">BREAKING · SWAMP GAZETTE</span><div id="bannerText"></div></div>
     <div id="fishHud" hidden><span>SNAP</span><div id="tension"><div id="tensionFill"></div></div><span>SLACK</span></div>
     <div id="fishMsg"></div>
-    <div id="card" hidden><div id="cardK">CAUGHT</div><div id="cardN"></div><div id="cardW"></div><div id="cardQ"></div><div class="tap">E / tap to keep it</div></div>
+    <div id="card" hidden><div id="cardK">CAUGHT</div><div id="cardN"></div><div id="cardW"></div><div id="cardQ"></div><div class="tap">tap to keep it</div></div>
     <div id="wrestle" class="panel" hidden><div id="wrestleMsg">HOLD THE JAWS SHUT!</div><div class="grip"><i id="gripFill"></i></div><div class="hint">MASH E · HIT THE ARROW WHEN HE THRASHES</div></div>
     <div id="wrestlePrompt"></div>
     <div id="raccoon" class="panel" hidden><div class="ttl">RACCOON ON FACE</div><div class="grip"><i id="raccoonFill"></i></div><div class="hint">MASH E TO PEEL IT OFF</div></div>
@@ -400,7 +408,7 @@
       <tr><td>Run</td><td><b class="key">SHIFT</b></td><td><b class="key pad">RT</b></td></tr>
       <tr><td>Fridge (to-do, headlines)</td><td><b class="key">J</b></td><td><b class="key pad">Y</b></td></tr>
     </tbody></table>
-    <p class="gist touchTip">On a phone: the stick moves you (push it all the way to run), <b>E</b> does almost everything, tap an item in the bottom bar to use it.</p>
+    <p class="gist touchTip">On a phone: the stick moves you (push it all the way to run). <b>A</b> does almost everything: when you can use something, an <b>A</b> pops up over it. <b>B</b> yells GIT, <b>X</b> punches. Tap an item in the bottom bar to use it.</p>
     <p class="gist">Follow the sticky note up top. Everything you do makes the news.</p>
     <button class="btn alt" id="howtoClose">Back</button></div>
 </div>
@@ -446,52 +454,52 @@
 <div id="lbox"><i></i><i></i><button id="lskip" onclick="Scene.skip()">SKIP ›</button></div>
 <div id="pad" hidden>
   <div id="stick"><div id="nub"></div></div>
-  <button class="tbtn" id="btnA" aria-label="Use">E</button>
-  <button class="tbtn" id="btnB" aria-label="Yell GIT">GIT</button>
-  <button class="tbtn" id="btnF" aria-label="Punch">PUNCH</button>
+  <button class="tbtn" id="btnA" aria-label="A: use">A<small>USE</small></button>
+  <button class="tbtn" id="btnB" aria-label="B: yell GIT">B<small>GIT</small></button>
+  <button class="tbtn" id="btnF" aria-label="X: punch">X<small>PUNCH</small></button>
 </div>
 
-<script src="engine.js?v=202609242254"></script>
-<script src="songs.js?v=202609242254"></script>
-<script src="music.js?v=202609242254"></script>
-<script src="art.js?v=202609242254"></script>
-<script src="font.js?v=202609242254"></script>
-<script src="world.js?v=202609242254"></script>
-<script src="ambient.js?v=202609242254"></script>
-<script src="look.js?v=202609242254"></script>
-<script src="landmarks.js?v=202609242254"></script>
-<script src="gigs.js?v=202609242254"></script>
-<script src="arcs.js?v=202609242254"></script>
-<script src="actors.js?v=202609242254"></script>
-<script src="items.js?v=202609242254"></script>
-<script src="flamingos.js?v=202609242254"></script>
-<script src="upgrades.js?v=202609242254"></script>
-<script src="money.js?v=202609242254"></script>
-<script src="headlines.js?v=202609242254"></script>
-<script src="story.js?v=202609242254"></script>
-<script src="phone.js?v=202609242254"></script>
-<script src="cutscene.js?v=202609242254"></script>
-<script src="minigames.js?v=202609242254"></script>
-<script src="court.js?v=202609242254"></script>
-<script src="cases.js?v=202609242254"></script>
-<script src="favors.js?v=202609242254"></script>
-<script src="court2.js?v=202609242254"></script>
-<script src="miami.js?v=202609242254"></script>
-<script src="cases45.js?v=202609242254"></script>
-<script src="miami2.js?v=202609242254"></script>
-<script src="daytona.js?v=202609242254"></script>
-<script src="daytona2.js?v=202609242254"></script>
-<script src="keys.js?v=202609242254"></script>
-<script src="keys2.js?v=202609242254"></script>
-<script src="bridge.js?v=202609242254"></script>
-<script src="dive.js?v=202609242254"></script>
-<script src="orlando.js?v=202609242254"></script>
-<script src="orlando2.js?v=202609242254"></script>
-<script src="sneak.js?v=202609242254"></script>
-<script src="coaster.js?v=202609242254"></script>
-<script src="chase.js?v=202609242254"></script>
-<script src="sidequests.js?v=202609242254"></script>
-<script src="game.js?v=202609242254"></script>
-<script src="share.js?v=202609242254"></script>
-<script src="ui.js?v=202609242254"></script>
-<script src="pwa.js?v=202609242254"></script>
+<script src="engine.js?v=202609262143"></script>
+<script src="songs.js?v=202609262143"></script>
+<script src="music.js?v=202609262143"></script>
+<script src="art.js?v=202609262143"></script>
+<script src="font.js?v=202609262143"></script>
+<script src="world.js?v=202609262143"></script>
+<script src="ambient.js?v=202609262143"></script>
+<script src="look.js?v=202609262143"></script>
+<script src="landmarks.js?v=202609262143"></script>
+<script src="gigs.js?v=202609262143"></script>
+<script src="arcs.js?v=202609262143"></script>
+<script src="actors.js?v=202609262143"></script>
+<script src="items.js?v=202609262143"></script>
+<script src="flamingos.js?v=202609262143"></script>
+<script src="upgrades.js?v=202609262143"></script>
+<script src="money.js?v=202609262143"></script>
+<script src="headlines.js?v=202609262143"></script>
+<script src="story.js?v=202609262143"></script>
+<script src="phone.js?v=202609262143"></script>
+<script src="cutscene.js?v=202609262143"></script>
+<script src="minigames.js?v=202609262143"></script>
+<script src="court.js?v=202609262143"></script>
+<script src="cases.js?v=202609262143"></script>
+<script src="favors.js?v=202609262143"></script>
+<script src="court2.js?v=202609262143"></script>
+<script src="miami.js?v=202609262143"></script>
+<script src="cases45.js?v=202609262143"></script>
+<script src="miami2.js?v=202609262143"></script>
+<script src="daytona.js?v=202609262143"></script>
+<script src="daytona2.js?v=202609262143"></script>
+<script src="keys.js?v=202609262143"></script>
+<script src="keys2.js?v=202609262143"></script>
+<script src="bridge.js?v=202609262143"></script>
+<script src="dive.js?v=202609262143"></script>
+<script src="orlando.js?v=202609262143"></script>
+<script src="orlando2.js?v=202609262143"></script>
+<script src="sneak.js?v=202609262143"></script>
+<script src="coaster.js?v=202609262143"></script>
+<script src="chase.js?v=202609262143"></script>
+<script src="sidequests.js?v=202609262143"></script>
+<script src="game.js?v=202609262143"></script>
+<script src="share.js?v=202609262143"></script>
+<script src="ui.js?v=202609262143"></script>
+<script src="pwa.js?v=202609262143"></script>

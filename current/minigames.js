@@ -153,7 +153,7 @@ const Fishing = {
     if (!f.hooked && f.phase !== 'done') OR(f.lure.x - 1, f.lure.y - 1, 3, 3, PAL.red);
     for (const fi of f.fish) if (f.phase !== 'card' || fi !== f.hooked) this.fishSprite(fi, t);
     if (f.gator) this.gatorSide(f.gator, t);
-    const A_ = Input.padActive ? 'Ⓐ' : 'E', B_ = Input.padActive ? 'Ⓑ' : isTouch ? 'GIT' : 'Q';
+    const A_ = Input.padActive || isTouch ? 'Ⓐ' : 'E', B_ = Input.padActive || isTouch ? 'Ⓑ' : 'Q';
     const hint = f.phase === 'wait' ? `HOLD ${A_} TO REEL/TWITCH · ${B_} TO QUIT` : f.phase === 'fight' ? `HOLD ${A_} TO REEL · LET OFF BEFORE IT SNAPS` : '';
     if (hint && !f.msgT) label(hint, VW / 2 + 20, VH - 5, PAL.white, 7);
   },

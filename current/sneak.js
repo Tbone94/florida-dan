@@ -113,7 +113,7 @@ const Sneak = {
     const k = s.sus; OR(92, 8, 136, 8, PAL.inkL); R(92, 8, 136 * k, 8, k > .7 && Math.floor(t * 8) % 2 ? PAL.red : k > .4 ? PAL.orange : PAL.yellow);
     label('SUSPICION', 160, 26, PAL.white, 6); mouseHead(80, 13, 4);
     if (s.msgT > 0) msgBox(s.msg, 46);   // up top: the phone pad lives at the bottom
-    else if (s.t < 5) msgBox(isTouch && !Input.padActive ? 'STICK: SNEAK · HOLD E: WAVE LIKE A MASCOT' : `${Input.padActive ? 'STICK' : 'ARROWS'}: SNEAK · HOLD ${K('a').replace(/<[^>]+>/g, '')}: WAVE LIKE A MASCOT`, 46);
+    else if (s.t < 5) msgBox(isTouch && !Input.padActive ? 'STICK: SNEAK · HOLD A: WAVE LIKE A MASCOT' : `${Input.padActive ? 'STICK' : 'ARROWS'}: SNEAK · HOLD ${K('a').replace(/<[^>]+>/g, '')}: WAVE LIKE A MASCOT`, 46);
   },
   drawSolid(x, y, w, h, k, t, night) {
     switch (k) {

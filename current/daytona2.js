@@ -90,13 +90,13 @@ const Speedway = {
       const cols = [['#86c94a', '#1a1423', 88], ['#e0433a', PAL.white, 3], ['#4f7bd1', PAL.yellow, 24], ['#ffd23f', PAL.red, 8], ['#1a1423', '#e0433a', 43], ['#ff8a3d', PAL.white, 11], ['#7b4bc4', PAL.white, 9]];
       this.cars = cols.map(([c, c2, num], k) => { const g0 = k < 2 ? k : k + 1, s = start(g0, (k % 2 ? 1 : -1) * 10); return { x: s.x, y: s.y, a: s.a, c, c2, num, prog: -g0 * 2, lane: (k % 2 ? 1 : -1) * 10, sp: 168 + k * 3 + Math.random() * 6 + (num === 88 ? 10 : 0) }; });
     } else this.cars = [];
-    Sound.play('siren'); toast(mode === 'race' ? 'DRIVERS... START YOUR ENGINES.' : 'Qualifying. One lap. Floor it.', 2.5);
+    Sound.play('siren'); note(mode === 'race' ? 'DRIVERS... START YOUR ENGINES.' : 'Qualifying. One lap. Floor it.', 2.5);
   },
   place() { return 1 + this.cars.filter(c => c.prog > this.me.prog).length; },
   tick(dt) {
     if (!this.on) return;
     const P = pathPts(), N = P.length, seg = 1936 / N, v = Game.car, D = Game.dan;
-    if (this.count > 0) { const c0 = Math.ceil(this.count); this.count -= dt; if (Math.ceil(this.count) !== c0 && this.count > 0) Sound.tone(660, .15, 'square', .08); if (this.count <= 0) { Sound.tone(990, .4, 'square', .1); toast('GO GO GO!', 1.2); } return; }
+    if (this.count > 0) { const c0 = Math.ceil(this.count); this.count -= dt; if (Math.ceil(this.count) !== c0 && this.count > 0) Sound.tone(660, .15, 'square', .08); if (this.count <= 0) { Sound.tone(990, .4, 'square', .1); note('GO GO GO!', 1.2); } return; }
     this.t += dt;
     if (!v || D.ride !== 'car') { this.abort('Dan got out of the car mid-race. The crowd boos. Get back in the #29 to try again.'); return; }
     const [i] = nearestIdx(v.x, v.y, this.me.idx); let d = i - this.me.idx; if (d > N / 2) d -= N; if (d < -N / 2) d += N; this.me.idx = i; this.me.prog += d;
@@ -119,7 +119,7 @@ const Speedway = {
     this.on = false; Game.racing = false; this.cars = []; this.hudText = '';
     DaytonaCases.raceDone(mode, place, t);
   },
-  abort(msg) { this.on = false; Game.racing = false; this.cars = []; this.hudText = ''; toast(msg, 4); },
+  abort(msg) { this.on = false; Game.racing = false; this.cars = []; this.hudText = ''; note(msg, 4); },
   hud() { return !this.on ? '' : this.count > 0 ? `${Math.ceil(this.count)}...` : this.hudText || ''; },
 };
 
@@ -141,7 +141,7 @@ const Mash = {
   },
   finish(won) {
     const s = this.s; this.s = null; ui.raccoon.hidden = true; Game.mode = 'play'; showHud(true); padFor(false);
-    ui.raccoon.querySelector('.ttl').textContent = 'RACCOON ON FACE'; ui.raccoon.querySelector('.hint').textContent = 'MASH E TO PEEL IT OFF';
+    ui.raccoon.querySelector('.ttl').textContent = 'RACCOON ON FACE'; ui.raccoon.querySelector('.hint').textContent = `MASH ${KT('a')} TO PEEL IT OFF`;
     if (won) { Sound.play('catch'); s.onWin && s.onWin(); } else { Sound.play('fail'); s.onLose && s.onLose(); }
   },
   draw() {
@@ -209,8 +209,9 @@ const DaytonaCases = {
     Convoy.tick(); Speedway.tick(dt);
     if (c.n === 6 && c.d === 1 && Convoy.on && Game.car && Game.car.id === 'pace') {
       // one full lap = the parade lap; then Dan smells donuts
-      const L = Game.day_, [i] = nearestIdx(Game.car.x, Game.car.y, L._pi || 0, 12); if (L._pi !== undefined) { let d = i - L._pi; if (d > 48) d -= 96; if (d < -48) d += 96; L._pp = (L._pp || 0) + d; } L._pi = i;
-      if (qOpen('pacelap') && (L._pp || 0) >= 90) { done('pacelap'); addQuest('donuts', 'Take the field to the Donut Hut drive-thru (Main Street)'); say([[PHONE_T, 'Beautiful lap, Dan! Now bring ’em into pit road. Slowly.'], ['DAN', '...Tammy, do you smell that?'], [PHONE_T, 'Smell what?'], ['DAN', 'Donuts.'], [PHONE_T, 'Dan. DAN. Do NOT take them off the track.']]); }
+      // either direction counts (the pace car starts just past the line, so plenty of people go the "wrong" way), and the search starts from wherever the car really is
+      const L = Game.day_, [i] = nearestIdx(Game.car.x, Game.car.y, L._pi !== undefined ? L._pi : nearestIdx(Game.car.x, Game.car.y, 0, 48)[0], 12); if (L._pi !== undefined) { let d = i - L._pi; if (d > 48) d -= 96; if (d < -48) d += 96; L._pp = (L._pp || 0) + d; } L._pi = i;
+      if (qOpen('pacelap') && Math.abs(L._pp || 0) >= 90) { done('pacelap'); addQuest('donuts', 'Take the field to the Donut Hut drive-thru (Main Street)'); say([[PHONE_T, 'Beautiful lap, Dan! Now bring ’em into pit road. Slowly.'], ['DAN', '...Tammy, do you smell that?'], [PHONE_T, 'Smell what?'], ['DAN', 'Donuts.'], [PHONE_T, 'Dan. DAN. Do NOT take them off the track.']]); }
       if (qOpen('donuts') && Math.hypot(D.x - DSP().drive.x, D.y - DSP().drive.y) < 34) this.donutRun();
     }
   },
@@ -300,10 +301,10 @@ const DaytonaCases = {
   armWrestle(win, lose) { Mash.start({ kind: 'arm', title: 'ARM WRESTLE TINY', need: 40, time: 9, sound: 'punch', onWin: win, onLose: lose }); },
   interactions() {
     const D = Game.dan, list = [], near = (p, r) => p && Math.hypot(D.x - p.x, D.y - p.y) < r, c = this.c(), F = Game.flags;
-    if (D.ride === 'car') { if (Speedway.on && !Speedway.frozen()) list.push({ label: 'Quit (hop out)', fn: () => Car.exit() }); if (!Speedway.on) list.push({ label: 'Hop out of the car', fn: () => { Car.exit(); if (Convoy.on) toast('The whole field stops and waits. Forty engines, idling. For you.'); } }); return list; }
+    if (D.ride === 'car') { if (Speedway.on && !Speedway.frozen()) list.push({ label: 'Quit (hop out)', fn: () => Car.exit() }); if (!Speedway.on) list.push({ label: 'Hop out of the car', fn: () => { Car.exit(); if (Convoy.on) note('The whole field stops and waits. Forty engines, idling. For you.'); } }); return list; }
     if (D.ride) return list;
     for (const v of Game.vehicles || []) if (v.kind === 'car' && near(v, 24)) {
-      if (v.id === 'pace') list.push({ label: 'Get in the pace car', fn: () => { Car.enter(v); Convoy.on = true; Convoy.hist = []; toast('The whole field falls in behind you. Forty cars. Go slow.'); } });
+      if (v.id === 'pace') list.push({ label: 'Get in the pace car', fn: () => { Car.enter(v); Convoy.on = true; Convoy.hist = []; note('The whole field falls in behind you. Forty cars. Go slow.'); } });
       if (v.id === 'car29') list.push({ label: c.n === 7 && c.d === 1 && qOpen('qualify') ? 'Get in the #29 (qualify)' : c.n === 7 && c.d === 3 && qOpen('race') ? 'Get in the #29 (RACE)' : 'Get in the #29',
         fn: () => { Car.enter(v); if (c.n === 7 && c.d === 1 && qOpen('qualify')) Speedway.start('qualify'); else if (c.n === 7 && c.d === 3 && qOpen('race')) Speedway.start('race'); } });
     }
@@ -314,7 +315,8 @@ const DaytonaCases = {
     switch (q.id) {
       case 'bus6': return DAYTONA() ? null : World.spots.stationDoor || null;
       case 'marshal': return who('tammy');
-      case 'pacelap': return Game.car ? S_.finish : veh('pace');
+      case 'pacelap': { if (!Game.car) return veh('pace');   // lead the lap around the oval (the finish line is right behind the pace car), then home to the line
+        const L = Game.day_, P = pathPts(), N = P.length, s = (L._pp || 0) < 0 ? -1 : 1; return L._pi === undefined || Math.abs(L._pp || 0) >= 78 ? S_.finish : P[((L._pi + s * 14) % N + N) % N]; }
       case 'donuts': return S_.drive;
       case 'rusty': return who('rusty');
       case 'donna': return Game.dan.carry === 'donutsign' ? who('donna') : Game.flags.donutSign ? who('tiny') : who('donna');
@@ -390,8 +392,8 @@ Object.assign(GIGS, {
     hl: 'FLORIDA MAN RETURNS BIKER’S "LUCKY HELMET" FOUND IN SAND; BIKER "NOT CRYING, IT’S SAND"' },
   pitcrew: { giver: 'tammy', pay: 30, quest: 'Run a pit crew drill for Tammy Jo (talk to her to start)',
     offer: [['TAMMY JO', 'The crews need a pace-setter for pit drills. Somebody fast. Or somebody who mashes buttons like a raccoon.'], ['TAMMY JO', 'Thirty bucks. Four tires. Go.']],
-    start() { Game.afterTalk = () => DaytonaCases.pitStop(() => { G_().pitDone = true; }, () => toast('Too slow. Talk to Tammy Jo to try again.')); },
-    talkActive: () => G_().pitDone ? 'done' : (Game.afterTalk = () => DaytonaCases.pitStop(() => { G_().pitDone = true; }, () => toast('Too slow. Talk to Tammy Jo to try again.')), [['TAMMY JO', 'Again! Tires! GO!']]),
+    start() { Game.afterTalk = () => DaytonaCases.pitStop(() => { G_().pitDone = true; }, () => note('Too slow. Talk to Tammy Jo to try again.')); },
+    talkActive: () => G_().pitDone ? 'done' : (Game.afterTalk = () => DaytonaCases.pitStop(() => { G_().pitDone = true; }, () => note('Too slow. Talk to Tammy Jo to try again.')), [['TAMMY JO', 'Again! Tires! GO!']]),
     check: () => !!G_().pitDone,
     hl: 'FLORIDA MAN SETS PIT DRILL RECORD; CREW CHIEF ASKS IF HE "HAS A DAY JOB"' },
 });
@@ -400,7 +402,7 @@ ICONS.helmet = { key: { o: 'ink', b: 'black', w: 'white', r: 'red' }, rows: [
 const DaytonaGigs = {
   interaction() {
     const D = Game.dan, G = G_(), near = (p, r) => Math.hypot(D.x - p.x, D.y - p.y) < r;
-    if (G.active === 'donuts') for (const p of World.props.filter(p => p.kind === 'garage')) if (!G.garages.includes(p.n) && near({ x: p.x + p.w / 2, y: p.y + p.h + 8 }, 24)) return { label: `Drop donuts at garage #${p.n}`, fn: () => { G.garages.push(p.n); Sound.play('pickup'); toast(`PIT CREW #${p.n}: “DONUTS!!!” (${G.garages.length}/3)`); questText('gig_donuts', `Deliver donuts to 3 garages in the speedway infield (${G.garages.length}/3)`); } };
+    if (G.active === 'donuts') for (const p of World.props.filter(p => p.kind === 'garage')) if (!G.garages.includes(p.n) && near({ x: p.x + p.w / 2, y: p.y + p.h + 8 }, 24)) return { label: `Drop donuts at garage #${p.n}`, fn: () => { G.garages.push(p.n); Sound.play('pickup'); note(`PIT CREW #${p.n}: “DONUTS!!!” (${G.garages.length}/3)`); questText('gig_donuts', `Deliver donuts to 3 garages in the speedway infield (${G.garages.length}/3)`); } };
     return null;
   },
   target(id) {

@@ -99,7 +99,7 @@ const Cases = {
     }
     if (c.n === 2 && c.d === 2) {
       questText('lettuce', `Buy 3 heads of lettuce (${Math.min(3, Game.inv.lettuce || 0)}/3)`); if ((Game.inv.lettuce || 0) >= 3) done('lettuce');
-      if (Game.hour >= 20 && !F.mannyOut) { F.mannyOut = true; const P = this.places(); Game.animals.push(makeCritter('manatee', P.manny.x, P.manny.y, { spirit: true, sober: true })); toast('Something is glowing in the water east of Merle’s...'); }
+      if (Game.hour >= 20 && !F.mannyOut) { F.mannyOut = true; const P = this.places(); Game.animals.push(makeCritter('manatee', P.manny.x, P.manny.y, { spirit: true, sober: true })); note('Something is glowing in the water east of Merle’s...'); }
     }
     if (c.n === 3 && c.d === 1) { questText('dogs', `Buy 3 roller dogs for bait (${Math.min(3, Game.inv.hotdog || 0)}/3)`); if ((Game.inv.hotdog || 0) >= 3) done('dogs'); }
     if (c.n === 3 && c.d === 2) { if (Game.flags.xxxl) done('jorts'); }
@@ -172,7 +172,7 @@ const Cases = {
   },
   bought(k) {
     if (k === 'lettuce' && !Game.flags.lettuceHead) { Game.flags.lettuceHead = true; headline('FLORIDA MAN BUYS LETTUCE AT GAS STATION; CLERK "SHOOK"', 2); }
-    if (k === 'jortsXXXL') { Game.flags.xxxl = true; Game.inv.jortsXXXL = 0; toast('Formal Jorts, XXXL. Darlene didn’t ask. Darlene has never looked more tired.'); }
+    if (k === 'jortsXXXL') { Game.flags.xxxl = true; Game.inv.jortsXXXL = 0; note('Formal Jorts, XXXL. Darlene didn’t ask. Darlene has never looked more tired.'); }
   },
 
   // the next step only happens after dark (and night work isn't cut off at 10 PM)
@@ -192,8 +192,8 @@ const Cases = {
           ['', 'In the corner of the photo, behind Dan, something much bigger is also holding a Swamp Lite.'], ['DAN', 'Oh. OH.']]);
       } });
       if (qDone('dogs') && qOpen('lure') && near(P.trailcam, 26)) list.push({ label: Game.hour >= 20 ? 'Set out the roller dogs' : 'Set the bait (come back after dark)', fn: () => {
-        if (Game.hour < 20) return toast('Too bright. Skunk Apes are night people. (Couch at home: “sit till dark.”)');
-        if ((Game.inv.hotdog || 0) < 3) return toast('You ate the bait, Dan. Three roller dogs. Darlene’s got more.');
+        if (Game.hour < 20) return note('Too bright. Skunk Apes are night people. (Couch at home: “sit till dark.”)');
+        if ((Game.inv.hotdog || 0) < 3) return note('You ate the bait, Dan. Three roller dogs. Darlene’s got more.');
         Game.inv.hotdog -= 3; done('lure'); addQuest('track', 'Follow the footprints', false);
         const ape = this.makeApe(P.trailcam.x + 60, P.trailcam.y - 20); Game.animals.push(ape);
         ape.x += 400; Scene.play(this.lureScene(ape), () => { ape.state = 'run'; });   // offstage until it steps out
@@ -202,7 +202,7 @@ const Cases = {
     for (const a of Game.animals) if (a.ape && a.state === 'den' && near(a, 30)) {
       if (c.n === 3 && (!F.apeFriend || qOpen('track'))) list.push({ label: 'Approach the Skunk Ape', fn: () => this.apeMeet(a) });
       else if (c.n === 3 && c.d === 2 && qOpen('rehearse')) list.push({ label: 'Rehearse the testimony', fn: () => this.rehearse() });
-      else if (c.n === 3 && c.d === 2 && qDone('rehearse') && qOpen('reunion')) list.push({ label: Game.hour >= 18 ? 'Hang out with the Skunk Ape' : 'Hang out (after 6 PM)', fn: () => Game.hour >= 18 ? this.reunion(a) : toast('The Skunk Ape is asleep. He sleeps like Dan: face down, one flip-flop on.') });
+      else if (c.n === 3 && c.d === 2 && qDone('rehearse') && qOpen('reunion')) list.push({ label: Game.hour >= 18 ? 'Hang out with the Skunk Ape' : 'Hang out (after 6 PM)', fn: () => Game.hour >= 18 ? this.reunion(a) : note('The Skunk Ape is asleep. He sleeps like Dan: face down, one flip-flop on.') });
       else list.push({ label: 'Talk to the Skunk Ape', fn: () => say([['SKUNK APE', pick(['HRRM.', 'HRRRRM?', '*offers Dan a half-eaten roller dog*', '*points at the moon, then at Dan, then nods slowly*'])]]) });
     }
     return list;

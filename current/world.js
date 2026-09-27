@@ -11,7 +11,7 @@ const World = {
   map: new Uint8Array(MW * MH), props: [], spots: {},
   tile(tx, ty) { return tx < 0 || ty < 0 || tx >= MW || ty >= MH ? T.DEEP : this.map[ty * MW + tx]; },
   at(px, py) { return this.tile(Math.floor(px / TS), Math.floor(py / TS)); },
-  set(tx, ty, t) { if (tx >= 0 && ty >= 0 && tx < MW && ty < MH) this.map[ty * MW + tx] = t; },
+  set(tx, ty, t) { if (tx >= 0 && ty >= 0 && tx < MW && ty < MH && this.map[ty * MW + tx] !== t) { this.map[ty * MW + tx] = t; TileCache.delete(this.map); } },
   fill(x0, y0, x1, y1, t) { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) this.set(x, y, t); },
   solidAt(px, py) { for (const p of this.props) if (p.solid && px >= p.x && px < p.x + p.w && py >= p.y && py < p.y + p.h) return p; return null; },
   region(px, py) {
@@ -128,89 +128,31 @@ const OR = (x, y, w, h, c) => { R(x - 1, y - 1, w + 2, h + 2, PAL.ink); R(x, y, 
 function shadow(x, y, w, h = 3) { g.globalAlpha = .28; g.fillStyle = PAL.ink; g.beginPath(); g.ellipse(Math.round(x), Math.round(y), w / 2, h / 2, 0, 0, 7); g.fill(); g.globalAlpha = 1; }
 // label() lives in font.js (crisp 5x7 pixel font)
 
+// Static ground is baked once per map into 16x16-tile chunks; each frame blits the few on screen and only the tiles that
+// move (water, swaying sawgrass) draw live. On phones the per-tile rects were ~40% of a frame.
+const CHUNK = 16, TileCache = new WeakMap();
+function tileChunk(cxi, cyi) {
+  let C = TileCache.get(World.map); if (!C) TileCache.set(World.map, C = {});
+  const key = cxi * 100 + cyi; if (C[key]) return C[key];
+  const cv = document.createElement('canvas'); cv.width = cv.height = CHUNK * TS; const saved = g; g = cv.getContext('2d');
+  try { for (let ty = cyi * CHUNK; ty < cyi * CHUNK + CHUNK; ty++) for (let tx = cxi * CHUNK; tx < cxi * CHUNK + CHUNK; tx++) drawTile(tx, ty, (tx - cxi * CHUNK) * TS, (ty - cyi * CHUNK) * TS, 0, World.tile(tx, ty), 1); }
+  finally { g = saved; }
+  return C[key] = cv;
+}
 function drawTiles(cx, cy, t) {
-  const tx0 = Math.floor(cx / TS), ty0 = Math.floor(cy / TS);
+  const tx0 = Math.floor(cx / TS), ty0 = Math.floor(cy / TS), CP = CHUNK * TS;
   const Gh = typeof Look !== 'undefined' && Look.g, hr = Game.hour, sheenA = Gh && Game.mode !== 'title' ? .22 * clamp((Math.abs(hr - 13) - 3) / 2.2, 0, 1) : 0;
+  if (!window.NO_TILE_CACHE) for (let cyi = Math.max(0, Math.floor(cy / CP)); cyi <= Math.floor((cy + VH) / CP) && cyi * CHUNK < MH; cyi++) for (let cxi = Math.max(0, Math.floor(cx / CP)); cxi <= Math.floor((cx + VW) / CP) && cxi * CHUNK < MW; cxi++)
+    g.drawImage(tileChunk(cxi, cyi), cxi * CP - cx, cyi * CP - cy);
+  if (!window.NO_TILE_CACHE) {   // bake one more chunk per frame, nearest first, so walking into a new part of the map never hitches
+    const C = TileCache.get(World.map), mx = Math.floor((cx + VW / 2) / CP), my = Math.floor((cy + VH / 2) / CP);
+    let best = null, bd = 1e9;
+    for (let j = 0; j * CHUNK < MH; j++) for (let i = 0; i * CHUNK < MW; i++) if (!C[i * 100 + j]) { const d = Math.abs(i - mx) + Math.abs(j - my); if (d < bd) { bd = d; best = [i, j]; } }
+    if (best) tileChunk(best[0], best[1]);
+  }
   for (let ty = ty0; ty <= ty0 + 12; ty++) for (let tx = tx0; tx <= tx0 + Math.ceil(VW / TS); tx++) {
-    const k = World.tile(tx, ty), x = tx * TS - cx, y = ty * TS - cy, hs = hash2(tx, ty);
-    if (WET(k)) {
-      const mia = MIAMI(), key = typeof KEYS === 'function' && KEYS(), orl = typeof ORLANDO === 'function' && ORLANDO();   // the Keys: the bluest water in the game. Orlando: theme-park lagoon blue
-      R(x, y, TS, TS, k === T.DEEP ? (key ? '#0b7fa6' : orl ? '#1f6fb8' : mia ? '#0f6f9a' : PAL.deep) : k === T.WATER ? (key ? '#18b8c8' : orl ? '#2f95d6' : mia ? '#1aa3b8' : PAL.waterD) : (key ? '#5fe3d3' : orl ? '#5cc2ec' : mia ? '#46d1c9' : PAL.water));
-      if (k === T.SHALLOW) { if (hs > .5) R(x + hs * 11, y + 9, 2, 1, PAL.sandD); }
-      const ph = t * 1.2 + hs * 6.28;
-      if (hs > .45) R(x + 3 + Math.sin(ph) * 2, y + 4 + hs * 8, 4, 1, k === T.DEEP ? PAL.waterD : PAL.waterL);
-      // foam where water meets land
-      const n = World.tile(tx, ty - 1), s = World.tile(tx, ty + 1), w = World.tile(tx - 1, ty), e = World.tile(tx + 1, ty), f = Math.sin(t * 2 + tx + ty) > 0 ? 1 : 0;
-      if (!WET(n) && n !== T.DOCK) R(x, y + 1 + f, TS, 1, PAL.foam);
-      if (!WET(w) && w !== T.DOCK) R(x + 1 + f, y, 1, TS, PAL.foam);
-      if (!WET(e) && e !== T.DOCK) R(x + 14 - f, y, 1, TS, PAL.foam);
-      if (!WET(s) && s !== T.DOCK) R(x, y + 14 - f, TS, 1, PAL.foam);
-      continue;
-    }
-    switch (k) {
-      case T.DOCK:
-        R(x, y, TS, TS, PAL.waterD);
-        R(x, y, TS, TS - 2, PAL.wood); for (let i = 0; i < TS; i += 4) R(x, y + i, TS, 1, PAL.woodD);
-        R(x, y + 14, TS, 2, PAL.ink); if (hs > .7) R(x + 5, y + 6, 1, 1, PAL.ink);
-        break;
-      case T.ROAD: {
-        R(x, y, TS, TS, PAL.road); if (hs > .6) R(x + hs * 13, y + 5, 1, 1, PAL.roadD);
-        const up = World.tile(tx, ty - 1), dn = World.tile(tx, ty + 1);
-        if (up !== T.ROAD) R(x, y, TS, 1, PAL.white);
-        if (dn === T.ROAD && up !== T.ROAD && tx % 2 === 0) R(x + 2, y + 15, 10, 2, PAL.line);
-        if (dn !== T.ROAD) R(x, y + 15, TS, 1, PAL.white);
-        break;
-      }
-      case T.ROADV: {
-        R(x, y, TS, TS, PAL.road); if (hs > .6) R(x + 5, y + hs * 13, 1, 1, PAL.roadD);
-        const lf = World.tile(tx - 1, ty), rt = World.tile(tx + 1, ty);
-        if (lf !== T.ROADV && lf !== T.ROAD) R(x, y, 1, TS, PAL.white);
-        if (rt === T.ROADV && lf !== T.ROADV && ty % 2 === 0) R(x + 15, y + 2, 2, 10, MIAMI() ? PAL.neon : PAL.line);
-        if (rt !== T.ROADV && rt !== T.ROAD) R(x + 15, y, 1, TS, PAL.white);
-        break;
-      }
-      case T.SIDEWALK:
-        R(x, y, TS, TS, '#f4c9c4'); R(x, y + 15, TS, 1, '#dfa9a6'); R(x + 15, y, 1, TS, '#dfa9a6'); if (hs > .9) R(x + 5, y + 7, 2, 1, '#dfa9a6');
-        break;
-      case T.PLAZA:
-        R(x, y, TS, TS, '#f1e6d2'); for (let i = 0; i < 4; i++) R(x + hash2(tx * 3 + i, ty) * 14, y + hash2(tx, ty * 3 + i) * 14, 1, 1, ['#27c6b4', '#ff5ea8', '#ffd23f', '#8d8a93'][i]);
-        if ((tx + ty) % 2 === 0) { g.globalAlpha = .06; R(x, y, TS, TS, PAL.ink); g.globalAlpha = 1; }
-        break;
-      case T.CONCRETE:
-        R(x, y, TS, TS, PAL.concrete); R(x, y + 15, TS, 1, PAL.concreteD); R(x + 15, y, 1, TS, PAL.concreteD);
-        if (hs > .85) { R(x + 4, y + 6, 4, 1, PAL.concreteD); R(x + 7, y + 7, 3, 1, PAL.concreteD); }
-        if (hs < .05) R(x + 6, y + 6, 4, 3, PAL.grey);   // gum. or worse
-        break;
-      case T.TRACK: drawTrackTile(tx, ty, x, y, hs); break;
-      case T.SAND:
-        R(x, y, TS, TS, MIAMI() ? '#f7e7bd' : PAL.sand); if (hs > .4) R(x + hs * 12, y + 3 + hs * 9, 1, 1, PAL.sandD); if (hs < .1) R(x + 9, y + 4, 2, 1, PAL.white);
-        break;
-      case T.MUD:
-        R(x, y, TS, TS, PAL.mud); if (hs > .5) R(x + hs * 12, y + 5, 3, 1, PAL.mudD); if (hs < .25) R(x + 3, y + 11, 2, 1, PAL.mudL);
-        break;
-      case T.SAWGRASS:
-        R(x, y, TS, TS, PAL.grassD);
-        for (let i = 0; i < 5; i++) { const bx = x + (hash2(tx * 7 + i, ty) * 15), sw = Math.sin(t * 1.4 + bx * .3) * 1.2; R(bx + sw * .5, y + 3 + i % 3 * 2, 1, 9, i % 2 ? PAL.grassL : PAL.camo); }
-        break;
-      default:
-        R(x, y, TS, TS, PAL.grass);
-        if (hs > .55) { R(x + hs * 10, y + 4, 1, 2, PAL.grassD); R(x + hs * 10 + 2, y + 3, 1, 3, PAL.grassD); }
-        if (hs < .18) R(x + 5, y + 10, 2, 1, PAL.grassL);
-        if (hs > .96) { R(x + 6, y + 6, 2, 2, PAL.yellow); R(x + 6, y + 8, 1, 2, PAL.grassDD); }
-        else if (hs > .93) { R(x + 9, y + 9, 2, 2, PAL.hat); }
-        else if (hs > .3 && hs < .312) { R(x + 4, y + 9, 3, 2, '#8fb3d9'); R(x + 4, y + 9, 1, 2, '#e8eef5'); }   // Florida wildflowers: a Swamp Lite can
-        else if (hs > .5 && hs < .515) { R(x + 10, y + 5, 2, 1, PAL.white); R(x + 12, y + 5, 1, 1, PAL.orange); }   // ...and a cigarette butt
-    }
-    if (k === T.MUD || k === T.SAND) {   // the grass creeps over the edges: no hard square seams
-      [[0, -1], [0, 1], [-1, 0], [1, 0]].forEach(([ox, oy], d) => {
-        if (World.tile(tx + ox, ty + oy) !== T.GRASS) return;
-        for (let i = 0; i < TS; i++) { const len = Math.floor(hash2(tx * 16 + i + d * 7, ty * 13 + d) * 3.4); if (!len) continue;
-          const col = hash2(i, tx + ty * 3) > .8 ? PAL.grassD : PAL.grass;
-          if (oy < 0) R(x + i, y, 1, len, col); else if (oy > 0) R(x + i, y + TS - len, 1, len, col); else if (ox < 0) R(x, y + i, len, 1, col); else R(x + TS - len, y + i, len, 1, col); }
-      });
-    }
-    // cliff lip where land drops to water (3/4 view)
-    if (!WET(k) && k !== T.DOCK && WET(World.tile(tx, ty + 1))) { R(x, y + 11, TS, 5, k === T.SAND ? PAL.sandD : PAL.mudD); R(x, y + 11, TS, 1, k === T.SAND ? PAL.sand : PAL.grassDD); }
+    const k = World.tile(tx, ty), off = tx < 0 || ty < 0 || tx >= MW || ty >= MH;
+    drawTile(tx, ty, tx * TS - cx, ty * TS - cy, t, k, !window.NO_TILE_CACHE && !off ? 2 : 0);   // (NO_TILE_CACHE: the old every-tile path, for the pixel-match test)
   }
   if (sheenA > .01) {   // the water reflects the sky: pink at dawn, orange at golden hour, violet at dusk
     const hi = Gh.hi; g.globalAlpha = sheenA; g.fillStyle = `rgb(${Math.min(255, hi[0] * 235) | 0},${Math.min(255, hi[1] * 175) | 0},${Math.min(255, hi[2] * 205) | 0})`;
@@ -218,6 +160,91 @@ function drawTiles(cx, cy, t) {
     g.globalAlpha = 1;
   }
 }
+
+// one tile. only: 0 = all of it, 1 = the static part (chunk bake), 2 = the moving part (water, sawgrass)
+function drawTile(tx, ty, x, y, t, k, only) {
+  const hs = hash2(tx, ty);
+  if (WET(k)) {
+    if (only === 1) return;
+    const mia = MIAMI(), key = typeof KEYS === 'function' && KEYS(), orl = typeof ORLANDO === 'function' && ORLANDO();   // the Keys: the bluest water in the game. Orlando: theme-park lagoon blue
+    R(x, y, TS, TS, k === T.DEEP ? (key ? '#0b7fa6' : orl ? '#1f6fb8' : mia ? '#0f6f9a' : PAL.deep) : k === T.WATER ? (key ? '#18b8c8' : orl ? '#2f95d6' : mia ? '#1aa3b8' : PAL.waterD) : (key ? '#5fe3d3' : orl ? '#5cc2ec' : mia ? '#46d1c9' : PAL.water));
+    if (k === T.SHALLOW) { if (hs > .5) R(x + hs * 11, y + 9, 2, 1, PAL.sandD); }
+    const ph = t * 1.2 + hs * 6.28;
+    if (hs > .45) R(x + 3 + Math.sin(ph) * 2, y + 4 + hs * 8, 4, 1, k === T.DEEP ? PAL.waterD : PAL.waterL);
+    // foam where water meets land
+    const n = World.tile(tx, ty - 1), s = World.tile(tx, ty + 1), w = World.tile(tx - 1, ty), e = World.tile(tx + 1, ty), f = Math.sin(t * 2 + tx + ty) > 0 ? 1 : 0;
+    if (!WET(n) && n !== T.DOCK) R(x, y + 1 + f, TS, 1, PAL.foam);
+    if (!WET(w) && w !== T.DOCK) R(x + 1 + f, y, 1, TS, PAL.foam);
+    if (!WET(e) && e !== T.DOCK) R(x + 14 - f, y, 1, TS, PAL.foam);
+    if (!WET(s) && s !== T.DOCK) R(x, y + 14 - f, TS, 1, PAL.foam);
+    return;
+  }
+  if (only === (k === T.SAWGRASS ? 1 : 2)) return;   // sawgrass sways: it draws live, never baked
+  switch (k) {
+    case T.DOCK:
+      R(x, y, TS, TS, PAL.waterD);
+      R(x, y, TS, TS - 2, PAL.wood); for (let i = 0; i < TS; i += 4) R(x, y + i, TS, 1, PAL.woodD);
+      R(x, y + 14, TS, 2, PAL.ink); if (hs > .7) R(x + 5, y + 6, 1, 1, PAL.ink);
+      break;
+    case T.ROAD: {
+      R(x, y, TS, TS, PAL.road); if (hs > .6) R(x + hs * 13, y + 5, 1, 1, PAL.roadD);
+      const up = World.tile(tx, ty - 1), dn = World.tile(tx, ty + 1);
+      if (up !== T.ROAD) R(x, y, TS, 1, PAL.white);
+      if (dn === T.ROAD && up !== T.ROAD && tx % 2 === 0) R(x + 2, y + 15, 10, 2, PAL.line);
+      if (dn !== T.ROAD) R(x, y + 15, TS, 1, PAL.white);
+      break;
+    }
+    case T.ROADV: {
+      R(x, y, TS, TS, PAL.road); if (hs > .6) R(x + 5, y + hs * 13, 1, 1, PAL.roadD);
+      const lf = World.tile(tx - 1, ty), rt = World.tile(tx + 1, ty);
+      if (lf !== T.ROADV && lf !== T.ROAD) R(x, y, 1, TS, PAL.white);
+      if (rt === T.ROADV && lf !== T.ROADV && ty % 2 === 0) R(x + 15, y + 2, 2, 10, MIAMI() ? PAL.neon : PAL.line);
+      if (rt !== T.ROADV && rt !== T.ROAD) R(x + 15, y, 1, TS, PAL.white);
+      break;
+    }
+    case T.SIDEWALK:
+      R(x, y, TS, TS, '#f4c9c4'); R(x, y + 15, TS, 1, '#dfa9a6'); R(x + 15, y, 1, TS, '#dfa9a6'); if (hs > .9) R(x + 5, y + 7, 2, 1, '#dfa9a6');
+      break;
+    case T.PLAZA:
+      R(x, y, TS, TS, '#f1e6d2'); for (let i = 0; i < 4; i++) R(x + hash2(tx * 3 + i, ty) * 14, y + hash2(tx, ty * 3 + i) * 14, 1, 1, ['#27c6b4', '#ff5ea8', '#ffd23f', '#8d8a93'][i]);
+      if ((tx + ty) % 2 === 0) { g.globalAlpha = .06; R(x, y, TS, TS, PAL.ink); g.globalAlpha = 1; }
+      break;
+    case T.CONCRETE:
+      R(x, y, TS, TS, PAL.concrete); R(x, y + 15, TS, 1, PAL.concreteD); R(x + 15, y, 1, TS, PAL.concreteD);
+      if (hs > .85) { R(x + 4, y + 6, 4, 1, PAL.concreteD); R(x + 7, y + 7, 3, 1, PAL.concreteD); }
+      if (hs < .05) R(x + 6, y + 6, 4, 3, PAL.grey);   // gum. or worse
+      break;
+    case T.TRACK: drawTrackTile(tx, ty, x, y, hs); break;
+    case T.SAND:
+      R(x, y, TS, TS, MIAMI() ? '#f7e7bd' : PAL.sand); if (hs > .4) R(x + hs * 12, y + 3 + hs * 9, 1, 1, PAL.sandD); if (hs < .1) R(x + 9, y + 4, 2, 1, PAL.white);
+      break;
+    case T.MUD:
+      R(x, y, TS, TS, PAL.mud); if (hs > .5) R(x + hs * 12, y + 5, 3, 1, PAL.mudD); if (hs < .25) R(x + 3, y + 11, 2, 1, PAL.mudL);
+      break;
+    case T.SAWGRASS:
+      R(x, y, TS, TS, PAL.grassD);
+      for (let i = 0; i < 5; i++) { const bx = x + (hash2(tx * 7 + i, ty) * 15), sw = Math.sin(t * 1.4 + bx * .3) * 1.2; R(bx + sw * .5, y + 3 + i % 3 * 2, 1, 9, i % 2 ? PAL.grassL : PAL.camo); }
+      break;
+    default:
+      R(x, y, TS, TS, PAL.grass);
+      if (hs > .55) { R(x + hs * 10, y + 4, 1, 2, PAL.grassD); R(x + hs * 10 + 2, y + 3, 1, 3, PAL.grassD); }
+      if (hs < .18) R(x + 5, y + 10, 2, 1, PAL.grassL);
+      if (hs > .96) { R(x + 6, y + 6, 2, 2, PAL.yellow); R(x + 6, y + 8, 1, 2, PAL.grassDD); }
+      else if (hs > .93) { R(x + 9, y + 9, 2, 2, PAL.hat); }
+      else if (hs > .3 && hs < .312) { R(x + 4, y + 9, 3, 2, '#8fb3d9'); R(x + 4, y + 9, 1, 2, '#e8eef5'); }   // Florida wildflowers: a Swamp Lite can
+      else if (hs > .5 && hs < .515) { R(x + 10, y + 5, 2, 1, PAL.white); R(x + 12, y + 5, 1, 1, PAL.orange); }   // ...and a cigarette butt
+  }
+  if (k === T.MUD || k === T.SAND) {   // the grass creeps over the edges: no hard square seams
+    [[0, -1], [0, 1], [-1, 0], [1, 0]].forEach(([ox, oy], d) => {
+      if (World.tile(tx + ox, ty + oy) !== T.GRASS) return;
+      for (let i = 0; i < TS; i++) { const len = Math.floor(hash2(tx * 16 + i + d * 7, ty * 13 + d) * 3.4); if (!len) continue;
+        const col = hash2(i, tx + ty * 3) > .8 ? PAL.grassD : PAL.grass;
+        if (oy < 0) R(x + i, y, 1, len, col); else if (oy > 0) R(x + i, y + TS - len, 1, len, col); else if (ox < 0) R(x, y + i, len, 1, col); else R(x + TS - len, y + i, len, 1, col); }
+    });
+  }
+  // cliff lip where land drops to water (3/4 view)
+  if (!WET(k) && k !== T.DOCK && WET(World.tile(tx, ty + 1))) { R(x, y + 11, TS, 5, k === T.SAND ? PAL.sandD : PAL.mudD); R(x, y + 11, TS, 1, k === T.SAND ? PAL.sand : PAL.grassDD); }
+  }
 
 // ---------- palm trees: a leaning ringed trunk and arched, drooping fronds, baked once per look ----------
 const PALMS = {};

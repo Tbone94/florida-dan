@@ -119,7 +119,7 @@ ICONS.pickles = { key: { o: 'ink', g: 'grassL', d: 'grassD', r: 'red' }, rows: [
 const MiamiGigs = {
   interaction() {
     const D = Game.dan, G = G_(), near = (p, r) => Math.hypot(D.x - p.x, D.y - p.y) < r;
-    if (G.active === 'cafecito') { for (const [i, p] of World.props.filter(p => p.kind === 'guard').entries()) if (!G.towers.includes(i) && near({ x: p.x + 11, y: p.y + 14 }, 26)) return { label: 'Hand a cafecito up the tower', fn: () => { G.towers.push(i); Sound.play('pickup'); toast(`LIFEGUARD: “¡Gracias!” (${G.towers.length}/3)`); questText('gig_cafecito', `Bring a cafecito up to 3 lifeguard towers (${G.towers.length}/3)`); } }; }
+    if (G.active === 'cafecito') { for (const [i, p] of World.props.filter(p => p.kind === 'guard').entries()) if (!G.towers.includes(i) && near({ x: p.x + 11, y: p.y + 14 }, 26)) return { label: 'Hand a cafecito up the tower', fn: () => { G.towers.push(i); Sound.play('pickup'); note(`LIFEGUARD: “¡Gracias!” (${G.towers.length}/3)`); questText('gig_cafecito', `Bring a cafecito up to 3 lifeguard towers (${G.towers.length}/3)`); } }; }
     if (G.active === 'pickles' && !D.carry) { const c = Game.animals.find(a => a.pickles); if (c && near(c, 16)) return { label: 'Grab Mr. Pickles', fn: () => { Game.animals = Game.animals.filter(a => a !== c); D.carry = 'pickles'; Sound.play('pickup'); toast('Got him. He is furious. His bow tie is crooked.'); } }; }
     return null;
   },

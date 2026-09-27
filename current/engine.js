@@ -1,6 +1,7 @@
 // FLORIDA DAN — engine: utils, input, sound, and the screen-FX shader that makes
 // every substance look and feel different.
 'use strict';
+const TEST_MODE = /[?&]test\b/.test(location.search) && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);   // index.html?test on this Mac only: the test menu (testmode.js), its own save slot
 let VW = 320;                // the overworld widens on wide phones (see resize); fixed scenes still draw at VW0
 const VW0 = 320, VH = 180;
 const $ = id => document.getElementById(id);
@@ -102,10 +103,24 @@ const Input = (() => {
 const Sound = (() => {
   let ac = null, master = null, muted = false, musicOn = false, musicT = 0, musicPref = true;
   try { musicPref = localStorage.getItem('floridaDan.music') !== 'off'; } catch (e) { }
+  const phone = matchMedia('(pointer: coarse)').matches && !window.TRAILER;
+  let nbuf = null;   // one shared second of white noise: every hiss, splash and typewriter tick reads a slice of it (no fresh buffer per sound)
   function unlock() {
-    if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
-    try { ac = new (window.AudioContext || window.webkitAudioContext)(); master = ac.createGain(); master.gain.value = .5; master.connect(ac.destination); } catch (e) { ac = null; }
+    if (ac) { if (ac.state !== 'running' && !document.hidden) ac.resume().catch(() => { }); return; }
+    // phones: a roomier audio buffer. The synth band is dozens of nodes a bar; tiny buffers underrun into crackles
+    try { const AC = window.AudioContext || window.webkitAudioContext; try { ac = new AC({ latencyHint: phone ? 'balanced' : 'interactive' }); } catch (e) { ac = new AC(); } master = ac.createGain(); master.gain.value = .5;
+      // SFX stacked on the music used to clip (crackle): one limiter on the way out
+      const lim = ac.createDynamicsCompressor(); lim.threshold.value = -3; lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = .002; lim.release.value = .1;
+      master.connect(lim); lim.connect(ac.destination); } catch (e) { ac = null; return; }
+    nbuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate); const d = nbuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
   }
+  // app switch / lock screen: stop the audio clock cleanly and pick up on the next bar when we're back (no burst of stale notes)
+  document.addEventListener('visibilitychange', () => {
+    if (!ac) return;
+    if (document.hidden) ac.suspend().catch(() => { });
+    else ac.resume().then(() => typeof Music !== 'undefined' && Music.resync()).catch(() => { });
+  });
+  addEventListener('pageshow', () => { if (ac && ac.state !== 'running' && !document.hidden) ac.resume().catch(() => { }); });
   function tone(f, dur, type = 'square', vol = .15, slide = 0, delay = 0) {
     if (!ac || muted) return;
     const t = ac.currentTime + delay, o = ac.createOscillator(), gn = ac.createGain();
@@ -115,11 +130,9 @@ const Sound = (() => {
   }
   function noise(dur, vol = .2, hp = 800, delay = 0) {
     if (!ac || muted) return;
-    const t = ac.currentTime + delay, len = Math.floor(ac.sampleRate * dur), b = ac.createBuffer(1, len, ac.sampleRate), d = b.getChannelData(0);
-    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
-    const s = ac.createBufferSource(), f = ac.createBiquadFilter(), gn = ac.createGain();
-    s.buffer = b; f.type = 'highpass'; f.frequency.value = hp; gn.gain.setValueAtTime(vol, t); gn.gain.exponentialRampToValueAtTime(.001, t + dur);
-    s.connect(f); f.connect(gn); gn.connect(master); s.start(t);
+    const t = ac.currentTime + delay, s = ac.createBufferSource(), f = ac.createBiquadFilter(), gn = ac.createGain();
+    s.buffer = nbuf; s.loop = true; f.type = 'highpass'; f.frequency.value = hp; gn.gain.setValueAtTime(vol, t); gn.gain.exponentialRampToValueAtTime(.001, t + dur);
+    s.connect(f); f.connect(gn); gn.connect(master); s.start(t, Math.random() * .8); s.stop(t + dur + .02);
   }
   const FX = {
     pickup: () => { tone(660, .08, 'square', .1); tone(990, .1, 'square', .1, 0, .07); },
@@ -224,7 +237,7 @@ const Screen = (() => {
     }`;
   function init(canvas, source) {
     cv = canvas; src = source;
-    gl = cv.getContext('webgl', { antialias: false, preserveDrawingBuffer: true });
+    gl = cv.getContext('webgl', { antialias: false, preserveDrawingBuffer: !!window.TRAILER, powerPreference: 'high-performance' });   // (keeping the buffer costs phones a copy every frame; only the trailer recorder reads it back)
     if (!gl) { ctx2d = cv.getContext('2d'); return; }
     const sh = (type, s) => { const x = gl.createShader(type); gl.shaderSource(x, s); gl.compileShader(x); if (!gl.getShaderParameter(x, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(x)); return x; };
     const prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS));

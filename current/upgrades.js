@@ -83,8 +83,8 @@ function drawCabinJunk(p, x, y, t) {
   return false;
 }
 function recliner() {   // the nap: two hours gone, chill restored
-  if (Heat.cop) return toast('Can’t nap with Rhonda on your ass.');
-  if (Game.hour >= 20) return toast('Too late for a nap. That’s just sleeping.');
+  if (Heat.cop) return note('Can’t nap with Rhonda on your ass.');
+  if (Game.hour >= 20) return note('Too late for a nap. That’s just sleeping.');
   Game.hour += 2; Game.chill = Math.min(100, Game.chill + 35); Game.flash = .7; Sound.play('talk');
-  toast(pick(['Dan naps in the recliner. Two hours gone. Worth it.', 'Dan wakes up with a lizard on his chest. Refreshed.', 'Power nap. Mostly nap. Some power.']));
+  note(pick(['Dan naps in the recliner. Two hours gone. Worth it.', 'Dan wakes up with a lizard on his chest. Refreshed.', 'Power nap. Mostly nap. Some power.']));
 }

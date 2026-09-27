@@ -173,9 +173,10 @@ function gatorBite(gt, dx, dy, dist) {
   Sound.play('chomp'); hurtDan(hasUp('waders') ? 7 : 15); react('flop');
   Game.day_.bites++;
   let msg = pick(['OW! SON OF A BITCH!', 'HE BIT MY ASS! MY ACTUAL ASS!', 'That’s my good leg, you scaly f*ck!', 'NOT THE JORTS!', 'Mother of GOD that hurts!']);
-  if (Game.inv.beer > 0 && Math.random() < .5) { Game.inv.beer--; msg = `${gt.chuck ? 'Chuck' : 'Gator'} stole a Swamp Lite. Rude as hell.`; }
-  else if (Game.inv.fish > 0 && Math.random() < .5) { Game.inv.fish--; Game.catchBag.pop(); msg = `${gt.chuck ? 'Chuck' : 'A gator'} ate one of your fish. Outta the BAG.`; }
-  toast(msg);
+  let lost = false;
+  if (Game.inv.beer > 0 && Math.random() < .5) { Game.inv.beer--; lost = true; msg = `${gt.chuck ? 'Chuck' : 'Gator'} stole a Swamp Lite. Rude as hell.`; }
+  else if (Game.inv.fish > 0 && Math.random() < .5) { Game.inv.fish--; Game.catchBag.pop(); lost = true; msg = `${gt.chuck ? 'Chuck' : 'A gator'} ate one of your fish. Outta the BAG.`; }
+  (lost ? note : toast)(msg);
   if (Game.day_.bites === 3) headline('FLORIDA MAN BITTEN BY GATORS THREE TIMES IN ONE DAY, SAYS HE "HAD IT HANDLED"', 6);
 }
 function knockback(nx, ny, d) {
@@ -274,8 +275,8 @@ function updateCritter(c, dt) {
     c.x += dx / (dist || 1) * 44 * dt; c.y += dy / (dist || 1) * 44 * dt; c.flip = dx < 0;
     if (dist < 10) {
       c.state = 'flee'; c.timer = 6; if (c.type === 'raccoon') c.cd = 60;
-      if (c.type === 'pelican' && Game.inv.fish > 0) { Game.inv.fish--; const f = Game.catchBag.pop(); toast(`A pelican just swallowed your ${f ? f.name.toLowerCase() : 'fish'} WHOLE. Fly away, you beaky bastard.`); Game.day_.pelican++; headline('PELICAN STEALS FLORIDA MAN’S FISH, FLIES OFF "LAUGHING"', 3); }
-      else if (c.type === 'raccoon') { const k = ['hotdog', 'beer', 'cig', 'scratch'].find(i => Game.inv[i] > 0); if (k) { Game.inv[k]--; toast(`Raccoon snatched your ${ITEMS[k].name.toLowerCase()} and ran. Little bandit.`); headline('RACCOON ROBS FLORIDA MAN IN BROAD DAYLIGHT; POLICE "NOT INVOLVED"', 3); } }
+      if (c.type === 'pelican' && Game.inv.fish > 0) { Game.inv.fish--; const f = Game.catchBag.pop(); note(`A pelican just swallowed your ${f ? f.name.toLowerCase() : 'fish'} WHOLE. Fly away, you beaky bastard.`); Game.day_.pelican++; headline('PELICAN STEALS FLORIDA MAN’S FISH, FLIES OFF "LAUGHING"', 3); }
+      else if (c.type === 'raccoon') { const k = ['hotdog', 'beer', 'cig', 'scratch'].find(i => Game.inv[i] > 0); if (k) { Game.inv[k]--; note(`Raccoon snatched your ${ITEMS[k].name.toLowerCase()} and ran. Little bandit.`); headline('RACCOON ROBS FLORIDA MAN IN BROAD DAYLIGHT; POLICE "NOT INVOLVED"', 3); } }
     }
     return;
   }
@@ -305,9 +306,7 @@ function drawCritter(c, cx, cy, t) {
   g.drawImage(s, x - (s.width >> 1), y - s.height - c.z + hop);
   if (c.stun > 0 && c.type !== 'iguana') label('✶', x, y - s.height - 4, PAL.yellow, 7);
   if (c.type === 'cow' && c.moo > 0) label('MOO', x + 6, y - 14, PAL.white, 6);
-  if (c.pet && Game.tbFace === c && Game.mode === 'play') {   // an E bubble over his head when you're looking at him
-    const by = y - s.height - 14 + Math.round(Math.sin(t * 5)); OR(x - 6, by - 6, 12, 11, PAL.ink); R(x - 1, by + 5, 3, 2, PAL.ink); label(Input.padActive ? 'A' : 'E', x + .5, by + 3, PAL.yellow, 7);
-  } else if (c.pet) label('TRASH BABY', x, y - s.height - 4, PAL.grey, 5);
+  if (c.pet && Game.tbFace !== c) label('TRASH BABY', x, y - s.height - 4, PAL.grey, 5);   // looking right at him: the use bubble floats there instead
   if (c.tag) label(c.tag, x, y - s.height - 6, PAL.yellow, 5);
 }
 

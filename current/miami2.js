@@ -69,7 +69,7 @@ const Dance = {
     if (s.t > s.seq[s.seq.length - 1].t + .9) this.finish();
   },
   finish() {
-    const s = this.s; this.s = null; showHud(true); padFor(false); ui.wrestle.hidden = true; ui.wrestle.querySelector('.hint').textContent = 'MASH E · HIT THE ARROW WHEN HE THRASHES'; Game.mode = 'play';
+    const s = this.s; this.s = null; showHud(true); padFor(false); ui.wrestle.hidden = true; ui.wrestle.querySelector('.hint').textContent = `MASH ${KT('a')} · HIT THE ARROW WHEN HE THRASHES`; Game.mode = 'play';
     if (s.score >= 11) s.then();
     else say([[s.who, `${s.score} out of 16? My GRANDMA hits more beats than that.`], [s.who, 'Again. From the top?', [['“Hit it.”', () => { s.again = true; }], ['“Gimme a minute.”', () => [[s.who, 'Take your time, abuelo. The floor ain’t goin’ nowhere.']]]]]], () => { if (s.again) Dance.start(s.then, s.o); });
   },
@@ -102,7 +102,7 @@ const Race = {
     const r = Game.npcs.find(n => n.id === 'raul'); if (!r) return;
     this.on = true; r.race = true; r.skate = 0; r.x = 57 * TS; r.y = 10 * TS;
     if (!Game.dan.ride) { Game.dan.x = 56.4 * TS; Game.dan.y = 10 * TS; }
-    toast('Race to the Flamingo Hotel! (Raul is fast. A cafecito or the cooler would help.)', 4); Sound.play('siren');
+    note('Race to the Flamingo Hotel! (Raul is fast. A cafecito or the cooler would help.)', 4); Sound.play('siren');
   },
   tick(dt) {
     const r = Game.npcs.find(n => n.id === 'raul'), D = Game.dan; if (!r) return;
@@ -129,20 +129,20 @@ const Party = {
   begin() {
     this.sus = 0; const spots = [[10, 26], [9.5, 31], [10.5, 34]];
     GUESTS.forEach((gst, i) => Game.npcs.push(makeNPC('guest', gst[0][0] + gst[0].slice(1).toLowerCase(), spots[i][0] * TS, spots[i][1] * TS, 'left', { sprite: ['dj', 'sheila', 'goon'][i], guest: i, quest: true })));
-    Sound.play('headline'); toast('You’re in. Blend in with 3 guests. Don’t say anything Florida.', 4);
+    Sound.play('headline'); note('You’re in. Blend in with 3 guests. Don’t say anything Florida.', 4);
   },
   talk(n) {
     const [who, q, opts] = GUESTS[n.guest];
     if (n.talked) return say([[who, pick(['Great party, right?', 'Love your suit.', 'Have you seen the boss? He’s... unusual.'])]]);
     say([[who, q, opts.map(([label, good, reply]) => [label, () => {
       n.talked = true; n.quest = false;
-      if (!good) { this.sus++; Game.shake = 3; toast(`SUSPICION ${'■'.repeat(this.sus)}${'□'.repeat(3 - this.sus)}`, 2); }
+      if (!good) { this.sus++; Game.shake = 3; note(`SUSPICION ${'■'.repeat(this.sus)}${'□'.repeat(3 - this.sus)}`, 2); }
       const out = [[who, reply]];
       if (this.sus >= 3) out.push(['', 'Two goons pick Dan up by the suit and throw him into Biscayne Bay.'], ['DAN', '(from the water) WORTH IT.'], ['BOUNCER', 'Come back when you’re less... you.']);
       return out;
     }])]], () => {
       if (this.sus >= 3) { this.sus = 0; splash(Game.dan.x, Game.dan.y, 20); Game.npcs.filter(g => g.guest !== undefined).forEach(g => { g.talked = false; g.quest = true; }); headline('FLORIDA MAN THROWN OFF YACHT PARTY FOR "BEING TOO FLORIDA"', 3); return; }
-      if (Game.npcs.filter(g => g.guest !== undefined).every(g => g.talked)) { done('mingle'); toast('Nobody suspects a thing. The boss is by the boats.'); }
+      if (Game.npcs.filter(g => g.guest !== undefined).every(g => g.talked)) { done('mingle'); note('Nobody suspects a thing. The boss is by the boats.'); }
     });
   },
   boss() {
@@ -169,7 +169,7 @@ const BoatChase = {
     if (Math.random() < dt * 8) Game.parts.push({ kind: 'foam', x: b.x - dx / (d || 1) * 12, y: b.y - dy / (d || 1) * 12 + 3, vx: 0, vy: 0, life: .8 });
     const D = Game.dan, close = D.ride === 'boat' && Math.hypot(D.x - b.x, D.y - b.y) < 20;
     this.hold = close ? this.hold + dt : Math.max(0, this.hold - dt * .6);
-    if (close && Math.random() < dt * 3) toast(pick(['STAY ON HIM!', 'Closer... CLOSER...', 'He’s squawking at you!']), .8);
+    if (close && Math.random() < dt * 3) note(pick(['STAY ON HIM!', 'Closer... CLOSER...', 'He’s squawking at you!']), .8);
     if (this.hold > 1.1) this.caught();
   },
   caught() {

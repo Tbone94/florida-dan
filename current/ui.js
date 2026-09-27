@@ -3,7 +3,7 @@
 const ui = {};
 ['hudTop', 'timeLabel', 'dayLabel', 'chillFill', 'buzzFill', 'allegeFill', 'allegeLabel', 'fxTags', 'objective', 'hint', 'hotbar', 'money', 'nFish', 'nBait', 'nCan', 'nPy',
   'prompt', 'toast', 'banner', 'bannerText', 'bannerKick', 'talk', 'talkWho', 'talkLine', 'talkChoices', 'fishHud', 'tensionFill', 'fishMsg', 'card', 'cardK', 'cardN', 'cardW', 'cardQ',
-  'wrestle', 'gripFill', 'wrestlePrompt', 'wrestleMsg', 'raccoon', 'raccoonFill', 'shop', 'shopList', 'shopMoney', 'journal', 'jQuests', 'jSheet', 'title', 'gazette', 'pad', 'urgent', 'continueBtn'].forEach(id => ui[id] = $(id));
+  'wrestle', 'gripFill', 'wrestlePrompt', 'wrestleMsg', 'raccoon', 'raccoonFill', 'btnA', 'tips', 'shop', 'shopList', 'shopMoney', 'journal', 'jQuests', 'jSheet', 'title', 'gazette', 'pad', 'urgent', 'continueBtn'].forEach(id => ui[id] = $(id));
 
 // ---------- hotbar ----------
 const slotEls = {};
@@ -19,7 +19,7 @@ function buildHotbar() {
 function updateHotbar() {
   for (const k of HOTBAR) { const el = slotEls[k], n = Game.inv[k] || 0; if (!el) continue; const s = el.querySelector('.n'); if (s.textContent !== String(n)) s.textContent = n; el.classList.toggle('empty', !n); el.classList.toggle('sel', Input.padActive && HOTBAR[Game.sel || 0] === k); }
 }
-function selSlot(d) { let i = Game.sel || 0; for (let n = 0; n < HOTBAR.length; n++) { i = (i + d + HOTBAR.length) % HOTBAR.length; if (Game.inv[HOTBAR[i]] > 0) break; } Game.sel = i; updateHotbar(); Sound.play('pickup'); toast(`${ITEMS[HOTBAR[Game.sel]].name} ×${Game.inv[HOTBAR[Game.sel]] || 0}`, 1.2); }
+function selSlot(d) { let i = Game.sel || 0; for (let n = 0; n < HOTBAR.length; n++) { i = (i + d + HOTBAR.length) % HOTBAR.length; if (Game.inv[HOTBAR[i]] > 0) break; } Game.sel = i; updateHotbar(); Sound.play('pickup'); note(`${ITEMS[HOTBAR[Game.sel]].name} ×${Game.inv[HOTBAR[Game.sel]] || 0}`, 1.2); }
 function flashSlot(k) { const el = slotEls[k]; if (!el) return; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
 
 // ---------- quests ----------
@@ -56,7 +56,8 @@ function hud() {
   if (Game.mode === 'title' || Game.mode === 'gazette') return;
   const set = (el, v) => { v = String(v); if (el._v !== v) { el._v = v; el.textContent = v; } };
   set(ui.timeLabel, clock()); set(ui.dayLabel, `${Game.day <= 4 ? days[Game.day] : Cases.name()} · DAY ${Game.day}${Game.cold ? ' · 47°F' : Game.storm > .3 ? ' · HURRICANE WANDA' : ''}`);
-  ui.chillFill.style.width = Game.chill + '%'; ui.buzzFill.style.width = Math.min(100, Game.fx.buzz) + '%'; ui.allegeFill.style.width = Game.allegations + '%';
+  const bar = (el, v) => { v = Math.round(v); if (el._w !== v) { el._w = v; el.style.width = v + '%'; } };   // style writes only when the bar actually moves
+  bar(ui.chillFill, Game.chill); bar(ui.buzzFill, Math.min(100, Game.fx.buzz)); bar(ui.allegeFill, Game.allegations);
   set(ui.allegeLabel, Game.allegations + '%');
   set(ui.money, '$' + Game.money); set(ui.nFish, Game.inv.fish || 0); set(ui.nBait, Game.inv.bait || 0); set(ui.nCan, Game.inv.can || 0); set(ui.nPy, Game.pythons.length ? Game.pythons.reduce((a, b) => a + b, 0).toFixed(0) + 'ft' : '0');
   // every timed effect gets a bar that drains until it wears off
@@ -67,8 +68,34 @@ function hud() {
   const tt = Gigs.timer(), rh = typeof Speedway !== 'undefined' ? Speedway.hud() : ''; ui.urgent.hidden = !(Game.urgent > 0 || tt || rh); if (rh) set(ui.urgent, rh); else if (Game.urgent > 0) set(ui.urgent, `FIND A TOILET: ${Math.ceil(Game.urgent)}s`); else if (tt) set(ui.urgent, `${SideQuests.timerLabel()}: ${tt}s`);
   for (const [id, n] of [['statBait', Game.inv.bait], ['statCan', Game.inv.can], ['statPy', Game.pythons.length]]) $(id).hidden = !n;
   updateHotbar(); renderQuests();
-  if (Game.mode !== 'play') { ui.prompt.hidden = true; ui.hint.hidden = true; }   // tips wait out minigames (hints() brings them back)
+  const tipsOn = Game.mode === 'play' || Game.mode === 'fish'; if (ui.tips._on !== tipsOn) { ui.tips._on = tipsOn; ui.tips.hidden = !tipsOn; }   // tips and notes never sit under a minigame panel
+  if (Game.mode !== 'play') { ui.prompt.hidden = true; ui.hint.hidden = true; if (ui.btnA._on) { ui.btnA._on = false; ui.btnA.classList.remove('ready'); } }   // tips wait out minigames (hints() brings them back)
+  else placePrompt();
 }
+// ---------- the use prompt: a button bubble floating over the thing you'd use (never parked on the hotbar) ----------
+function promptAt(act) {
+  const D = Game.dan;
+  if (act.at) return act.at;
+  if (!D.ride) {   // most talk-y actions belong to whoever Dan is standing next to
+    let best = null, bd = 34;
+    for (const n of Game.npcs) { if (n.hidden) continue; const d = Math.hypot(n.x - D.x, n.y - D.y); if (d < bd) { bd = d; best = n; } }
+    if (best) return { x: best.x, y: best.y - 38 };
+  }
+  return { x: D.x, y: D.y - (D.ride ? 34 : 38) };
+}
+function showPrompt(act) {
+  const pv = act ? `${K('a')}<span>${act.label}</span>` : ''; if (ui.prompt._v !== pv) { ui.prompt._v = pv; ui.prompt.innerHTML = pv; }
+  ui.prompt.hidden = !act; Game.promptPt = act ? promptAt(act) : null;
+  if (isTouch && ui.btnA._on !== !!act) { ui.btnA._on = !!act; ui.btnA.classList.toggle('ready', !!act); }   // the A button glows while there's something to press
+}
+function placePrompt() {
+  const p = Game.promptPt; if (!p || ui.prompt.hidden) return;
+  const cx = clamp(Game.cam.x, 0, MW * TS - VW), cy = clamp(Game.cam.y, 0, MH * TS - VH), vw = Game.view;
+  let u = (p.x - cx) / VW, v = (p.y - cy) / VH; if (vw) { u = (u - vw[0]) / vw[2]; v = (v - vw[1]) / vw[2]; }
+  const x = Math.round(clamp(u * stageW, 70, stageW - 70)), y = Math.round(clamp(v * stageH, stageH * .22, stageH * .74)), k = x * 10000 + y;
+  if (ui.prompt._k !== k) { ui.prompt._k = k; ui.prompt.style.transform = `translate(${x}px,${y}px) translate(-50%,-100%)`; }
+}
+
 // touch controls must be up whenever a minigame needs input, even inside a cutscene (court) where the HUD is hidden
 function padFor(needed) { ui.pad.hidden = !(isTouch && (needed || !ui.hudTop.hidden)); }
 function showHud(on) { ['hudTop', 'hotbar'].forEach(k => ui[k].hidden = !on); ui.objective.hidden = !on || !ui.objective._v; if (!on) ui.hint.hidden = true; ui.pad.hidden = !(on && isTouch); }
@@ -137,7 +164,7 @@ function buy(k, b) {
   box.append(f); setTimeout(() => f.remove(), 950);
   b.classList.remove('bought'); void b.offsetWidth; b.classList.add('bought');
   shopMsg(`Bought: ${name} for $${price}.`);
-  if (!shopItems().includes(k)) { if (shopItems().length) renderShop(shopItems()[0]); else { closeShop(); toast({ tees: 'Dwayne’s out of everything but regret. And one shirt that says “MY OTHER CAR IS A COOLER.”', surf: 'Coral’s sold out. She’s closing early to go surf.', ink: 'Ink & Regret is out of regrets. For now.', speed: 'Wrench is out of parts. He’s eyeing your car.' }[vendor] || 'Bubba’s sold out. You bought everything. He’s buying a boat.'); } } else refreshShop();
+  if (!shopItems().includes(k)) { if (shopItems().length) renderShop(shopItems()[0]); else { closeShop(); note({ tees: 'Dwayne’s out of everything but regret. And one shirt that says “MY OTHER CAR IS A COOLER.”', surf: 'Coral’s sold out. She’s closing early to go surf.', ink: 'Ink & Regret is out of regrets. For now.', speed: 'Wrench is out of parts. He’s eyeing your car.' }[vendor] || 'Bubba’s sold out. You bought everything. He’s buying a boat.'); } } else refreshShop();
   const w = $('wallet'); if (w) { w.classList.remove('tick'); void w.offsetWidth; w.classList.add('tick'); }
 }
 function shopMsg(msg, bad) { const el = $('shopMsg'); el.textContent = msg; el.className = bad ? 'bad' : 'good'; el.hidden = false; clearTimeout(shopMsg.t); shopMsg.t = setTimeout(() => el.hidden = true, 2200); }
@@ -176,9 +203,9 @@ $('musicBtn').addEventListener('click', e => { e.stopPropagation(); Sound.toggle
 // Trash Baby: face him to send him home (he waddles back to the cabin porch); walk up to him there to bring him along again
 function setTrashBaby(stay) {
   Game.flags.tbStay = stay; const tb = Game.animals.find(a => a.pet);
-  if (stay && Game.region !== 'swamp') { Game.animals = Game.animals.filter(a => a !== tb); toast('Trash Baby hops a Greyhound back to the swamp. He’ll be on the porch.'); }
-  else if (stay) { const d = World.spots.door; if (tb) { tb.hx = d.x + 22; tb.hy = d.y + 8; } toast('Trash Baby waddles home to the porch. Judging you the whole way.'); }
-  else { if (tb) tb.hx = tb.hy = undefined; toast('Trash Baby scampers after you. Reunited.'); }
+  if (stay && Game.region !== 'swamp') { Game.animals = Game.animals.filter(a => a !== tb); note('Trash Baby hops a Greyhound back to the swamp. He’ll be on the porch.'); }
+  else if (stay) { const d = World.spots.door; if (tb) { tb.hx = d.x + 22; tb.hy = d.y + 8; } note('Trash Baby waddles home to the porch. Judging you the whole way.'); }
+  else { if (tb) tb.hx = tb.hy = undefined; note('Trash Baby scampers after you. Reunited.'); }
   Sound.play(stay ? 'talk' : 'pickup'); save();
 }
 function closeJournal() { ui.journal.hidden = true; Game.mode = 'play'; }
@@ -200,7 +227,7 @@ function load() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); re
 // ---------- title / next day ----------
 function begin(fromSave) {
   Sound.unlock(); ui.title.hidden = true; if (window.PWA) PWA.immerse();
-  if (fromSave) { const s = load(); World.load(s.region || 'swamp'); setTimeout(() => toast('Picked up from this morning. (The game saves every dawn.)', 3.5), 50); Object.assign(Game, { day: s.day, inv: s.inv, money: s.money, allegations: s.allegations, headlines: s.headlines, flags: s.flags, catchBag: s.catchBag || [], pythons: s.pythons || [] }); startDay(); }
+  if (fromSave) { const s = load(); World.load(s.region || 'swamp'); setTimeout(() => note('Picked up from this morning. (The game saves every dawn.)', 3.5), 50); Object.assign(Game, { day: s.day, inv: s.inv, money: s.money, allegations: s.allegations, headlines: s.headlines, flags: s.flags, catchBag: s.catchBag || [], pythons: s.pythons || [] }); startDay(); }
   else newGame();
 }
 $('startBtn').addEventListener('click', () => begin(false));
@@ -233,10 +260,11 @@ function nextDay() {
   else if (Game.day >= 18 && Game.day <= 22 && !DAYTONA()) Game.day = 17;
   else if (Game.day === 16 && !Game.flags.flyer) Game.day = 14;          // the trial can't open without the flyer
   startDay();
-  if (redo) toast(kc.n === 8 && kc.d === 1 ? 'Captain Lou: The houseboat’s still yours, son. The sun sets again tonight. It does that.' : kc.n === 10 && kc.d === 1 ? 'Chad: The passes are still good, buddy! The mouse waits for no one. Except you.' : kc.n === 11 && kc.d === 1 ? 'Brenda: The gang is STILL on I-4, Dan. Rhonda is directing traffic. Go.' : REDO[Game.day] || 'Brenda: You MISSED COURT. I got it rescheduled. To TODAY. Please.', 7);
+  if (redo) note(kc.n === 8 && kc.d === 1 ? 'Captain Lou: The houseboat’s still yours, son. The sun sets again tonight. It does that.' : kc.n === 10 && kc.d === 1 ? 'Chad: The passes are still good, buddy! The mouse waits for no one. Except you.' : kc.n === 11 && kc.d === 1 ? 'Brenda: The gang is STILL on I-4, Dan. Rhonda is directing traffic. Go.' : REDO[Game.day] || 'Brenda: You MISSED COURT. I got it rescheduled. To TODAY. Please.', 7);
 }
 
 // ---------- layout ----------
+let stageW = 1, stageH = 1;
 function resize() {
   const vw = innerWidth, vh = innerHeight, portrait = vh > vw * 1.05;
   let w, h;
@@ -245,6 +273,7 @@ function resize() {
     h = Math.min(vh, Math.floor(vw * VH / VW)); w = Math.min(vw, Math.round(h * VW / VH));
   } else { VW = VW0; w = Math.floor(Math.min(vw, (portrait ? vh * .58 : vh) * 16 / 9)); h = Math.floor(w * 9 / 16); }
   if (buf.width !== VW) { buf.width = VW; g.imageSmoothingEnabled = false; }
+  stageW = w; stageH = h;
   Object.assign(stage.style, { width: w + 'px', height: h + 'px', left: ((vw - w) / 2) + 'px', top: (portrait ? 8 : (vh - h) / 2) + 'px' });
   stage.style.setProperty('--u', Math.max(11, Math.min(21, w / 54, h / 25)) + 'px');   // short landscape phones: size text by height too
   // Render at the screen's real resolution (capped at 2200px wide); the shader's sharp-bilinear upscale keeps every
@@ -274,11 +303,13 @@ function menuNav() {
   if (Input.tapped('b') && m.id === 'shop') closeShop();
   if ((Input.tapped('b') || Input.tapped('pause')) && m.id === 'howto') closeHowto();
 }
-Input.onPad = on => { document.body.classList.toggle('pad', on); if (on && Game.mode !== 'title') toast('Controller connected. Hell yeah.', 2); };
+Input.onPad = on => { document.body.classList.toggle('pad', on); if (on && Game.mode !== 'title') note('Controller connected. Hell yeah.', 2); };
 
 // ---------- boot ----------
 let last = performance.now();
 function frame(now) {
+  // 120 Hz phones: every other vsync is plenty for a pixel game, and it halves the heat (hot phones throttle, then stutter)
+  if (isTouch && !window.TRAILER && now - last < 10.5) { requestAnimationFrame(frame); return; }
   const dt = Math.min(.05, (now - last) / 1000); last = now;
   Input.poll(); menuNav();
   // one bad frame should never freeze the swamp on its last image; log it and keep going

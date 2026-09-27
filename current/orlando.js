@@ -274,7 +274,7 @@ const Orlando = {
   punch(f) {
     const tr = World.props.find(p => p.kind === 'otree' && Math.hypot(p.x + 6 - f.x, p.y + 2 - f.y) < 18); if (!tr) return false;
     tr.shake = .35; Sound.play('punch'); Game.shake = 2; Game.punchCd = .45;
-    if ((tr.picked || 0) >= 4) { toast(pick(['That tree is picked clean. It looks tired.', 'Nothing left. The tree respects you anyway.']), 2); return true; }
+    if ((tr.picked || 0) >= 4) { note(pick(['That tree is picked clean. It looks tired.', 'Nothing left. The tree respects you anyway.']), 2); return true; }
     tr.picked = (tr.picked || 0) + 1;
     const n = Math.random() < .35 ? 2 : 1;
     for (let i = 0; i < n; i++) Game.pickups.push({ kind: 'orange', x: tr.x + 6 + rnd(-14, 14), y: tr.y + rnd(8, 16) });
@@ -287,14 +287,14 @@ const Orlando = {
     list.push(...OrlandoCases.interactions());
     if (D.ride) return list;
     if (near(S_.door, 20) && sleepReady()) list.push({ label: 'Sleep at the Kingdom Inn (room 214)', fn: () => sleep() });
-    if (near(S_.court, 22)) { const cs = Cases.courtCase(); list.push({ label: cs ? 'Enter the courthouse' : 'Orange County Courthouse (closed)', fn: () => cs ? Court.start(cs) : toast('The Orange County Courthouse. There’s a mouse-ear hat in the lost and found. There are 400.') }); }
+    if (near(S_.court, 22)) { const cs = Cases.courtCase(); list.push({ label: cs ? 'Enter the courthouse' : 'Orange County Courthouse (closed)', fn: () => cs ? Court.start(cs) : note('The Orange County Courthouse. There’s a mouse-ear hat in the lost and found. There are 400.') }); }
     if (near(S_.stationDoor, 22)) list.push({ label: 'Greyhound', fn: () => busMenu() });
     if (near(S_.gateOut, 24) && !list.length) list.push(this.gatePrompt());
     if (near(S_.gateIn, 22) && inPark(D.x, D.y)) list.push({ label: 'Leave SqueakyLand', fn: () => this.leavePark() });
-    if (near(S_.upside, 24)) list.push({ label: 'Try the front door (it’s on the roof)', fn: () => { toast(pick(['Dan climbs up to the door. It opens onto a ceiling fan. Upside down. Still on.', 'The door is upside down. Dan is now also upside down. Nobody is sure how.']), 3.5); if (!F.upsideHl) { F.upsideHl = true; headline('FLORIDA MAN TRIES TO ENTER UPSIDE-DOWN HOUSE THROUGH THE ROOF; "IT WAS THE FRONT DOOR"', 2); } } });
-    if (near(S_.knights, 22)) list.push({ label: 'Knights & Nuggets (dinner show)', fn: () => { toast(pick(['The Red Knight wins. Dan boos for 40 minutes. He is asked to leave. He leaves with nuggets.', 'Dan jousts a man on a horse with a turkey leg. He is escorted out. Worth it.']), 3.5); if (!F.knightHl) { F.knightHl = true; headline('FLORIDA MAN CHALLENGES DINNER-SHOW KNIGHT TO JOUST USING TURKEY LEG; HORSE "UNIMPRESSED"', 3); } } });
-    if (near(S_.orange, 20) && !near(Game.npcs.find(n => n.id === 'kyle'), 24)) list.push({ label: 'Hug the Big Orange', fn: () => { toast('Dan hugs the Big Orange. It is warm from the sun. He stays a while.', 3); Game.chill = Math.min(100, Game.chill + 10); } });
-    if (Game.urgent > 0 && near(S_.hide, 22)) list.push({ label: 'USE THE TOILET', fn: () => { Game.urgent = 0; Sound.play('splash'); toast('A theme park parking lot porta-potty in August. Dan has been to the other side.'); Game.chill = 100; } });
+    if (near(S_.upside, 24)) list.push({ label: 'Try the front door (it’s on the roof)', fn: () => { note(pick(['Dan climbs up to the door. It opens onto a ceiling fan. Upside down. Still on.', 'The door is upside down. Dan is now also upside down. Nobody is sure how.']), 3.5); if (!F.upsideHl) { F.upsideHl = true; headline('FLORIDA MAN TRIES TO ENTER UPSIDE-DOWN HOUSE THROUGH THE ROOF; "IT WAS THE FRONT DOOR"', 2); } } });
+    if (near(S_.knights, 22)) list.push({ label: 'Knights & Nuggets (dinner show)', fn: () => { note(pick(['The Red Knight wins. Dan boos for 40 minutes. He is asked to leave. He leaves with nuggets.', 'Dan jousts a man on a horse with a turkey leg. He is escorted out. Worth it.']), 3.5); if (!F.knightHl) { F.knightHl = true; headline('FLORIDA MAN CHALLENGES DINNER-SHOW KNIGHT TO JOUST USING TURKEY LEG; HORSE "UNIMPRESSED"', 3); } } });
+    if (near(S_.orange, 20) && !near(Game.npcs.find(n => n.id === 'kyle'), 24)) list.push({ label: 'Hug the Big Orange', fn: () => { note('Dan hugs the Big Orange. It is warm from the sun. He stays a while.', 3); Game.chill = Math.min(100, Game.chill + 10); } });
+    if (Game.urgent > 0 && near(S_.hide, 22)) list.push({ label: 'USE THE TOILET', fn: () => { Game.urgent = 0; Sound.play('splash'); note('A theme park parking lot porta-potty in August. Dan has been to the other side.'); Game.chill = 100; } });
     return list;
   },
   // the front gate: free passes, $139 at the booth, or legs
@@ -311,11 +311,11 @@ const Orlando = {
   enterPark(hopped) {
     const D = Game.dan, S_ = World.spots; if (D.ride === 'cooler') D.ride = null;
     Object.assign(D, { x: S_.gateIn.x, y: S_.gateIn.y - 30, dir: 'up', ride: null }); Game.cam.x = D.x - VW / 2; Game.cam.y = D.y - VH / 2 - 10; Game.flash = .4; Sound.play('pickup');
-    if (hopped) { toast('Dan vaults the turnstile. A family of five applauds. Fun Enforcement writes something down.', 3.5); if (!Game.flags.hopHl) { Game.flags.hopHl = true; headline('FLORIDA MAN HOPS SQUEAKYLAND TURNSTILE IN FLIP-FLOPS; SECURITY "IMPRESSED, HONESTLY"', 5); } }
+    if (hopped) { note('Dan vaults the turnstile. A family of five applauds. Fun Enforcement writes something down.', 3.5); if (!Game.flags.hopHl) { Game.flags.hopHl = true; headline('FLORIDA MAN HOPS SQUEAKYLAND TURNSTILE IN FLIP-FLOPS; SECURITY "IMPRESSED, HONESTLY"', 5); } }
     else toast(pick(['Welcome to SQUEAKYLAND! Churros are $14. Water is $9. Joy is free (it is not).', 'SQUEAKYLAND! The air smells like sugar and sunscreen and fear.']), 3.5);
     if (typeof OrlandoCases !== 'undefined') OrlandoCases.enteredPark();
   },
-  leavePark() { const D = Game.dan, S_ = World.spots; Object.assign(D, { x: S_.gateOut.x, y: S_.gateOut.y + 6, dir: 'down' }); Game.cam.x = D.x - VW / 2; Game.cam.y = D.y - VH / 2 - 10; toast('Dan leaves SqueakyLand. His wallet is lighter. His heart is... also lighter. Churro-related.', 3); },
+  leavePark() { const D = Game.dan, S_ = World.spots; Object.assign(D, { x: S_.gateOut.x, y: S_.gateOut.y + 6, dir: 'down' }); Game.cam.x = D.x - VW / 2; Game.cam.y = D.y - VH / 2 - 10; note('Dan leaves SqueakyLand. His wallet is lighter. His heart is... also lighter. Churro-related.', 3); },
   // nightly fireworks over the castle, 8:45 to 9:15
   tick(dt) {
     const h = Game.hour; if (!(h > 20.75 && h < 21.25) || Game.mode !== 'play') return;

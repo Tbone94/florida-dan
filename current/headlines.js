@@ -193,7 +193,7 @@ const HEADLINES = [
   ['hellsGranny', /HELL’S GRANNY/, 'Bike Night with a visiting mother. Tell the truth.'],
   ['mamaArm', /ARM-WRESTLES BIKER’S MOTHER/, 'Bike Night with a visiting mother. Settle it at the table.'],
 ];
-const SHEET_KEY = 'floridaDan.sheet';
+const SHEET_KEY = TEST_MODE ? 'floridaDan.testSheet' : 'floridaDan.sheet';
 const Sheet = {
   found: (() => { try { return JSON.parse(localStorage.getItem(SHEET_KEY)) || {}; } catch (e) { return {}; } })(),
   total: () => HEADLINES.length,

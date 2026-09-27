@@ -85,7 +85,7 @@ const Dive = {
     const F = Game.flags; F.dives = (F.dives || 0) + 1;
     if (F.dives === 1) headline('FLORIDA MAN GOES SNORKELING IN JORTS; REEF "DISAPPOINTED BUT NOT SURPRISED"', 2);
     if (s.got.some(g => g.k === 'lobster') && !F.lobsterHl) { F.lobsterHl = true; headline('FLORIDA MAN CATCHES LOBSTER WITH BARE HANDS, NAMES IT, RELEASES IT, CATCHES IT AGAIN', 3); }
-    if (!s.lostAll && s.got.length) toast(`Dan climbs out with: ${names.slice(0, 4).join(', ')}${names.length > 4 ? '…' : ''}${cash ? ` (+$${cash})` : ''}`, 3.5);
+    if (!s.lostAll && s.got.length) note(`Dan climbs out with: ${names.slice(0, 4).join(', ')}${names.length > 4 ? '…' : ''}${cash ? ` (+$${cash})` : ''}`, 3.5);
     updateHotbar && updateHotbar();
     if (s.then) s.then({ got: s.got, cash, lost: !!s.lostAll });
   },

@@ -28,7 +28,7 @@ function giveItem(k, n = 1, quiet) {
 
 function useItem(k) {
   if (Game.mode !== 'play' && Game.mode !== 'fish') return;
-  if (!(Game.inv[k] > 0)) { toast(`No ${ITEMS[k].name}. ${pick(['Tragic.', 'Life is pain.', 'Gulp-N-Go sells some. Probably.'])}`); Sound.play('fail'); return; }
+  if (!(Game.inv[k] > 0)) { note(`No ${ITEMS[k].name}. ${pick(['Tragic.', 'Life is pain.', 'Gulp-N-Go sells some. Probably.'])}`); Sound.play('fail'); return; }
   if (k === 'flamingo') return Flamingos.place();   // flamingos.js: it goes in the ground, not in Dan
   const F = Game.fx, D = Game.dan, L = Game.day_;
   Game.inv[k]--;
@@ -77,7 +77,7 @@ function useItem(k) {
     case 'scratch': {
       const r = Math.random() * (hasUp('lucky') ? .45 : 1), win = r < .02 ? 100 : r < .1 ? 20 : r < .3 ? 5 : 0;
       Game.money += win; Sound.play(win ? 'cash' : 'fail'); L.scratchers++;
-      toast(win ? (win === 100 ? '$100!!! DAN IS RICH. DAN IS A MILLIONAIRE (HUNDREDAIRE)!' : `Won $${win}. Dan’s a financial genius.`) : pick(['Nothin’. Florida Frenzy my ass.', 'Lost. The state of Florida thanks you.', 'Zip. Zilch. Scratch dust.']));
+      note(win ? (win === 100 ? '$100!!! DAN IS RICH. DAN IS A MILLIONAIRE (HUNDREDAIRE)!' : `Won $${win}. Dan’s a financial genius.`) : pick(['Nothin’. Florida Frenzy my ass.', 'Lost. The state of Florida thanks you.', 'Zip. Zilch. Scratch dust.']));
       if (win >= 20) react('cheer');
       if (win === 100) headline('FLORIDA MAN WINS $100 ON SCRATCH-OFF, IMMEDIATELY SPENDS IT ON SCRATCH-OFFS', 3);
       break;
@@ -131,7 +131,7 @@ function blackout() {
 // ---------- throwing: empty cans (F), fireworks ----------
 function throwThing(kind) {
   const D = Game.dan;
-  if (kind === 'can') { if (!(Game.inv.can > 0)) { toast('No empties to throw. Drink more? (Dan’s words, not ours.)'); return; } Game.inv.can--; }
+  if (kind === 'can') { if (!(Game.inv.can > 0)) { note('No empties to throw. Drink more? (Dan’s words, not ours.)'); return; } Game.inv.can--; }
   const d = D.dir, vx = d === 'right' ? 1 : d === 'left' ? -1 : 0, vy = d === 'down' ? 1 : d === 'up' ? -1 : 0;
   Game.projectiles.push({ kind, x: D.x + vx * 8, y: D.y - 10, vx: vx * 150, vy: vy * 150, z: 10, vz: 60, life: kind === 'firework' ? 1.2 : 1 });
   Sound.play('git');

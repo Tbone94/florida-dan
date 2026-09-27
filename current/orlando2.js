@@ -179,7 +179,7 @@ const OrlandoCases = {
     Object.assign(D, { x: S_.arrive.x + 22, y: S_.arrive.y + 30, dir: 'down', ride: 'cooler' }); Object.assign(Game.cooler, { x: D.x, y: D.y, dir: 'down' }); Game.cam.x = D.x - VW / 2; Game.cam.y = D.y - VH / 2 - 10;
     if (first) headline(res.hits >= 3 ? 'FLORIDA MAN DRIVES MOTORIZED COOLER DOWN I-4 SHOULDER, HITS "A FEW" CONES' : 'FLORIDA MAN RIDES MOTORIZED COOLER DOWN I-4 TO RESCUE STRANDED GREYHOUND; TRAFFIC "STILL NOT MOVING"', 5);
     if (qOpen('i4')) return this.gangArrives();
-    toast(`I-4 in ${res.secs.toFixed(1)}s. ${res.hits ? `${res.hits} cones.` : 'Not one cone.'} Traffic did not move the whole time.`, 3.5);
+    note(`I-4 in ${res.secs.toFixed(1)}s. ${res.hits ? `${res.hits} cones.` : 'Not one cone.'} Traffic did not move the whole time.`, 3.5);
   },
   gangArrives() {
     const F = Game.flags, S_ = OSP(), ax = S_.arrive.x, ay = S_.arrive.y; F.gangHere = true; done('i4');
@@ -194,7 +194,7 @@ const OrlandoCases = {
       for (const [id, , , [tx, ty]] of GANG) { const n = oWho(id); if (n) Object.assign(n, { x: tx * TS, y: ty * TS, hx: tx * TS, hy: ty * TS, moving: false, dir: 'down' }); }   // a skipped scene leaves them mid-walk
       ape.x = 4.8 * TS; ape.y = 45.4 * TS;
       headline('ENTIRE CAST OF FLORIDA MAN’S LIFE PILES OFF ONE GREYHOUND ON I-4; DRIVER "NEEDS A MINUTE"', 3);
-      addQuest('fishfry', 'Catch 3 fish for Merle (0/3, Lake Lola)'); toast('The whole gang checks into the Kingdom Inn. Manny takes the pool.', 3.5);
+      addQuest('fishfry', 'Catch 3 fish for Merle (0/3, Lake Lola)'); note('The whole gang checks into the Kingdom Inn. Manny takes the pool.', 3.5);
     });
   },
   fishFry() {
@@ -218,7 +218,7 @@ const OrlandoCases = {
       return say([['', 'The ride photo prints. Row one: Dan, thumbs up. Row two: the CEO of Squeaky Corp.'], ['', 'He is shotgunning a Swamp Lite on the big drop. Shirt off. Screaming “FLORIDA!”'],
         ['DAN', '...Brenda’s gonna LOVE this.'], ['PHOTO BOOTH', 'That’s $29.99 for the photo, sir.'], ['DAN', 'Worth every penny.']], () => { Game.money = Math.max(0, Game.money - 30); });
     }
-    toast(pick(['Ride photo: Dan, thumbs up, eyes closed. Row two: a CEO screaming. $29.99.', 'Space Squeak Mountain: survived. Dan buys the photo. And a keychain of the photo.']), 3.5);
+    note(pick(['Ride photo: Dan, thumbs up, eyes closed. Row two: a CEO screaming. $29.99.', 'Space Squeak Mountain: survived. Dan buys the photo. And a keychain of the photo.']), 3.5);
     if (F.coasterRides === 3) headline('FLORIDA MAN RIDES SPACE SQUEAK MOUNTAIN THREE TIMES IN A ROW, "STILL GOT IT DOWN"', 2);
   },
   memo() { say([['', Game.flags.memoTry ? 'Back in the suit. Back over the wall.' : 'Dan digs the mouse suit out of the motel closet. Nobody ever asked for it back.'], ['DAN', '(muffled) Mouse stuff.']], () => { Game.flags.memoTry = true; Sneak.start({ night: true, then: r => this.memoDone(r) }); }); },
@@ -298,12 +298,12 @@ const OrlandoCases = {
     const D = Game.dan, S_ = OSP(), list = [], near = (p, r) => p && Math.hypot(D.x - p.x, D.y - p.y) < r, c = this.c(), F = Game.flags, park = inPark(D.x, D.y);
     if (D.ride) return list;
     if (c.n === 10 && c.d === 1 && qOpen('escape') && park) list.push({ label: 'MAKE A RUN FOR IT (in the suit)', fn: () => this.runForIt() });
-    if (near(S_.phone, 20)) list.push(c.n === 11 && c.d === 1 && qOpen('calls') ? { label: 'Call in your witnesses (payphone)', fn: () => this.calls() } : { label: 'Use the payphone', fn: () => toast(pick(['It takes quarters. Dan has a bottle cap and a dream.', 'Dan calls his own number. It goes to voicemail. It’s full of Brenda.']), 3) });
+    if (near(S_.phone, 20)) list.push(c.n === 11 && c.d === 1 && qOpen('calls') ? { label: 'Call in your witnesses (payphone)', fn: () => this.calls() } : { label: 'Use the payphone', fn: () => note(pick(['It takes quarters. Dan has a bottle cap and a dream.', 'Dan calls his own number. It goes to voicemail. It’s full of Brenda.']), 3) });
     if (park && near(S_.coaster, 26)) list.push({ label: 'Ride Space Squeak Mountain', fn: () => this.coaster() });
     if (c.n === 11 && c.d === 2 && qOpen('memo')) {
       if (near(S_.gateOut, 26) && !park && Game.hour >= 20) list.push({ label: 'Sneak into SqueakyLand after hours', fn: () => this.memo() });
-      if (park && near(S_.castle, 30)) list.push({ label: 'Squeaky HQ (locked till after dark)', fn: () => toast(Game.hour >= 20 ? 'Guards everywhere in here. Go back out the front gate and sneak in proper.' : 'The castle door says CAST ONLY. A guard is eating a turkey leg in front of it. Come back after dark.', 3.5) });
-      if (near(S_.door, 22) && Game.hour < 20) list.push({ label: 'Wait for dark with the gang', fn: () => { Game.hour = 20.1; toast('Everyone sits by the pool. Gary tries the hot tub. The hot tub does not survive. It’s dark.', 4); } });
+      if (park && near(S_.castle, 30)) list.push({ label: 'Squeaky HQ (locked till after dark)', fn: () => note(Game.hour >= 20 ? 'Guards everywhere in here. Go back out the front gate and sneak in proper.' : 'The castle door says CAST ONLY. A guard is eating a turkey leg in front of it. Come back after dark.', 3.5) });
+      if (near(S_.door, 22) && Game.hour < 20) list.push({ label: 'Wait for dark with the gang', fn: () => { Game.hour = 20.1; note('Everyone sits by the pool. Gary tries the hot tub. The hot tub does not survive. It’s dark.', 4); } });
     }
     for (const a of Game.animals) if (a.ape && near(a, 30)) list.push({ label: 'Hang out with Gary', fn: () => { const gt = F.gangTalk = F.gangTalk || {}; if (c.n === 11 && c.d === 2) gt.gary = 1; giveItem('beer', 1, true);
       say([['SKUNK APE', pick(['HRRRM.', 'HRRM HRM.', '*offers Dan half a churro*'])], ['', pick(['Gary hands Dan a Swamp Lite. They watch the traffic on I-4 not move.', 'Gary is wearing a SqueakyLand poncho. He looks happy. It’s hard to tell.'])]]); } });

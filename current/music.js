@@ -27,8 +27,8 @@ const Music = (() => {
     const lim = ctx.createDynamicsCompressor(); lim.threshold.value = -4; lim.knee.value = 0; lim.ratio.value = 20; lim.attack.value = .001; lim.release.value = .08;
     R.bus.gain.value = .8; R.bus.connect(R.lp); R.lp.connect(comp); comp.connect(lim); lim.connect(dest);
     R.pump = ctx.createGain(); R.pump.connect(R.bus);                       // sidechain: the kick ducks this
-    const lite = typeof isTouch !== 'undefined' && isTouch && !window.TRAILER;   // phones: a shorter reverb tail keeps the audio thread light
-    const len = Math.floor(ctx.sampleRate * (lite ? 1.3 : 2.2)), ir = ctx.createBuffer(2, len, ctx.sampleRate);
+    const lite = R.lite = ctx instanceof (window.AudioContext || window.webkitAudioContext) && matchMedia('(pointer: coarse)').matches && !window.TRAILER;   // phones: a shorter reverb tail and thinner voices keep the audio thread from crackling
+    const len = Math.floor(ctx.sampleRate * (lite ? 1 : 2.2)), ir = ctx.createBuffer(2, len, ctx.sampleRate);
     for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.4); }
     R.verb = ctx.createConvolver(); R.verb.buffer = ir; const vg = ctx.createGain(); vg.gain.value = .32; R.verb.connect(vg); vg.connect(R.bus);
     R.dly = ctx.createDelay(2); const fb = ctx.createGain(), dlp = ctx.createBiquadFilter(), dg = ctx.createGain();
@@ -79,9 +79,9 @@ const Music = (() => {
       const hg = R.ctx.createGain(); hg.gain.value = .18; h.connect(hg); hg.connect(ws);
     },
     saw(R, t, f, dur, v = 1, bright = 1) {   // gritty filtered bass
-      const lp = filt(R, 'lowpass', 180, 5, amp(R, t, .004, .2 * v, Math.max(0, dur - .06), .08, R.pump));
+      const lp = filt(R, 'lowpass', 180, 5, amp(R, t, .004, .2 * v * (R.lite ? 1.4 : 1), Math.max(0, dur - .06), .08, R.pump));   // (lite: one saw instead of a detuned pair, same weight)
       lp.frequency.setValueAtTime(180, t); lp.frequency.linearRampToValueAtTime(900 + 900 * bright, t + .012); lp.frequency.exponentialRampToValueAtTime(260, t + .18);
-      for (const d of [-9, 9]) osc(R, 'sawtooth', f, t, t + dur + .1, d).connect(lp);
+      for (const d of R.lite ? [0] : [-9, 9]) osc(R, 'sawtooth', f, t, t + dur + .1, d).connect(lp);
     },
     banjo(R, t, f, v = 1, p = 0) {
       const g = amp(R, t, .001, .16 * v, 0, .3, pan(R, p, R.pump)); send(R, g, .12, R.verb);
@@ -94,7 +94,7 @@ const Music = (() => {
     whistle(R, t, f, dur, v = 1) {
       const g = amp(R, t, .025, .16 * v, dur * .8, .14, pan(R, .08, R.bus)); send(R, g, .3, R.dly); send(R, g, .25, R.verb);
       const lfo = osc(R, 'sine', 5.6, t, t + dur + .2), lg = R.ctx.createGain(); lg.gain.setValueAtTime(0, t); lg.gain.linearRampToValueAtTime(f * .014, t + .22); lfo.connect(lg);
-      for (const [type, lvl] of [['sine', 1], ['triangle', .55], ['square', .07]]) {
+      for (const [type, lvl] of R.lite ? [['sine', 1], ['triangle', .6]] : [['sine', 1], ['triangle', .55], ['square', .07]]) {
         const o = osc(R, type, f * .97, t, t + dur + .2); o.frequency.exponentialRampToValueAtTime(f, t + .045); lg.connect(o.frequency);
         const og = R.ctx.createGain(); og.gain.value = lvl; o.connect(og); og.connect(g);
       }
@@ -102,7 +102,7 @@ const Music = (() => {
     synth(R, t, f, dur, v = 1) {
       const g = amp(R, t, .012, .085 * v, dur * .85, .2, R.bus); send(R, g, .35, R.dly); send(R, g, .3, R.verb);
       const lp = filt(R, 'lowpass', 3400, 1.5, g);
-      for (const [type, mul, det, lvl] of [['sawtooth', 1, -12, 1], ['sawtooth', 1, 12, 1], ['square', .5, 0, .45]]) {
+      for (const [type, mul, det, lvl] of R.lite ? [['sawtooth', 1, 0, 1.6], ['square', .5, 0, .45]] : [['sawtooth', 1, -12, 1], ['sawtooth', 1, 12, 1], ['square', .5, 0, .45]]) {
         const o = osc(R, type, f * mul, t, t + dur + .25, det), og = R.ctx.createGain(); og.gain.value = lvl; o.connect(og); og.connect(lp);
       }
     },
@@ -122,9 +122,9 @@ const Music = (() => {
       o.connect(filt(R, 'bandpass', 1600, .8, g));
     },
     pad(R, t, notes, dur, v = 1) {
-      const g = amp(R, t, .3, .03 * v, Math.max(0, dur - .45), .5, R.pump); send(R, g, .45, R.verb);
+      const g = amp(R, t, .3, .03 * v * (R.lite ? 1.4 : 1), Math.max(0, dur - .45), .5, R.pump); send(R, g, .45, R.verb);
       const lp = filt(R, 'lowpass', 1200, .5, g);
-      for (const n of notes) for (const d of [-14, 14]) osc(R, 'sawtooth', N(n), t, t + dur + .6, d).connect(lp);
+      for (const n of notes) for (const d of R.lite ? [0] : [-14, 14]) osc(R, 'sawtooth', N(n), t, t + dur + .6, d).connect(lp);
     },
     calliope(R, t, f, v = 1) { const out = pan(R, -.15, R.pump), g1 = amp(R, t, .004, .035 * v, .03, .16, out); send(R, g1, .25, R.verb); const o = osc(R, 'square', f, t, t + .3); o.frequency.setValueAtTime(f * 1.01, t + .05); o.connect(filt(R, 'lowpass', 2400, 1, g1)); osc(R, 'sine', f * 2, t, t + .2).connect(amp(R, t, .002, .03 * v, 0, .1, out)); },   // a music-box / calliope: square + a high sine
     steel(R, t, f, v = 1) { const out = pan(R, .2, R.pump), g1 = amp(R, t, .002, .07 * v, 0, .55, out), g2 = amp(R, t, .002, .025 * v, 0, .18, out); send(R, g1, .3, R.verb); osc(R, 'sine', f, t, t + .6).connect(g1); osc(R, 'sine', f * 2.76, t, t + .25).connect(g2); },   // a steel pan: a bell with a slightly-off overtone
@@ -186,7 +186,7 @@ const Music = (() => {
   function barAt(song, bar) { const L = layout(song), loop = song.loopAt || 0; return bar < L.length ? L[bar] : L[loop + (bar - L.length) % (L.length - loop)]; }
 
   // ---------- live play (the game) ----------
-  const live = { R: null, cur: null, pos: {}, nextT: 0 };
+  const live = { R: null, cur: null, pos: {}, nextT: 0 }, AHEAD = matchMedia('(pointer: coarse)').matches ? .4 : .15;
   function pick(mood) {
     const mia = typeof MIAMI === 'function' && MIAMI(), isl = typeof KEYS === 'function' && KEYS(), par = typeof ORLANDO === 'function' && ORLANDO();   // the Keys: Swamp Lite, slower, with a steel pan. Orlando: faster, with a calliope
     const base = mia ? ['ocean', 108] : isl ? ['swamp', 112] : par ? ['swamp', 128] : ['swamp', 122], io = isl ? { island: 1, swing: .12 } : par ? { park: 1 } : {};
@@ -205,7 +205,7 @@ const Music = (() => {
     if (sw && !live.fading && live.cur && !urgent) { live.fading = true; G.setTargetAtTime(.25, ctx.currentTime, .4); }   // ease the old song down...
     if (!sw && live.fading) { live.fading = false; G.setTargetAtTime(.8, ctx.currentTime, .2); }                       // (mood flickered back)
     if (live.nextT < ctx.currentTime) live.nextT = ctx.currentTime + .05;
-    while (live.nextT < ctx.currentTime + .15) {
+    while (live.nextT < ctx.currentTime + AHEAD) {
       const c = live.cur, p = c ? live.pos[c.song] || 0 : 0;
       if (sw && (!c || p % 16 === 0 || urgent)) {   // ...switch on the next bar line, and bring the new one up (the chase just kicks the door in)
         live.cur = want; live.fading = false; R.lp.frequency.setTargetAtTime(want.lp, live.nextT, .25);
@@ -232,5 +232,5 @@ const Music = (() => {
     R.pumpDepth = song.pump ?? .45; R.dly.delayTime.setValueAtTime(s16 * 3, t0);
     for (let i = 0; i < bars * 16; i++) { const [n, b] = barAt(song, Math.floor(i / 16)); step(R, song, n, b, i % 16, t0 + i * s16, s16, o); }
   }
-  return { rig, tick, span, arrange, I, N, reset() { live.pos = {}; live.cur = null; } };
+  return { rig, tick, span, arrange, I, N, reset() { live.pos = {}; live.cur = null; }, resync() { live.nextT = 0; } };
 })();

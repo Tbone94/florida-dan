@@ -47,7 +47,7 @@ const Gigs = {
   offering: n => { const G = G_(); return !G.active && !!G.offers[n.id]; },
   hasOffer: id => Gigs.offering({ id }),
   active: () => G_().active,
-  drop() { const G = G_(); if (!G.active) return; G.active = null; Game.quests = Game.quests.filter(q => !q.gig); renderQuests(); toast('Side gig abandoned. They’ll get over it.'); },
+  drop() { const G = G_(); if (!G.active) return; G.active = null; Game.quests = Game.quests.filter(q => !q.gig); renderQuests(); note('Side gig abandoned. They’ll get over it.'); },
   // the offer conversation
   offerLines(n) {
     const id = G_().offers[n.id], d = GIGS[id], last = d.offer[d.offer.length - 1];
@@ -73,7 +73,7 @@ const Gigs = {
   complete(id) {
     const G = G_(), d = GIGS[id]; if (G.active !== id) return;
     G.active = null; G.done.push(id); done('gig_' + id);
-    Game.money += d.pay; Sound.play('cash'); toast(`Gig done: +$${d.pay}`); react('cheer');
+    Game.money += d.pay; Sound.play('cash'); note(`Gig done: +$${d.pay}`); react('cheer');
     headline(d.hl, 2);
     Game.animals = Game.animals.filter(a => a.gig !== id);   // the kiddie-pool gator, Deb's runaway
   },
@@ -85,10 +85,10 @@ const Gigs = {
     if (d.check && id !== 'beer' && d.check()) return Gigs.complete(id);
     if (id === 'trial') {
       const P = trialPoints(), D = Game.dan, near = (p, r) => Math.hypot(D.x - p.x, D.y - p.y) < r;
-      if (G.cp === -1) { if (D.ride === 'boat' && near(P[0], 40)) { G.cp = 1; G.t = 0; Sound.play('siren'); toast('GO GO GO!', 1.5); } return; }
+      if (G.cp === -1) { if (D.ride === 'boat' && near(P[0], 40)) { G.cp = 1; G.t = 0; Sound.play('siren'); note('GO GO GO!', 1.5); } return; }
       G.t += dt;
       if (near(P[G.cp], 42)) { G.cp++; Sound.play('cash'); if (G.cp >= P.length) return Gigs.complete('trial'); }
-      if (G.t > TRIAL_LIMIT) { G.cp = -1; Sound.play('fail'); toast('Too slow. Back to Bubba’s dock to try again.'); }
+      if (G.t > TRIAL_LIMIT) { G.cp = -1; Sound.play('fail'); note('Too slow. Back to Bubba’s dock to try again.'); }
     }
   },
   timer: () => { const G = G_(); return G.active === 'trial' && G.cp >= 1 ? Math.max(0, Math.ceil(TRIAL_LIMIT - G.t)) : SideQuests.timer(); },

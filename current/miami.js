@@ -185,9 +185,9 @@ const Miami = {
     if (D.ride) return list;
     list.push(...MiamiCases.interactions());
     if (near(S_.door, 18) && Game.flags.checkedIn !== false && sleepReady()) list.push({ label: 'Go up to your room (sleep)', fn: () => sleep() });
-    if (near(S_.court, 22)) { const cs = Cases.courtCase(); list.push({ label: cs ? 'Enter the courthouse' : 'Miami-Dade Courthouse (closed)', fn: () => cs ? Court.start(cs) : toast('The Miami-Dade Courthouse. Dan salutes it. Force of habit.') }); }
+    if (near(S_.court, 22)) { const cs = Cases.courtCase(); list.push({ label: cs ? 'Enter the courthouse' : 'Miami-Dade Courthouse (closed)', fn: () => cs ? Court.start(cs) : note('The Miami-Dade Courthouse. Dan salutes it. Force of habit.') }); }
     if (near(S_.stationDoor, 22)) list.push({ label: Cases.info().n >= 4 && Cases.info().n <= 5 ? 'Greyhound (can’t leave mid-case)' : 'Greyhound', fn: () => busMenu() });
-    if (Game.urgent > 0 && near(S_.hide, 22)) list.push({ label: 'USE THE TOILET', fn: () => { Game.urgent = 0; Sound.play('splash'); toast('...Made it. A beach porta-potty in July. Dan has seen God, and God is sweaty.'); Game.chill = 100; } });
+    if (Game.urgent > 0 && near(S_.hide, 22)) list.push({ label: 'USE THE TOILET', fn: () => { Game.urgent = 0; Sound.play('splash'); note('...Made it. A beach porta-potty in July. Dan has seen God, and God is sweaty.'); Game.chill = 100; } });
     return list;
   },
 };
@@ -205,7 +205,7 @@ function travel(to) {
     spawn();
     Game.cam.x = Game.dan.x - VW / 2; Game.cam.y = Game.dan.y - VH / 2 - 10; Game.flash = .7;
     if (to === 'miami' && !Game.flags.miamiFirst) { Game.flags.miamiFirst = true; headline('FLORIDA MAN ARRIVES IN MIAMI WITH A COOLER AND "NO PLAN"; CITY "BRACES"', 3); }
-    toast({ miami: 'Welcome to MIAMI. Everything is pink and costs $19.', daytona: 'Welcome to DAYTONA BEACH. World Center of Racing. And sunburns.', keys: 'Welcome to the KEYS. Mile marker 50. The rest is bridge.', orlando: 'Welcome to ORLANDO. It’s 97°. Everything has ears.', swamp: 'Home sweet swamp.' }[to], 3.5);
+    note({ miami: 'Welcome to MIAMI. Everything is pink and costs $19.', daytona: 'Welcome to DAYTONA BEACH. World Center of Racing. And sunburns.', keys: 'Welcome to the KEYS. Mile marker 50. The rest is bridge.', orlando: 'Welcome to ORLANDO. It’s 97°. Everything has ears.', swamp: 'Home sweet swamp.' }[to], 3.5);
     if (to === 'daytona' && !Game.flags.daytonaFirst) { Game.flags.daytonaFirst = true; headline('FLORIDA MAN ARRIVES IN DAYTONA; SPEEDWAY "ON HIGH ALERT"', 2); }
     if (typeof MiamiCases !== 'undefined') MiamiCases.arrived(to);
     if (typeof DaytonaCases !== 'undefined') DaytonaCases.arrived(to);

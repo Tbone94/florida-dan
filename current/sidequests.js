@@ -64,14 +64,14 @@ const SideQuests = {
     const bomb = Game.animals.some(a => a.type === 'rooster' && Math.hypot(a.x - c.x, a.y - c.y) < 40);
     toast(`*click* ${c.tag}. ${bomb ? 'A rooster photobombs it. Somehow it’s better.' : pick(['Six toes on every foot. Glaring.', 'He licked the lens.', 'Blurry. Majestic. Suspicious.', 'Pure contempt. Perfect.'])} (${Math.min(4, s.n)}/4)`, 3);
     questText('arc_pearl', `Photograph 4 of Miss Pearl’s six-toed cats for the census (${Math.min(4, s.n)}/4)`);
-    if (s.n >= 4) toast('That’s four cats. Back to Miss Pearl at the Six-Toe House.', 3);
+    if (s.n >= 4) note('That’s four cats. Back to Miss Pearl at the Six-Toe House.', 3);
   },
   // the tail: Mr. Toes walks his route; every so often he looks back. Freeze, or he goes home.
   tailPath: [[68.8, 41.4], [68.8, 44.4], [75.4, 44.4], [75.4, 33], [75.4, 26.2], [77.4, 24.2]],
   tailStart(fin) {
     const P = this.tailPath.map(([x, y]) => this.at(x, y)), cat = makeCritter('cat', P[0].x, P[0].y, { tag: 'MR. TOES', toes: true });
     Game.animals.push(cat); this.tmp.tail = { cat, P, i: 1, st: 'walk', k: 0, next: rnd(3.5, 4.5), grace: 2.5, fin };
-    Sound.play('talk'); toast('Mr. Toes slips out the cat door. Follow him. When he looks back: FREEZE.', 4);
+    Sound.play('talk'); note('Mr. Toes slips out the cat door. Follow him. When he looks back: FREEZE.', 4);
     hint('sqTail', 'Tailing: stay close-ish. When Mr. Toes turns around (?!), let go of everything', 6);
   },
   tailTick(dt) {
@@ -93,7 +93,7 @@ const SideQuests = {
   },
   tailFail(why) {
     const X = this.tmp.tail; this.tmp.tail = null; if (!X) return; this.tmp.lastFail = why; Game.animals = Game.animals.filter(a => a !== X.cat); Sound.play('fail');
-    toast({ seen: 'Mr. Toes turns. Sees you. Stares into your soul. Goes home. (Try again: the Six-Toe House)', close: 'Too close! Mr. Toes hisses and bolts home. (Try again: the Six-Toe House)', lost: 'You lost him. Somewhere on Duval, a cat is laughing. (Try again: the Six-Toe House)' }[why], 4);
+    note({ seen: 'Mr. Toes turns. Sees you. Stares into your soul. Goes home. (Try again: the Six-Toe House)', close: 'Too close! Mr. Toes hisses and bolts home. (Try again: the Six-Toe House)', lost: 'You lost him. Somewhere on Duval, a cat is laughing. (Try again: the Six-Toe House)' }[why], 4);
   },
   tailWin() {
     const X = this.tmp.tail, c = X.cat, j = this.who('joelle'), keep = j && { x: j.x, y: j.y, hx: j.hx, hy: j.hy };
@@ -109,7 +109,7 @@ const SideQuests = {
   },
   blowDry(fin) {
     Mash.start({ kind: 'blowdry', title: 'BLOW-DRY MR. TOES', hint: `MASH ${K('a')}: MAXIMUM FLUFF!`, need: 30, time: 8, sound: 'reel',
-      onWin: () => this.catShow(fin), onLose: () => toast('Mr. Toes bit the hair dryer. He’s still wet. Try again.', 3),
+      onWin: () => this.catShow(fin), onLose: () => note('Mr. Toes bit the hair dryer. He’s still wet. Try again.', 3),
       draw: (t, k) => {
         Dance.sunsetBg(t);
         g.drawImage(SPR.dan.right[Math.floor(t * 8) % 2], 0, 0, 16, 22, 70, 70, 40, 55);
@@ -231,7 +231,7 @@ const SideQuests = {
   papBust(p, gd) {
     const D = Game.dan; p.busts++; p.st = 'calm'; p.k = 0; p.next = rnd(2.2, 3.4);
     for (const off of [120, 100, 80, 60]) if (canWalk(gd.x - off, D.y)) { D.x = gd.x - off; break; } Game.shake = 5; Sound.play('hurt'); hurtDan(3);
-    toast(pick(['BODYGUARD: NO. PHOTOS.', 'BODYGUARD: I SAW THAT. Back to the palm trees.', 'BODYGUARD: Sir. SIR. Walk away.']), 2.5);
+    note(pick(['BODYGUARD: NO. PHOTOS.', 'BODYGUARD: I SAW THAT. Back to the palm trees.', 'BODYGUARD: Sir. SIR. Walk away.']), 2.5);
     if (p.busts === 3) headline('BODYGUARD THROWS FLORIDA MAN OFF SOUTH BEACH THREE TIMES; FLORIDA MAN "UNDETERRED"', 3);
   },
 
@@ -276,11 +276,11 @@ Object.assign(ARCS, {
       ask: [['OLD GUS', 'Son. They’re hauling her up next month. For the museum.'], ['OLD GUS', 'I want to see her one more time. Where she lies. Before she’s a gift shop.'], ['DAN', 'I’ll get the boat.'], ['OLD GUS', 'End of the tarpon dock. I’ll bring the rum. The rum’s for her.']],
       interaction() {
         const X = SideQuests.tmp, D = Game.dan; if (X.gusAboard || D.ride !== 'boat' || !SideQuests.near(World.spots.tarpon, 48)) return null;
-        return { label: 'Pick up Old Gus', fn: () => { const n = SideQuests.who('gus'); if (n) n.hidden = true; X.gusAboard = true; Sound.play('pickup'); toast('Gus climbs in with a bottle of rum and a folding chair. Head for the Southernmost Point buoy.', 4); } };
+        return { label: 'Pick up Old Gus', fn: () => { const n = SideQuests.who('gus'); if (n) n.hidden = true; X.gusAboard = true; Sound.play('pickup'); note('Gus climbs in with a bottle of rum and a folding chair. Head for the Southernmost Point buoy.', 4); } };
       },
       tick() {
         const X = SideQuests.tmp, D = Game.dan; if (!X.gusAboard || X.gusScene) return;
-        if (D.ride !== 'boat') { X.gusAboard = false; const n = SideQuests.who('gus'); if (n) n.hidden = false; toast('Gus climbs out. “I’ll wait on the dock, son. I’m 81. I’m not swimming.”', 3.5); return; }
+        if (D.ride !== 'boat') { X.gusAboard = false; const n = SideQuests.who('gus'); if (n) n.hidden = false; note('Gus climbs out. “I’ll wait on the dock, son. I’m 81. I’m not swimming.”', 3.5); return; }
         if (SideQuests.near(World.spots.reef, 70) || SideQuests.near(World.spots.buoy, 60)) SideQuests.gusWreck();
       },
       draw(s, cx, cy) { if (!SideQuests.tmp.gusAboard) return; const D = Game.dan, vert = D.dir === 'up' || D.dir === 'down'; SideQuests.person('gus', D.x - cx + (vert ? 9 : D.dir === 'left' ? 13 : -13), D.y - cy + (vert ? 4 : 0), 12); },
@@ -291,7 +291,7 @@ Object.assign(ARCS, {
     { sq: 1, gate: F => KEYS() && SideQuests.free('gus') && SideQuests.fresh('gus'), where: 'keys', text: 'Dive the wreck off the Southernmost Point for Gus’s lost dive watch (1984)',
       ask: [['OLD GUS', 'Back in ’84 I lost my dive watch on her. A Timex. My wife gave it to me.'], ['OLD GUS', 'It’s still down there, son. I can feel it. It’s probably still ticking. It’s a Timex.']],
       diveExtra: (s, at, wreckHere) => s.watch || !wreckHere ? null : { k: 'guswatch', name: 'Gus’s old Timex', keep: true, say: 'A Timex. 1984. Still ticking. It took a licking.', draw: (x, y, t) => { OR(x - 3, y - 3, 6, 6, '#c9c2b4'); R(x - 2, y - 2, 4, 4, PAL.white); R(x, y - 2, 1, 2, PAL.ink); R(x - 6, y - 1, 3, 2, '#6b4a2e'); R(x + 3, y - 1, 3, 2, '#6b4a2e'); if (Math.floor(t * 2) % 2) R(x, y, 2, 1, PAL.red); } },
-      diveDone(s, r) { if (!s.watch && r.got.some(g => g.k === 'guswatch')) { s.watch = true; toast('Got Gus’s watch. Take it to him (the tarpon dock, Marathon).', 3.5); } },
+      diveDone(s, r) { if (!s.watch && r.got.some(g => g.k === 'guswatch')) { s.watch = true; note('Got Gus’s watch. Take it to him (the tarpon dock, Marathon).', 3.5); } },
       target: s => s.watch ? SideQuests.who('gus') : World.spots.buoy,
       ready: s => !!s.watch && SideQuests.free('gus'), get readyHint() { return SideQuests.nag('gus', 'Off the Southernmost Point, son. Dive by the buoy. Forty feet.'); },
       pay: () => [['OLD GUS', '...That’s it. She gave me this in 1979. Said it would outlast me.'], ['OLD GUS', 'It’s four minutes slow. It was ALWAYS four minutes slow.'], ['', 'Gus puts it on. He doesn’t say anything for a while. Neither does Dan.']],
@@ -304,8 +304,8 @@ Object.assign(ARCS, {
       },
       tick(s) {
         const i = Game.catchBag.findIndex(f => f.id === 'silver');
-        if (i >= 0) { Game.catchBag.splice(i, 1); Game.inv.fish = Game.catchBag.filter(f => !f.junk).length; s.silver = true; toast('OLD SILVER. 142 lb. Gus is going to lose his mind. Go get him.', 3.5); }
-        if (!s.silver && Game.hour < 18 && !SideQuests.tmp.silverTold && SideQuests.near(World.spots.dockEnd, 30)) { SideQuests.tmp.silverTold = true; toast('Old Silver only bites at sunset. Come back after 6 PM.', 3); }
+        if (i >= 0) { Game.catchBag.splice(i, 1); Game.inv.fish = Game.catchBag.filter(f => !f.junk).length; s.silver = true; note('OLD SILVER. 142 lb. Gus is going to lose his mind. Go get him.', 3.5); }
+        if (!s.silver && Game.hour < 18 && !SideQuests.tmp.silverTold && SideQuests.near(World.spots.dockEnd, 30)) { SideQuests.tmp.silverTold = true; note('Old Silver only bites at sunset. Come back after 6 PM.', 3); }
       },
       target: s => s.silver ? SideQuests.who('gus') : World.spots.dockEnd,
       ready: s => !!s.silver && SideQuests.free('gus'), get readyHint() { return SideQuests.nag('gus', 'Sunset, son. End of the dock. He only bites at sunset.'); },
@@ -370,7 +370,7 @@ Object.assign(GIGS, {
     interaction() {
       const p = G_().pap, c = SideQuests.who('celeb'), gd = Game.npcs.find(n => n.guard); if (!p || p.photo || Game.dan.ride) return null;
       if (c && SideQuests.near(c, 30)) return { label: 'SNAP THE PHOTO', fn: () => { p.photo = true; Game.flash = .8; Sound.play('pickup'); SideQuests.papClear(); questText('gig_paparazzi', 'Sell the celebrity photo to the Valet (Hotel Neon)'); say([['', '*CLICK*'], ['MR. WORLDWIDE-ISH', '...DALÉ?'], ['', 'It’s mostly his feet. The celebrity leaves in a golf cart. The feet are VERY recognizable.']]); } };
-      if (gd && SideQuests.near(gd, 24)) return { label: 'Talk to the Bodyguard', fn: () => toast('BODYGUARD: No photos. No autographs. No eye contact. Especially you.', 3) };
+      if (gd && SideQuests.near(gd, 24)) return { label: 'Talk to the Bodyguard', fn: () => note('BODYGUARD: No photos. No autographs. No eye contact. Especially you.', 3) };
       return null;
     },
     talkActive: () => G_().pap && G_().pap.photo ? 'done' : [['VALET', 'He’s on the beach, man. The bodyguard turns around a lot. Move when he’s not looking.']],
@@ -387,7 +387,7 @@ Object.assign(GIGS, {
     start() { G_().yt = { aboard: 0, fell: false, over: null }; },
     tick() {
       const y = G_().yt, D = Game.dan; if (!y) return;
-      if (y.aboard === 3 && !y.fell && D.ride === 'boat' && D.y > 33 * TS) { y.fell = true; y.aboard = 2; y.over = canBoat(D.x + 20, D.y - 16) ? { x: D.x + 20, y: D.y - 16 } : { x: D.x, y: D.y - 16 }; splash(y.over.x, y.over.y, 12); Sound.play('splash'); toast('MAN OVERBOARD! Chad fell off doing a “boat pose.” Go back and get him.', 3.5); }
+      if (y.aboard === 3 && !y.fell && D.ride === 'boat' && D.y > 33 * TS) { y.fell = true; y.aboard = 2; y.over = canBoat(D.x + 20, D.y - 16) ? { x: D.x + 20, y: D.y - 16 } : { x: D.x, y: D.y - 16 }; splash(y.over.x, y.over.y, 12); Sound.play('splash'); note('MAN OVERBOARD! Chad fell off doing a “boat pose.” Go back and get him.', 3.5); }
       if (y.over) y.over.x += Math.sin(Game.t) * .08;
     },
     interaction() {
@@ -396,7 +396,7 @@ Object.assign(GIGS, {
       if (y.aboard === 0 && !y.fell && SideQuests.near(SideQuests.at(px, py), 46)) return { label: 'Pick up the party guests', fn: () => { y.aboard = 3; Sound.play('pickup'); toast('Three guests climb in. One of them is named Chad. Chad stands up in the boat. Chad, SIT DOWN.', 3.5); } };
       if (y.over && SideQuests.near(y.over, 28)) return { label: 'Fish Chad out of the bay', fn: () => { y.over = null; y.aboard = 3; Sound.play('catch'); toast('Dan hauls Chad in by the shorts. Chad is fine. Chad wants to do it again.', 3); } };
       if (y.aboard > 0 && SideQuests.near(SideQuests.at(dx, dy), 46)) return { label: 'Drop the guests at the yacht', fn: () => {
-        if (y.aboard < 3) return toast('One guest short. Chad is still in the bay. Somewhere. Yelling.', 3);
+        if (y.aboard < 3) return note('One guest short. Chad is still in the bay. Somewhere. Yelling.', 3);
         y.aboard = 0; y.done = true; say([['', 'The guests climb the yacht ladder. The party cheers. Chad cannonballs off the top deck immediately.'], ['YACHT GUY', 'Water taxi guy! You want a drink?'], ['DAN', 'I’m workin’.'], ['DAN', '...Yes.']], () => Gigs.complete('yacht'));
       } };
       return null;
@@ -417,10 +417,10 @@ Object.assign(GIGS, {
     start() { G_().br = { cp: -1, t: 0 }; },
     tick(dt) {
       const b = G_().br, P = GIGS.beachrun.pts(), D = Game.dan; if (!b) return;
-      if (b.cp === -1) { if (D.ride === 'cooler' && SideQuests.near(P[0], 40)) { b.cp = 1; b.t = 0; Sound.play('siren'); toast('GO GO GO! Cone 1 is way down south.', 1.5); } return; }
+      if (b.cp === -1) { if (D.ride === 'cooler' && SideQuests.near(P[0], 40)) { b.cp = 1; b.t = 0; Sound.play('siren'); note('GO GO GO! Cone 1 is way down south.', 1.5); } return; }
       b.t += dt;
       if (SideQuests.near(P[b.cp], 42) && D.ride === 'cooler') { b.cp++; Sound.play('cash'); if (b.cp >= P.length) { b.won = true; return Gigs.complete('beachrun'); } }
-      if (b.t > SideQuests.BEACH_T) { b.cp = -1; Sound.play('fail'); toast('The mower wins. Back to the beach ramp to try again.', 3); }
+      if (b.t > SideQuests.BEACH_T) { b.cp = -1; Sound.play('fail'); note('The mower wins. Back to the beach ramp to try again.', 3); }
     },
     timer: () => { const b = G_().br; return b && b.cp >= 1 ? Math.max(0, Math.ceil(SideQuests.BEACH_T - b.t)) : 0; },
     timerLabel: 'BEAT THE MOWER',
@@ -437,10 +437,10 @@ Object.assign(GIGS, {
       const birds = Game.animals.filter(a => a.gull);
       if (!birds.length && G.bonks < 3) GIGS.gulls.perch.forEach(([x, y], i) => { if (i >= G.bonks) Game.animals.push(makeCritter('pelican', x * TS, y * TS, { gull: true, px: x * TS, py: y * TS, z: 30 })); });
       for (const a of Game.animals.filter(b => b.gull)) {
-        if (!a.bonked && a.stun > 0) { a.bonked = true; a.gone = 1.4; G.bonks++; a.z = 30; Sound.play('chomp'); toast(`BONK! Pelican ${G.bonks} is OFF the roof. (${G.bonks}/3)`, 2); questText('gig_gulls', `Bonk 3 pelicans off the Ink & Regret roof with empties (${G.bonks}/3)`); if ((Game.inv.can || 0) < 3 - G.bonks) giveItem('can', 3, true); }
+        if (!a.bonked && a.stun > 0) { a.bonked = true; a.gone = 1.4; G.bonks++; a.z = 30; Sound.play('chomp'); note(`BONK! Pelican ${G.bonks} is OFF the roof. (${G.bonks}/3)`, 2); questText('gig_gulls', `Bonk 3 pelicans off the Ink & Regret roof with empties (${G.bonks}/3)`); if ((Game.inv.can || 0) < 3 - G.bonks) giveItem('can', 3, true); }
         if (!a.bonked) Object.assign(a, { x: a.px, y: a.py, z: 30, state: 'wander', vx: 0, vy: 0, timer: 9 });
       }
-      if ((Game.inv.can || 0) === 0 && G.bonks < 3 && !G.moreCans) { G.moreCans = true; giveItem('can', 4, true); toast('NEEDLES: Out of empties? Here. I had more. I always have more.', 3); }
+      if ((Game.inv.can || 0) === 0 && G.bonks < 3 && !G.moreCans) { G.moreCans = true; giveItem('can', 4, true); note('NEEDLES: Out of empties? Here. I had more. I always have more.', 3); }
     },
     check: () => (G_().bonks || 0) >= 3,
     target() { const a = Game.animals.find(b => b.gull && !b.bonked); return a ? { x: a.x, y: a.y + 30 } : null; },
@@ -449,12 +449,12 @@ Object.assign(GIGS, {
   pies: { giver: 'joelle', pay: 40, quest: 'Key lime pies to Tarpon Tom’s in Marathon by COOLER before they melt (load up at the Conch Shack)',
     offer: [['JOELLE', 'Tarpon Tom’s bait club ordered twelve key lime pies. In MARATHON. It’s 94 degrees.'], ['JOELLE', 'Your cooler has headlights. Bring it here, load up, FLOOR it.'], ['JOELLE', 'Thirty seconds or it’s soup. Forty bucks.']],
     start() { G_().pie = { on: false, t: 0 }; },
-    tick(dt) { const p = G_().pie; if (!p || !p.on) return; p.t += dt; if (p.t > SideQuests.PIE_T) { p.on = false; Sound.play('fail'); toast('The pies melted. Key lime SOUP. Joelle has more: reload at the Conch Shack.', 3.5); } },
+    tick(dt) { const p = G_().pie; if (!p || !p.on) return; p.t += dt; if (p.t > SideQuests.PIE_T) { p.on = false; Sound.play('fail'); note('The pies melted. Key lime SOUP. Joelle has more: reload at the Conch Shack.', 3.5); } },
     timer: () => { const p = G_().pie; return p && p.on ? Math.max(0, Math.ceil(SideQuests.PIE_T - p.t)) : 0; },
     timerLabel: 'PIES MELT IN',
     interaction() {
       const p = G_().pie, D = Game.dan, S_ = World.spots; if (!p || p.done) return null;
-      if (!p.on && D.ride === 'cooler' && SideQuests.near({ x: S_.conch.x, y: S_.conch.y + 12 }, 38)) return { label: 'Load twelve key lime pies into the cooler', fn: () => { p.on = true; p.t = 0; Sound.play('siren'); toast('GO GO GO! Tarpon Tom’s, Marathon. Thirty seconds.', 2); } };
+      if (!p.on && D.ride === 'cooler' && SideQuests.near({ x: S_.conch.x, y: S_.conch.y + 12 }, 38)) return { label: 'Load twelve key lime pies into the cooler', fn: () => { p.on = true; p.t = 0; Sound.play('siren'); note('GO GO GO! Tarpon Tom’s, Marathon. Thirty seconds.', 2); } };
       if (p.on && SideQuests.near(S_.bait, 44) && (D.ride === 'cooler' || Math.hypot(Game.cooler.x - D.x, Game.cooler.y - D.y) < 60)) return { label: 'Deliver the key lime pies', fn: () => { p.on = false; p.done = true; say([['TARPON TOM', 'PIES! Still cold! The bait club is going to riot. In a good way.'], ['DAN', 'I only ate one.'], ['TARPON TOM', 'There are eleven here.'], ['DAN', 'I only ate one on the BRIDGE.']], () => Gigs.complete('pies')); } };
       return null;
     },
